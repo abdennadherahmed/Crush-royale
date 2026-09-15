@@ -194,7 +194,7 @@ namespace CrushRoyale.Game.Screens
                 string label = p.Objective.Type == ObjectiveType.CollectColor
                     ? Loc.T("objective.CollectColor", Loc.T("color." + p.Objective.Color))
                     : Loc.T("objective." + p.Objective.Type);
-                parts.Add(label + " " + Loc.Number(Mathf.Min(p.Current, p.Target)) + "/" + Loc.Number(p.Target));
+                parts.Add(label + " " + Loc.Number(System.Math.Min(p.Current, p.Target)) + "/" + Loc.Number(p.Target));
             }
             _objectives.text = string.Join("   ", parts);
 

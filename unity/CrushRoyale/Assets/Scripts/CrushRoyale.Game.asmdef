@@ -4,6 +4,7 @@
   "references": [
     "UnityEngine.UI",
     "UnityEngine.Purchasing",
+    "UnityEngine.Purchasing.Stores",
     "Unity.Notifications.Android"
   ],
   "includePlatforms": [],
