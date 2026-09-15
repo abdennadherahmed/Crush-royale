@@ -44,7 +44,7 @@ jobs:
           tool-cache: false
           android: true
           dotnet: false
-          large-packages: true
+          large-packages: false # keeps PowerShell (pwsh), needed by tools/sync-unity.ps1
           docker-images: true
           swap-storage: false
 
