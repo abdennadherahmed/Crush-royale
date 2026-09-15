@@ -1,7 +1,7 @@
 {
   "apiBaseUrl": "https://crushroyale-api.onrender.com",
   "supabaseUrl": "https://gzivxtzugewlvygnxkhn.supabase.co",
-  "supabasePublishableKey": "sb_publishable_REPLACE_ME",
+  "supabasePublishableKey": "sb_publishable_sPVUhykjdL7et797usUKPA_2N2ZyArc",
   "googleWebClientId": "REPLACE_ME.apps.googleusercontent.com",
   "deviceSalt": "crush-royale-device-v1",
   "iapEnabled": true,
