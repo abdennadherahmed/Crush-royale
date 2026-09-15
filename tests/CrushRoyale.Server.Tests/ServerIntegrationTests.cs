@@ -256,6 +256,22 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         Assert.Contains(((InMemoryGameStore)_app.Store).PurchaseSnapshot(), p => p.PlayerId == id && p.Record.CentsCharged == 499);
     }
 
+    /// <summary>Plays a fixed number of moves then stops, so a match winner never depends on the random PvP seed.</summary>
+    private sealed class LimitedBot : IBotStrategy
+    {
+        private readonly IBotStrategy _inner;
+        private int _remaining;
+
+        public LimitedBot(IBotStrategy inner, int moves)
+        {
+            _inner = inner;
+            _remaining = moves;
+        }
+
+        public PlayerAction? ChooseAction(GameSession session, int nowMs) =>
+            _remaining-- > 0 ? _inner.ChooseAction(session, nowMs) : null;
+    }
+
     [Fact]
     public async Task LivePvp_BothPlayersSettled()
     {
@@ -272,11 +288,13 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         Assert.Equal("Matched", sb.Status);
         Assert.Equal(sa.Match.Seed, sb.Match.Seed);
 
-        PvpResultDto first = await a.Http.PostOk<PvpResultDto>(ApiRoutes.PvpRecord, _app.Play(a.Id, sa.Match, new GreedyBot(600)));
+        // The matchmaking seed is random: a full greedy match against a single move keeps the winner deterministic.
+        PvpResultDto first = await a.Http.PostOk<PvpResultDto>(ApiRoutes.PvpRecord, _app.Play(a.Id, sa.Match, new GreedyBot()));
         Assert.Equal("Pending", first.Outcome);
 
-        PvpResultDto second = await b.Http.PostOk<PvpResultDto>(ApiRoutes.PvpRecord, _app.Play(b.Id, sb.Match, new RandomBot(3)));
+        PvpResultDto second = await b.Http.PostOk<PvpResultDto>(ApiRoutes.PvpRecord, _app.Play(b.Id, sb.Match, new LimitedBot(new RandomBot(3), 1)));
         Assert.True(second.Accepted, second.Error);
+        Assert.True(second.Score < second.OpponentScore, $"single move {second.Score} vs full greedy match {second.OpponentScore}");
         Assert.Equal("Loss", second.Outcome);
 
         MatchInfoResponse info = await a.Http.GetOk<MatchInfoResponse>(ApiRoutes.Fill(ApiRoutes.PvpMatch, "matchId", sa.Match.MatchId));
