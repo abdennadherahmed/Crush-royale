@@ -111,6 +111,11 @@ docker build -f src/CrushRoyale.Server/Dockerfile -t crushroyale-api .
 docker run -p 8080:8080 -e Supabase__Url=https://<ref>.supabase.co -e Database__ConnectionString="..." -e Iap__ServiceAccountJsonPath=/secrets/play.json -v /chemin/play.json:/secrets/play.json:ro crushroyale-api
 ```
 
+**Render (gratuit)** : `render.yaml` à la racine décrit le service. *Render > New > Blueprint*, choisir le dépôt,
+puis saisir `Database__ConnectionString` (chaîne du *session pooler*, IPv4). L'URL publique
+`https://crushroyale-api.onrender.com` est déjà dans `client.json`. Limite du plan gratuit : le service s'endort
+après 15 minutes sans requête (premier appel lent, matchmaking en pause pendant le sommeil).
+
 **Hébergement** : n'importe quel hébergeur de conteneurs convient (Fly.io, Render, Azure Container Apps, Cloud
 Run…). Contraintes :
 - **Une seule instance** tant que le matchmaking reste en mémoire. Pour plusieurs instances, désactiver

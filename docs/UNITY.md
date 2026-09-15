@@ -129,6 +129,18 @@ Les prix affichés en jeu sont ceux de Google Play (devise locale) quand ils son
 2. *Player Settings > Publishing Settings* : créer ou choisir le keystore de signature.
 3. **Build** pour produire l'AAB à envoyer dans la Play Console.
 
+### Keystore de signature (une seule fois)
+
+```bash
+python tools/create-keystore.py
+```
+
+Le script demande un mot de passe, crée `%USERPROFILE%\CrushRoyale-signing\crushroyale-release.keystore` (hors du
+dépôt) et affiche les empreintes SHA-1/SHA-256 pour la connexion Google. Ajouter ensuite deux secrets GitHub :
+`ANDROID_KEYSTORE_BASE64` (contenu du fichier `ANDROID_KEYSTORE_BASE64.txt`) et `ANDROID_KEYSTORE_PASS`. Le build
+cloud signe alors l'APK avec cette clé ; sans ces secrets, l'APK est signé en debug (installable, pas publiable).
+**Sauvegarder le keystore et son mot de passe** : sans eux, plus aucune mise à jour possible sur Google Play.
+
 ## Organisation du code (`Assets/Scripts`)
 
 | Dossier | Contenu |
