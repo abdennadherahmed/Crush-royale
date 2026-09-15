@@ -35,19 +35,10 @@ jobs:
   android:
     name: Unity Android APK
     needs: tests
-    runs-on: ubuntu-latest
+    # Windows: unity-setup installs Unity Hub reliably there (the Linux Hub install failed on hosted runners).
+    runs-on: windows-latest
     timeout-minutes: 150
     steps:
-      - name: Free disk space (Unity + Android need ~20 GB)
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          tool-cache: false
-          android: true
-          dotnet: false
-          large-packages: false # keeps PowerShell (pwsh), needed by tools/sync-unity.ps1
-          docker-images: true
-          swap-storage: false
-
       - uses: actions/checkout@v4
 
       - uses: actions/setup-dotnet@v4
@@ -62,8 +53,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.PROJECT_PATH }}/Library
-          key: Library-Android-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/Assets/**/*.cs') }}
-          restore-keys: Library-Android-${{ env.UNITY_VERSION }}-
+          key: Library-Android-win-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/Assets/**/*.cs') }}
+          restore-keys: Library-Android-win-${{ env.UNITY_VERSION }}-
 
       - name: Install Unity with Android support
         uses: RageAgainstThePixel/unity-setup@v2
@@ -107,6 +98,6 @@ jobs:
           name: unity-logs-${{ github.run_number }}
           path: |
             ${{ github.workspace }}/**/*android-build*.log
-            ~/.config/unity3d/Editor.log
+            C:/Users/runneradmin/AppData/Local/Unity/Editor/Editor.log
           if-no-files-found: ignore
           retention-days: 14

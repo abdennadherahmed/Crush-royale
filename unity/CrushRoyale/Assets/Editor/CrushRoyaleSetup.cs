@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -38,8 +39,54 @@ namespace CrushRoyale.EditorTools
             PlayerSettings.Android.forceInternetPermission = true;
             PlayerSettings.runInBackground = false;
             EditorUserBuildSettings.buildAppBundle = true;
+            EnsureAndroidDependencies();
             Debug.Log("Crush Royale: Android settings applied (IL2CPP, ARM64, API 24+, portrait, AAB). " +
                       "Remember: Player > Other Settings > Active Input Handling = 'Input Manager (Old)' or 'Both', and set up keystore signing.");
+        }
+
+        private const string MainGradleTemplatePath = "Assets/Plugins/Android/mainTemplate.gradle";
+
+        /// <summary>Gradle dependencies of Assets/Plugins/Android/GoogleSignInBridge.java (Credential Manager + Sign in with Google).</summary>
+        private static readonly string[] AndroidDependencies =
+        {
+            "implementation 'androidx.credentials:credentials:1.3.0'",
+            "implementation 'androidx.credentials:credentials-play-services-auth:1.3.0'",
+            "implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'"
+        };
+
+        /// <summary>
+        /// Enables the custom main Gradle template (copied from the installed Unity version, so it always matches)
+        /// and adds the dependencies of the Java plugins. Safe to run repeatedly.
+        /// </summary>
+        public static void EnsureAndroidDependencies()
+        {
+            if (!File.Exists(MainGradleTemplatePath))
+            {
+                string engine = BuildPipeline.GetPlaybackEngineDirectory(BuildTarget.Android, BuildOptions.None);
+                string source = Path.Combine(engine, "Tools", "GradleTemplates", "mainTemplate.gradle");
+                if (!File.Exists(source))
+                {
+                    throw new FileNotFoundException("Unity Android Gradle template not found (is Android Build Support installed?)", source);
+                }
+                Directory.CreateDirectory(Path.GetDirectoryName(MainGradleTemplatePath));
+                File.Copy(source, MainGradleTemplatePath);
+            }
+
+            const string marker = "**DEPS**";
+            string template = File.ReadAllText(MainGradleTemplatePath);
+            if (!template.Contains(marker))
+            {
+                throw new InvalidOperationException(MainGradleTemplatePath + " has no " + marker + " placeholder: add the dependencies manually.");
+            }
+
+            List<string> missing = AndroidDependencies.Where(d => !template.Contains(d)).ToList();
+            if (missing.Count > 0)
+            {
+                template = template.Replace(marker, string.Join("\n    ", missing) + "\n    " + marker);
+                File.WriteAllText(MainGradleTemplatePath, template);
+                Debug.Log("Crush Royale: added Android Gradle dependencies: " + string.Join(", ", missing));
+            }
+            AssetDatabase.ImportAsset(MainGradleTemplatePath);
         }
 
         [MenuItem("Crush Royale/2. Create Boot Scene", priority = 2)]

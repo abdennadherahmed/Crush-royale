@@ -86,12 +86,12 @@ Voir [BACKEND.md](BACKEND.md) pour créer le projet Supabase et déployer l'API.
 
 ## Connexion Google
 
-- **Plugin Android** : `Assets/Plugins/Android/GoogleSignInBridge.java` s'appuie sur Google Play Services.
-- **Dépendance Gradle** : cocher *Player Settings > Publishing Settings > Custom Main Gradle Template*, puis
-  ajouter dans `mainTemplate.gradle` :
-  ```
-  implementation 'com.google.android.gms:play-services-auth:21.2.0'
-  ```
+- **Plugin Android** : `Assets/Plugins/Android/GoogleSignInBridge.java` utilise Credential Manager et « Sign in
+  with Google ».
+- **Dépendances Gradle** : rien à faire à la main. Le menu **Crush Royale > 1. Configure Android Player Settings**
+  (appelé aussi par le build cloud) crée `Assets/Plugins/Android/mainTemplate.gradle` à partir du modèle de la
+  version d'Unity installée et y ajoute `androidx.credentials:credentials`,
+  `androidx.credentials:credentials-play-services-auth` et `com.google.android.libraries.identity.googleid:googleid`.
 - **Google Cloud Console** : créer un identifiant client **Android** avec le nom de package et l'empreinte SHA-1
   de la clé de signature (clé d'upload et clé Play App Signing), puis l'ajouter dans Supabase.
 
