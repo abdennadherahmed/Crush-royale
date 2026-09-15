@@ -157,9 +157,11 @@ la main, donc on peut remplacer ou retirer une image sans rien casser. Pour refa
 python tools/art/process_art.py sheet art/source/powerups_sheet.jpg unity/CrushRoyale/Assets/Resources/Art/PowerUps 3 3 time_bomb,coin_boost,starburst,multiplier,chain,potion,bomb,tornado,infinity
 ```
 
-## Remplacer les placeholders restants
+## Sons, musiques et police
 
-- **Sons** : remplacer les clips de `SynthClips` par des `AudioClip` chargés depuis `Resources`, en gardant les
-  identifiants `SoundIds`.
-- **Police** : la police système est utilisée pour couvrir l'arabe, le cyrillique et les caractères CJK ; une
-  police de marque nécessite des variantes couvrant ces écritures.
+- **Sons et musiques** : `Assets/Resources/Audio/<id>.ogg`, un fichier par identifiant de `SoundIds` (effets Kenney,
+  musiques OpenGameArt, tous en CC0). `AudioManager` charge ce fichier s'il existe, sinon le son synthétisé par
+  `SynthClips`. Les musiques sont importées en streaming par `Editor/ArtImportSettings.cs`.
+- **Police** : *Cinzel Decorative* (`Assets/Resources/Fonts`) pour les titres quand elle contient tous les
+  caractères du texte (langues latines) ; l'arabe, le cyrillique et le CJK gardent la police système.
+- Auteurs et licences : [CREDITS.md](CREDITS.md).

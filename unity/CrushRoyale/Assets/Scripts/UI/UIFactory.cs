@@ -34,6 +34,41 @@ namespace CrushRoyale.Game.UI
             }
         }
 
+        private static Font _titleFont;
+        private static bool _titleFontLoaded;
+
+        /// <summary>Cinzel Decorative (OFL) from Resources/Fonts for titles; null when the file is absent.</summary>
+        public static Font TitleFont
+        {
+            get
+            {
+                if (!_titleFontLoaded)
+                {
+                    _titleFontLoaded = true;
+                    _titleFont = Resources.Load<Font>("Fonts/CinzelDecorative-Bold");
+                }
+                return _titleFont;
+            }
+        }
+
+        /// <summary>Bold header-sized text uses the title font when it has every glyph (Latin languages), else the OS font.</summary>
+        private static bool UsesTitleFont(string text, int size, FontStyle style)
+        {
+            Font title = TitleFont;
+            if (title == null || style != FontStyle.Bold || size < Theme.HeaderSize || string.IsNullOrEmpty(text))
+            {
+                return false;
+            }
+            foreach (char c in text)
+            {
+                if (!char.IsWhiteSpace(c) && !title.HasCharacter(c))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public static RectTransform Rect(string name, Transform parent)
         {
             var go = new GameObject(name, typeof(RectTransform));
@@ -78,10 +113,12 @@ namespace CrushRoyale.Game.UI
         {
             RectTransform rect = Rect("Label", parent);
             Text label = rect.gameObject.AddComponent<Text>();
-            label.font = Font;
+            bool title = UsesTitleFont(text, size, style);
+            label.font = title ? TitleFont : Font;
             label.text = text;
             label.fontSize = size;
-            label.fontStyle = style;
+            // The title font file is already bold: no synthetic bold on top of it.
+            label.fontStyle = title ? FontStyle.Normal : style;
             label.color = color ?? Theme.Text;
             label.alignment = align;
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
