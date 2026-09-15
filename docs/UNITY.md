@@ -94,6 +94,12 @@ Voir [BACKEND.md](BACKEND.md) pour créer le projet Supabase et déployer l'API.
   `androidx.credentials:credentials-play-services-auth` et `com.google.android.libraries.identity.googleid:googleid`.
 - **Google Cloud Console** : créer un identifiant client **Android** avec le nom de package et l'empreinte SHA-1
   de la clé de signature (clé d'upload et clé Play App Signing), puis l'ajouter dans Supabase.
+- **Empreintes de la clé d'upload** (`tools/create-keystore.py`, alias `crushroyale`, publiques) :
+  - SHA-1 : `3B:2E:AC:34:24:90:5E:2F:7C:63:7E:E5:5D:94:2A:25:B9:2E:13:93`
+  - SHA-256 : `6B:4A:EC:5B:61:50:16:94:BC:4F:5C:36:20:56:C4:C5:AC:0B:4A:1D:38:27:FA:EE:A3:2B:BC:57:E1:F5:FB:5E`
+
+  Une fois l'app sur Google Play, ajouter aussi l'empreinte de la clé *Play App Signing* (Play Console > Intégrité
+  de l'application).
 
 ## Achats intégrés
 
