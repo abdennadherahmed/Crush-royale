@@ -1,6 +1,42 @@
 # Projet Unity
 
-## Prérequis
+## Build dans le cloud (sans installer Unity)
+
+GitHub compile le jeu sur ses serveurs et fournit un fichier APK à installer sur un téléphone Android. Rien à
+installer sur le PC. Le workflow est `.github/workflows/android-build.yml`.
+
+**Une seule fois :**
+
+1. **Compte Unity** gratuit sur id.unity.com. Si tu te connectes avec Google, définis quand même un mot de passe
+   dans les paramètres du compte : le build en a besoin. Si la double authentification est activée, désactive-la
+   pour ce compte, sinon l'activation automatique de la licence échoue.
+2. **Compte GitHub** gratuit sur github.com, puis **New repository** : nom `crush-royale`, **Private**, sans README.
+3. **Secrets** : dans le dépôt, *Settings > Secrets and variables > Actions > New repository secret* :
+   - `UNITY_USERNAME` : l'email du compte Unity ;
+   - `UNITY_PASSWORD` : le mot de passe du compte Unity.
+
+   Les secrets restent chiffrés chez GitHub et ne sont jamais affichés dans les logs.
+4. **Envoyer le code** vers le dépôt (depuis le dossier du projet) :
+   ```bash
+   git remote add origin https://github.com/<ton-compte>/crush-royale.git
+   ```
+   ```bash
+   git push -u origin crush-royale-v1
+   ```
+   Une fenêtre du navigateur s'ouvre pour te connecter à GitHub.
+
+**À chaque build :**
+
+1. **Suivre le build** : onglet **Actions** du dépôt, workflow **Android build**. Il démarre à chaque envoi de
+   code, ou à la main via **Run workflow**. Compter environ 45 minutes la première fois (installation d'Unity),
+   puis 20 à 30 minutes.
+2. **Récupérer l'APK** : ouvrir le run terminé, section **Artifacts**, télécharger `CrushRoyale-APK-…` (un zip).
+3. **Installer sur le téléphone** : copier l'APK sur le téléphone Android, l'ouvrir et autoriser l'installation
+   depuis cette source.
+4. **En cas d'échec** (croix rouge) : ouvrir l'étape en rouge, copier les lignes d'erreur ou télécharger
+   l'artifact `unity-logs-…`, puis les transmettre pour correction.
+
+## Prérequis (build sur un PC)
 
 - **Unity 6 LTS**, installé avec le module **Android Build Support** (OpenJDK, Android SDK et NDK).
 - **SDK .NET 8** pour la synchronisation des DLL.

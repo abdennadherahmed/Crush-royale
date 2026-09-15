@@ -15,8 +15,11 @@ $plugins = Join-Path $unity "Assets/Plugins/CrushRoyale"
 $data = Join-Path $unity "Assets/Resources/Data"
 
 $dotnet = "dotnet"
-$userDotnet = Join-Path $env:LOCALAPPDATA "Microsoft/dotnet/dotnet.exe"
-if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -and (Test-Path $userDotnet)) { $dotnet = $userDotnet }
+if (-not (Get-Command dotnet -ErrorAction SilentlyContinue) -and $env:LOCALAPPDATA) {
+    # Windows without admin rights: SDK installed per user by dotnet-install.ps1
+    $userDotnet = Join-Path $env:LOCALAPPDATA "Microsoft/dotnet/dotnet.exe"
+    if (Test-Path $userDotnet) { $dotnet = $userDotnet }
+}
 
 Write-Host "Building client assemblies..."
 & $dotnet build (Join-Path $root "src/CrushRoyale.Client/CrushRoyale.Client.csproj") -c Release -v q

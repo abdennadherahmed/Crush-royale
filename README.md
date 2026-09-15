@@ -55,8 +55,9 @@ Serveur local sans Supabase (stockage en mémoire, authentification de test par 
 dotnet run --project src/CrushRoyale.Server --environment Development
 ```
 
-Projet Unity : voir [docs/UNITY.md](docs/UNITY.md). Sans backend configuré, le jeu démarre en mode entraînement
-hors ligne (niveaux 1 à 50 et PvP contre un bot).
+Projet Unity : voir [docs/UNITY.md](docs/UNITY.md). Sans Unity installé, GitHub peut compiler l'APK Android dans
+le cloud ([build dans le cloud](docs/UNITY.md#build-dans-le-cloud-sans-installer-unity)). Sans backend configuré,
+le jeu démarre en mode entraînement hors ligne (niveaux 1 à 50 et PvP contre un bot).
 
 ## Documentation
 

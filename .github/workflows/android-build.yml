@@ -1,0 +1,111 @@
+# Builds an installable Android APK in the cloud, without Unity installed locally.
+# Required repository secrets (Settings > Secrets and variables > Actions):
+#   UNITY_USERNAME  Unity ID email
+#   UNITY_PASSWORD  Unity ID password (Personal license, activated and returned automatically)
+name: Android build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master, main, crush-royale-v1]
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UNITY_VERSION: 6000.0.83f1
+  PROJECT_PATH: unity/CrushRoyale
+
+jobs:
+  tests:
+    name: .NET tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Run engine, server and client tests
+        run: dotnet test CrushRoyale.sln -c Release
+
+  android:
+    name: Unity Android APK
+    needs: tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Free disk space (Unity + Android need ~20 GB)
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          large-packages: true
+          docker-images: true
+          swap-storage: false
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Sync shared assemblies, game data and localization
+        shell: pwsh
+        run: ./tools/sync-unity.ps1
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PROJECT_PATH }}/Library
+          key: Library-Android-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/Assets/**/*.cs') }}
+          restore-keys: Library-Android-${{ env.UNITY_VERSION }}-
+
+      - name: Install Unity with Android support
+        uses: RageAgainstThePixel/unity-setup@v2
+        with:
+          unity-version: ${{ env.UNITY_VERSION }}
+          build-targets: Android
+          modules: android-sdk-ndk-tools, android-open-jdk
+
+      - name: Activate Unity Personal license
+        uses: RageAgainstThePixel/activate-unity-license@v2
+        with:
+          license: Personal
+          username: ${{ secrets.UNITY_USERNAME }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Build APK
+        uses: RageAgainstThePixel/unity-action@v3
+        with:
+          project-path: ${{ env.PROJECT_PATH }}
+          build-target: Android
+          log-name: android-build
+          args: >-
+            -quit -batchmode -nographics
+            -executeMethod CrushRoyale.EditorTools.CIBuild.BuildAndroid
+            -customBuildPath ${{ github.workspace }}/build/Android/CrushRoyale.apk
+            -androidVersionCode ${{ github.run_number }}
+
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrushRoyale-APK-${{ github.run_number }}
+          path: build/Android/*.apk
+          retention-days: 14
+
+      - name: Upload Unity logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unity-logs-${{ github.run_number }}
+          path: |
+            ${{ github.workspace }}/**/*android-build*.log
+            ~/.config/unity3d/Editor.log
+          if-no-files-found: ignore
+          retention-days: 14
