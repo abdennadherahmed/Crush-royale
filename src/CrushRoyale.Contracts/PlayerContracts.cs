@@ -1,0 +1,393 @@
+using System.Collections.Generic;
+
+namespace CrushRoyale.Contracts
+{
+    public sealed class LoginRequest
+    {
+        /// <summary>SHA-256 of the device identifier, hashed on the device (never the raw id).</summary>
+        public string DeviceHash { get; set; }
+
+        public string Platform { get; set; }
+
+        public string ClientVersion { get; set; }
+
+        public int RulesVersion { get; set; }
+
+        /// <summary>Hex of GameBalance.ComputeHash() the client runs with.</summary>
+        public string BalanceHash { get; set; }
+
+        public string Region { get; set; }
+
+        public string Language { get; set; }
+    }
+
+    public sealed class LoginResponse
+    {
+        public ProfileDto Profile { get; set; }
+
+        public bool IsNewPlayer { get; set; }
+
+        /// <summary>True when the client must download /v1/config before playing.</summary>
+        public bool ConfigOutdated { get; set; }
+
+        public string BalanceHash { get; set; }
+
+        public int RulesVersion { get; set; }
+
+        public long ServerTimeUnixMs { get; set; }
+    }
+
+    public sealed class ConfigResponse
+    {
+        public int RulesVersion { get; set; }
+
+        public string BalanceHash { get; set; }
+
+        /// <summary>Serialized GameBalance (camelCase JSON).</summary>
+        public string BalanceJson { get; set; }
+
+        public long ServerTimeUnixMs { get; set; }
+    }
+
+    public sealed class HeroDto
+    {
+        public string Gender { get; set; }
+
+        public string Name { get; set; }
+
+        public int Appearance { get; set; }
+    }
+
+    public sealed class SetHeroRequest
+    {
+        public string Gender { get; set; }
+
+        public string HeroName { get; set; }
+
+        public int Appearance { get; set; }
+
+        public string DisplayName { get; set; }
+
+        /// <summary>Age gate answer (consumer protection for purchases). Optional.</summary>
+        public int? Age { get; set; }
+
+        public string Language { get; set; }
+    }
+
+    public sealed class PvpDto
+    {
+        public int Trophies { get; set; }
+
+        public string League { get; set; }
+
+        public string HighestLeague { get; set; }
+
+        public int WinStreak { get; set; }
+
+        public int BestWinStreak { get; set; }
+
+        public int Wins { get; set; }
+
+        public int Losses { get; set; }
+
+        public int Draws { get; set; }
+
+        public long BoostingCooldownUntilUnixMs { get; set; }
+    }
+
+    public sealed class StoryDto
+    {
+        public int HighestUnlockedStage { get; set; }
+
+        public int TotalStars { get; set; }
+
+        /// <summary>One char per stage from stage 1: '0' not won, '1'-'3' best stars.</summary>
+        public string StarsByStage { get; set; }
+
+        public List<string> Flags { get; set; } = new List<string>();
+
+        public Dictionary<string, string> Choices { get; set; } = new Dictionary<string, string>();
+
+        public string Ending { get; set; }
+
+        public bool NewGamePlusUnlocked { get; set; }
+
+        public List<string> Party { get; set; } = new List<string>();
+
+        public List<string> UnlockedFeatures { get; set; } = new List<string>();
+
+        public List<string> SeenEvents { get; set; } = new List<string>();
+    }
+
+    public sealed class InventoryDto
+    {
+        public Dictionary<string, int> PowerUps { get; set; } = new Dictionary<string, int>();
+
+        public List<string> Cosmetics { get; set; } = new List<string>();
+
+        public string EquippedFrame { get; set; }
+
+        public string EquippedBoardSkin { get; set; }
+
+        public string EquippedPieceSkin { get; set; }
+
+        public string EquippedTitle { get; set; }
+
+        public string EquippedOutfit { get; set; }
+
+        public bool AdsRemoved { get; set; }
+
+        public bool RarePerkUnlocked { get; set; }
+
+        public bool PremiumPass { get; set; }
+    }
+
+    public sealed class ProfileDto
+    {
+        public string Id { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public HeroDto Hero { get; set; }
+
+        public bool HeroChosen { get; set; }
+
+        public int? DeclaredAge { get; set; }
+
+        public string Language { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public LivesDto Lives { get; set; }
+
+        public VipDto Vip { get; set; }
+
+        public PvpDto Pvp { get; set; }
+
+        public StoryDto Story { get; set; }
+
+        public InventoryDto Inventory { get; set; }
+
+        public long? GuildId { get; set; }
+
+        public bool LoginBonusAvailable { get; set; }
+
+        public int LoginCalendarSlot { get; set; }
+
+        public int CollectionPagesCompleted { get; set; }
+
+        public int UnclaimedAchievements { get; set; }
+
+        public int ClaimableQuests { get; set; }
+
+        public long SuspendedUntilUnixMs { get; set; }
+    }
+
+    public sealed class PublicProfileDto
+    {
+        public string Id { get; set; }
+
+        public string DisplayName { get; set; }
+
+        public int Trophies { get; set; }
+
+        public string League { get; set; }
+
+        public int HighestStage { get; set; }
+
+        public long? GuildId { get; set; }
+
+        public string Frame { get; set; }
+
+        public string Title { get; set; }
+    }
+
+    public sealed class PlayerStatsDto
+    {
+        public PublicProfileDto Profile { get; set; }
+
+        public int PvpWins { get; set; }
+
+        public int PvpLosses { get; set; }
+
+        public int BestWinStreak { get; set; }
+
+        public string HighestLeague { get; set; }
+
+        public int TotalStars { get; set; }
+
+        public int AchievementsUnlocked { get; set; }
+
+        public int? WeeklyRank { get; set; }
+    }
+
+    public sealed class SearchPlayersResponse
+    {
+        public List<PublicProfileDto> Players { get; set; } = new List<PublicProfileDto>();
+    }
+
+    // ------------------------------------------------------------------ progression
+
+    public sealed class AchievementDto
+    {
+        public string Id { get; set; }
+
+        public string Type { get; set; }
+
+        public int Page { get; set; }
+
+        public long Target { get; set; }
+
+        public long Progress { get; set; }
+
+        public bool Unlocked { get; set; }
+
+        public bool Claimed { get; set; }
+
+        public RewardDto Reward { get; set; }
+    }
+
+    public sealed class AchievementsResponse
+    {
+        public List<AchievementDto> Achievements { get; set; } = new List<AchievementDto>();
+
+        public List<int> PagesCompleted { get; set; } = new List<int>();
+
+        public float CoinBonus { get; set; }
+    }
+
+    public sealed class ClaimAchievementRequest
+    {
+        public string Id { get; set; }
+    }
+
+    public sealed class ClaimResponse
+    {
+        public RewardDto Reward { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public bool PageCompleted { get; set; }
+    }
+
+    public sealed class QuestDto
+    {
+        public string Id { get; set; }
+
+        public string Type { get; set; }
+
+        public int Target { get; set; }
+
+        public int Progress { get; set; }
+
+        public bool Claimed { get; set; }
+    }
+
+    public sealed class QuestsResponse
+    {
+        public List<QuestDto> Quests { get; set; } = new List<QuestDto>();
+
+        public long ResetAtUnixMs { get; set; }
+    }
+
+    public sealed class LoginBonusResponse
+    {
+        public RewardDto Reward { get; set; }
+
+        public int NextSlot { get; set; }
+
+        public int TotalLoginDays { get; set; }
+
+        public WalletDto Wallet { get; set; }
+    }
+
+    public sealed class BattlePassTierDto
+    {
+        public int Tier { get; set; }
+
+        public RewardDto Free { get; set; }
+
+        public RewardDto Premium { get; set; }
+
+        public bool FreeClaimed { get; set; }
+
+        public bool PremiumClaimed { get; set; }
+    }
+
+    public sealed class BattlePassResponse
+    {
+        public int Season { get; set; }
+
+        public long Xp { get; set; }
+
+        public int Tier { get; set; }
+
+        public int XpPerTier { get; set; }
+
+        public bool Premium { get; set; }
+
+        public long SeasonEndUnixMs { get; set; }
+
+        public List<BattlePassTierDto> Tiers { get; set; } = new List<BattlePassTierDto>();
+    }
+
+    public sealed class BattlePassClaimRequest
+    {
+        public int Tier { get; set; }
+
+        public bool Premium { get; set; }
+    }
+
+    // ------------------------------------------------------------------ admin / reports
+
+    public sealed class ReportCheatRequest
+    {
+        public string PlayerId { get; set; }
+
+        public string MatchId { get; set; }
+
+        public string Reason { get; set; }
+    }
+
+    public sealed class FlagDto
+    {
+        public long Id { get; set; }
+
+        public string PlayerId { get; set; }
+
+        public string Reason { get; set; }
+
+        public string Severity { get; set; }
+
+        public string Details { get; set; }
+
+        public string MatchId { get; set; }
+
+        public long CreatedAtUnixMs { get; set; }
+    }
+
+    public sealed class ReviewFlagRequest
+    {
+        public string Outcome { get; set; }
+
+        public bool Punish { get; set; }
+
+        public bool Severe { get; set; }
+    }
+
+    public sealed class AdminGrantRequest
+    {
+        public string PlayerId { get; set; }
+
+        public long Coins { get; set; }
+
+        public long Orbes { get; set; }
+
+        public string Note { get; set; }
+    }
+
+    public sealed class UpdateBalanceRequest
+    {
+        public string BalanceJson { get; set; }
+    }
+}

@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Engine-agnostic, deterministic game simulation.
+    netstandard2.1 + C# 9 so the exact same assembly runs inside Unity 6 (client)
+    and on the ASP.NET server (replay validation / anti-cheat).
+    Rules: no UnityEngine, no System.Random, no floating point in simulation paths.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>CrushRoyale.Core</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CrushRoyale.Core.Tests" />
+  </ItemGroup>
+
+</Project>

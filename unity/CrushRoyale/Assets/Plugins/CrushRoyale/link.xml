@@ -1,0 +1,8 @@
+<!-- IL2CPP managed code stripping must keep the reflection-serialized game assemblies intact. -->
+<linker>
+  <assembly fullname="CrushRoyale.Core" preserve="all" />
+  <assembly fullname="CrushRoyale.Contracts" preserve="all" />
+  <assembly fullname="CrushRoyale.Client" preserve="all" />
+  <assembly fullname="Newtonsoft.Json" preserve="all" />
+  <assembly fullname="System.Net.Http" preserve="all" />
+</linker>

@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Client SDK for the Unity game: Supabase auth, typed HTTP API, offline queue, realtime chat. netstandard2.1 / C# 9 for Unity 6. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>CrushRoyale.Client</RootNamespace>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CrushRoyale.Core\CrushRoyale.Core.csproj" />
+    <ProjectReference Include="..\CrushRoyale.Contracts\CrushRoyale.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CrushRoyale.Client.Tests" />
+  </ItemGroup>
+
+</Project>

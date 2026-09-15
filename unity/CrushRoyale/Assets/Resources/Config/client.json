@@ -1,0 +1,13 @@
+{
+  "apiBaseUrl": "https://api.crushroyale.example",
+  "supabaseUrl": "https://YOUR-PROJECT-REF.supabase.co",
+  "supabasePublishableKey": "sb_publishable_REPLACE_ME",
+  "googleWebClientId": "REPLACE_ME.apps.googleusercontent.com",
+  "deviceSalt": "crush-royale-device-v1",
+  "iapEnabled": true,
+  "adsEnabled": false,
+  "levelPlayAppKey": "",
+  "privacyPolicyUrl": "https://crushroyale.example/privacy",
+  "termsUrl": "https://crushroyale.example/terms",
+  "supportEmail": "support@crushroyale.example"
+}

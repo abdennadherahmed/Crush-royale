@@ -1,0 +1,576 @@
+using System;
+using System.Collections.Generic;
+using CrushRoyale.Core.Common;
+using CrushRoyale.Core.Config;
+
+namespace CrushRoyale.Core.Board
+{
+    /// <summary>Why a piece left the board.</summary>
+    public enum ClearCause : byte
+    {
+        Match = 0,
+        LineBlast = 1,
+        AreaBlast = 2,
+        ColorBlast = 3,
+        PowerUp = 4
+    }
+
+    public readonly struct ClearedPiece
+    {
+        public readonly Pos Position;
+        public readonly Piece Piece;
+        public readonly ClearCause Cause;
+
+        public ClearedPiece(Pos position, Piece piece, ClearCause cause)
+        {
+            Position = position;
+            Piece = piece;
+            Cause = cause;
+        }
+    }
+
+    public readonly struct PieceFall
+    {
+        public readonly int PieceId;
+        public readonly Pos From;
+        public readonly Pos To;
+
+        public PieceFall(int pieceId, Pos from, Pos to)
+        {
+            PieceId = pieceId;
+            From = from;
+            To = to;
+        }
+    }
+
+    /// <summary>A piece appearing on the board. SpawnRow is the virtual row (>= Height for refills) it animates from.</summary>
+    public readonly struct PieceSpawn
+    {
+        public readonly Piece Piece;
+        public readonly Pos Position;
+        public readonly int SpawnRow;
+
+        public PieceSpawn(Piece piece, Pos position, int spawnRow)
+        {
+            Piece = piece;
+            Position = position;
+            SpawnRow = spawnRow;
+        }
+    }
+
+    public readonly struct StoneHit
+    {
+        public readonly Pos Position;
+        public readonly int PieceId;
+        public readonly int RemainingHp;
+
+        public StoneHit(Pos position, int pieceId, int remainingHp)
+        {
+            Position = position;
+            PieceId = pieceId;
+            RemainingHp = remainingHp;
+        }
+
+        public bool Destroyed => RemainingHp <= 0;
+    }
+
+    /// <summary>One wave: clear -> spawn bonuses -> gravity -> refill. Cascade level 0 is the action itself.</summary>
+    public sealed class ResolutionStep
+    {
+        public int CascadeLevel { get; internal set; }
+
+        public List<MatchGroup> Groups { get; } = new List<MatchGroup>();
+
+        public List<ClearedPiece> Cleared { get; } = new List<ClearedPiece>();
+
+        public List<PieceSpawn> SpecialsCreated { get; } = new List<PieceSpawn>();
+
+        public List<Pos> IceBroken { get; } = new List<Pos>();
+
+        public List<StoneHit> StoneHits { get; } = new List<StoneHit>();
+
+        public List<PieceFall> Falls { get; } = new List<PieceFall>();
+
+        public List<PieceSpawn> Refills { get; } = new List<PieceSpawn>();
+
+        /// <summary>Points before cascade / power-up multipliers.</summary>
+        public long BasePoints { get; internal set; }
+
+        public int SpecialsActivated { get; internal set; }
+
+        /// <summary>Cleared gems per color, indexed by (int)PieceColor.</summary>
+        public int[] ClearedByColor { get; } = new int[6];
+
+        public int StonesDestroyed
+        {
+            get
+            {
+                int n = 0;
+                foreach (StoneHit hit in StoneHits)
+                {
+                    if (hit.Destroyed)
+                    {
+                        n++;
+                    }
+                }
+                return n;
+            }
+        }
+    }
+
+    /// <summary>Everything that happened because of one player action.</summary>
+    public sealed class ResolutionResult
+    {
+        public List<ResolutionStep> Steps { get; } = new List<ResolutionStep>();
+
+        /// <summary>Number of automatic cascades after the action's own wave.</summary>
+        public int CascadeCount => Math.Max(0, Steps.Count - 1);
+
+        public bool Shuffled { get; internal set; }
+
+        /// <summary>Snapshot after the deadlock shuffle, for views to re-layout pieces by id.</summary>
+        public GameBoard BoardAfterShuffle { get; internal set; }
+
+        public bool GoldenChainConsumed { get; internal set; }
+
+        public long TotalBasePoints
+        {
+            get
+            {
+                long total = 0;
+                foreach (ResolutionStep s in Steps)
+                {
+                    total += s.BasePoints;
+                }
+                return total;
+            }
+        }
+    }
+
+    /// <summary>Power-up flags that change how a resolution behaves.</summary>
+    public sealed class ResolveOptions
+    {
+        public static readonly ResolveOptions None = new ResolveOptions();
+
+        /// <summary>Golden Chain: the first match clears its row and column too.</summary>
+        public bool GoldenChainArmed { get; set; }
+
+        /// <summary>Bright Spark: every Match-3 also spawns a Line bomb (the GDD's "Match 3 = +1 bonus piece").</summary>
+        public bool BrightSparkActive { get; set; }
+    }
+
+    /// <summary>
+    /// Applies the match-3 rules to a board: removal, bonus creation, chain reactions, stones, ice,
+    /// gravity, refills and cascades, then deadlock shuffling. Produces a full event log for animation.
+    /// Scoring multipliers are NOT applied here (see Scoring.CascadeCalculator).
+    /// </summary>
+    public sealed class ResolutionEngine
+    {
+        private readonly ScoringBalance _scoring;
+        private readonly int _maxSteps;
+        private readonly RefillSpawner _spawner;
+        private readonly DeterministicRandom _shuffleRng;
+        private readonly int _colorCount;
+
+        public ResolutionEngine(GameBalance balance, RefillSpawner spawner, DeterministicRandom shuffleRng)
+        {
+            if (balance == null)
+            {
+                throw new ArgumentNullException(nameof(balance));
+            }
+            _scoring = balance.Scoring;
+            _maxSteps = balance.Board.MaxResolutionSteps;
+            _spawner = spawner ?? throw new ArgumentNullException(nameof(spawner));
+            _shuffleRng = shuffleRng ?? throw new ArgumentNullException(nameof(shuffleRng));
+            _colorCount = spawner.ColorCount;
+        }
+
+        /// <summary>Validates and resolves a player swap. On failure the board is untouched.</summary>
+        public OperationResult<ResolutionResult> ResolveSwap(GameBoard board, Pos a, Pos b, ResolveOptions options = null)
+        {
+            ErrorCode error = MoveFinder.CheckSwap(board, a, b);
+            if (error != ErrorCode.None)
+            {
+                return OperationResult<ResolutionResult>.Fail(error);
+            }
+
+            board.Swap(a, b);
+            List<MatchGroup> groups = MatchFinder.FindMatches(board);
+            return OperationResult<ResolutionResult>.Ok(Run(board, groups, null, ClearCause.PowerUp, a, b, true, options ?? ResolveOptions.None));
+        }
+
+        /// <summary>Clears arbitrary cells (power-ups), then lets cascades play out.</summary>
+        public ResolutionResult ResolveForcedClear(GameBoard board, IReadOnlyList<Pos> cells, ClearCause cause, ResolveOptions options = null)
+        {
+            if (cells == null)
+            {
+                throw new ArgumentNullException(nameof(cells));
+            }
+            return Run(board, new List<MatchGroup>(), cells, cause, default, default, false, options ?? ResolveOptions.None);
+        }
+
+        private ResolutionResult Run(
+            GameBoard board,
+            List<MatchGroup> groups,
+            IReadOnlyList<Pos> forced,
+            ClearCause forcedCause,
+            Pos swapA,
+            Pos swapB,
+            bool hasSwap,
+            ResolveOptions options)
+        {
+            var result = new ResolutionResult();
+            int level = 0;
+
+            while (groups.Count > 0 || (forced != null && forced.Count > 0))
+            {
+                ResolutionStep step = ExecuteStep(board, level, groups, forced, forcedCause, swapA, swapB, hasSwap, options, result);
+                result.Steps.Add(step);
+
+                level++;
+                forced = null;
+                hasSwap = false;
+                if (level >= _maxSteps)
+                {
+                    break;
+                }
+                groups = MatchFinder.FindMatches(board);
+            }
+
+            if (MatchFinder.HasAnyMatch(board) || !MoveFinder.HasValidMove(board))
+            {
+                if (BoardShuffler.EnsurePlayable(board, _shuffleRng, _colorCount))
+                {
+                    result.Shuffled = true;
+                    result.BoardAfterShuffle = board.Clone();
+                }
+            }
+
+            return result;
+        }
+
+        private ResolutionStep ExecuteStep(
+            GameBoard board,
+            int level,
+            List<MatchGroup> groups,
+            IReadOnlyList<Pos> forced,
+            ClearCause forcedCause,
+            Pos swapA,
+            Pos swapB,
+            bool hasSwap,
+            ResolveOptions options,
+            ResolutionResult result)
+        {
+            var step = new ResolutionStep { CascadeLevel = level };
+            step.Groups.AddRange(groups);
+
+            var causes = new Dictionary<Pos, ClearCause>();
+            var order = new List<Pos>();
+            var specials = new List<PieceSpawn>();
+            var reserved = new HashSet<Pos>();
+            long points = 0;
+
+            void Mark(Pos p, ClearCause cause)
+            {
+                if (!board.InBounds(p) || board[p].IsEmpty || causes.ContainsKey(p))
+                {
+                    return;
+                }
+                causes[p] = cause;
+                order.Add(p);
+            }
+
+            void AddSpecial(Pos p, PieceColor color, PieceType type)
+            {
+                if (reserved.Add(p))
+                {
+                    specials.Add(new PieceSpawn(new Piece(1, color, type), p, p.Y));
+                }
+            }
+
+            // 1) Matches and the bonuses they create.
+            foreach (MatchGroup group in groups)
+            {
+                foreach (Pos cell in group.Cells)
+                {
+                    Mark(cell, ClearCause.Match);
+                }
+                points += (long)group.Cells.Count * _scoring.PointsPerPiece;
+
+                Pos spawn = ChooseSpawn(group, swapA, swapB, hasSwap);
+                MatchRun longest = LongestRun(group);
+                switch (group.Shape)
+                {
+                    case MatchShape.Line4:
+                        points += _scoring.Line4Bonus;
+                        AddSpecial(spawn, group.Color, longest.Horizontal ? PieceType.LineHorizontal : PieceType.LineVertical);
+                        break;
+                    case MatchShape.Cross:
+                        points += _scoring.CrossBonus;
+                        AddSpecial(spawn, group.Color, PieceType.AreaBomb);
+                        break;
+                    case MatchShape.Line5:
+                        points += _scoring.Line5SuperBonus;
+                        foreach (Pos p in board.AllPositions())
+                        {
+                            Piece piece = board[p];
+                            if (piece.IsMatchable && piece.Color == group.Color)
+                            {
+                                Mark(p, ClearCause.ColorBlast);
+                            }
+                        }
+                        break;
+                    default:
+                        if (options.BrightSparkActive)
+                        {
+                            AddSpecial(spawn, group.Color, longest.Horizontal ? PieceType.LineHorizontal : PieceType.LineVertical);
+                        }
+                        break;
+                }
+
+                if (options.GoldenChainArmed && !result.GoldenChainConsumed)
+                {
+                    result.GoldenChainConsumed = true;
+                    for (int x = 0; x < board.Width; x++)
+                    {
+                        Mark(new Pos(x, spawn.Y), ClearCause.PowerUp);
+                    }
+                    for (int y = 0; y < board.Height; y++)
+                    {
+                        Mark(new Pos(spawn.X, y), ClearCause.PowerUp);
+                    }
+                }
+            }
+
+            // 2) Cells forced by a power-up.
+            if (forced != null)
+            {
+                foreach (Pos p in forced)
+                {
+                    Mark(p, forcedCause);
+                }
+            }
+
+            // 3) Chain reactions: any bonus caught in the clear set detonates (order-stable BFS).
+            var detonated = new HashSet<int>();
+            for (int i = 0; i < order.Count; i++)
+            {
+                Pos p = order[i];
+                Piece piece = board[p];
+                if (!piece.IsSpecial || !detonated.Add(piece.Id))
+                {
+                    continue;
+                }
+
+                step.SpecialsActivated++;
+                points += _scoring.SpecialActivationBonus;
+                switch (piece.Type)
+                {
+                    case PieceType.LineHorizontal:
+                        for (int x = 0; x < board.Width; x++)
+                        {
+                            Mark(new Pos(x, p.Y), ClearCause.LineBlast);
+                        }
+                        break;
+                    case PieceType.LineVertical:
+                        for (int y = 0; y < board.Height; y++)
+                        {
+                            Mark(new Pos(p.X, y), ClearCause.LineBlast);
+                        }
+                        break;
+                    case PieceType.AreaBomb:
+                        for (int dy = -1; dy <= 1; dy++)
+                        {
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                Mark(new Pos(p.X + dx, p.Y + dy), ClearCause.AreaBlast);
+                            }
+                        }
+                        break;
+                }
+            }
+
+            // 4) Stones: hit when blasted directly, or when a MATCH happens next to them (once per stone per wave).
+            var stoneOrder = new List<Pos>();
+            var stoneSet = new HashSet<Pos>();
+            foreach (Pos p in order)
+            {
+                if (board[p].IsStone && stoneSet.Add(p))
+                {
+                    stoneOrder.Add(p);
+                }
+            }
+            foreach (Pos p in order)
+            {
+                if (causes[p] != ClearCause.Match || board[p].IsStone)
+                {
+                    continue;
+                }
+                AddAdjacentStone(board, p.Offset(-1, 0), stoneOrder, stoneSet);
+                AddAdjacentStone(board, p.Offset(1, 0), stoneOrder, stoneSet);
+                AddAdjacentStone(board, p.Offset(0, -1), stoneOrder, stoneSet);
+                AddAdjacentStone(board, p.Offset(0, 1), stoneOrder, stoneSet);
+            }
+
+            // 5) Remove gems, break ice.
+            foreach (Pos p in order)
+            {
+                Piece piece = board[p];
+                if (piece.IsStone)
+                {
+                    continue;
+                }
+
+                ClearCause cause = causes[p];
+                step.Cleared.Add(new ClearedPiece(p, piece, cause));
+                step.ClearedByColor[(int)piece.Color]++;
+                if (cause != ClearCause.Match)
+                {
+                    points += _scoring.PointsPerPiece;
+                }
+                if (board.ReduceIce(p))
+                {
+                    step.IceBroken.Add(p);
+                    points += _scoring.IceLayerPoints;
+                }
+                board[p] = Piece.Empty;
+            }
+
+            foreach (Pos p in stoneOrder)
+            {
+                Piece stone = board[p];
+                int hp = stone.Hp - 1;
+                step.StoneHits.Add(new StoneHit(p, stone.Id, hp));
+                if (hp <= 0)
+                {
+                    board[p] = Piece.Empty;
+                    points += _scoring.StonePoints;
+                }
+                else
+                {
+                    board[p] = stone.WithHp((byte)hp);
+                }
+            }
+
+            // 6) Place newly created bonuses (their cells were just cleared).
+            foreach (PieceSpawn template in specials)
+            {
+                if (!board[template.Position].IsEmpty)
+                {
+                    continue;
+                }
+                Piece created = board.CreatePiece(template.Piece.Color, template.Piece.Type);
+                board[template.Position] = created;
+                step.SpecialsCreated.Add(new PieceSpawn(created, template.Position, template.Position.Y));
+            }
+
+            // 7) Gravity + refill, column by column.
+            ApplyGravityAndRefill(board, step);
+
+            step.BasePoints = points;
+            return step;
+        }
+
+        private void ApplyGravityAndRefill(GameBoard board, ResolutionStep step)
+        {
+            for (int x = 0; x < board.Width; x++)
+            {
+                int write = 0;
+                for (int y = 0; y < board.Height; y++)
+                {
+                    Piece piece = board[x, y];
+                    if (piece.IsEmpty)
+                    {
+                        continue;
+                    }
+                    if (y != write)
+                    {
+                        board[x, write] = piece;
+                        board[x, y] = Piece.Empty;
+                        step.Falls.Add(new PieceFall(piece.Id, new Pos(x, y), new Pos(x, write)));
+                    }
+                    write++;
+                }
+
+                for (int y = write; y < board.Height; y++)
+                {
+                    Piece fresh = board.CreatePiece(_spawner.NextColor(x));
+                    board[x, y] = fresh;
+                    step.Refills.Add(new PieceSpawn(fresh, new Pos(x, y), board.Height + (y - write)));
+                }
+            }
+        }
+
+        private static void AddAdjacentStone(GameBoard board, Pos p, List<Pos> order, HashSet<Pos> set)
+        {
+            if (board.InBounds(p) && board[p].IsStone && set.Add(p))
+            {
+                order.Add(p);
+            }
+        }
+
+        /// <summary>
+        /// Where a bonus appears: on the swapped cell when the player caused the match (the natural feel),
+        /// else on the crossing cell of an L/T, else in the middle of the longest run.
+        /// </summary>
+        private static Pos ChooseSpawn(MatchGroup group, Pos swapA, Pos swapB, bool hasSwap)
+        {
+            if (hasSwap)
+            {
+                if (group.Contains(swapA))
+                {
+                    return swapA;
+                }
+                if (group.Contains(swapB))
+                {
+                    return swapB;
+                }
+            }
+
+            if (group.Shape == MatchShape.Cross)
+            {
+                var horizontalCells = new HashSet<Pos>();
+                foreach (MatchRun run in group.Runs)
+                {
+                    if (run.Horizontal)
+                    {
+                        foreach (Pos c in run.Cells)
+                        {
+                            horizontalCells.Add(c);
+                        }
+                    }
+                }
+                foreach (MatchRun run in group.Runs)
+                {
+                    if (run.Horizontal)
+                    {
+                        continue;
+                    }
+                    foreach (Pos c in run.Cells)
+                    {
+                        if (horizontalCells.Contains(c))
+                        {
+                            return c;
+                        }
+                    }
+                }
+            }
+
+            MatchRun longest = LongestRun(group);
+            return longest.Cells[(longest.Length - 1) / 2];
+        }
+
+        private static MatchRun LongestRun(MatchGroup group)
+        {
+            MatchRun best = group.Runs[0];
+            foreach (MatchRun run in group.Runs)
+            {
+                if (run.Length > best.Length)
+                {
+                    best = run;
+                }
+            }
+            return best;
+        }
+    }
+}

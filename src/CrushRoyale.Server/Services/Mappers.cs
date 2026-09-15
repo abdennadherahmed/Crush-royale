@@ -1,0 +1,248 @@
+using System.Text;
+using CrushRoyale.Contracts;
+using CrushRoyale.Core.Common;
+using CrushRoyale.Core.Config;
+using CrushRoyale.Core.Economy;
+using CrushRoyale.Core.Gameplay;
+using CrushRoyale.Core.Progression;
+using CrushRoyale.Core.Pvp;
+using CrushRoyale.Core.Replay;
+using CrushRoyale.Core.Story;
+using CrushRoyale.Server.Infrastructure;
+using CrushRoyale.Server.Persistence;
+
+namespace CrushRoyale.Server.Services;
+
+/// <summary>Core/persistence objects to API contracts, plus input parsing helpers.</summary>
+public static class Mappers
+{
+    public static WalletDto Wallet(PlayerWorkspace ws) => new() { Coins = ws.State.Wallet.Coins, Orbes = ws.State.Wallet.Orbes };
+
+    public static LivesDto Lives(PlayerWorkspace ws)
+    {
+        StaminaManager stamina = ws.Stamina;
+        LifePurchaseQuote next = stamina.QuoteLives(1);
+        return new LivesDto
+        {
+            Lives = stamina.Lives,
+            MaxRegen = stamina.MaxRegenLives,
+            RechargeSeconds = stamina.GetRechargeTimer(),
+            FreeContinues = stamina.GetContinueCount(),
+            VipLifeAvailable = stamina.CanClaimVipDailyLife(),
+            NextLifeCoins = next.Coins,
+            NextLifeOrbes = next.Orbes
+        };
+    }
+
+    public static VipDto Vip(PlayerWorkspace ws)
+    {
+        VipProgress progress = new VipSystem(ws.Balance).GetProgress(ws.State.Vip.LifetimeSpendCents);
+        return new VipDto
+        {
+            Tier = (int)progress.Tier,
+            LifetimeSpendCents = progress.LifetimeSpendCents,
+            NextThresholdCents = progress.NextThresholdCents,
+            Progress = progress.ProgressToNext
+        };
+    }
+
+    public static PvpDto Pvp(PlayerWorkspace ws)
+    {
+        PlayerTrophyRecord r = ws.State.Pvp;
+        return new PvpDto
+        {
+            Trophies = r.Trophies,
+            League = LeagueTable.GetLeague(r.Trophies, ws.Balance.Trophies).ToString(),
+            HighestLeague = r.HighestLeague.ToString(),
+            WinStreak = r.CurrentWinStreak,
+            BestWinStreak = r.BestWinStreak,
+            Wins = r.Wins,
+            Losses = r.Losses,
+            Draws = r.Draws,
+            BoostingCooldownUntilUnixMs = ws.State.Integrity.BoostingCooldownUntilUnixMs
+        };
+    }
+
+    public static StoryDto Story(PlayerWorkspace ws)
+    {
+        StoryProgress p = ws.State.Story;
+        int maxStage = Math.Max(p.HighestUnlockedStage - 1, p.Stages.Count == 0 ? 0 : p.Stages.Keys.Max());
+        var stars = new StringBuilder(maxStage);
+        for (int id = 1; id <= maxStage; id++)
+        {
+            stars.Append(p.Stages.TryGetValue(id, out StageProgress? s) && s.EverWon ? (char)('0' + Math.Clamp(s.BestStars, 1, 3)) : '0');
+        }
+
+        return new StoryDto
+        {
+            HighestUnlockedStage = p.HighestUnlockedStage,
+            TotalStars = p.TotalStars,
+            StarsByStage = stars.ToString(),
+            Flags = p.Flags.OrderBy(f => f, StringComparer.Ordinal).ToList(),
+            Choices = new Dictionary<string, string>(p.Choices),
+            Ending = p.Ending?.ToString(),
+            NewGamePlusUnlocked = p.NewGamePlusUnlocked,
+            Party = ws.Story.GetParty().Select(c => c.Id).ToList(),
+            UnlockedFeatures = Enum.GetValues<Feature>().Where(ws.Story.IsFeatureUnlocked).Select(f => f.ToString()).ToList(),
+            SeenEvents = p.SeenEvents.OrderBy(e => e, StringComparer.Ordinal).ToList()
+        };
+    }
+
+    public static InventoryDto Inventory(PlayerWorkspace ws)
+    {
+        InventoryState s = ws.State.Inventory;
+        return new InventoryDto
+        {
+            PowerUps = s.PowerUps.Where(kv => kv.Value > 0).ToDictionary(kv => kv.Key.ToString(), kv => kv.Value),
+            Cosmetics = s.Cosmetics.OrderBy(c => c, StringComparer.Ordinal).ToList(),
+            EquippedFrame = s.EquippedFrame,
+            EquippedBoardSkin = s.EquippedBoardSkin,
+            EquippedPieceSkin = s.EquippedPieceSkin,
+            EquippedTitle = s.EquippedTitle,
+            EquippedOutfit = s.EquippedOutfit,
+            AdsRemoved = s.AdsRemoved,
+            RarePerkUnlocked = s.RarePerkUnlocked,
+            PremiumPass = s.PremiumPassSeason == ws.BattlePassSeason
+        };
+    }
+
+    public static ProfileDto Profile(PlayerWorkspace ws)
+    {
+        PlayerState s = ws.State;
+        return new ProfileDto
+        {
+            Id = ws.IdString,
+            DisplayName = s.DisplayName,
+            Hero = new HeroDto { Gender = s.Hero.Gender, Name = s.Hero.Name, Appearance = s.Hero.Appearance },
+            HeroChosen = s.HeroChosen,
+            DeclaredAge = s.DeclaredAge,
+            Language = s.Language,
+            Wallet = Wallet(ws),
+            Lives = Lives(ws),
+            Vip = Vip(ws),
+            Pvp = Pvp(ws),
+            Story = Story(ws),
+            Inventory = Inventory(ws),
+            GuildId = s.GuildId,
+            LoginBonusAvailable = LoginCalendar.CanClaim(s.Login, ws.Now),
+            LoginCalendarSlot = s.Login.NextSlot,
+            CollectionPagesCompleted = s.Achievements.PagesCompleted.Count,
+            UnclaimedAchievements = ws.Achievements.GetUnclaimed().Count,
+            ClaimableQuests = s.Quests.Day == TimeUtil.DayIndex(ws.Now) ? s.Quests.Quests.Count(q => q.IsComplete && !q.Claimed) : 0,
+            SuspendedUntilUnixMs = s.Integrity.PermanentlyBanned ? long.MaxValue : s.Integrity.SuspendedUntilUnixMs
+        };
+    }
+
+    public static PublicProfileDto Public(PlayerSummary p) => new()
+    {
+        Id = p.Id.ToString(),
+        DisplayName = p.DisplayName,
+        Trophies = p.Trophies,
+        League = p.League.ToString(),
+        HighestStage = p.HighestStage,
+        GuildId = p.GuildId,
+        Frame = p.Frame,
+        Title = p.Title
+    };
+
+    public static RewardDto Reward(RewardData? reward) => reward == null ? new RewardDto() : new RewardDto
+    {
+        Coins = reward.Coins,
+        Orbes = reward.Orbes,
+        PowerUps = reward.PowerUps.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value),
+        Cosmetics = reward.Cosmetics.ToList(),
+        Lives = reward.Lives,
+        BattlePassXp = reward.BattlePassXp
+    };
+
+    public static List<LoadoutEntryDto> Loadout(IEnumerable<LoadoutEntry> loadout) =>
+        loadout.Select(l => new LoadoutEntryDto { Type = l.Type.ToString(), Quantity = l.Quantity }).ToList();
+
+    public static StoryEventDto Event(StoryEvent e) => new()
+    {
+        Id = e.Id,
+        StageId = e.StageId,
+        Trigger = e.Trigger.ToString(),
+        DialogueId = e.DialogueId,
+        Cinematic = e.Cinematic,
+        CharacterJoins = e.CharacterJoins,
+        CharacterLeaves = e.CharacterLeaves,
+        ChoiceId = e.ChoiceId
+    };
+
+    public static ShopItemDto ShopItem(ShopItem i) => new()
+    {
+        Id = i.Id,
+        Kind = i.Kind.ToString(),
+        PowerUp = i.Kind is ShopItemKind.PowerUp or ShopItemKind.PowerUpBundle ? i.PowerUp.ToString() : null,
+        Quantity = i.Quantity,
+        PriceCoins = i.PriceCoins,
+        PriceOrbes = i.PriceOrbes,
+        PriceCents = i.PriceCents,
+        Sku = i.Sku,
+        IsDeal = i.IsDeal,
+        DiscountPermille = i.DiscountPermille,
+        RequiredVip = i.RequiredVip,
+        CosmeticId = i.CosmeticId,
+        OrbesGranted = i.OrbesGranted,
+        CoinsGranted = i.CoinsGranted,
+        OrbesPerEuro = i.OrbesPerEuro,
+        SoldOut = i.SoldOut
+    };
+
+    public static MatchStartResponse MatchStart(MatchRow match, PlayerWorkspace ws, string balanceHash, GhostDto? ghost = null) => new()
+    {
+        MatchId = match.Id,
+        Mode = match.Mode.ToString(),
+        Seed = match.Seed.ToString(System.Globalization.CultureInfo.InvariantCulture),
+        StageId = match.StageId,
+        Loadout = Loadout(match.Config.Loadout),
+        HighestLeague = match.Config.HighestLeague.ToString(),
+        AssistExtraMoves = match.Config.AssistExtraMoves,
+        StartedAtUnixMs = TimeUtil.ToUnixMs(match.StartedAt),
+        BalanceHash = balanceHash,
+        Lives = Lives(ws),
+        Ghost = ghost
+    };
+
+    // ------------------------------------------------------------------ input parsing
+
+    public static T ParseEnum<T>(string? value, string field) where T : struct, Enum
+    {
+        if (string.IsNullOrWhiteSpace(value) || !Enum.TryParse(value.Trim(), ignoreCase: true, out T parsed) || !Enum.IsDefined(parsed) || int.TryParse(value, out _))
+        {
+            throw new ApiException(ErrorCode.InvalidArgument, "Invalid " + field + ": '" + value + "'.");
+        }
+        return parsed;
+    }
+
+    public static List<PowerUpType> ParseLoadout(IEnumerable<string>? names, GameBalance balance)
+    {
+        var list = (names ?? Enumerable.Empty<string>()).Select(n => ParseEnum<PowerUpType>(n, "power-up")).Distinct().ToList();
+        if (list.Count > balance.PowerUps.LoadoutSlots)
+        {
+            throw new ApiException(ErrorCode.LimitReached, "At most " + balance.PowerUps.LoadoutSlots + " power-ups per match.");
+        }
+        return list;
+    }
+
+    public static ReplayData DecodeReplay(string? base64)
+    {
+        if (string.IsNullOrWhiteSpace(base64) || base64.Length > 90000)
+        {
+            throw new ApiException(ErrorCode.ReplayInvalid, "Replay missing or too large.");
+        }
+        byte[] bytes;
+        try
+        {
+            bytes = Convert.FromBase64String(base64);
+        }
+        catch (FormatException)
+        {
+            throw new ApiException(ErrorCode.ReplayInvalid, "Replay is not valid base64.");
+        }
+        return ReplaySerializer.TryDeserialize(bytes).ValueOrThrow();
+    }
+
+    public static string NewId(string prefix) => prefix + "_" + Guid.NewGuid().ToString("N");
+}
