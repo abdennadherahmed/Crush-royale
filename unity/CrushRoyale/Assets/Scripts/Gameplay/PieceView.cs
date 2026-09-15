@@ -57,15 +57,25 @@ namespace CrushRoyale.Game.Gameplay
 
             if (piece.IsStone)
             {
-                _body.sprite = ProceduralSprites.Stone();
+                _body.sprite = ArtLibrary.Stone() ?? ProceduralSprites.Stone();
                 float shade = piece.Hp >= 2 ? 0.7f : 1f;
                 _body.color = new Color(shade, shade, shade, 1f);
                 _overlay.enabled = false;
                 return;
             }
 
-            _body.sprite = ProceduralSprites.Gem(ShapeFor(piece.Color));
-            _body.color = (colorBlind ? Theme.GemsColorBlind : Theme.Gems)[(int)piece.Color];
+            // Illustrated gems already have one distinct shape per color (color-blind friendly), so they are not tinted.
+            Sprite art = ArtLibrary.Gem(piece.Color);
+            if (art != null)
+            {
+                _body.sprite = art;
+                _body.color = Color.white;
+            }
+            else
+            {
+                _body.sprite = ProceduralSprites.Gem(ShapeFor(piece.Color));
+                _body.color = (colorBlind ? Theme.GemsColorBlind : Theme.Gems)[(int)piece.Color];
+            }
 
             switch (piece.Type)
             {

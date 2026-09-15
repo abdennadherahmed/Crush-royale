@@ -289,8 +289,20 @@ namespace CrushRoyale.Game.Screens
                 string line = bar > 0 ? raw.Substring(bar + 1).Trim() : raw;
 
                 speaker.text = loc.T("char." + who);
-                initial.text = speaker.text.Length > 0 ? speaker.text.Substring(0, 1) : "?";
-                portrait.color = CharacterColor(who);
+                Sprite art = ArtLibrary.Character(who);
+                if (art != null)
+                {
+                    portrait.sprite = art;
+                    portrait.color = Color.white;
+                    portrait.preserveAspect = true;
+                    initial.text = string.Empty;
+                }
+                else
+                {
+                    portrait.sprite = ProceduralSprites.Circle();
+                    portrait.color = CharacterColor(who);
+                    initial.text = speaker.text.Length > 0 ? speaker.text.Substring(0, 1) : "?";
+                }
 
                 // Typewriter effect; a tap completes the line, the next tap advances.
                 advance = new TaskCompletionSource<bool>();

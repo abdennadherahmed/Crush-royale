@@ -25,6 +25,9 @@ namespace CrushRoyale.Game.Screens
 
         public override System.Type BackTarget => typeof(MainMenuScreen);
 
+        // Acts 1-5 are the kingdoms in enum order (North, East, West, South, Central).
+        protected override Kingdom BackdropKingdom => (Kingdom)Mathf.Clamp(_act - 1, 0, 4);
+
         private int HighestUnlocked => Game.Backend.IsOnline
             ? Game.Backend.Profile.Story.HighestUnlockedStage
             : Mathf.Clamp(Game.Save.Settings.LastSeenStage, 1, OfflineStageCap);
@@ -149,6 +152,8 @@ namespace CrushRoyale.Game.Screens
         private int _stageId;
         private readonly HashSet<string> _selected = new HashSet<string>();
 
+        protected override Kingdom BackdropKingdom => Game.Backend.Catalog.Get(_stageId).Kingdom;
+
         protected override void Build()
         {
             _stageId = Args is int id ? id : 1;
@@ -162,6 +167,11 @@ namespace CrushRoyale.Game.Screens
             if (stage.IsBoss)
             {
                 UIFactory.Height(UIFactory.Label(list, Loc.T("boss." + stage.BossKind) + " - " + Loc.T(stage.BossId + ".name"), Theme.BodySize, Theme.Danger, TextAnchor.MiddleCenter, FontStyle.Bold), 80);
+                Sprite bossArt = ArtLibrary.Boss(stage);
+                if (bossArt != null)
+                {
+                    UIFactory.Height(UIFactory.Icon(list, bossArt, Color.white, 360), 360);
+                }
             }
 
             RectTransform info = Widgets.Card(list, 260);
@@ -229,6 +239,7 @@ namespace CrushRoyale.Game.Screens
                         button.GetComponent<Image>().color = Theme.GoldDark;
                     }
                 }, Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                Widgets.AddPowerUpIcon(button, def.Type);
                 button.interactable = !locked && count > 0;
             }
         }
@@ -322,6 +333,7 @@ namespace CrushRoyale.Game.Screens
                             button.GetComponent<Image>().color = Theme.GoldDark;
                         }
                     }, Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                    Widgets.AddPowerUpIcon(button, def.Type);
                     button.interactable = highest >= def.UnlockLeague && count > 0;
                 }
             }

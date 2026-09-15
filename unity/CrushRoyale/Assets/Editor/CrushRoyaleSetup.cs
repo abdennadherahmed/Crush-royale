@@ -39,9 +39,25 @@ namespace CrushRoyale.EditorTools
             PlayerSettings.Android.forceInternetPermission = true;
             PlayerSettings.runInBackground = false;
             EditorUserBuildSettings.buildAppBundle = true;
+            ApplyAppIcon();
             EnsureAndroidDependencies();
             Debug.Log("Crush Royale: Android settings applied (IL2CPP, ARM64, API 24+, portrait, AAB). " +
                       "Remember: Player > Other Settings > Active Input Handling = 'Input Manager (Old)' or 'Both', and set up keystore signing.");
+        }
+
+        private const string AppIconPath = "Assets/Art/AppIcon/app_icon.png";
+
+        /// <summary>Uses the illustrated 1024px icon as the default icon for every platform (Android scales it per density).</summary>
+        private static void ApplyAppIcon()
+        {
+            AssetDatabase.ImportAsset(AppIconPath, ImportAssetOptions.ForceSynchronousImport);
+            Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(AppIconPath);
+            if (icon == null)
+            {
+                Debug.LogWarning("Crush Royale: app icon not found at " + AppIconPath + ", keeping the Unity default icon.");
+                return;
+            }
+            PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
         }
 
         private const string MainGradleTemplatePath = "Assets/Plugins/Android/mainTemplate.gradle";

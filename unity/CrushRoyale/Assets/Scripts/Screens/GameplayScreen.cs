@@ -38,6 +38,7 @@ namespace CrushRoyale.Game.Screens
         protected override void Build()
         {
             _launch = (MatchLaunch)Args;
+            AddBackdrop();
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
             safe.gameObject.AddComponent<SafeArea>();
 
@@ -110,6 +111,7 @@ namespace CrushRoyale.Game.Screens
             {
                 PowerUpType type = entry.Type;
                 Button button = UIFactory.Button(bar, Loc.T("powerup." + type), () => OnPowerUp(type), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                Widgets.AddPowerUpIcon(button, type);
                 _powerUps.Add((type, button, button.GetComponentInChildren<Text>()));
             }
             if (config.Loadout.Count == 0)
@@ -213,6 +215,18 @@ namespace CrushRoyale.Game.Screens
                 button.interactable = s.IsRunning && can == ErrorCode.None;
                 label.text = Loc.T("powerup." + type) + " x" + s.PowerUps.Remaining(type);
             }
+        }
+
+        /// <summary>Kingdom illustration behind the whole screen (story: the stage's kingdom; PvP and guild boss: Crystalheim).</summary>
+        private void AddBackdrop()
+        {
+            Kingdom kingdom = Kingdom.Central;
+            if (_launch.Mode == GameMode.Story && _launch.StageId > 0)
+            {
+                kingdom = Game.Backend.Catalog.Get(_launch.StageId).Kingdom;
+            }
+
+            Widgets.Backdrop(Root, kingdom);
         }
 
         private void Update()

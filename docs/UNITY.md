@@ -140,13 +140,25 @@ Les prix affichés en jeu sont ceux de Google Play (devise locale) quand ils son
 | `Networking` | Backend Supabase et API, connexion Google, achats intégrés, publicités, notifications locales |
 | `Audio` | Sons et musiques générés par synthèse |
 
-## Remplacer les placeholders
+## Illustrations
 
-Tout le visuel et le son sont générés en code pour que le jeu soit jouable immédiatement. Pour y mettre de vrais
-assets :
+Les illustrations (gemmes, fonds des 5 royaumes, portraits, boss, bonus, icônes, logo, icône de l'app) ont été
+générées avec Gemini sur un fond magenta uni, puis découpées par `tools/art/process_art.py` :
 
-- **Gemmes** : remplacer `ProceduralSprites.Gem` par des sprites importés (garder une forme distincte par
-  couleur pour le mode daltonien).
+- `art/source/` : images d'origine (planches et fonds) ;
+- `Assets/Resources/Art/` : fichiers prêts pour Unity (`Gems`, `Backgrounds`, `Characters`, `Bosses`, `PowerUps`,
+  `Icons`, `logo.png`), importés en sprites par `Editor/ArtImportSettings.cs` ;
+- `Assets/Art/AppIcon/app_icon.png` : icône appliquée par *Configure Android Player Settings* (et par le build cloud).
+
+Le code passe par `UI/ArtLibrary.cs`, qui renvoie `null` si un fichier manque : le visuel procédural reprend alors
+la main, donc on peut remplacer ou retirer une image sans rien casser. Pour refaire une planche :
+
+```bash
+python tools/art/process_art.py sheet art/source/powerups_sheet.jpg unity/CrushRoyale/Assets/Resources/Art/PowerUps 3 3 time_bomb,coin_boost,starburst,multiplier,chain,potion,bomb,tornado,infinity
+```
+
+## Remplacer les placeholders restants
+
 - **Sons** : remplacer les clips de `SynthClips` par des `AudioClip` chargés depuis `Resources`, en gardant les
   identifiants `SoundIds`.
 - **Police** : la police système est utilisée pour couvrir l'arabe, le cyrillique et les caractères CJK ; une

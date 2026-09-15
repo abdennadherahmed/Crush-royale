@@ -19,8 +19,18 @@ namespace CrushRoyale.Game.Screens
 
         protected override void Build()
         {
-            Text title = UIFactory.Label(Root, "CRUSH ROYALE", 120, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(title.rectTransform, 0.05f, 0.58f, 0.95f, 0.72f);
+            Widgets.Backdrop(Root, CrushRoyale.Core.Story.Kingdom.Central, 0.55f);
+            Sprite logo = ArtLibrary.Logo();
+            if (logo != null)
+            {
+                Image image = UIFactory.Icon(Root, logo, Color.white, 0);
+                UIFactory.Anchor(image.rectTransform, 0.05f, 0.59f, 0.95f, 0.84f);
+            }
+            else
+            {
+                Text title = UIFactory.Label(Root, "CRUSH ROYALE", 120, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(title.rectTransform, 0.05f, 0.58f, 0.95f, 0.72f);
+            }
             Text subtitle = UIFactory.Label(Root, Loc.T("splash.subtitle"), Theme.BodySize, Theme.Crystal);
             UIFactory.Anchor(subtitle.rectTransform, 0.1f, 0.52f, 0.9f, 0.58f);
 
@@ -129,8 +139,17 @@ namespace CrushRoyale.Game.Screens
                 _gender = gender;
                 Highlight();
             }, Theme.PanelLight, Theme.HeaderSize, Theme.Text);
-            Image silhouette = UIFactory.Icon(button.transform, ProceduralSprites.Gem(gender == "male" ? ProceduralSprites.GemShape.Diamond : ProceduralSprites.GemShape.Hexagon), gender == "male" ? Theme.Crystal : Theme.Orbe, 150);
-            silhouette.rectTransform.anchorMin = silhouette.rectTransform.anchorMax = new Vector2(0.5f, 0.66f);
+            Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
+            if (portrait != null)
+            {
+                Image art = UIFactory.Icon(button.transform, portrait, Color.white, 0);
+                UIFactory.Anchor(art.rectTransform, 0.08f, 0.28f, 0.92f, 0.98f);
+            }
+            else
+            {
+                Image silhouette = UIFactory.Icon(button.transform, ProceduralSprites.Gem(gender == "male" ? ProceduralSprites.GemShape.Diamond : ProceduralSprites.GemShape.Hexagon), gender == "male" ? Theme.Crystal : Theme.Orbe, 150);
+                silhouette.rectTransform.anchorMin = silhouette.rectTransform.anchorMax = new Vector2(0.5f, 0.66f);
+            }
             return button.GetComponent<Image>();
         }
 
@@ -192,6 +211,7 @@ namespace CrushRoyale.Game.Screens
 
         protected override void Build()
         {
+            Widgets.Backdrop(Root, CrushRoyale.Core.Story.Kingdom.Central, 0.6f);
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
             safe.gameObject.AddComponent<SafeArea>();
 
@@ -211,8 +231,16 @@ namespace CrushRoyale.Game.Screens
             Text sub = UIFactory.Label(card.transform, detail, Theme.SmallSize + 2, profile == null ? Theme.Warning : Theme.League(profile.Pvp.League), TextAnchor.MiddleLeft);
             UIFactory.Anchor(sub.rectTransform, 0.05f, 0.05f, 0.95f, 0.5f);
 
-            Text logo = UIFactory.Label(card.transform, "CR", 80, Theme.Gold, TextAnchor.MiddleRight, FontStyle.Bold);
-            UIFactory.Anchor(logo.rectTransform, 0.7f, 0.1f, 0.95f, 0.9f);
+            Sprite crown = ArtLibrary.Icon("crown");
+            if (crown != null)
+            {
+                UIFactory.Anchor(UIFactory.Icon(card.transform, crown, Color.white, 0).rectTransform, 0.74f, 0.1f, 0.95f, 0.9f);
+            }
+            else
+            {
+                Text logo = UIFactory.Label(card.transform, "CR", 80, Theme.Gold, TextAnchor.MiddleRight, FontStyle.Bold);
+                UIFactory.Anchor(logo.rectTransform, 0.7f, 0.1f, 0.95f, 0.9f);
+            }
 
             RectTransform grid = UIFactory.Anchor(UIFactory.Rect("Grid", safe), 0.03f, 0.04f, 0.97f, 0.76f);
             GridLayoutGroup layout = grid.gameObject.AddComponent<GridLayoutGroup>();

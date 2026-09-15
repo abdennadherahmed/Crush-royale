@@ -132,6 +132,44 @@ namespace CrushRoyale.Game.UI
         }
 
         private static string OnOff(bool value) => GameRoot.Instance.Loc.T(value ? "common.on" : "common.off");
+
+        /// <summary>Puts the power-up illustration on the left of a button and shifts its label to the right.</summary>
+        public static void AddPowerUpIcon(Button button, CrushRoyale.Core.Config.PowerUpType type)
+        {
+            Sprite art = ArtLibrary.PowerUp(type);
+            if (art == null)
+            {
+                return;
+            }
+            Text label = button.GetComponentInChildren<Text>();
+            Image icon = UIFactory.Icon(button.transform, art, Color.white, 0);
+            UIFactory.Anchor(icon.rectTransform, 0.03f, 0.1f, 0.33f, 0.9f);
+            if (label != null)
+            {
+                UIFactory.Anchor(label.rectTransform, 0.34f, 0.05f, 0.97f, 0.95f);
+            }
+        }
+
+        /// <summary>Full-screen kingdom illustration behind everything else, darkened so text stays readable. Null without art.</summary>
+        public static Image Backdrop(Transform parent, CrushRoyale.Core.Story.Kingdom kingdom, float brightness = 0.72f)
+        {
+            Sprite sprite = ArtLibrary.Background(kingdom);
+            if (sprite == null)
+            {
+                return null;
+            }
+
+            RectTransform rect = UIFactory.Stretch(UIFactory.Rect("Backdrop", parent));
+            rect.SetAsFirstSibling();
+            Image image = rect.gameObject.AddComponent<Image>();
+            image.sprite = sprite;
+            image.raycastTarget = false;
+            image.color = new Color(brightness, brightness, brightness * 1.06f, 1f);
+            AspectRatioFitter fitter = rect.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = sprite.rect.width / sprite.rect.height;
+            return image;
+        }
     }
 
     /// <summary>Top bar: coins, orbes, lives with recharge countdown. Updates itself from profile changes.</summary>
@@ -151,13 +189,27 @@ namespace CrushRoyale.Game.UI
             row.padding = new RectOffset(24, 24, 8, 8);
             row.spacing = 16;
             row.childControlWidth = row.childControlHeight = true;
-            row.childForceExpandWidth = row.childForceExpandHeight = true;
+            row.childForceExpandWidth = false;
+            row.childForceExpandHeight = true;
 
-            component._lives = UIFactory.Label(bar.transform, string.Empty, Theme.BodySize, Theme.Danger, TextAnchor.MiddleLeft, FontStyle.Bold);
-            component._coins = UIFactory.Label(bar.transform, string.Empty, Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            component._orbes = UIFactory.Label(bar.transform, string.Empty, Theme.BodySize, Theme.Orbe, TextAnchor.MiddleRight, FontStyle.Bold);
+            component._lives = CurrencyLabel(bar.transform, "heart", Theme.Danger);
+            component._coins = CurrencyLabel(bar.transform, "coin", Theme.Gold);
+            component._orbes = CurrencyLabel(bar.transform, "orb", Theme.Orbe);
             component.Apply(GameRoot.Instance.Backend.Profile);
             return component;
+        }
+
+        /// <summary>Illustrated icon (when available) followed by a label that shares the remaining width.</summary>
+        private static Text CurrencyLabel(Transform bar, string icon, Color color)
+        {
+            Sprite art = ArtLibrary.Icon(icon);
+            if (art != null)
+            {
+                UIFactory.Width(UIFactory.Icon(bar, art, Color.white, 64), 64);
+            }
+            Text label = UIFactory.Label(bar, string.Empty, Theme.BodySize, color, TextAnchor.MiddleLeft, FontStyle.Bold);
+            label.gameObject.AddComponent<LayoutElement>().flexibleWidth = 1;
+            return label;
         }
 
         private void OnEnable() => GameRoot.Instance.Backend.ProfileChanged += Apply;

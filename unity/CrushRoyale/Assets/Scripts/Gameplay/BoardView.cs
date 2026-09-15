@@ -98,8 +98,16 @@ namespace CrushRoyale.Game.Gameplay
                     ice.sizeDelta = cell.sizeDelta;
                     ice.anchoredPosition = cell.anchoredPosition;
                     Image iceImage = ice.gameObject.AddComponent<Image>();
-                    iceImage.sprite = ProceduralSprites.RoundedRect(16);
-                    iceImage.type = Image.Type.Sliced;
+                    Sprite iceArt = ArtLibrary.Ice();
+                    if (iceArt != null)
+                    {
+                        iceImage.sprite = iceArt;
+                    }
+                    else
+                    {
+                        iceImage.sprite = ProceduralSprites.RoundedRect(16);
+                        iceImage.type = Image.Type.Sliced;
+                    }
                     iceImage.raycastTarget = false;
                     _ice[y * Width + x] = iceImage;
                 }
@@ -501,7 +509,10 @@ namespace CrushRoyale.Game.Gameplay
             int layers = _iceLayers[y * Width + x];
             Image ice = _ice[y * Width + x];
             ice.enabled = layers > 0;
-            ice.color = new Color(0.75f, 0.92f, 1f, 0.18f + 0.18f * layers);
+            // The illustrated cube sits behind the piece: thicker ice is more opaque.
+            ice.color = ice.type == Image.Type.Sliced
+                ? new Color(0.75f, 0.92f, 1f, 0.18f + 0.18f * layers)
+                : new Color(1f, 1f, 1f, 0.45f + 0.25f * layers);
         }
     }
 }
