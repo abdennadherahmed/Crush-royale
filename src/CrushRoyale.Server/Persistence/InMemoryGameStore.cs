@@ -507,6 +507,27 @@ public sealed class InMemoryGameStore : IGameStore
             return Task.CompletedTask;
         }
 
+        public Task DeletePlayerAccountAsync(Guid id)
+        {
+            lock (_s._lock)
+            {
+                if (_s._players.TryGetValue(id, out StoredDoc? old))
+                {
+                    _s._players.Remove(id);
+                    var devices = _s._devices.Where(kv => kv.Value.Remove(id)).Select(kv => kv.Key).ToList();
+                    _undo.Add(() =>
+                    {
+                        _s._players[id] = old;
+                        foreach (string device in devices)
+                        {
+                            _s._devices[device].Add(id);
+                        }
+                    });
+                }
+            }
+            return Task.CompletedTask;
+        }
+
         public Task<IReadOnlyList<GuildRecord>> GetAllGuildsAsync()
         {
             lock (_s._lock)

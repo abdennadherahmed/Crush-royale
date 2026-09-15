@@ -363,6 +363,15 @@ namespace CrushRoyale.Game.Gameplay
                 view.Rect.localScale = Vector3.zero;
                 _pieces[special.Piece.Id] = view;
                 appearing.Add(view);
+                if (!IsGhost)
+                {
+                    StartCoroutine(SpecialGlow(CellPosition(special.Position)));
+                }
+            }
+            // Big clears (a line/bomb going off, or a large combo) shake the board a little.
+            if (!IsGhost && step.Cleared.Count >= 10)
+            {
+                StartCoroutine(Shake(0.18f));
             }
 
             var moves = new List<(PieceView View, Vector2 From, Vector2 To)>();
@@ -435,17 +444,28 @@ namespace CrushRoyale.Game.Gameplay
             });
         }
 
+        /// <summary>Power-up impact: bright core flash, expanding shockwave ring and a short board shake.</summary>
         private IEnumerator Flash(Vector2 center, float seconds)
         {
             Image flash = UIFactory.Icon(_fxLayer, ProceduralSprites.Circle(), new Color(1f, 0.9f, 0.6f, 0.8f), Cell);
             flash.rectTransform.anchoredPosition = center;
+            Image wave = UIFactory.Icon(_fxLayer, ProceduralSprites.Ring(128), Theme.Crystal, Cell);
+            wave.rectTransform.anchoredPosition = center;
+            if (!IsGhost)
+            {
+                StartCoroutine(Shake(Mathf.Min(0.3f, seconds)));
+            }
             yield return CoroutineTask.Tween(seconds, k =>
             {
                 float size = Cell * (1 + k * 5);
                 flash.rectTransform.sizeDelta = new Vector2(size, size);
                 flash.color = new Color(1f, 0.9f, 0.6f, 0.8f * (1 - k));
+                float waveSize = Cell * (1 + Ease.OutCubic(k) * 8);
+                wave.rectTransform.sizeDelta = new Vector2(waveSize, waveSize);
+                wave.color = new Color(Theme.Crystal.r, Theme.Crystal.g, Theme.Crystal.b, 1 - k);
             });
             Destroy(flash.gameObject);
+            Destroy(wave.gameObject);
         }
 
         private IEnumerator Shake(float seconds)
@@ -459,28 +479,54 @@ namespace CrushRoyale.Game.Gameplay
             Rect.anchoredPosition = origin;
         }
 
+        /// <summary>Gem shatter: a white pop ring, star sparks that fly out and fall, and small colored shards.</summary>
         private IEnumerator Burst(Vector2 center, Color color)
         {
-            const int particles = 5;
-            var images = new Image[particles];
-            var directions = new Vector2[particles];
+            const int particles = 8;
+            Color light = Color.Lerp(color, Color.white, 0.55f);
+            var images = new Image[particles + 1];
+            var velocities = new Vector2[particles];
+            var spins = new float[particles];
+
+            images[particles] = UIFactory.Icon(_fxLayer, ProceduralSprites.Ring(64), light, Cell * 0.5f);
+            images[particles].rectTransform.anchoredPosition = center;
+
             for (int i = 0; i < particles; i++)
             {
-                images[i] = UIFactory.Icon(_fxLayer, ProceduralSprites.Circle(32), color, Cell * 0.18f);
+                bool star = i % 2 == 0;
+                Sprite sprite = star ? ProceduralSprites.Gem(ProceduralSprites.GemShape.Star, 32) : ProceduralSprites.Gem(ProceduralSprites.GemShape.Diamond, 32);
+                images[i] = UIFactory.Icon(_fxLayer, sprite, star ? light : color, Cell * (star ? 0.26f : 0.16f));
                 images[i].rectTransform.anchoredPosition = center;
-                float angle = (i / (float)particles) * Mathf.PI * 2 + UnityEngine.Random.value;
-                directions[i] = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+                float angle = (i / (float)particles) * Mathf.PI * 2 + UnityEngine.Random.Range(-0.3f, 0.3f);
+                float speed = Cell * UnityEngine.Random.Range(1.3f, 2.1f);
+                velocities[i] = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle) + 0.6f) * speed;
+                spins[i] = UnityEngine.Random.Range(-540f, 540f);
             }
-            yield return CoroutineTask.Tween(0.35f, k =>
+
+            const float duration = 0.55f;
+            yield return CoroutineTask.Tween(duration, k =>
             {
+                float t = k * duration;
                 for (int i = 0; i < particles; i++)
                 {
                     if (images[i] == null)
                     {
                         continue;
                     }
-                    images[i].rectTransform.anchoredPosition = center + directions[i] * Cell * 0.8f * Ease.OutCubic(k);
-                    images[i].color = new Color(color.r, color.g, color.b, 1 - k);
+                    // Ballistic arc: initial burst slowed by gravity.
+                    Vector2 offset = velocities[i] * t + new Vector2(0, -Cell * 5.5f) * t * t;
+                    images[i].rectTransform.anchoredPosition = center + offset;
+                    images[i].rectTransform.localEulerAngles = new Vector3(0, 0, spins[i] * t);
+                    float scale = 1f - Ease.InQuad(k) * 0.7f;
+                    images[i].rectTransform.localScale = new Vector3(scale, scale, 1);
+                    Color c = images[i].color;
+                    images[i].color = new Color(c.r, c.g, c.b, 1 - Ease.InQuad(k));
+                }
+                if (images[particles] != null)
+                {
+                    float ring = Cell * (0.5f + Ease.OutCubic(Mathf.Min(1f, k * 2f)) * 0.9f);
+                    images[particles].rectTransform.sizeDelta = new Vector2(ring, ring);
+                    images[particles].color = new Color(light.r, light.g, light.b, 0.9f * (1 - Mathf.Min(1f, k * 2f)));
                 }
             });
             foreach (Image image in images)
@@ -490,6 +536,20 @@ namespace CrushRoyale.Game.Gameplay
                     Destroy(image.gameObject);
                 }
             }
+        }
+
+        /// <summary>Golden glow ring that pulses out when a special piece (line, bomb) is created.</summary>
+        private IEnumerator SpecialGlow(Vector2 center)
+        {
+            Image ring = UIFactory.Icon(_fxLayer, ProceduralSprites.Ring(96), Theme.Gold, Cell);
+            ring.rectTransform.anchoredPosition = center;
+            yield return CoroutineTask.Tween(0.45f, k =>
+            {
+                float size = Cell * (0.8f + Ease.OutCubic(k) * 1.2f);
+                ring.rectTransform.sizeDelta = new Vector2(size, size);
+                ring.color = new Color(Theme.Gold.r, Theme.Gold.g, Theme.Gold.b, 1 - k);
+            });
+            Destroy(ring.gameObject);
         }
 
         private PieceView FindAt(Pos pos)

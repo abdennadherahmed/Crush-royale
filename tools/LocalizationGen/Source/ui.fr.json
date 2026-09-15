@@ -167,6 +167,8 @@
   "settings.privacy": "Politique de confidentialité",
   "settings.terms": "Conditions d'utilisation",
   "settings.deleteAccount": "Supprimer mon compte",
+  "settings.deleteAccountBody": "Ton compte, ta progression, tes achats et tes amis seront supprimés pour toujours. Impossible de revenir en arrière.",
+  "settings.deleteAccountDone": "Ton compte a été supprimé.",
   "settings.version": "Version {0}",
   "language.en": "English",
   "language.fr": "Français",

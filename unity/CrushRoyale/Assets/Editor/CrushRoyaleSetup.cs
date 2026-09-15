@@ -58,7 +58,46 @@ namespace CrushRoyale.EditorTools
                 return;
             }
             PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
+#if UNITY_ANDROID
+            ApplyAdaptiveIcons(icon);
+#endif
         }
+
+#if UNITY_ANDROID
+        private const string AdaptiveBackgroundPath = "Assets/Art/AppIcon/adaptive_background.png";
+        private const string AdaptiveForegroundPath = "Assets/Art/AppIcon/adaptive_foreground.png";
+
+        /// <summary>
+        /// Android 8+ launchers mask icons to their own shape: adaptive layers (blurred art behind, art inside the safe
+        /// zone in front) avoid the white frame around a plain square icon. Round icons reuse the full art.
+        /// </summary>
+        private static void ApplyAdaptiveIcons(Texture2D legacy)
+        {
+            AssetDatabase.ImportAsset(AdaptiveBackgroundPath, ImportAssetOptions.ForceSynchronousImport);
+            AssetDatabase.ImportAsset(AdaptiveForegroundPath, ImportAssetOptions.ForceSynchronousImport);
+            Texture2D background = AssetDatabase.LoadAssetAtPath<Texture2D>(AdaptiveBackgroundPath);
+            Texture2D foreground = AssetDatabase.LoadAssetAtPath<Texture2D>(AdaptiveForegroundPath);
+            if (background == null || foreground == null)
+            {
+                Debug.LogWarning("Crush Royale: adaptive icon layers missing, Android uses the legacy icon only.");
+                return;
+            }
+
+            PlatformIcon[] adaptive = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Adaptive);
+            foreach (PlatformIcon slot in adaptive)
+            {
+                slot.SetTextures(background, foreground);
+            }
+            PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Adaptive, adaptive);
+
+            PlatformIcon[] round = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Round);
+            foreach (PlatformIcon slot in round)
+            {
+                slot.SetTexture(legacy);
+            }
+            PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Round, round);
+        }
+#endif
 
         private const string MainGradleTemplatePath = "Assets/Plugins/Android/mainTemplate.gradle";
 

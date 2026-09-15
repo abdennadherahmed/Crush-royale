@@ -179,6 +179,7 @@ namespace CrushRoyale.Client
         public Task<ConfigResponse> GetConfigAsync(CancellationToken ct = default) => Transport.GetAsync<ConfigResponse>(ApiRoutes.Config, ct);
         public Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken ct = default) => Transport.PostAsync<LoginResponse>(ApiRoutes.Login, request, ct);
         public Task<ProfileDto> GetMeAsync(CancellationToken ct = default) => Transport.GetAsync<ProfileDto>(ApiRoutes.Me, ct);
+        public Task<bool> DeleteMeAsync(CancellationToken ct = default) => Transport.DeleteAsync<bool>(ApiRoutes.Me, ct);
         public Task<ProfileDto> SetHeroAsync(SetHeroRequest request, CancellationToken ct = default) => Transport.PutAsync<ProfileDto>(ApiRoutes.Hero, request, ct);
         public Task<PlayerStatsDto> GetPlayerStatsAsync(string playerId, CancellationToken ct = default) => Transport.GetAsync<PlayerStatsDto>(ApiRoutes.Fill(ApiRoutes.PlayerStats, "id", playerId), ct);
         public Task<SearchPlayersResponse> SearchPlayersAsync(string query, CancellationToken ct = default) => Transport.GetAsync<SearchPlayersResponse>(ApiRoutes.PlayerSearch + "?q=" + Uri.EscapeDataString(query ?? string.Empty), ct);

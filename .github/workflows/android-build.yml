@@ -9,6 +9,12 @@ name: Android build
 
 on:
   workflow_dispatch:
+    inputs:
+      format:
+        description: "apk = install on a phone, aab = upload to Google Play"
+        type: choice
+        options: [apk, aab]
+        default: apk
   push:
     branches: [master, main, crush-royale-v1]
 
@@ -26,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
@@ -42,9 +48,9 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 150
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: 8.0.x
 
@@ -53,7 +59,7 @@ jobs:
         run: ./tools/sync-unity.ps1
 
       - name: Cache Unity Library
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ${{ env.PROJECT_PATH }}/Library
           key: Library-Android-win-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/Assets/**/*.cs') }}
@@ -99,20 +105,20 @@ jobs:
           args: >-
             -quit -batchmode -nographics
             -executeMethod CrushRoyale.EditorTools.CIBuild.BuildAndroid
-            -customBuildPath ${{ github.workspace }}/build/Android/CrushRoyale.apk
+            -customBuildPath ${{ github.workspace }}/build/Android/CrushRoyale.${{ inputs.format || 'apk' }}
             -androidVersionCode ${{ github.run_number }}
 
-      - name: Upload APK
+      - name: Upload build
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: CrushRoyale-APK-${{ github.run_number }}
-          path: build/Android/*.apk
+          name: CrushRoyale-${{ inputs.format || 'apk' }}-${{ github.run_number }}
+          path: build/Android/CrushRoyale.${{ inputs.format || 'apk' }}
           retention-days: 14
 
       - name: Upload Unity logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: unity-logs-${{ github.run_number }}
           path: |

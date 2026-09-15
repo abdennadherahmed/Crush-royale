@@ -47,6 +47,12 @@ public interface IStoreTransaction
     /// <summary>Saves with optimistic concurrency (version check). Throws <see cref="ConcurrencyException"/>.</summary>
     Task UpdatePlayerAsync(PlayerRecord player);
 
+    /// <summary>
+    /// Deletes the account for good: the auth user and player row, with dependent rows cascading and the financial
+    /// audit trail anonymised (see migration 20260915170000_account_deletion).
+    /// </summary>
+    Task DeletePlayerAccountAsync(Guid id);
+
     /// <summary>Players ordered by id, for batch jobs (weekly reset).</summary>
     Task<IReadOnlyList<PlayerRecord>> GetPlayersPageAsync(Guid? afterId, int limit);
 

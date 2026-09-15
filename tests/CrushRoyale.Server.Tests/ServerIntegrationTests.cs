@@ -185,6 +185,24 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
     }
 
     [Fact]
+    public async Task DeleteAccount_ErasesThePlayer_AndLeavesTheGuild()
+    {
+        var (leader, leaderHttp, _) = await _app.NewPlayerAsync(unlockStage: 400);
+        var (member, memberHttp, _) = await _app.NewPlayerAsync(unlockStage: 400);
+        await _app.MutateAsync(leader, s => s.Wallet.Coins = 100_000);
+        GuildDto guild = await leaderHttp.PostOk<GuildDto>(ApiRoutes.GuildCreate, new CreateGuildRequest { Name = "Erasers" + Random.Shared.Next(1000, 9999), IsOpen = true });
+        await memberHttp.PostOk<GuildDto>(ApiRoutes.Fill(ApiRoutes.GuildJoin, "guildId", guild.Id), new { });
+
+        HttpResponseMessage deleted = await memberHttp.DeleteAsync(ApiRoutes.Me);
+        Assert.Equal(HttpStatusCode.OK, deleted.StatusCode);
+
+        Assert.Equal(HttpStatusCode.NotFound, (await memberHttp.GetAsync(ApiRoutes.Me)).StatusCode);
+        GuildDto after = await leaderHttp.GetOk<GuildDto>(ApiRoutes.GuildMine);
+        Assert.DoesNotContain(after.Members, m => m.PlayerId == member.ToString());
+        Assert.Equal(HttpStatusCode.OK, (await leaderHttp.GetAsync(ApiRoutes.Me)).StatusCode);
+    }
+
+    [Fact]
     public async Task StoryStage_PlayedAndValidated_ByServer()
     {
         var (id, http, _) = await _app.NewPlayerAsync();

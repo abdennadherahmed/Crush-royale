@@ -304,11 +304,15 @@ namespace CrushRoyale.Game.UI
                 outgoing.interactable = false;
             }
 
-            const float duration = 0.18f;
+            // Fade plus a slight zoom-in of the new screen (0.96 -> 1) so page changes feel less abrupt.
+            const float duration = 0.22f;
+            Transform incomingTransform = incoming.transform;
             for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
             {
                 float k = t / duration;
                 incoming.alpha = k;
+                float zoom = 0.96f + 0.04f * (1f - (1f - k) * (1f - k));
+                incomingTransform.localScale = new Vector3(zoom, zoom, 1f);
                 if (outgoing != null)
                 {
                     outgoing.alpha = 1 - k;
@@ -316,6 +320,7 @@ namespace CrushRoyale.Game.UI
                 yield return null;
             }
             incoming.alpha = 1f;
+            incomingTransform.localScale = Vector3.one;
             if (previous != null)
             {
                 previous.OnHidden();

@@ -167,6 +167,8 @@
   "settings.privacy": "プライバシーポリシー",
   "settings.terms": "利用規約",
   "settings.deleteAccount": "アカウントを削除",
+  "settings.deleteAccountBody": "アカウント、進行状況、購入内容、フレンドが完全に削除されます。この操作は取り消せません。",
+  "settings.deleteAccountDone": "アカウントを削除しました。",
   "settings.version": "バージョン {0}",
   "language.en": "English",
   "language.fr": "Français",

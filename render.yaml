@@ -26,3 +26,15 @@ services:
       # Single free instance: it runs matchmaking and the background jobs.
       - key: Game__EnableBackgroundJobs
         value: "true"
+
+  # Privacy policy, terms and account deletion page (required by Google Play), served from /site.
+  - type: web
+    name: crushroyale-legal
+    runtime: static
+    branch: crush-royale-v1
+    staticPublishPath: ./site
+    buildCommand: ""
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - site/**

@@ -16,15 +16,17 @@ namespace CrushRoyale.EditorTools
 
         public static void BuildAndroid()
         {
+            // The output extension picks the format: .aab (Google Play upload) or .apk (direct install).
             string output = GetArgument("-customBuildPath") ?? "build/Android/CrushRoyale.apk";
-            if (!output.EndsWith(".apk", StringComparison.OrdinalIgnoreCase))
+            bool appBundle = output.EndsWith(".aab", StringComparison.OrdinalIgnoreCase);
+            if (!appBundle && !output.EndsWith(".apk", StringComparison.OrdinalIgnoreCase))
             {
                 output = Path.Combine(output, "CrushRoyale.apk");
             }
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output)));
 
             CrushRoyaleSetup.ConfigureAndroid();
-            EditorUserBuildSettings.buildAppBundle = false;
+            EditorUserBuildSettings.buildAppBundle = appBundle;
             if (!File.Exists(BootScenePath))
             {
                 CrushRoyaleSetup.CreateBootScene();

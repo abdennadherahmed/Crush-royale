@@ -7,7 +7,7 @@
   "iapEnabled": true,
   "adsEnabled": false,
   "levelPlayAppKey": "",
-  "privacyPolicyUrl": "https://crushroyale.example/privacy",
-  "termsUrl": "https://crushroyale.example/terms",
+  "privacyPolicyUrl": "https://crushroyale-legal.onrender.com/privacy.html",
+  "termsUrl": "https://crushroyale-legal.onrender.com/terms.html",
   "supportEmail": "support@crushroyale.example"
 }

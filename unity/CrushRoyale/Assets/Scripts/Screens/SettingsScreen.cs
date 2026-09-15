@@ -104,6 +104,12 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Height(UIFactory.Button(list, Loc.T("settings.terms"), () => Application.OpenURL(Game.Config.TermsUrl), Theme.PanelLight, Theme.BodySize, Theme.Text), 110);
             UIFactory.Height(UIFactory.Button(list, Loc.T("settings.deleteAccount"), () =>
             {
+                if (profile != null && Game.Backend.IsOnline)
+                {
+                    _ = DeleteAccountAsync();
+                    return;
+                }
+                // Offline or no server account: fall back to an e-mail request.
                 string id = profile?.Id ?? "unknown";
                 Application.OpenURL("mailto:" + Game.Config.SupportEmail + "?subject=" + System.Uri.EscapeDataString("Account deletion " + id));
             }, Theme.PanelLight, Theme.BodySize, Theme.Danger), 110);
@@ -126,6 +132,29 @@ namespace CrushRoyale.Game.Screens
             {
                 UI.ShowError(Game.Backend.LastError);
             }
+        }
+
+        private async Task DeleteAccountAsync()
+        {
+            if (!await UI.Confirm(Loc.T("settings.deleteAccount"), Loc.T("settings.deleteAccountBody")))
+            {
+                return;
+            }
+            bool deleted;
+            using (UI.Loading())
+            {
+                deleted = await Game.Backend.DeleteAccountAsync();
+            }
+            if (!deleted)
+            {
+                if (Game.Backend.LastError != null)
+                {
+                    UI.ShowError(Game.Backend.LastError);
+                }
+                return;
+            }
+            UI.Toast(Loc.T("settings.deleteAccountDone"), 3f);
+            UI.ShowRoot<SplashScreen>();
         }
 
         private async Task SignOutAsync()

@@ -37,6 +37,7 @@ public static class ApiEndpoints
     {
         api.MapPost(ApiRoutes.Login, (LoginRequest body, ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.LoginAsync(Me(user), body, ct));
         api.MapGet(ApiRoutes.Me, (ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.GetMeAsync(Me(user), ct));
+        api.MapDelete(ApiRoutes.Me, (ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.DeleteAccountAsync(Me(user), ct));
         api.MapPut(ApiRoutes.Hero, (SetHeroRequest body, ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.SetHeroAsync(Me(user), body, ct));
         api.MapGet(ApiRoutes.PlayerStats, (Guid id, ProfileService s, CancellationToken ct) => s.GetStatsAsync(id, ct));
         api.MapGet(ApiRoutes.PlayerSearch, ([FromQuery] string? q, ProfileService s, CancellationToken ct) => s.SearchAsync(q, ct));

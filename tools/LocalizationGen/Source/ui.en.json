@@ -167,6 +167,8 @@
   "settings.privacy": "Privacy policy",
   "settings.terms": "Terms of service",
   "settings.deleteAccount": "Delete my account",
+  "settings.deleteAccountBody": "Your account, progress, purchases and friends will be deleted forever. This cannot be undone.",
+  "settings.deleteAccountDone": "Your account has been deleted.",
   "settings.version": "Version {0}",
   "language.en": "English",
   "language.fr": "Français",

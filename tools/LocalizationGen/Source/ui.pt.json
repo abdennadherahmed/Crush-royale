@@ -167,6 +167,8 @@
   "settings.privacy": "Política de privacidade",
   "settings.terms": "Termos de serviço",
   "settings.deleteAccount": "Excluir minha conta",
+  "settings.deleteAccountBody": "Sua conta, seu progresso, suas compras e seus amigos serão excluídos para sempre. Isso não pode ser desfeito.",
+  "settings.deleteAccountDone": "Sua conta foi excluída.",
   "settings.version": "Versão {0}",
   "language.en": "English",
   "language.fr": "Français",

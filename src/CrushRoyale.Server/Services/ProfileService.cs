@@ -20,11 +20,13 @@ public sealed class ProfileService
     };
 
     private readonly PlayerOperations _ops;
+    private readonly GuildService _guilds;
     private readonly ILogger<ProfileService> _logger;
 
-    public ProfileService(PlayerOperations ops, ILogger<ProfileService> logger)
+    public ProfileService(PlayerOperations ops, GuildService guilds, ILogger<ProfileService> logger)
     {
         _ops = ops;
+        _guilds = guilds;
         _logger = logger;
     }
 
@@ -93,6 +95,35 @@ public sealed class ProfileService
 
     public Task<ProfileDto> GetMeAsync(Guid userId, CancellationToken ct) =>
         _ops.ReadAsync(userId, (ws, _) => Task.FromResult(Mappers.Profile(ws)), ct);
+
+    /// <summary>
+    /// Permanent account deletion requested by the player (Google Play / GDPR). The guild is left first so the other
+    /// members keep a consistent roster and leadership; then the account and its data are erased in the store.
+    /// </summary>
+    public async Task<bool> DeleteAccountAsync(Guid userId, CancellationToken ct)
+    {
+        bool inGuild = await _ops.ReadAsync(userId, (ws, _) => Task.FromResult(ws.State.GuildId != null), ct).ConfigureAwait(false);
+        if (inGuild)
+        {
+            try
+            {
+                await _guilds.LeaveAsync(userId, ct).ConfigureAwait(false);
+            }
+            catch (ApiException ex) when (ex.Code is ErrorCode.NotMember or ErrorCode.NotFound)
+            {
+                // Guild already gone: nothing to leave.
+            }
+        }
+
+        await _ops.RunStoreAsync(async tx =>
+        {
+            await tx.DeletePlayerAccountAsync(userId).ConfigureAwait(false);
+            return true;
+        }, ct).ConfigureAwait(false);
+
+        _logger.LogInformation("Player {PlayerId} deleted their account", userId);
+        return true;
+    }
 
     public Task<ProfileDto> SetHeroAsync(Guid userId, SetHeroRequest request, CancellationToken ct)
     {

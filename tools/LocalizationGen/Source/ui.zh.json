@@ -167,6 +167,8 @@
   "settings.privacy": "隐私政策",
   "settings.terms": "服务条款",
   "settings.deleteAccount": "删除我的账号",
+  "settings.deleteAccountBody": "你的账号、进度、购买记录和好友将被永久删除，且无法恢复。",
+  "settings.deleteAccountDone": "你的账号已删除。",
   "settings.version": "版本 {0}",
   "language.en": "English",
   "language.fr": "Français",

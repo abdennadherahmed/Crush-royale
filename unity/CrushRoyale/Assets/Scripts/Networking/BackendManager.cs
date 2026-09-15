@@ -145,6 +145,26 @@ namespace CrushRoyale.Game.Networking
             IsOnline = false;
         }
 
+        /// <summary>Permanently deletes the account on the server (Google Play requirement), then signs out locally.</summary>
+        public async Task<bool> DeleteAccountAsync()
+        {
+            if (Client == null || !IsOnline)
+            {
+                return false;
+            }
+            try
+            {
+                await Client.Api.DeleteMeAsync();
+            }
+            catch (CrushApiException ex)
+            {
+                LastError = ex;
+                return false;
+            }
+            await SignOutAsync();
+            return true;
+        }
+
         public void ApplyWallet(WalletDto wallet)
         {
             if (Profile == null || wallet == null)

@@ -60,7 +60,7 @@
   "error.Conflict": "يُرجى المحاولة مجددًا.",
   "error.Internal": "خطأ في الخادم. حاول لاحقًا.",
 
-  "hud.surge": "!RED SURGE",
+  "hud.surge": "RED SURGE!",
   "hud.noPowerUps": "لا توجد قوى مجهّزة",
   "hud.moves": "الحركات: {0}",
   "hud.opponent": "الخصم: {0}",
@@ -167,6 +167,8 @@
   "settings.privacy": "سياسة الخصوصية",
   "settings.terms": "شروط الخدمة",
   "settings.deleteAccount": "حذف حسابي",
+  "settings.deleteAccountBody": "سيتم حذف حسابك وتقدّمك ومشترياتك وأصدقائك نهائيًا. لا يمكن التراجع عن ذلك.",
+  "settings.deleteAccountDone": "تم حذف حسابك.",
   "settings.version": "الإصدار {0}",
   "language.en": "English",
   "language.fr": "Français",

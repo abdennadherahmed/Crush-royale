@@ -629,6 +629,13 @@ public sealed class PostgresGameStore : IGameStore
             await cmd.ExecuteNonQueryAsync(_ct).ConfigureAwait(false);
         }
 
+        public async Task DeletePlayerAccountAsync(Guid id)
+        {
+            await using NpgsqlCommand cmd = Cmd("select private.delete_player_account(@id)");
+            cmd.Parameters.AddWithValue("id", id);
+            await cmd.ExecuteNonQueryAsync(_ct).ConfigureAwait(false);
+        }
+
         public async Task<IReadOnlyList<GuildRecord>> GetAllGuildsAsync()
         {
             await using NpgsqlCommand cmd = Cmd("select id, version, created_at, state::text from public.guilds where member_count > 0 order by id for update");
