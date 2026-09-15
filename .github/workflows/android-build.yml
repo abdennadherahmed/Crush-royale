@@ -2,6 +2,9 @@
 # Required repository secrets (Settings > Secrets and variables > Actions):
 #   UNITY_USERNAME  Unity ID email
 #   UNITY_PASSWORD  Unity ID password (Personal license, activated and returned automatically)
+# Optional release signing (created with tools/create-keystore.py); without them the APK is debug-signed:
+#   ANDROID_KEYSTORE_BASE64  base64 of the keystore file
+#   ANDROID_KEYSTORE_PASS    keystore and key password (alias "crushroyale")
 name: Android build
 
 on:
@@ -70,6 +73,22 @@ jobs:
           license: Personal
           username: ${{ secrets.UNITY_USERNAME }}
           password: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Restore release keystore
+        shell: pwsh
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:KEYSTORE_BASE64)) {
+            Write-Host "No ANDROID_KEYSTORE_BASE64 secret: the APK will be debug-signed."
+            exit 0
+          }
+          $path = Join-Path $env:RUNNER_TEMP "crushroyale-release.keystore"
+          [IO.File]::WriteAllBytes($path, [Convert]::FromBase64String($env:KEYSTORE_BASE64.Trim()))
+          "ANDROID_KEYSTORE_PATH=$path" >> $env:GITHUB_ENV
+          "ANDROID_KEYSTORE_PASS=$env:KEYSTORE_PASS" >> $env:GITHUB_ENV
+          "ANDROID_KEY_ALIAS=crushroyale" >> $env:GITHUB_ENV
 
       - name: Build APK
         uses: RageAgainstThePixel/unity-action@v3

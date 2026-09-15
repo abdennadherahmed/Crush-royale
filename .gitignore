@@ -22,6 +22,8 @@ export/
 ## Secrets (Google Play service account, keystores)
 *.keystore
 *.jks
+*.p12
+ANDROID_KEYSTORE_BASE64.txt
 **/play-service-account*.json
 
 ## Ignore Visual Studio temporary files, build results, and

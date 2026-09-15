@@ -30,6 +30,8 @@ namespace CrushRoyale.EditorTools
                 CrushRoyaleSetup.CreateBootScene();
             }
 
+            ApplyReleaseSigning();
+
             string versionCode = GetArgument("-androidVersionCode");
             if (int.TryParse(versionCode, out int code) && code > 0)
             {
@@ -50,6 +52,29 @@ namespace CrushRoyale.EditorTools
             {
                 EditorApplication.Exit(1);
             }
+        }
+
+        /// <summary>
+        /// Release signing from the environment (set by the workflow from GitHub secrets, see tools/create-keystore.py).
+        /// Without a keystore the APK stays debug-signed: installable for testing, not uploadable to Google Play.
+        /// </summary>
+        private static void ApplyReleaseSigning()
+        {
+            string path = Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PATH");
+            string password = Environment.GetEnvironmentVariable("ANDROID_KEYSTORE_PASS");
+            if (string.IsNullOrEmpty(path) || !File.Exists(path) || string.IsNullOrEmpty(password))
+            {
+                PlayerSettings.Android.useCustomKeystore = false;
+                Debug.Log("CIBuild: no release keystore, debug signing.");
+                return;
+            }
+
+            PlayerSettings.Android.useCustomKeystore = true;
+            PlayerSettings.Android.keystoreName = path;
+            PlayerSettings.Android.keystorePass = password;
+            PlayerSettings.Android.keyaliasName = Environment.GetEnvironmentVariable("ANDROID_KEY_ALIAS") ?? "crushroyale";
+            PlayerSettings.Android.keyaliasPass = password;
+            Debug.Log("CIBuild: release signing with the keystore from secrets.");
         }
 
         private static string GetArgument(string name)

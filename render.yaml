@@ -1,0 +1,28 @@
+# Render Blueprint: free Docker web service for the Crush Royale API.
+# Render dashboard > New > Blueprint > pick this repository. Secrets marked "sync: false" are asked once in the dashboard.
+services:
+  - type: web
+    name: crushroyale-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: crush-royale-v1
+    dockerfilePath: ./src/CrushRoyale.Server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - src/CrushRoyale.Core/**
+        - src/CrushRoyale.Contracts/**
+        - src/CrushRoyale.Server/**
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: Supabase__Url
+        value: https://gzivxtzugewlvygnxkhn.supabase.co
+      - key: Database__ConnectionString
+        sync: false
+      # Single free instance: it runs matchmaking and the background jobs.
+      - key: Game__EnableBackgroundJobs
+        value: "true"
