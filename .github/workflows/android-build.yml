@@ -69,6 +69,7 @@ jobs:
         uses: RageAgainstThePixel/unity-setup@v2
         with:
           unity-version: ${{ env.UNITY_VERSION }}
+          version-file: ${{ env.PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
           build-targets: Android
           modules: android-sdk-ndk-tools, android-open-jdk
 
