@@ -34,6 +34,7 @@ namespace CrushRoyale.Game.UI
             {
                 int slot = i;
                 Button button = UIFactory.Button(root, string.Empty, () => _ = bar.OnTapAsync(slot), new Color(0.06f, 0.04f, 0.14f, 0.82f));
+                UiKit.CardFrame(button.GetComponent<Image>());
                 UIFactory.Anchor(button.GetComponent<RectTransform>(), i * 0.25f + 0.008f, 0f, (i + 1) * 0.25f - 0.008f, 1f);
                 Image chest = UIFactory.Icon(button.transform, null, Color.white, 0);
                 UIFactory.Anchor(chest.rectTransform, 0.12f, 0.34f, 0.88f, 1.05f);
@@ -197,76 +198,21 @@ namespace CrushRoyale.Game.UI
             }
         }
 
-        /// <summary>The chest shakes, bursts open, then the rewards appear one by one.</summary>
-        private async Task ShowOpeningAsync(ChestOpenResponse opened)
+        /// <summary>The chest shakes, bursts open (opened chest art), then each reward flies out with its icon.</summary>
+        private static Task ShowOpeningAsync(ChestOpenResponse opened)
         {
             Localization loc = Game.Loc;
-            RectTransform box = _ui.Popup(0.18f, 0.84f);
-            Image glow = UIFactory.Icon(box, ProceduralSprites.Glow(128), new Color(1f, 0.85f, 0.45f, 0f), 0);
-            UIFactory.Anchor(glow.rectTransform, -0.1f, 0.35f, 1.1f, 1.05f);
-            Image chest = UIFactory.Icon(box, ChestArt(opened.Type), Color.white, 0);
-            UIFactory.Anchor(chest.rectTransform, 0.25f, 0.5f, 0.75f, 0.95f);
-
-            Game.Audio.PlaySFX(SoundIds.PowerUp);
-            for (float t = 0; t < 0.9f && chest != null; t += Time.deltaTime)
-            {
-                chest.rectTransform.localEulerAngles = new Vector3(0, 0, Mathf.Sin(t * 45f) * 10f * t);
-                chest.rectTransform.localScale = Vector3.one * (1f + t * 0.15f);
-                await Task.Yield();
-            }
-            if (box == null)
-            {
-                return;
-            }
-            chest.rectTransform.localEulerAngles = Vector3.zero;
-            Game.Audio.PlaySFX(SoundIds.WinFanfare);
-            Game.Haptics.Heavy();
-            glow.color = new Color(1f, 0.85f, 0.45f, 0.9f);
-            glow.gameObject.AddComponent<Pulse>();
-
-            RectTransform list = UIFactory.Anchor(UIFactory.Rect("Rewards", box), 0.05f, 0.16f, 0.95f, 0.5f);
-            VerticalLayoutGroup layout = list.gameObject.AddComponent<VerticalLayoutGroup>();
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.spacing = 6;
-            layout.childControlHeight = false;
-            layout.childForceExpandHeight = false;
-
-            var lines = new System.Collections.Generic.List<string>();
-            string rewards = MainMenuScreen.RewardText(loc, opened.Reward);
-            if (!string.IsNullOrEmpty(rewards))
-            {
-                lines.AddRange(rewards.Split('\n'));
-            }
+            var items = RevealOverlay.FromReward(opened.Reward);
             if (opened.PetFragments > 0 && !string.IsNullOrEmpty(opened.FragmentsPet))
             {
-                lines.Add(loc.T("chest.petFragments", opened.PetFragments, PetsScreen.PetName(loc, opened.FragmentsPet)));
-            }
-            foreach (string line in lines)
-            {
-                Text text = UIFactory.Label(list, line, Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-                text.rectTransform.sizeDelta = new Vector2(0, 58);
-                text.rectTransform.localScale = Vector3.zero;
-                for (float t = 0; t < 0.18f && text != null; t += Time.deltaTime)
+                items.Add(new RevealItem
                 {
-                    text.rectTransform.localScale = Vector3.one * CrushRoyale.Game.Gameplay.Ease.OutBack(t / 0.18f);
-                    await Task.Yield();
-                }
-                if (text == null)
-                {
-                    return;
-                }
-                text.rectTransform.localScale = Vector3.one;
-                Game.Audio.PlaySFX(SoundIds.Coins);
+                    Art = PetsScreen.PetArt(opened.FragmentsPet),
+                    Caption = loc.T("pets.fragmentsGain", opened.PetFragments)
+                });
             }
-
-            var closed = new TaskCompletionSource<bool>();
-            Button ok = UIFactory.Button(box, loc.T("common.ok"), () => closed.TrySetResult(true));
-            UIFactory.Anchor(ok.GetComponent<RectTransform>(), 0.3f, 0.03f, 0.7f, 0.13f);
-            await closed.Task;
-            if (box != null)
-            {
-                Destroy(box.parent.gameObject);
-            }
+            string type = (opened.Type ?? "wood").ToLowerInvariant();
+            return RevealOverlay.PlayChestAsync(items, ChestArt(opened.Type), UiKit.Art("chest_open_" + type) ?? ChestArt(opened.Type), loc.T("chest.openedTitle"));
         }
     }
 }

@@ -15,7 +15,8 @@ namespace CrushRoyale.Core.Config
     }
 
     /// <summary>
-    /// Pets: summoned with orbes (1 in 120 for the whole pet, fragments otherwise, pity at 120 pulls), levelled with
+    /// Pets: summoned with orbes (1 in 120 for the whole pet, fragments otherwise, pity at 120 pulls) or unlocked with
+    /// 100 of their fragments, levelled with
     /// match XP plus fragments and coins at the awakening gates. In a match the equipped pet has Level% chance after
     /// each player move to play the best move for free (not counted); at max level it also offers its power-up once.
     /// </summary>
@@ -48,6 +49,9 @@ namespace CrushRoyale.Core.Config
 
         /// <summary>A whole pet you already own turns into this many of its fragments.</summary>
         public int DuplicateFragments { get; set; } = 50;
+
+        /// <summary>Collecting this many fragments of a pet you do not own lets you unlock it without luck.</summary>
+        public int UnlockFragments { get; set; } = 100;
 
         public int StoryWinXp { get; set; } = 30;
 
@@ -110,6 +114,7 @@ namespace CrushRoyale.Core.Config
             GameBalance.Require(PvpLevelCap >= 0 && PvpLevelCap <= MaxLevel, "Pet PvP cap");
             GameBalance.Require(WholePetOneIn >= 1 && PityPulls >= 1, "Pet summon odds");
             GameBalance.Require(FragmentsMin >= 1 && FragmentsMax >= FragmentsMin, "Pet fragments");
+            GameBalance.Require(UnlockFragments >= 1, "Pet unlock fragments");
             GameBalance.Require(GateLevels != null && GateFragments != null && GateCoins != null
                 && GateLevels.Length == GateFragments.Length && GateLevels.Length == GateCoins.Length, "Pet gates");
             for (int i = 1; i < XpForLevel.Length; i++)

@@ -48,7 +48,7 @@ namespace CrushRoyale.Game.UI
                 {
                     if (buttons[i] != null)
                     {
-                        buttons[i].color = i == active ? Theme.GoldDark : Theme.PanelLight;
+                        UiKit.Recolor(buttons[i], i == active ? Theme.GoldDark : Theme.PanelLight);
                     }
                 }
             };
@@ -88,9 +88,41 @@ namespace CrushRoyale.Game.UI
             {
                 current = !current;
                 button.GetComponentInChildren<Text>().text = OnOff(current);
-                button.GetComponent<Image>().color = current ? Theme.Success : Theme.PanelLight;
+                UiKit.Recolor(button.GetComponent<Image>(), current ? Theme.Success : Theme.PanelLight);
                 onChange(current);
             }, current ? Theme.Success : Theme.PanelLight, Theme.BodySize, Theme.Text);
+        }
+
+        /// <summary>Thick dark outline used on titles laid over illustrated ribbons and buttons.</summary>
+        public static void TitleOutline(Text text)
+        {
+            Outline outline = text.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.16f, 0.04f, 0.22f, 0.95f);
+            outline.effectDistance = new Vector2(3, -3);
+        }
+
+        /// <summary>Row of reward chips (icon + amount) filling <paramref name="parent"/>.</summary>
+        public static void RewardChips(RectTransform parent, RewardDto reward)
+        {
+            HorizontalLayoutGroup row = parent.gameObject.AddComponent<HorizontalLayoutGroup>();
+            row.spacing = 10;
+            row.childAlignment = TextAnchor.MiddleLeft;
+            row.childControlWidth = row.childControlHeight = true;
+            row.childForceExpandWidth = false;
+            row.childForceExpandHeight = true;
+            foreach (RevealItem item in RevealOverlay.FromReward(reward))
+            {
+                RectTransform chip = UIFactory.Rect("Chip", parent);
+                UIFactory.Width(chip.gameObject.AddComponent<LayoutElement>(), 190);
+                if (item.Art != null)
+                {
+                    Image icon = UIFactory.Icon(chip, item.Art, Color.white, 0);
+                    UIFactory.Anchor(icon.rectTransform, 0f, 0.05f, 0.4f, 0.95f);
+                }
+                Text label = UIFactory.Label(chip, item.Caption, Theme.SmallSize - 2, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+                UIFactory.Anchor(label.rectTransform, 0.42f, 0f, 1f, 1f);
+                TitleOutline(label);
+            }
         }
 
         public static Text SectionTitle(Transform parent, string text)
@@ -104,6 +136,10 @@ namespace CrushRoyale.Game.UI
         public static RectTransform Card(Transform parent, float height, Color? color = null)
         {
             Image card = UIFactory.Panel("Card", parent, color ?? Theme.Panel);
+            if (!color.HasValue)
+            {
+                UiKit.CardFrame(card);
+            }
             UIFactory.Height(card, height);
             VerticalLayoutGroup layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
             layout.padding = new RectOffset(28, 28, 20, 20);
@@ -182,6 +218,54 @@ namespace CrushRoyale.Game.UI
             fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = sprite.rect.width / sprite.rect.height;
             return image;
+        }
+    }
+
+    /// <summary>Springy scale-in when a popup, card or reward appears.</summary>
+    public sealed class PopIn : MonoBehaviour
+    {
+        public float Delay;
+        public float Duration = 0.32f;
+
+        private float _start = -1f;
+
+        /// <summary>Plays the pop again (e.g. a caption whose text just changed).</summary>
+        public void Replay()
+        {
+            enabled = false;
+            enabled = true;
+        }
+
+        private void OnEnable()
+        {
+            // The start time is taken on the first frame so a Delay set right after AddComponent is honoured.
+            _start = -1f;
+            transform.localScale = Vector3.zero;
+        }
+
+        private void Update()
+        {
+            if (_start < 0f)
+            {
+                _start = Time.unscaledTime + Delay;
+            }
+            float t = (Time.unscaledTime - _start) / Duration;
+            if (t < 0f)
+            {
+                transform.localScale = Vector3.zero;
+                return;
+            }
+            if (t >= 1f)
+            {
+                transform.localScale = Vector3.one;
+                enabled = false;
+                return;
+            }
+            // Ease-out-back: overshoots a little then settles.
+            const float c1 = 1.70158f;
+            const float c3 = c1 + 1f;
+            float k = 1f + c3 * Mathf.Pow(t - 1f, 3) + c1 * Mathf.Pow(t - 1f, 2);
+            transform.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, k);
         }
     }
 

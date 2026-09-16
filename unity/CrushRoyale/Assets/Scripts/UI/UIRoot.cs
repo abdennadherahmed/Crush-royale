@@ -69,8 +69,19 @@ namespace CrushRoyale.Game.UI
             safe.gameObject.AddComponent<SafeArea>();
 
             RectTransform bar = UIFactory.Anchor(UIFactory.Rect("TitleBar", safe), 0, 0.92f, 1, 1);
-            Text title = UIFactory.Label(bar, Loc.T(titleKey), Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Stretch(title.rectTransform, 160, 160, 0, 0);
+            Widgets.Fade(Root, true, 0.16f, 0.85f);
+            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", bar), 0.13f, -0.08f, 0.87f, 1.02f);
+            if (UiKit.Ribbon(ribbon) != null)
+            {
+                Text ribbonTitle = UIFactory.Label(ribbon, Loc.T(titleKey), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(ribbonTitle.rectTransform, 0.2f, 0.36f, 0.8f, 0.9f);
+                Widgets.TitleOutline(ribbonTitle);
+            }
+            else
+            {
+                Text title = UIFactory.Label(bar, Loc.T(titleKey), Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(title.rectTransform, 160, 160, 0, 0);
+            }
             if (backButton)
             {
                 Button back = UIFactory.Button(bar, "<", () => UI.Back(), Theme.Panel, Theme.HeaderSize, Theme.Text);
@@ -229,6 +240,9 @@ namespace CrushRoyale.Game.UI
             _game.Audio.PlaySFX(Audio.SoundIds.Invalid);
         }
 
+        /// <summary>Layer above every screen for dialogs, popups and full-screen reveals.</summary>
+        public Transform DialogLayer => _dialogs;
+
         public Task Alert(string title, string message) => Dialog(title, message, _game.Loc.T("common.ok"), null);
 
         public async Task<bool> Confirm(string title, string message, string ok = null, string cancel = null) =>
@@ -243,11 +257,25 @@ namespace CrushRoyale.Game.UI
 
             Image box = UIFactory.Panel("Box", shade.transform, Theme.Panel);
             UIFactory.Anchor(box.rectTransform, 0.08f, 0.32f, 0.92f, 0.68f);
+            bool framed = UiKit.FramePanel(box);
+            box.gameObject.AddComponent<PopIn>();
 
-            Text titleText = UIFactory.Label(box.transform, title, Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(titleText.rectTransform, 0.05f, 0.75f, 0.95f, 0.95f);
+            if (framed)
+            {
+                // Title on a ribbon straddling the top edge of the ornate frame.
+                RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", box.transform), -0.04f, 0.83f, 1.04f, 1.1f);
+                UiKit.Ribbon(ribbon);
+                Text ribbonTitle = UIFactory.Label(ribbon, title, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(ribbonTitle.rectTransform, 0.2f, 0.36f, 0.8f, 0.9f);
+                Widgets.TitleOutline(ribbonTitle);
+            }
+            else
+            {
+                Text titleText = UIFactory.Label(box.transform, title, Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(titleText.rectTransform, 0.05f, 0.75f, 0.95f, 0.95f);
+            }
             Text body = UIFactory.Label(box.transform, message, Theme.BodySize);
-            UIFactory.Anchor(body.rectTransform, 0.06f, 0.3f, 0.94f, 0.75f);
+            UIFactory.Anchor(body.rectTransform, 0.08f, 0.3f, 0.92f, framed ? 0.8f : 0.75f);
 
             void Close(bool result)
             {
@@ -277,6 +305,8 @@ namespace CrushRoyale.Game.UI
             UIFactory.Stretch(shade.rectTransform);
             Image box = UIFactory.Panel("Box", shade.transform, Theme.Panel);
             UIFactory.Anchor(box.rectTransform, 0.05f, minY, 0.95f, maxY);
+            UiKit.FramePanel(box);
+            box.gameObject.AddComponent<PopIn>();
             return box.rectTransform;
         }
 

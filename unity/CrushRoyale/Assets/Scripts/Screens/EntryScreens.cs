@@ -438,11 +438,36 @@ namespace CrushRoyale.Game.Screens
             Text sub = UIFactory.Label(chipRect, detail, Theme.SmallSize - 4, profile == null ? Theme.Warning : Theme.League(profile.Pvp.League), TextAnchor.MiddleLeft);
             UIFactory.Anchor(sub.rectTransform, 0.32f, 0.06f, 0.98f, 0.5f);
 
+            if (profile != null)
+            {
+                VipBadge(safe, profile.Vip?.Tier ?? 0);
+            }
+
             CurrencyBar bar = CurrencyBar.Create(safe);
             UIFactory.Anchor((RectTransform)bar.transform, 0.44f, 0.925f, 0.865f, 0.985f);
 
             Button gear = IconButton(safe, "settings", () => UI.Show<SettingsScreen>());
             UIFactory.Anchor(gear.GetComponent<RectTransform>(), 0.875f, 0.915f, 0.985f, 0.99f);
+        }
+
+        /// <summary>Gold "VIP n" plate with a crown under the profile chip; opens the VIP benefits page.</summary>
+        private void VipBadge(RectTransform safe, int tier)
+        {
+            Button plate = UIFactory.Button(safe, string.Empty, () => UI.Show<VipScreen>(), tier > 0 ? Theme.GoldDark : Theme.PanelLight);
+            RectTransform rect = UIFactory.Anchor(plate.GetComponent<RectTransform>(), 0.03f, 0.872f, 0.25f, 0.914f);
+            Sprite crown = UiKit.Art("item_crown") ?? ArtLibrary.Icon("crown");
+            if (crown != null)
+            {
+                Image icon = UIFactory.Icon(rect, crown, Color.white, 0);
+                UIFactory.Anchor(icon.rectTransform, -0.06f, 0.05f, 0.3f, 1.25f);
+            }
+            Text label = UIFactory.Label(rect, tier > 0 ? Loc.T("vip.badge", tier) : Loc.T("vip.become"), Theme.SmallSize - 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(label.rectTransform, 0.28f, 0.05f, 0.97f, 0.95f);
+            Widgets.TitleOutline(label);
+            if (tier > 0)
+            {
+                plate.gameObject.AddComponent<Breathe>().Amount = 0.015f;
+            }
         }
 
         private void SideButton(RectTransform safe, string icon, string key, Type screen, string feature, float x, float yTop, int badge)

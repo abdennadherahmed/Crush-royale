@@ -13,14 +13,25 @@ using UnityEngine.UI;
 
 namespace CrushRoyale.Game.Screens
 {
-    /// <summary>World map: 5 kingdoms (acts), 10 chapters each, 20 stages per chapter, stars and friends' positions.</summary>
+    /// <summary>
+    /// World map: the illustrated continent with its 5 kingdoms (acts) on top, then the selected chapter as a winding
+    /// path of 20 stage medallions over the kingdom's scenery (stars, bosses, the hero on the current stage, friends).
+    /// </summary>
     public sealed class WorldMapScreen : UIScreen
     {
         /// <summary>Offline practice lets players try the first stages without an account.</summary>
         public const int OfflineStageCap = 50;
 
+        private const float NodeSpacing = 250f;
+
+        // Kingdom hotspots on the world map illustration (normalized), in act order (North, East, West, South, Central).
+        private static readonly Vector2[] KingdomSpots =
+        {
+            new Vector2(0.56f, 0.76f), new Vector2(0.74f, 0.58f), new Vector2(0.22f, 0.56f), new Vector2(0.5f, 0.22f), new Vector2(0.5f, 0.47f)
+        };
+
         private int _act = -1;
-        private RectTransform _list;
+        private int _chapter = -1;
         private Dictionary<int, List<string>> _friendsByStage = new Dictionary<int, List<string>>();
 
         public override System.Type BackTarget => typeof(MainMenuScreen);
@@ -35,34 +46,23 @@ namespace CrushRoyale.Game.Screens
         protected override void Build()
         {
             StoryBalance story = Game.Backend.Balance.Story;
+            int stagesPerAct = story.ChaptersPerAct * story.StagesPerChapter;
+            int highest = Mathf.Min(HighestUnlocked, story.TotalStages);
             if (_act < 1)
             {
-                _act = Mathf.Clamp((Mathf.Min(HighestUnlocked, story.TotalStages) - 1) / (story.ChaptersPerAct * story.StagesPerChapter) + 1, 1, story.Acts);
+                _act = Mathf.Clamp((highest - 1) / stagesPerAct + 1, 1, story.Acts);
+            }
+            if (_chapter < 1)
+            {
+                int currentChapter = (highest - 1) / story.StagesPerChapter + 1;
+                int firstOfAct = (_act - 1) * story.ChaptersPerAct + 1;
+                _chapter = Mathf.Clamp(currentChapter, firstOfAct, firstOfAct + story.ChaptersPerAct - 1);
             }
 
             RectTransform body = Frame("map.title");
-            RectTransform container = UIFactory.Stretch(UIFactory.Rect("Container", body));
-
-            var labels = new List<string>();
-            for (int a = 1; a <= story.Acts; a++)
-            {
-                labels.Add(Loc.T("kingdom." + (Kingdom)(a - 1) + ".short"));
-            }
-            RectTransform tabsHolder = UIFactory.Anchor(UIFactory.Rect("Tabs", container), 0.02f, 0.9f, 0.98f, 1f);
-            VerticalLayoutGroup tabLayout = tabsHolder.gameObject.AddComponent<VerticalLayoutGroup>();
-            tabLayout.childControlWidth = tabLayout.childControlHeight = true;
-            tabLayout.childForceExpandWidth = true;
-            System.Action<int> setTab = Widgets.Tabs(tabsHolder, labels, index =>
-            {
-                _act = index + 1;
-                Rebuild();
-            });
-            setTab(_act - 1);
-
-            RectTransform listHolder = UIFactory.Anchor(UIFactory.Rect("ListHolder", container), 0, 0, 1, 0.89f);
-            _list = UIFactory.ScrollList(listHolder, 20, 24);
-            UIFactory.Stretch((RectTransform)_list.parent.parent);
-            FillAct(story);
+            BuildWorld(body, story, highest);
+            BuildChapterBar(body, story, highest);
+            BuildPath(body, story, highest);
         }
 
         public override async Task OnShownAsync()
@@ -80,58 +80,250 @@ namespace CrushRoyale.Game.Screens
             Rebuild();
         }
 
-        private void FillAct(StoryBalance story)
+        private void BuildWorld(RectTransform body, StoryBalance story, int highest)
         {
-            int highest = HighestUnlocked;
-            string stars = Game.Backend.Profile?.Story?.StarsByStage ?? string.Empty;
-            int firstChapter = (_act - 1) * story.ChaptersPerAct + 1;
-
-            Text kingdom = UIFactory.Label(_list, Loc.T("kingdom." + (Kingdom)(_act - 1)), Theme.HeaderSize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Height(kingdom, 100);
-
-            for (int chapter = firstChapter; chapter < firstChapter + story.ChaptersPerAct; chapter++)
+            Image frame = UIFactory.Panel("World", body, Theme.Panel);
+            UIFactory.Anchor(frame.rectTransform, 0.02f, 0.67f, 0.98f, 1f);
+            UiKit.FramePanel(frame);
+            RectTransform inner = UIFactory.Stretch(UIFactory.Rect("Inner", frame.transform), 22, 22, 22, 22);
+            inner.gameObject.AddComponent<RectMask2D>();
+            Sprite world = ArtLibrary.Load("Art/Backgrounds/world_map");
+            RectTransform pins = inner;
+            if (world != null)
             {
-                int firstStage = (chapter - 1) * story.StagesPerChapter + 1;
-                bool chapterVisible = firstStage <= highest + story.StagesPerChapter;
-                Widgets.SectionTitle(_list, Loc.T("chapter.title", chapter, Loc.T("chapter." + chapter + ".name")));
-                if (!chapterVisible)
-                {
-                    UIFactory.Height(UIFactory.Label(_list, Loc.T("map.chapterLocked"), Theme.SmallSize, Theme.TextMuted), 60);
-                    continue;
-                }
+                Image map = UIFactory.Icon(inner, world, Color.white, 0);
+                pins = map.rectTransform;
+                UIFactory.Stretch(map.rectTransform);
+                map.preserveAspect = false;
+                map.rectTransform.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                map.rectTransform.GetComponent<AspectRatioFitter>().aspectRatio = world.rect.width / world.rect.height;
+            }
+            else
+            {
+                Widgets.Backdrop(inner, Kingdom.Central, 0.8f);
+            }
 
-                RectTransform gridRect = UIFactory.Rect("Stages", _list);
-                UIFactory.Height(gridRect, 4 * 190 + 3 * 16);
-                GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
-                grid.cellSize = new Vector2(180, 190);
-                grid.spacing = new Vector2(16, 16);
-                grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                grid.constraintCount = 5;
-                grid.childAlignment = TextAnchor.UpperCenter;
-
-                for (int id = firstStage; id < firstStage + story.StagesPerChapter; id++)
+            int stagesPerAct = story.ChaptersPerAct * story.StagesPerChapter;
+            for (int act = 1; act <= story.Acts && act <= KingdomSpots.Length; act++)
+            {
+                int a = act;
+                bool unlocked = (act - 1) * stagesPerAct + 1 <= highest;
+                Vector2 spot = KingdomSpots[act - 1];
+                RectTransform pin = UIFactory.Rect("Kingdom" + act, pins);
+                pin.anchorMin = pin.anchorMax = spot;
+                pin.sizeDelta = new Vector2(act == _act ? 150 : 120, act == _act ? 150 : 120);
+                Button button = pin.gameObject.AddComponent<Button>();
+                Image hit = pin.gameObject.AddComponent<Image>();
+                hit.color = new Color(0, 0, 0, 0);
+                button.targetGraphic = hit;
+                button.onClick.AddListener(() =>
                 {
-                    StageButton(gridRect, id, highest, stars);
+                    if (!unlocked)
+                    {
+                        UI.Toast(Loc.T("map.kingdomLocked"));
+                        return;
+                    }
+                    _act = a;
+                    _chapter = (a - 1) * story.ChaptersPerAct + 1;
+                    int currentChapter = (highest - 1) / story.StagesPerChapter + 1;
+                    if (currentChapter >= _chapter && currentChapter < _chapter + story.ChaptersPerAct)
+                    {
+                        _chapter = currentChapter;
+                    }
+                    Rebuild();
+                });
+                pin.gameObject.AddComponent<ButtonFeedback>();
+
+                UiKit.RoundBadge(pin, crystal: act != _act);
+                if (act == _act)
+                {
+                    Image ring = UIFactory.Icon(pin, ProceduralSprites.Glow(128), new Color(1f, 0.85f, 0.35f, 0.9f), 0);
+                    UIFactory.Stretch(ring.rectTransform, -40, -40, -40, -40);
+                    ring.gameObject.AddComponent<Pulse>();
+                    ring.transform.SetAsFirstSibling();
                 }
+                if (!unlocked)
+                {
+                    Sprite lockArt = UiKit.Art("item_lock") ?? ArtLibrary.Icon("lock");
+                    if (lockArt != null)
+                    {
+                        Image lockIcon = UIFactory.Icon(pin, lockArt, Color.white, 0);
+                        UIFactory.Stretch(lockIcon.rectTransform, 28, 28, 22, 22);
+                    }
+                }
+                else
+                {
+                    Text number = UIFactory.Label(pin, RomanAct(act), Theme.HeaderSize - 6, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                    UIFactory.Stretch(number.rectTransform);
+                    Widgets.TitleOutline(number);
+                }
+                Text name = UIFactory.Label(pin, Loc.T("kingdom." + (Kingdom)(act - 1)), Theme.SmallSize - 4, act == _act ? Theme.Gold : Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(name.rectTransform, -0.8f, -0.42f, 1.8f, -0.02f);
+                Widgets.TitleOutline(name);
             }
         }
 
-        private void StageButton(Transform parent, int stageId, int highest, string stars)
+        private static string RomanAct(int act)
+        {
+            switch (act)
+            {
+                case 1: return "I";
+                case 2: return "II";
+                case 3: return "III";
+                case 4: return "IV";
+                default: return "V";
+            }
+        }
+
+        private void BuildChapterBar(RectTransform body, StoryBalance story, int highest)
+        {
+            int firstChapter = (_act - 1) * story.ChaptersPerAct + 1;
+            int lastChapter = firstChapter + story.ChaptersPerAct - 1;
+            int lastVisible = (highest - 1) / story.StagesPerChapter + 1;
+
+            Image bar = UIFactory.Panel("Chapter", body, Theme.Panel);
+            UIFactory.Anchor(bar.rectTransform, 0.02f, 0.575f, 0.98f, 0.665f);
+            UiKit.CardFrame(bar);
+
+            Button prev = UIFactory.Button(bar.transform, "<", () => { _chapter--; Rebuild(); }, _chapter > firstChapter ? Theme.Gold : Theme.PanelLight, Theme.HeaderSize);
+            RectTransform prevRect = UIFactory.Anchor(prev.GetComponent<RectTransform>(), 0.02f, 0.14f, 0.14f, 0.86f);
+            prevRect.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+            prev.interactable = _chapter > firstChapter;
+            Button next = UIFactory.Button(bar.transform, ">", () => { _chapter++; Rebuild(); }, _chapter < Mathf.Min(lastChapter, lastVisible) ? Theme.Gold : Theme.PanelLight, Theme.HeaderSize);
+            RectTransform nextRect = UIFactory.Anchor(next.GetComponent<RectTransform>(), 0.86f, 0.14f, 0.98f, 0.86f);
+            nextRect.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+            next.interactable = _chapter < Mathf.Min(lastChapter, lastVisible);
+
+            Text title = UIFactory.Label(bar.transform, Loc.T("chapter.title", _chapter, Loc.T("chapter." + _chapter + ".name")), Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.16f, 0.45f, 0.84f, 0.95f);
+            Widgets.TitleOutline(title);
+
+            string stars = Game.Backend.Profile?.Story?.StarsByStage ?? string.Empty;
+            int firstStage = (_chapter - 1) * story.StagesPerChapter + 1;
+            int earned = 0;
+            for (int id = firstStage; id < firstStage + story.StagesPerChapter && id - 1 < stars.Length; id++)
+            {
+                earned += Mathf.Max(0, stars[id - 1] - '0');
+            }
+            Text starText = UIFactory.Label(bar.transform, "★ " + earned + " / " + story.StagesPerChapter * 3, Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(starText.rectTransform, 0.16f, 0.06f, 0.84f, 0.45f);
+        }
+
+        private void BuildPath(RectTransform body, StoryBalance story, int highest)
+        {
+            RectTransform viewport = UIFactory.Anchor(UIFactory.Rect("PathView", body), 0.02f, 0.01f, 0.98f, 0.565f);
+            viewport.gameObject.AddComponent<RectMask2D>();
+            Image hit = viewport.gameObject.AddComponent<Image>();
+            hit.color = new Color(0, 0, 0, 0.25f);
+            ScrollRect scroll = viewport.gameObject.AddComponent<ScrollRect>();
+            scroll.horizontal = false;
+            scroll.movementType = ScrollRect.MovementType.Elastic;
+            scroll.scrollSensitivity = 40;
+
+            int count = story.StagesPerChapter;
+            float height = (count + 1) * NodeSpacing;
+            RectTransform content = UIFactory.Rect("Path", viewport);
+            content.anchorMin = new Vector2(0, 0);
+            content.anchorMax = new Vector2(1, 0);
+            content.pivot = new Vector2(0.5f, 0);
+            content.sizeDelta = new Vector2(0, height);
+            content.anchoredPosition = Vector2.zero;
+            scroll.content = content;
+            scroll.viewport = viewport;
+
+            // Kingdom scenery, repeated (mirrored every other tile) along the path.
+            Sprite scenery = ArtLibrary.Background(BackdropKingdom);
+            if (scenery != null)
+            {
+                float tile = 1400f;
+                for (int i = 0; i * tile < height; i++)
+                {
+                    RectTransform segment = UIFactory.Rect("Scenery", content);
+                    segment.anchorMin = new Vector2(0, 0);
+                    segment.anchorMax = new Vector2(1, 0);
+                    segment.pivot = new Vector2(0.5f, 0);
+                    segment.sizeDelta = new Vector2(0, tile);
+                    segment.anchoredPosition = new Vector2(0, i * tile);
+                    segment.gameObject.AddComponent<RectMask2D>();
+                    Image image = UIFactory.Icon(segment, scenery, new Color(0.62f, 0.6f, 0.68f, 1f), 0);
+                    UIFactory.Stretch(image.rectTransform);
+                    AspectRatioFitter fitter = image.gameObject.AddComponent<AspectRatioFitter>();
+                    fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+                    fitter.aspectRatio = scenery.rect.width / scenery.rect.height;
+                    if (i % 2 == 1)
+                    {
+                        image.rectTransform.localScale = new Vector3(1, -1, 1);
+                    }
+                }
+            }
+
+            string stars = Game.Backend.Profile?.Story?.StarsByStage ?? string.Empty;
+            int firstStage = (_chapter - 1) * story.StagesPerChapter + 1;
+            Vector2 previous = Vector2.zero;
+            RectTransform currentNode = null;
+            for (int i = 0; i < count; i++)
+            {
+                int stageId = firstStage + i;
+                Vector2 position = new Vector2(Mathf.Sin(i * 0.9f) * 290f, NodeSpacing * (i + 0.8f));
+                if (i > 0)
+                {
+                    Dots(content, previous, position, stageId <= highest);
+                }
+                RectTransform node = StageNode(content, stageId, position, highest, stars);
+                if (stageId == highest)
+                {
+                    currentNode = node;
+                }
+                previous = position;
+            }
+
+            // Start scrolled so the current stage (or the chapter start) is visible.
+            float target = currentNode != null ? currentNode.anchoredPosition.y : 0f;
+            StartCoroutine(ScrollTo(scroll, target, height));
+        }
+
+        /// <summary>Waits one frame for the viewport size, then centers the path on <paramref name="y"/>.</summary>
+        private static System.Collections.IEnumerator ScrollTo(ScrollRect scroll, float y, float height)
+        {
+            yield return null;
+            if (scroll == null)
+            {
+                yield break;
+            }
+            float view = ((RectTransform)scroll.viewport).rect.height;
+            scroll.verticalNormalizedPosition = Mathf.Clamp01((y - view * 0.4f) / Mathf.Max(1f, height - view));
+        }
+
+        private static void Dots(RectTransform content, Vector2 from, Vector2 to, bool reached)
+        {
+            for (int d = 1; d <= 4; d++)
+            {
+                Vector2 p = Vector2.Lerp(from, to, d / 5f);
+                Image dot = UIFactory.Icon(content, ProceduralSprites.Circle(), reached ? Theme.Gold : new Color(0.1f, 0.08f, 0.2f, 0.85f), 18);
+                dot.rectTransform.anchorMin = dot.rectTransform.anchorMax = new Vector2(0.5f, 0f);
+                dot.rectTransform.anchoredPosition = p;
+            }
+        }
+
+        private RectTransform StageNode(RectTransform content, int stageId, Vector2 position, int highest, string stars)
         {
             bool unlocked = stageId <= highest && (Game.Backend.IsOnline || stageId <= OfflineStageCap);
             bool current = stageId == highest;
             int starCount = stageId - 1 < stars.Length ? stars[stageId - 1] - '0' : 0;
             StageData stage = Game.Backend.Catalog.Get(stageId);
+            float size = stage.IsBoss ? 190f : current ? 160f : 140f;
 
-            Color color = !unlocked ? Theme.BackgroundLight : current ? Theme.Crystal : starCount > 0 ? Theme.GoldDark : Theme.PanelLight;
-            string label = stageId + "\n" + (stage.IsBoss ? Loc.T("map.boss") : new string('*', starCount));
-            if (_friendsByStage.TryGetValue(stageId, out List<string> friends))
-            {
-                label += "\n" + string.Join(",", friends.Select(f => f.Substring(0, 1)));
-            }
-
+            RectTransform node = UIFactory.Rect("Stage" + stageId, content);
+            node.anchorMin = node.anchorMax = new Vector2(0.5f, 0f);
+            node.sizeDelta = new Vector2(size, size);
+            node.anchoredPosition = position;
+            Image hit = node.gameObject.AddComponent<Image>();
+            hit.color = new Color(0, 0, 0, 0);
+            Button button = node.gameObject.AddComponent<Button>();
+            button.targetGraphic = hit;
+            node.gameObject.AddComponent<ButtonFeedback>();
             int id = stageId;
-            Button button = UIFactory.Button(parent, label, () =>
+            button.onClick.AddListener(() =>
             {
                 if (unlocked)
                 {
@@ -141,8 +333,89 @@ namespace CrushRoyale.Game.Screens
                 {
                     UI.Toast(Loc.T("map.stageLocked"));
                 }
-            }, color, Theme.SmallSize + 2, current ? Theme.Background : Theme.Text);
-            button.interactable = true;
+            });
+
+            Image badge = UiKit.RoundBadge(node, crystal: current || !unlocked);
+            if (current)
+            {
+                Image glow = UIFactory.Icon(node, ProceduralSprites.Glow(128), new Color(0.45f, 0.9f, 1f, 0.9f), 0);
+                UIFactory.Stretch(glow.rectTransform, -50, -50, -50, -50);
+                glow.gameObject.AddComponent<Pulse>();
+                glow.transform.SetAsFirstSibling();
+            }
+            if (badge != null && !unlocked)
+            {
+                badge.color = new Color(0.35f, 0.33f, 0.45f, 1f);
+            }
+
+            if (stage.IsBoss)
+            {
+                Sprite bossArt = ArtLibrary.Boss(stage);
+                if (bossArt != null)
+                {
+                    Image boss = UIFactory.Icon(node, bossArt, unlocked ? Color.white : new Color(0.3f, 0.3f, 0.35f, 1f), 0);
+                    UIFactory.Stretch(boss.rectTransform, 18, 18, 18, 18);
+                }
+                Text tag = UIFactory.Label(node, Loc.T("map.boss"), Theme.SmallSize - 2, Theme.Danger, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(tag.rectTransform, -0.2f, 0.88f, 1.2f, 1.12f);
+                Widgets.TitleOutline(tag);
+            }
+            Text number = UIFactory.Label(node, unlocked || stage.IsBoss ? stageId.ToString() : string.Empty, stage.IsBoss ? Theme.SmallSize : Theme.BodySize + 2, Theme.Text, stage.IsBoss ? TextAnchor.LowerCenter : TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(number.rectTransform, 0, 0, 0, stage.IsBoss ? 6 : 0);
+            Widgets.TitleOutline(number);
+            if (!unlocked && !stage.IsBoss)
+            {
+                Sprite lockArt = UiKit.Art("item_lock") ?? ArtLibrary.Icon("lock");
+                if (lockArt != null)
+                {
+                    Image lockIcon = UIFactory.Icon(node, lockArt, new Color(1f, 1f, 1f, 0.9f), 0);
+                    UIFactory.Stretch(lockIcon.rectTransform, size * 0.28f, size * 0.28f, size * 0.22f, size * 0.22f);
+                }
+            }
+
+            // Stars under completed stages.
+            if (starCount > 0)
+            {
+                RectTransform row = UIFactory.Anchor(UIFactory.Rect("Stars", node), 0.05f, -0.22f, 0.95f, 0.08f);
+                HorizontalLayoutGroup layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+                layout.childAlignment = TextAnchor.MiddleCenter;
+                layout.childControlWidth = layout.childControlHeight = true;
+                layout.childForceExpandWidth = layout.childForceExpandHeight = true;
+                Sprite star = ArtLibrary.Icon("star");
+                for (int s = 0; s < 3; s++)
+                {
+                    if (star != null)
+                    {
+                        UIFactory.Icon(row, star, s < starCount ? Color.white : new Color(0.2f, 0.18f, 0.3f, 1f), 0);
+                    }
+                }
+            }
+
+            // The hero stands on the current stage.
+            if (current)
+            {
+                ProfileDto profile = Game.Backend.Profile;
+                string gender = profile?.Hero?.Gender ?? Game.Save.Settings.HeroGender ?? "female";
+                Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
+                if (portrait != null)
+                {
+                    RectTransform marker = UIFactory.Anchor(UIFactory.Rect("Hero", node), 0.1f, 0.95f, 0.9f, 1.75f);
+                    Image ring = UIFactory.Icon(marker, ProceduralSprites.Circle(), Theme.Gold, 0);
+                    UIFactory.Stretch(ring.rectTransform);
+                    Image face = UIFactory.Icon(marker, portrait, Color.white, 0);
+                    UIFactory.Stretch(face.rectTransform, 8, 8, 8, 8);
+                    marker.gameObject.AddComponent<Breathe>().Amount = 0.06f;
+                }
+            }
+
+            if (_friendsByStage.TryGetValue(stageId, out List<string> friends) && friends.Count > 0)
+            {
+                Image chip = UIFactory.Panel("Friends", node, Theme.Crystal);
+                UIFactory.Anchor(chip.rectTransform, 0.72f, 0.7f, 1.35f, 1.0f);
+                Text initials = UIFactory.Label(chip.transform, string.Join("", friends.Take(3).Select(f => f.Substring(0, 1))), Theme.SmallSize - 4, Theme.Background, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(initials.rectTransform);
+            }
+            return node;
         }
     }
 
@@ -159,89 +432,165 @@ namespace CrushRoyale.Game.Screens
             _stageId = Args is int id ? id : 1;
             StageData stage = Game.Backend.Catalog.Get(_stageId);
             RectTransform body = Frame("stage.title");
-            RectTransform list = UIFactory.ScrollList(body, 20, 40);
+            RectTransform list = UIFactory.ScrollList(body, 22, 36);
             UIFactory.Stretch((RectTransform)list.parent.parent, 0, 0, 0, 240);
 
-            Text title = UIFactory.Label(list, Loc.T("stage.heading", stage.Id, Loc.T("kingdom." + stage.Kingdom)), Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Height(title, 100);
+            // Header: ribbon with the stage number and kingdom, stars already earned below.
+            RectTransform header = UIFactory.Rect("Header", list);
+            UIFactory.Height(header, 190);
+            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", header), 0.02f, 0.25f, 0.98f, 1f);
+            UiKit.Ribbon(ribbon);
+            Text title = UIFactory.Label(ribbon, Loc.T("stage.heading", stage.Id, Loc.T("kingdom." + stage.Kingdom)), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.18f, 0.34f, 0.82f, 0.92f);
+            Widgets.TitleOutline(title);
+            string stars = Game.Backend.Profile?.Story?.StarsByStage ?? string.Empty;
+            int earned = stage.Id - 1 < stars.Length ? stars[stage.Id - 1] - '0' : 0;
+            StarRow(header, earned, 0.32f, 0f, 0.68f, 0.3f);
+
             if (stage.IsBoss)
             {
                 UIFactory.Height(UIFactory.Label(list, Loc.T("boss." + stage.BossKind) + " - " + Loc.T(stage.BossId + ".name"), Theme.BodySize, Theme.Danger, TextAnchor.MiddleCenter, FontStyle.Bold), 80);
                 Sprite bossArt = ArtLibrary.Boss(stage);
                 if (bossArt != null)
                 {
-                    UIFactory.Height(UIFactory.Icon(list, bossArt, Color.white, 360), 360);
+                    Image boss = UIFactory.Icon(list, bossArt, Color.white, 360);
+                    UIFactory.Height(boss, 360);
+                    boss.gameObject.AddComponent<Breathe>().Amount = 0.02f;
                 }
             }
 
-            RectTransform info = Widgets.Card(list, 260);
-            UIFactory.Label(info, Loc.T("stage.limits", stage.MoveLimit, stage.TimeLimitMs / 1000), Theme.BodySize);
-            UIFactory.Label(info, Loc.T("stage.difficulty", Mathf.RoundToInt(stage.DifficultyPercent)), Theme.BodySize, Theme.TextMuted);
-            UIFactory.Label(info, Loc.T("stage.stars", Loc.Number(stage.TargetScore), Loc.Number(stage.TwoStarScore), Loc.Number(stage.ThreeStarScore)), Theme.SmallSize, Theme.TextMuted);
-
-            Widgets.SectionTitle(list, Loc.T("stage.objectives"));
+            // Objectives as big illustrated chips.
+            Image goals = UIFactory.Panel("Goals", list, Theme.Panel);
+            UIFactory.Height(goals, 300);
+            UiKit.FramePanel(goals);
+            Text goalsTitle = UIFactory.Label(goals.transform, Loc.T("stage.objectives"), Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(goalsTitle.rectTransform, 0.05f, 0.72f, 0.95f, 0.92f);
+            Widgets.TitleOutline(goalsTitle);
+            RectTransform chips = UIFactory.Anchor(UIFactory.Rect("Chips", goals.transform), 0.06f, 0.26f, 0.94f, 0.72f);
+            HorizontalLayoutGroup chipRow = chips.gameObject.AddComponent<HorizontalLayoutGroup>();
+            chipRow.spacing = 20;
+            chipRow.childAlignment = TextAnchor.MiddleCenter;
+            chipRow.childControlWidth = chipRow.childControlHeight = true;
+            chipRow.childForceExpandWidth = chipRow.childForceExpandHeight = true;
             foreach (StageObjective objective in stage.Objectives)
             {
-                string text = objective.Type == ObjectiveType.CollectColor
-                    ? Loc.T("objective.CollectColor", Loc.T("color." + objective.Color)) + " " + objective.Target
-                    : Loc.T("objective." + objective.Type) + (objective.Target > 0 ? " " + Loc.Number(objective.Target) : string.Empty);
-                UIFactory.Height(UIFactory.Label(list, "- " + text, Theme.BodySize, Theme.Text, TextAnchor.MiddleLeft), 70);
+                GoalChip(chips, stage, objective);
+            }
+            string limits = Loc.T("stage.limits", stage.MoveLimit, stage.TimeLimitMs / 1000) + "   ·   " + Loc.T("stage.difficulty", Mathf.RoundToInt(stage.DifficultyPercent));
+            Text limitText = UIFactory.Label(goals.transform, limits, Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(limitText.rectTransform, 0.06f, 0.07f, 0.94f, 0.26f);
+
+            // Star thresholds.
+            Image thresholds = UIFactory.Panel("Stars", list, Theme.Panel);
+            UIFactory.Height(thresholds, 150);
+            UiKit.CardFrame(thresholds);
+            long[] scores = { stage.TargetScore, stage.TwoStarScore, stage.ThreeStarScore };
+            for (int i = 0; i < 3; i++)
+            {
+                float x = i / 3f;
+                StarRow(thresholds.transform, i + 1, x + 0.03f, 0.52f, x + 0.3f, 0.92f, i + 1);
+                Text score = UIFactory.Label(thresholds.transform, Loc.Number(scores[i]), Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(score.rectTransform, x + 0.02f, 0.08f, x + 0.31f, 0.5f);
             }
             if (stage.StoneCount > 0 || stage.IceCells > 0)
             {
-                UIFactory.Height(UIFactory.Label(list, Loc.T("stage.obstacles", stage.StoneCount, stage.IceCells), Theme.SmallSize, Theme.TextMuted, TextAnchor.MiddleLeft), 60);
+                UIFactory.Height(UIFactory.Label(list, Loc.T("stage.obstacles", stage.StoneCount, stage.IceCells), Theme.SmallSize, Theme.TextMuted), 60);
             }
 
             if (Game.Backend.IsOnline)
             {
-                BuildLoadout(list);
-                UIFactory.Height(UIFactory.Label(list, Loc.T("stage.rewards", stage.RewardCoins, stage.RewardOrbes), Theme.BodySize, Theme.Gold), 70);
+                Widgets.SectionTitle(list, Loc.T("stage.boostsTitle"));
+                LoadoutPicker.Build(list, _selected, pvp: false, rebuild: Rebuild);
+                RewardRow(list, stage.RewardCoins, stage.RewardOrbes);
             }
             else
             {
                 UIFactory.Height(UIFactory.Label(list, Loc.T("result.practice"), Theme.SmallSize, Theme.Warning), 90);
             }
 
-            Button play = UIFactory.Button(body, Loc.T("stage.play"), () => _ = PlayAsync());
-            UIFactory.Anchor(play.GetComponent<RectTransform>(), 0.15f, 0.02f, 0.85f, 0.11f);
+            Button play = UIFactory.Button(body, Loc.T("stage.play"), () => _ = PlayAsync(), Theme.Success, Theme.HeaderSize);
+            UIFactory.Anchor(play.GetComponent<RectTransform>(), 0.15f, 0.02f, 0.85f, 0.115f);
+            play.gameObject.AddComponent<Breathe>().Amount = 0.02f;
         }
 
-        private void BuildLoadout(Transform list)
+        /// <summary>Row of star icons, the first <paramref name="filled"/> lit.</summary>
+        private static void StarRow(Transform parent, int filled, float minX, float minY, float maxX, float maxY, int total = 3)
         {
-            ProfileDto profile = Game.Backend.Profile;
-            GameBalance balance = Game.Backend.Balance;
-            Widgets.SectionTitle(list, Loc.T("stage.loadout", balance.PowerUps.LoadoutSlots));
-
-            League highest = (League)System.Enum.Parse(typeof(League), profile.Pvp.HighestLeague);
-            RectTransform gridRect = UIFactory.Rect("Loadout", list);
-            UIFactory.Height(gridRect, 3 * 150 + 2 * 16);
-            GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(300, 150);
-            grid.spacing = new Vector2(16, 16);
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 3;
-
-            foreach (PowerUpDefinition def in balance.PowerUps.Definitions)
+            RectTransform row = UIFactory.Anchor(UIFactory.Rect("StarRow", parent), minX, minY, maxX, maxY);
+            HorizontalLayoutGroup layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 6;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = true;
+            Sprite star = ArtLibrary.Icon("star");
+            for (int i = 0; i < total; i++)
             {
-                string type = def.Type.ToString();
-                int count = profile.Inventory.PowerUps.TryGetValue(type, out int n) ? n : 0;
-                bool locked = highest < def.UnlockLeague || def.PvpOnly;
-                Button button = null;
-                button = UIFactory.Button(gridRect, Loc.T("powerup." + type) + "\nx" + count, () =>
+                if (star != null)
                 {
-                    if (_selected.Remove(type))
-                    {
-                        button.GetComponent<Image>().color = Theme.PanelLight;
-                    }
-                    else if (_selected.Count < balance.PowerUps.LoadoutSlots)
-                    {
-                        _selected.Add(type);
-                        button.GetComponent<Image>().color = Theme.GoldDark;
-                    }
-                }, Theme.PanelLight, Theme.SmallSize, Theme.Text);
-                Widgets.AddPowerUpIcon(button, def.Type);
-                button.interactable = !locked && count > 0;
+                    UIFactory.Icon(row, star, i < filled ? Color.white : new Color(0.25f, 0.22f, 0.35f, 1f), 0);
+                }
+                else
+                {
+                    UIFactory.Label(row, "★", Theme.HeaderSize, i < filled ? Theme.Gold : Theme.TextMuted);
+                }
             }
+        }
+
+        private void GoalChip(Transform parent, StageData stage, StageObjective objective)
+        {
+            RectTransform chip = UIFactory.Rect("Chip", parent);
+            Sprite art;
+            switch (objective.Type)
+            {
+                case ObjectiveType.CollectColor: art = ArtLibrary.Gem(objective.Color); break;
+                case ObjectiveType.ClearIce: art = ArtLibrary.Ice(); break;
+                case ObjectiveType.BreakStones: art = ArtLibrary.Stone(); break;
+                case ObjectiveType.DefeatBoss: art = ArtLibrary.Boss(stage); break;
+                default: art = UiKit.Art("item_stars") ?? ArtLibrary.Icon("star"); break;
+            }
+            if (art != null)
+            {
+                Image icon = UIFactory.Icon(chip, art, Color.white, 0);
+                UIFactory.Anchor(icon.rectTransform, 0f, 0.05f, 0.4f, 0.95f);
+            }
+            string label = objective.Type == ObjectiveType.CollectColor
+                ? Loc.T("objective.CollectColor", Loc.T("color." + objective.Color))
+                : Loc.T("objective." + objective.Type);
+            Text name = UIFactory.Label(chip, label, Theme.SmallSize - 2, Theme.TextMuted, TextAnchor.LowerLeft, FontStyle.Bold);
+            UIFactory.Anchor(name.rectTransform, 0.42f, 0.52f, 1f, 0.95f);
+            Text target = UIFactory.Label(chip, objective.Target > 0 ? Loc.Number(objective.Target) : Loc.T("stage.all"), Theme.HeaderSize, Theme.Text, TextAnchor.UpperLeft, FontStyle.Bold);
+            UIFactory.Anchor(target.rectTransform, 0.42f, 0.02f, 1f, 0.55f);
+            Widgets.TitleOutline(target);
+        }
+
+        /// <summary>Win rewards with the coin and orb illustrations.</summary>
+        public static void RewardRow(Transform list, long coins, long orbes)
+        {
+            Localization loc = GameRoot.Instance.Loc;
+            Image panel = UIFactory.Panel("Rewards", list, Theme.Panel);
+            UIFactory.Height(panel, 170);
+            UiKit.CardFrame(panel);
+            Text title = UIFactory.Label(panel.transform, loc.T("stage.rewardsTitle"), Theme.SmallSize + 2, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.05f, 0.1f, 0.34f, 0.9f);
+            Widgets.TitleOutline(title);
+            RewardItem(panel.transform, "item_coins", "+" + loc.Number(coins), Theme.Gold, 0.35f);
+            if (orbes > 0)
+            {
+                RewardItem(panel.transform, "item_orbs", "+" + loc.Number(orbes), Theme.Orbe, 0.67f);
+            }
+        }
+
+        private static void RewardItem(Transform parent, string icon, string text, Color color, float x)
+        {
+            Sprite art = UiKit.Art(icon);
+            if (art != null)
+            {
+                Image image = UIFactory.Icon(parent, art, Color.white, 0);
+                UIFactory.Anchor(image.rectTransform, x, 0.12f, x + 0.12f, 0.88f);
+            }
+            Text label = UIFactory.Label(parent, text, Theme.HeaderSize - 4, color, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(label.rectTransform, x + 0.13f, 0.1f, x + 0.32f, 0.9f);
+            Widgets.TitleOutline(label);
         }
 
         private async Task PlayAsync()
@@ -307,35 +656,8 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Height(UIFactory.Label(list, Loc.T("pvp.record", profile.Pvp.Trophies, profile.Pvp.Wins, profile.Pvp.Losses, profile.Pvp.WinStreak), Theme.BodySize), 80);
                 UIFactory.Height(UIFactory.Label(list, Loc.T("pvp.rules"), Theme.SmallSize, Theme.TextMuted), 150);
 
-                Widgets.SectionTitle(list, Loc.T("stage.loadout", Game.Backend.Balance.PowerUps.LoadoutSlots));
-                League highest = (League)System.Enum.Parse(typeof(League), profile.Pvp.HighestLeague);
-                RectTransform gridRect = UIFactory.Rect("Loadout", list);
-                UIFactory.Height(gridRect, 3 * 150 + 2 * 16);
-                GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
-                grid.cellSize = new Vector2(300, 150);
-                grid.spacing = new Vector2(16, 16);
-                grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                grid.constraintCount = 3;
-                foreach (PowerUpDefinition def in Game.Backend.Balance.PowerUps.Definitions)
-                {
-                    string type = def.Type.ToString();
-                    int count = profile.Inventory.PowerUps.TryGetValue(type, out int n) ? n : 0;
-                    Button button = null;
-                    button = UIFactory.Button(gridRect, Loc.T("powerup." + type) + "\nx" + count, () =>
-                    {
-                        if (_selected.Remove(type))
-                        {
-                            button.GetComponent<Image>().color = Theme.PanelLight;
-                        }
-                        else if (_selected.Count < Game.Backend.Balance.PowerUps.LoadoutSlots)
-                        {
-                            _selected.Add(type);
-                            button.GetComponent<Image>().color = Theme.GoldDark;
-                        }
-                    }, Theme.PanelLight, Theme.SmallSize, Theme.Text);
-                    Widgets.AddPowerUpIcon(button, def.Type);
-                    button.interactable = highest >= def.UnlockLeague && count > 0;
-                }
+                Widgets.SectionTitle(list, Loc.T("stage.boostsTitle"));
+                LoadoutPicker.Build(list, _selected, pvp: true, rebuild: Rebuild);
             }
             else
             {

@@ -42,6 +42,23 @@ public class PetCollectionTests
     }
 
     [Fact]
+    public void Unlock_NeedsTheFragments_AndSpendsThem()
+    {
+        var state = new PetCollectionState();
+        var pets = new PetCollection(state, Balance);
+        pets.Get(PetType.ForestOwl).Fragments = Balance.UnlockFragments - 1;
+        Assert.Equal(ErrorCode.NotEnoughItems, pets.Unlock(PetType.ForestOwl));
+
+        pets.Get(PetType.ForestOwl).Fragments = Balance.UnlockFragments + 7;
+        Assert.Equal(ErrorCode.None, pets.Unlock(PetType.ForestOwl));
+        Assert.True(pets.Owns(PetType.ForestOwl));
+        Assert.Equal(1, pets.Get(PetType.ForestOwl).Level);
+        Assert.Equal(7, pets.Get(PetType.ForestOwl).Fragments);
+        Assert.Equal(PetType.ForestOwl, state.Equipped);
+        Assert.Equal(ErrorCode.AlreadyClaimed, pets.Unlock(PetType.ForestOwl));
+    }
+
+    [Fact]
     public void Duplicate_BecomesFragments()
     {
         var state = new PetCollectionState();

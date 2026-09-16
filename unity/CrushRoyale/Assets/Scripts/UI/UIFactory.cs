@@ -136,6 +136,7 @@ namespace CrushRoyale.Game.UI
         public static Button Button(Transform parent, string text, Action onClick, Color? color = null, int fontSize = Theme.BodySize, Color? textColor = null)
         {
             Image image = Panel("Button", parent, color ?? Theme.Gold);
+            bool illustrated = UiKit.TryStyleFor(color ?? Theme.Gold, out UiKit.ButtonStyle style) && UiKit.Apply(image, UiKit.Button(style));
             Button button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
             ColorBlock colors = button.colors;
@@ -144,8 +145,15 @@ namespace CrushRoyale.Game.UI
             colors.disabledColor = new Color(0.5f, 0.5f, 0.5f, 0.6f);
             button.colors = colors;
 
-            Text label = Label(image.transform, text, fontSize, textColor ?? (color.HasValue ? Theme.Text : Theme.Background), TextAnchor.MiddleCenter, FontStyle.Bold);
-            Stretch(label.rectTransform, 16, 16, 8, 8);
+            Text label = Label(image.transform, text, fontSize, illustrated ? Theme.Text : textColor ?? (color.HasValue ? Theme.Text : Theme.Background), TextAnchor.MiddleCenter, FontStyle.Bold);
+            Stretch(label.rectTransform, illustrated ? 28 : 16, illustrated ? 28 : 16, 10, 14);
+            if (illustrated)
+            {
+                // Light text with a dark outline stays readable on every glossy face.
+                Outline outline = label.gameObject.AddComponent<Outline>();
+                outline.effectColor = new Color(0.14f, 0.05f, 0.12f, 0.9f);
+                outline.effectDistance = new Vector2(2, -2);
+            }
 
             image.gameObject.AddComponent<ButtonFeedback>();
             if (onClick != null)
@@ -240,6 +248,10 @@ namespace CrushRoyale.Game.UI
         /// <summary>Horizontal progress bar (0-1).</summary>
         public static Image ProgressBar(Transform parent, float value, Color fill, out RectTransform root)
         {
+            if (UiKit.Sliced("bar_track", 0.45f) != null)
+            {
+                return UiKit.Bar(parent, value, fill, out root);
+            }
             Image back = Panel("Progress", parent, Theme.BackgroundLight);
             root = back.rectTransform;
             Image bar = Panel("Fill", back.transform, fill);

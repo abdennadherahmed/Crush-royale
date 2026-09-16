@@ -37,14 +37,49 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Height(UIFactory.Label(list, loc.T("chest.full"), Theme.SmallSize, Theme.Warning), 70);
                 return;
             }
-            RectTransform row = UIFactory.Rect("Chest", list);
-            UIFactory.Height(row.gameObject.AddComponent<Image>(), 150).GetComponent<Image>().color = new Color(0, 0, 0, 0);
+            Image panel = UIFactory.Panel("Chest", list, Theme.Panel);
+            UIFactory.Height(panel, 190);
+            UiKit.CardFrame(panel);
+            panel.gameObject.AddComponent<PopIn>().Delay = 0.6f;
+            RectTransform row = panel.rectTransform;
             Image art = UIFactory.Icon(row, ChestBar.ChestArt(chest), Color.white, 0);
             UIFactory.Anchor(art.rectTransform, 0.08f, 0f, 0.36f, 1f);
             art.gameObject.AddComponent<Breathe>().Amount = 0.05f;
             Text text = UIFactory.Label(row, loc.T("chest.won"), Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
             UIFactory.Anchor(text.rectTransform, 0.4f, 0f, 1f, 1f);
             GameRoot.Instance.Audio.PlaySFX(SoundIds.WinFanfare);
+        }
+
+        /// <summary>Three big stars (the middle one higher) popping in one after the other; unearned ones stay dark.</summary>
+        public static void StarBurst(Transform list, int stars)
+        {
+            RectTransform row = UIFactory.Rect("Stars", list);
+            UIFactory.Height(row, 300);
+            Sprite star = ArtLibrary.Icon("star");
+            float[] x = { 0.12f, 0.35f, 0.62f };
+            float[] w = { 0.26f, 0.3f, 0.26f };
+            float[] y = { 0.08f, 0.25f, 0.08f };
+            for (int i = 0; i < 3; i++)
+            {
+                bool lit = i < stars;
+                if (lit)
+                {
+                    Image glow = UIFactory.Icon(row, ProceduralSprites.Glow(128), new Color(1f, 0.85f, 0.35f, 0.7f), 0);
+                    UIFactory.Anchor(glow.rectTransform, x[i] - 0.06f, y[i] - 0.15f, x[i] + w[i] + 0.06f, y[i] + 0.85f);
+                    glow.gameObject.AddComponent<Pulse>();
+                }
+                Image image = star != null
+                    ? UIFactory.Icon(row, star, lit ? Color.white : new Color(0.18f, 0.15f, 0.28f, 1f), 0)
+                    : null;
+                if (image == null)
+                {
+                    continue;
+                }
+                UIFactory.Anchor(image.rectTransform, x[i], y[i], x[i] + w[i], y[i] + 0.72f);
+                PopIn pop = image.gameObject.AddComponent<PopIn>();
+                pop.Delay = 0.15f + i * 0.3f;
+                pop.Duration = 0.4f;
+            }
         }
 
         private StoryResultArgs _args;
@@ -65,10 +100,11 @@ namespace CrushRoyale.Game.Screens
             }
 
             int stars = _args.Server?.Stars ?? _args.Local.Stars;
-            Text starText = UIFactory.Label(list, new string('*', stars) + new string('-', 3 - Mathf.Clamp(stars, 0, 3)), 110, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Height(starText, 160);
+            StarBurst(list, _args.Local.Won ? stars : 0);
 
-            UIFactory.Height(UIFactory.Label(list, Loc.T("result.score", Loc.Number(_args.Local.FinalScore)), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold), 90);
+            Text score = UIFactory.Label(list, Loc.T("result.score", Loc.Number(_args.Local.FinalScore)), Theme.TitleSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Height(score, 110);
+            Widgets.TitleOutline(score);
             if (_args.Local.BonusPoints > 0)
             {
                 UIFactory.Height(UIFactory.Label(list, Loc.T("result.bonus", Loc.Number(_args.Local.BonusPoints)), Theme.BodySize, Theme.TextMuted), 60);
@@ -92,7 +128,7 @@ namespace CrushRoyale.Game.Screens
                 }
                 if (s.CoinsEarned > 0 || s.OrbesEarned > 0)
                 {
-                    UIFactory.Height(UIFactory.Label(list, Loc.T("result.rewards", Loc.Number(s.CoinsEarned), Loc.Number(s.OrbesEarned)), Theme.HeaderSize, Theme.Gold), 80);
+                    StagePreviewScreen.RewardRow(list, s.CoinsEarned, s.OrbesEarned);
                     Game.Audio.PlaySFX(SoundIds.Coins);
                 }
                 ChestLine(list, s.ChestEarned);

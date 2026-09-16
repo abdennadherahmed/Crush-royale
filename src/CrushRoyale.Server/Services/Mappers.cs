@@ -166,6 +166,7 @@ public static class Mappers
             Equipped = pets.State.Equipped == PetType.None ? null : pets.State.Equipped.ToString(),
             PullsSinceWholePet = pets.State.PullsSinceWholePet,
             PityPulls = balance.PityPulls,
+            UnlockFragments = balance.UnlockFragments,
             WholePetOneIn = balance.WholePetOneIn,
             SummonCostOrbes = balance.SummonCostOrbes,
             Summon10CostOrbes = balance.Summon10CostOrbes,

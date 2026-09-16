@@ -112,7 +112,7 @@ def _components(mask: np.ndarray) -> tuple[np.ndarray, list[tuple[int, float, fl
     return labels, comps
 
 
-def key_cell(cell: Image.Image) -> Image.Image:
+def key_cell(cell: Image.Image, main_only: bool = True) -> Image.Image:
     """Removes only the magenta connected to the border, then drops fragments far from the main sprite."""
     rgb = np.asarray(cell.convert("RGB")).astype(np.int32)
     keyed = np.array(remove_magenta(cell))
@@ -128,7 +128,7 @@ def key_cell(cell: Image.Image) -> Image.Image:
     keyed[inside, 3] = 255
 
     labels, comps = _components(keyed[..., 3] > 30)
-    if comps:
+    if comps and main_only:
         main = max(range(len(comps)), key=lambda i: comps[i][0])
         _, _, _, top, bottom, left, right = comps[main]
         my, mx = (bottom - top) * 0.06, (right - left) * 0.06

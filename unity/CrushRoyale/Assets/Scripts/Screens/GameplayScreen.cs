@@ -34,6 +34,8 @@ namespace CrushRoyale.Game.Screens
         private RectTransform _pausePanel;
         private bool _submitting;
         private RectTransform _petIcon;
+        private RectTransform _goalRow;
+        private readonly List<(Text Count, GameObject Check)> _goalChips = new List<(Text, GameObject)>();
 
         public override System.Type BackTarget => null;
 
@@ -44,30 +46,62 @@ namespace CrushRoyale.Game.Screens
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
             safe.gameObject.AddComponent<SafeArea>();
 
-            // HUD
+            Widgets.Fade(Root, true, 0.2f, 0.75f);
+
+            // HUD: ornate top bar with moves in a gold medallion, score in the middle, timer on the right.
             Image hud = UIFactory.Panel("Hud", safe, Theme.Panel);
-            UIFactory.Anchor(hud.rectTransform, 0.02f, 0.86f, 0.98f, 0.99f);
-            _moves = UIFactory.Label(hud.transform, string.Empty, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(_moves.rectTransform, 0.14f, 0.1f, 0.38f, 0.9f);
-            _score = UIFactory.Label(hud.transform, "0", Theme.TitleSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(_score.rectTransform, 0.36f, 0.1f, 0.66f, 0.9f);
-            _time = UIFactory.Label(hud.transform, string.Empty, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleRight, FontStyle.Bold);
-            UIFactory.Anchor(_time.rectTransform, 0.66f, 0.1f, 0.96f, 0.9f);
+            UIFactory.Anchor(hud.rectTransform, 0.02f, 0.865f, 0.98f, 0.99f);
+            UiKit.FramePanel(hud);
 
             Button pause = UIFactory.Button(hud.transform, "II", OpenPause, Theme.PanelLight, Theme.BodySize, Theme.Text);
-            UIFactory.Anchor(pause.GetComponent<RectTransform>(), 0.01f, 0.15f, 0.12f, 0.85f);
+            UIFactory.Anchor(pause.GetComponent<RectTransform>(), 0.03f, 0.2f, 0.13f, 0.8f);
 
-            // Objectives / boss / opponent row
-            _objectives = UIFactory.Label(safe, string.Empty, Theme.SmallSize + 2, Theme.TextMuted, TextAnchor.MiddleLeft);
-            UIFactory.Anchor(_objectives.rectTransform, 0.04f, 0.79f, 0.7f, 0.86f);
+            RectTransform medal = UIFactory.Anchor(UIFactory.Rect("Moves", hud.transform), 0.15f, -0.08f, 0.33f, 1.08f);
+            if (UiKit.RoundBadge(medal, crystal: false) != null)
+            {
+                medal.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+            }
+            _moves = UIFactory.Label(medal, string.Empty, Theme.TitleSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(_moves.rectTransform, 0.1f, 0.3f, 0.9f, 0.85f);
+            Widgets.TitleOutline(_moves);
+            Text movesCaption = UIFactory.Label(medal, Loc.T("hud.movesLabel"), Theme.SmallSize - 6, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(movesCaption.rectTransform, 0.1f, 0.1f, 0.9f, 0.34f);
+            Widgets.TitleOutline(movesCaption);
+
+            Text scoreCaption = UIFactory.Label(hud.transform, Loc.T("hud.scoreLabel"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(scoreCaption.rectTransform, 0.36f, 0.62f, 0.68f, 0.88f);
+            _score = UIFactory.Label(hud.transform, "0", Theme.TitleSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(_score.rectTransform, 0.34f, 0.1f, 0.7f, 0.68f);
+            Widgets.TitleOutline(_score);
+
+            Sprite hourglass = UiKit.Art("item_hourglass");
+            if (hourglass != null)
+            {
+                Image clock = UIFactory.Icon(hud.transform, hourglass, Color.white, 0);
+                UIFactory.Anchor(clock.rectTransform, 0.71f, 0.18f, 0.79f, 0.82f);
+            }
+            _time = UIFactory.Label(hud.transform, string.Empty, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(_time.rectTransform, 0.79f, 0.1f, 0.97f, 0.9f);
+            Widgets.TitleOutline(_time);
+
+            // Objectives: big icon chips (gem, ice, stone, stars, boss) with a live counter and a check mark when done.
+            Image goals = UIFactory.Panel("Goals", safe, Theme.Panel);
+            UIFactory.Anchor(goals.rectTransform, 0.02f, 0.775f, 0.7f, 0.86f);
+            UiKit.CardFrame(goals);
+            _goalRow = goals.rectTransform;
+            _objectives = UIFactory.Label(goals.transform, string.Empty, Theme.BodySize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(_objectives.rectTransform, 24, 24, 8, 8);
+
             _bossFill = UIFactory.ProgressBar(safe, 1f, Theme.Danger, out RectTransform bossBar);
-            UIFactory.Anchor(bossBar, 0.04f, 0.765f, 0.7f, 0.785f);
+            UIFactory.Anchor(bossBar, 0.03f, 0.742f, 0.69f, 0.772f);
             bossBar.gameObject.SetActive(false);
 
             _meterFill = UIFactory.ProgressBar(safe, 0f, Theme.RedSurge, out RectTransform meter);
-            UIFactory.Anchor(meter, 0.04f, 0.735f, 0.7f, 0.755f);
-            _surge = UIFactory.Label(safe, Loc.T("hud.surge"), Theme.SmallSize, Theme.RedSurge, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(_surge.rectTransform, 0.04f, 0.70f, 0.7f, 0.735f);
+            UIFactory.Anchor(meter, 0.03f, 0.71f, 0.69f, 0.74f);
+            _surge = UIFactory.Label(safe, Loc.T("hud.surge"), Theme.BodySize, Theme.RedSurge, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(_surge.rectTransform, 0.03f, 0.705f, 0.69f, 0.745f);
+            Widgets.TitleOutline(_surge);
+            _surge.gameObject.AddComponent<Pulse>().Scale = true;
             _surge.enabled = false;
 
             // Board
@@ -131,6 +165,7 @@ namespace CrushRoyale.Game.Screens
             AddPetBadge(safe, config);
 
             bossBar.gameObject.SetActive(config.BossHp > 0);
+            _goalRow.gameObject.SetActive(session.Objectives.Progress.Count > 0);
 
             _controller = gameObject.AddComponent<MatchController>();
             _controller.Changed += RefreshHud;
@@ -176,6 +211,12 @@ namespace CrushRoyale.Game.Screens
                         }
                     }
                     _controller.Resume();
+                }
+
+                await ShowGoalBannerAsync();
+                if (this == null)
+                {
+                    return;
                 }
 
                 if (stage.Id == 1 && !Game.Save.Settings.TutorialDone)
@@ -306,7 +347,8 @@ namespace CrushRoyale.Game.Screens
             int now = _controller.Clock.NowMs;
 
             _score.text = Loc.Number(s.Score);
-            _moves.text = s.Config.HasMoveLimit ? Loc.T("hud.moves", s.MovesLeft) : string.Empty;
+            _moves.text = s.Config.HasMoveLimit ? Loc.Number(s.MovesLeft) : "∞";
+            _moves.color = s.Config.HasMoveLimit && s.MovesLeft <= 5 ? Theme.Danger : Theme.Text;
             int seconds = Mathf.CeilToInt(s.RemainingTimeMs(now) / 1000f);
             _time.text = (seconds / 60) + ":" + (seconds % 60).ToString("00");
             _time.color = seconds <= 10 ? Theme.Danger : Theme.Text;
@@ -314,15 +356,18 @@ namespace CrushRoyale.Game.Screens
             UIFactory.SetProgress(_meterFill, s.ComboMeterPermille / 1000f);
             _surge.enabled = s.IsRedSurgeActive(now);
 
-            var parts = new List<string>();
-            foreach (ObjectiveProgress p in s.Objectives.Progress)
+            if (_goalChips.Count == 0 && s.Objectives.Progress.Count > 0)
             {
-                string label = p.Objective.Type == ObjectiveType.CollectColor
-                    ? Loc.T("objective.CollectColor", Loc.T("color." + p.Objective.Color))
-                    : Loc.T("objective." + p.Objective.Type);
-                parts.Add(label + " " + Loc.Number(System.Math.Min(p.Current, p.Target)) + "/" + Loc.Number(p.Target));
+                BuildGoalChips(_goalRow, s, 92f, Theme.HeaderSize, _goalChips);
+                _objectives.text = string.Empty;
             }
-            _objectives.text = string.Join("   ", parts);
+            for (int i = 0; i < _goalChips.Count && i < s.Objectives.Progress.Count; i++)
+            {
+                ObjectiveProgress p = s.Objectives.Progress[i];
+                _goalChips[i].Count.text = GoalCount(p);
+                _goalChips[i].Count.color = p.IsComplete ? Theme.Success : Theme.Text;
+                _goalChips[i].Check.SetActive(p.IsComplete);
+            }
 
             if (s.Config.BossHp > 0)
             {
@@ -338,6 +383,109 @@ namespace CrushRoyale.Game.Screens
                 ErrorCode can = s.PowerUps.CanActivate(type, true);
                 button.interactable = s.IsRunning && can == ErrorCode.None;
                 label.text = Loc.T("powerup." + type) + " x" + s.PowerUps.Remaining(type);
+            }
+        }
+
+        private static string GoalCount(ObjectiveProgress p) =>
+            GameRoot.Instance.Loc.Number(System.Math.Min(p.Current, p.Target)) + "/" + GameRoot.Instance.Loc.Number(p.Target);
+
+        private Sprite GoalIcon(StageObjective objective)
+        {
+            switch (objective.Type)
+            {
+                case ObjectiveType.CollectColor: return ArtLibrary.Gem(objective.Color);
+                case ObjectiveType.ClearIce: return ArtLibrary.Ice();
+                case ObjectiveType.BreakStones: return ArtLibrary.Stone();
+                case ObjectiveType.DefeatBoss:
+                    return (_launch.Mode == GameMode.Story && _launch.StageId > 0 ? ArtLibrary.Boss(Game.Backend.Catalog.Get(_launch.StageId)) : null)
+                        ?? ArtLibrary.GuildBoss();
+                default: return UiKit.Art("item_stars") ?? ArtLibrary.Icon("star");
+            }
+        }
+
+        /// <summary>One chip per objective, laid out side by side: icon, big counter, check mark once reached.</summary>
+        private void BuildGoalChips(RectTransform parent, GameSession s, float iconSize, int fontSize, List<(Text Count, GameObject Check)> into)
+        {
+            RectTransform row = UIFactory.Stretch(UIFactory.Rect("Chips", parent), 20, 20, 6, 6);
+            HorizontalLayoutGroup layout = row.gameObject.AddComponent<HorizontalLayoutGroup>();
+            layout.spacing = 18;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = layout.childControlHeight = true;
+            layout.childForceExpandWidth = layout.childForceExpandHeight = true;
+
+            foreach (ObjectiveProgress p in s.Objectives.Progress)
+            {
+                RectTransform chip = UIFactory.Rect("Chip", row);
+                Sprite art = GoalIcon(p.Objective);
+                float split = 0.42f;
+                if (art != null)
+                {
+                    Image icon = UIFactory.Icon(chip, art, Color.white, 0);
+                    UIFactory.Anchor(icon.rectTransform, 0f, 0.05f, split, 0.95f);
+                    icon.rectTransform.sizeDelta = Vector2.zero;
+                    split = Mathf.Clamp(iconSize / 400f, 0.3f, 0.45f);
+                    UIFactory.Anchor(icon.rectTransform, 0f, 0.05f, split, 0.95f);
+                }
+                else
+                {
+                    split = 0f;
+                }
+                Text count = UIFactory.Label(chip, GoalCount(p), fontSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+                UIFactory.Anchor(count.rectTransform, split + 0.03f, 0f, 1f, 1f);
+                Widgets.TitleOutline(count);
+
+                Text check = UIFactory.Label(chip, "✔", fontSize, Theme.Success, TextAnchor.LowerLeft, FontStyle.Bold);
+                UIFactory.Anchor(check.rectTransform, split * 0.55f, -0.05f, split + 0.3f, 0.6f);
+                Widgets.TitleOutline(check);
+                check.gameObject.SetActive(false);
+                into.Add((count, check.gameObject));
+            }
+        }
+
+        /// <summary>Stage start: a big "OBJECTIVE" window with the goals and the move budget, closed by a tap or after a few seconds.</summary>
+        private async Task ShowGoalBannerAsync()
+        {
+            GameSession s = _controller.Session;
+            if (s.Objectives.Progress.Count == 0)
+            {
+                return;
+            }
+            _controller.Pause();
+            var done = new TaskCompletionSource<bool>();
+            Image shade = UIFactory.Panel("GoalBanner", Root, new Color(0.02f, 0.01f, 0.06f, 0.6f), rounded: false);
+            UIFactory.Stretch(shade.rectTransform);
+            Button tap = shade.gameObject.AddComponent<Button>();
+            tap.transition = Selectable.Transition.None;
+            tap.onClick.AddListener(() => done.TrySetResult(true));
+
+            Image box = UIFactory.Panel("Box", shade.transform, Theme.Panel);
+            UIFactory.Anchor(box.rectTransform, 0.06f, 0.4f, 0.94f, 0.64f);
+            UiKit.FramePanel(box);
+            box.gameObject.AddComponent<PopIn>();
+
+            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", box.transform), -0.05f, 0.8f, 1.05f, 1.14f);
+            UiKit.Ribbon(ribbon);
+            Text title = UIFactory.Label(ribbon, Loc.T("hud.goalTitle"), Theme.TitleSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.2f, 0.34f, 0.8f, 0.92f);
+            Widgets.TitleOutline(title);
+
+            RectTransform chips = UIFactory.Anchor(UIFactory.Rect("Goals", box.transform), 0.06f, 0.3f, 0.94f, 0.78f);
+            BuildGoalChips(chips, s, 150f, Theme.TitleSize, new List<(Text, GameObject)>());
+
+            string budget = s.Config.HasMoveLimit ? Loc.T("hud.goalMoves", s.MovesLeft) : Loc.T("hud.goalTime", Mathf.CeilToInt(s.Config.TimeLimitMs / 1000f));
+            Text sub = UIFactory.Label(box.transform, budget, Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(sub.rectTransform, 0.06f, 0.08f, 0.94f, 0.3f);
+            Widgets.TitleOutline(sub);
+
+            Game.Audio.PlaySFX(SoundIds.Click);
+            await Task.WhenAny(done.Task, Task.Delay(2600));
+            if (shade != null)
+            {
+                Destroy(shade.gameObject);
+            }
+            if (this != null && _controller != null)
+            {
+                _controller.Resume();
             }
         }
 

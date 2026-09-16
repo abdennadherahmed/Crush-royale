@@ -210,6 +210,8 @@ namespace CrushRoyale.Client
 
         public Task<PetActionResponse> EquipPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetEquip, new PetRequest { Pet = pet }, ct);
 
+        public Task<PetActionResponse> UnlockPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetUnlock, new PetRequest { Pet = pet }, ct);
+
         public Task<PetActionResponse> AwakenPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetAwaken, new PetRequest { Pet = pet }, ct);
 
         public Task<ShopResponse> GetShopAsync(CancellationToken ct = default) => Transport.GetAsync<ShopResponse>(ApiRoutes.Shop, ct);

@@ -161,6 +161,9 @@ namespace CrushRoyale.Contracts
 
         public int PityPulls { get; set; }
 
+        /// <summary>Fragments of a pet needed to unlock it without a lucky pull.</summary>
+        public int UnlockFragments { get; set; }
+
         public int WholePetOneIn { get; set; }
 
         public int SummonCostOrbes { get; set; }

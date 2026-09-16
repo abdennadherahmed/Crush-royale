@@ -205,6 +205,9 @@ namespace CrushRoyale.Core.Economy
 
         private int Today => TimeUtil.DayIndex(_clock.UtcNow);
 
+        /// <summary>Id prefix of the always-available single power-up items ("powerup.NuclearBomb").</summary>
+        public const string DirectPowerUpPrefix = "powerup.";
+
         public bool IsShopUnlocked(PlayerContext ctx) => ctx.HighestUnlockedStage > _balance.Story.UnlockShopStage;
 
         /// <summary>Prompt API: automatic refresh at UTC midnight.</summary>
@@ -246,6 +249,18 @@ namespace CrushRoyale.Core.Economy
             {
                 offer.SoldOut = ctx.Shop.SoldOutOffers.Contains(offer.Id);
                 items.Add(offer);
+            }
+
+            // Every unlocked power-up can always be bought one at a time at its full (VIP-discounted) price:
+            // "Get it" buttons on the loadout screens point here when the player runs out.
+            foreach (PowerUpDefinition def in _balance.PowerUps.Definitions)
+            {
+                if (ctx.HighestLeague < def.UnlockLeague)
+                {
+                    continue;
+                }
+                PowerUpPrice unit = PowerUpManager.GetPowerUpPrice(_balance, def.Type, vipLevel);
+                items.Add(new ShopItem { Id = DirectPowerUpPrefix + def.Type, Kind = ShopItemKind.PowerUp, PowerUp = def.Type, Quantity = 1, PriceCoins = unit.Coins, PriceOrbes = unit.Orbes });
             }
 
             foreach (CoinPackDefinition pack in _balance.Economy.CoinPacks)
@@ -364,7 +379,10 @@ namespace CrushRoyale.Core.Economy
                 case ShopItemKind.PowerUpBundle:
                     ctx.Inventory.Add(item.PowerUp, item.Quantity);
                     result.Granted.AddPowerUp(item.PowerUp, item.Quantity);
-                    ctx.Shop.SoldOutOffers.Add(item.Id);
+                    if (!item.Id.StartsWith(DirectPowerUpPrefix, StringComparison.Ordinal))
+                    {
+                        ctx.Shop.SoldOutOffers.Add(item.Id);
+                    }
                     break;
                 case ShopItemKind.CoinPack:
                     ctx.Wallet.Credit(Currency.Coins, item.CoinsGranted, TransactionReason.CoinExchange, item.Id);

@@ -64,6 +64,7 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.Telemetry, (TelemetryRequest body, ClaimsPrincipal user, TelemetryService s, CancellationToken ct) => s.RecordAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.PetSummon, (PetSummonRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.SummonAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.PetEquip, (PetRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.EquipAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.PetUnlock, (PetRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.UnlockAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.PetAwaken, (PetRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.AwakenAsync(Me(user), body, ct));
         api.MapGet(ApiRoutes.Shop, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.GetShopAsync(Me(user), ct));
         api.MapPost(ApiRoutes.ShopRefresh, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.RefreshShopAsync(Me(user), ct));

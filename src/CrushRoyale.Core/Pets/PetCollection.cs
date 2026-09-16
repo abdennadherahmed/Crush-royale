@@ -117,6 +117,33 @@ namespace CrushRoyale.Core.Pets
             return pulls;
         }
 
+        /// <summary>Unlocks a pet not owned yet by spending <see cref="PetBalance.UnlockFragments"/> of its fragments.</summary>
+        public ErrorCode Unlock(PetType type)
+        {
+            if (type == PetType.None || _balance.Get(type) == null)
+            {
+                return ErrorCode.NotFound;
+            }
+            if (Owns(type))
+            {
+                return ErrorCode.AlreadyClaimed;
+            }
+            PetState pet = Get(type);
+            if (pet.Fragments < _balance.UnlockFragments)
+            {
+                return ErrorCode.NotEnoughItems;
+            }
+            pet.Fragments -= _balance.UnlockFragments;
+            pet.Owned = true;
+            pet.Level = 1;
+            pet.Xp = 0;
+            if (State.Equipped == PetType.None)
+            {
+                State.Equipped = type;
+            }
+            return ErrorCode.None;
+        }
+
         public ErrorCode Equip(PetType type)
         {
             if (type != PetType.None && !Owns(type))

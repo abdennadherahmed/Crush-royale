@@ -62,6 +62,19 @@ public sealed class PetService
             return new PetActionResponse { Pets = Mappers.Pets(ws), Wallet = Mappers.Wallet(ws) };
         }, ct);
 
+    public Task<PetActionResponse> UnlockAsync(Guid userId, PetRequest request, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            PetType pet = Mappers.ParseEnum<PetType>(request?.Pet, "pet");
+            ErrorCode error = ws.Pets.Unlock(pet);
+            if (error != ErrorCode.None)
+            {
+                throw new ApiException(error, error == ErrorCode.NotEnoughItems ? "Not enough fragments." : "Pet cannot be unlocked.");
+            }
+            return new PetActionResponse { Pets = Mappers.Pets(ws), Wallet = Mappers.Wallet(ws) };
+        }, ct);
+
     public Task<PetActionResponse> AwakenAsync(Guid userId, PetRequest request, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx =>
         {
