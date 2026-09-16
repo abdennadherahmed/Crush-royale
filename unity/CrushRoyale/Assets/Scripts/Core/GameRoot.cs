@@ -72,6 +72,11 @@ namespace CrushRoyale.Game
             Loc = new Localization(Save.Settings.Language);
             Haptics = new Haptics(Save);
 
+            // Unity plays no sound at all without an AudioListener; the generated boot scene camera has none.
+            if (FindAnyObjectByType<AudioListener>() == null)
+            {
+                gameObject.AddComponent<AudioListener>();
+            }
             Audio = gameObject.AddComponent<AudioManager>();
             Audio.Initialize(Save);
 

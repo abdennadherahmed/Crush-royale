@@ -151,6 +151,7 @@ namespace CrushRoyale.EditorTools
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             var cameraObject = new GameObject("Main Camera");
             Camera camera = cameraObject.AddComponent<Camera>();
+            cameraObject.AddComponent<AudioListener>();
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.08f, 0.06f, 0.14f);
             camera.orthographic = true;
