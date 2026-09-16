@@ -57,6 +57,8 @@ public static class ApiEndpoints
     {
         api.MapPost(ApiRoutes.LivesBuy, (BuyLivesRequest body, ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.BuyLivesAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.LivesVipClaim, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.ClaimVipLifeAsync(Me(user), ct));
+        api.MapPost(ApiRoutes.ChestUnlock, (int slot, ClaimsPrincipal user, ChestService s, CancellationToken ct) => s.UnlockAsync(Me(user), slot, ct));
+        api.MapPost(ApiRoutes.ChestOpen, (int slot, ChestOpenRequest body, ClaimsPrincipal user, ChestService s, CancellationToken ct) => s.OpenAsync(Me(user), slot, body, ct));
         api.MapPost(ApiRoutes.Telemetry, (TelemetryRequest body, ClaimsPrincipal user, TelemetryService s, CancellationToken ct) => s.RecordAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.PetSummon, (PetSummonRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.SummonAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.PetEquip, (PetRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.EquipAsync(Me(user), body, ct));

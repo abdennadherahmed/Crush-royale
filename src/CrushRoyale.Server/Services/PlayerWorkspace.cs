@@ -190,6 +190,12 @@ public sealed class PlayerWorkspace
 
     public PetCollection Pets => new(State.Pets ??= new PetCollectionState(), Balance.Pets);
 
+    public ChestSystem Chests => new(State.Chests ??= new ChestState(), Balance);
+
+    /// <summary>Grants a chest; returns its type name, "Full" when no slot is free.</summary>
+    public string GrantChest(ChestType type, string source, int? unlockSeconds = null) =>
+        Chests.Grant(type, source, unlockSeconds) >= 0 ? type.ToString() : "Full";
+
     /// <summary>Freezes the equipped pet into a match snapshot (PvP modes use the capped level).</summary>
     public void SnapshotPet(MatchConfigSnapshot snapshot, GameMode mode)
     {

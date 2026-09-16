@@ -74,6 +74,7 @@ builder.Services.AddSingleton<StoryService>();
 builder.Services.AddSingleton<EconomyService>();
 builder.Services.AddSingleton<PetService>();
 builder.Services.AddSingleton<TelemetryService>();
+builder.Services.AddSingleton<ChestService>();
 builder.Services.AddSingleton<ProgressionService>();
 builder.Services.AddSingleton<PvpService>();
 builder.Services.AddSingleton<SocialService>();

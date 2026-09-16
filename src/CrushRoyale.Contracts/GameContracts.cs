@@ -135,6 +135,9 @@ namespace CrushRoyale.Contracts
 
         public bool ShowInterstitial { get; set; }
 
+        /// <summary>Chest granted by this stage (welcome chest, chapter bosses), null otherwise.</summary>
+        public string ChestEarned { get; set; }
+
         public WalletDto Wallet { get; set; }
 
         public LivesDto Lives { get; set; }
@@ -336,6 +339,9 @@ namespace CrushRoyale.Contracts
         public int FirstReachOrbes { get; set; }
 
         public long CoinsEarned { get; set; }
+
+        /// <summary>Chest won with this victory (null when none, "Full" when every slot was taken).</summary>
+        public string ChestEarned { get; set; }
 
         public bool Ranked { get; set; }
 

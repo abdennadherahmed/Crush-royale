@@ -49,6 +49,8 @@ namespace CrushRoyale.Core.Config
 
         public PetBalance Pets { get; set; } = new PetBalance();
 
+        public Progression.ChestBalance Chests { get; set; } = new Progression.ChestBalance();
+
         public static GameBalance CreateDefault() => new GameBalance();
 
         /// <summary>Throws if a value would break the simulation (called when loading remote config).</summary>

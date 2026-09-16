@@ -19,6 +19,11 @@ namespace CrushRoyale.Core.Story
 
         private const ulong StageSeedSalt = 0xC4A57A6E;
 
+        /// <summary>Stages 1-3 ask for 45% of the normal score.</summary>
+        private const int OnboardingStages = 3;
+
+        private const int OnboardingTargetPermille = 450;
+
         private readonly GameBalance _balance;
         private readonly Dictionary<int, StageData> _cache = new Dictionary<int, StageData>();
         private readonly object _lock = new object();
@@ -157,6 +162,11 @@ namespace CrushRoyale.Core.Story
 
             int factor = Lerp(s.EasyTargetFactorPermille, s.HardTargetFactorPermille, d);
             int target = (int)((long)stage.MoveLimit * s.ExpectedPointsPerMove * factor / 1000);
+            if (!endless && id <= OnboardingStages)
+            {
+                // First minutes: the opening stages are near-certain wins so new players feel strong right away.
+                target = target * OnboardingTargetPermille / 1000;
+            }
             target = RoundTo(Math.Max(200, target), 50);
 
             // Obstacles unlock gradually: stones from stage 21, ice from stage 41.

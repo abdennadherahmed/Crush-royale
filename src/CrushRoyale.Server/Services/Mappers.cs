@@ -131,8 +131,30 @@ public static class Mappers
             UnclaimedAchievements = ws.Achievements.GetUnclaimed().Count,
             ClaimableQuests = s.Quests.Day == TimeUtil.DayIndex(ws.Now) ? s.Quests.Quests.Count(q => q.IsComplete && !q.Claimed) : 0,
             Pets = Pets(ws),
+            Chests = Chests(ws),
             SuspendedUntilUnixMs = s.Integrity.PermanentlyBanned ? long.MaxValue : s.Integrity.SuspendedUntilUnixMs
         };
+    }
+
+    public static ChestsDto Chests(PlayerWorkspace ws)
+    {
+        ChestSystem chests = ws.Chests;
+        long now = ws.NowMs;
+        var dto = new ChestsDto { ServerNowUnixMs = now };
+        for (int i = 0; i < chests.State.Slots.Count; i++)
+        {
+            ChestSlot slot = chests.State.Slots[i];
+            dto.Slots.Add(slot == null ? null! : new ChestSlotDto
+            {
+                Slot = i,
+                Type = slot.Type.ToString(),
+                Status = chests.Status(i, now).ToString(),
+                SecondsLeft = chests.SecondsLeft(i, now),
+                UnlockSeconds = slot.UnlockSeconds,
+                SkipCostOrbes = chests.SkipCostOrbes(i, now)
+            });
+        }
+        return dto;
     }
 
     public static PetsDto Pets(PlayerWorkspace ws)

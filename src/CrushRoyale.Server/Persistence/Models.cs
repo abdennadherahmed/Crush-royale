@@ -74,6 +74,8 @@ public sealed class PlayerState
 
     public PetCollectionState Pets { get; set; } = new();
 
+    public ChestState Chests { get; set; } = new();
+
     public long LastSeenUnixMs { get; set; }
 }
 

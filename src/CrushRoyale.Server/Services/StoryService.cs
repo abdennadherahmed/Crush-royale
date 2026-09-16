@@ -145,6 +145,16 @@ public sealed class StoryService
                 return await Reject(ctx, match, completion.Error).ConfigureAwait(false);
             }
 
+            string? chest = null;
+            if (completion.FirstWin && stage.Id == ws.Balance.Chests.WelcomeChestStage)
+            {
+                chest = ws.GrantChest(ChestType.Silver, "welcome", ws.Balance.Chests.WelcomeChestUnlockSeconds);
+            }
+            else if (completion.FirstWin && stage.BossKind >= BossKind.ChapterBoss)
+            {
+                chest = ws.GrantChest(stage.BossKind >= BossKind.ActBoss ? ChestType.Crystal : ChestType.Gold, "boss:" + stage.Id);
+            }
+
             long coins = ws.CreditEarnedCoins(completion.BaseCoins, TransactionReason.StageReward, match.Id, match.Id + ":coins");
             long orbes = ws.CreditEarnedOrbes(completion.Orbes, TransactionReason.StageReward, match.Id, match.Id + ":orbes");
 
@@ -200,6 +210,7 @@ public sealed class StoryService
                 CharactersJoined = completion.CharactersJoined,
                 AchievementsUnlocked = ws.UnlockedAchievements.ToList(),
                 ShowInterstitial = showAd,
+                ChestEarned = chest,
                 Wallet = Mappers.Wallet(ws),
                 Lives = Mappers.Lives(ws)
             };

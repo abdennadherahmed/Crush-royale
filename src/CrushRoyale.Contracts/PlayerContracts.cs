@@ -172,6 +172,57 @@ namespace CrushRoyale.Contracts
         public int PvpLevelCap { get; set; }
     }
 
+    public sealed class ChestSlotDto
+    {
+        public int Slot { get; set; }
+
+        /// <summary>Wood, Silver, Gold, Crystal.</summary>
+        public string Type { get; set; }
+
+        /// <summary>Locked, Unlocking or Ready.</summary>
+        public string Status { get; set; }
+
+        public int SecondsLeft { get; set; }
+
+        public int UnlockSeconds { get; set; }
+
+        public int SkipCostOrbes { get; set; }
+    }
+
+    public sealed class ChestsDto
+    {
+        /// <summary>One entry per slot; null for an empty slot.</summary>
+        public List<ChestSlotDto> Slots { get; set; } = new List<ChestSlotDto>();
+
+        /// <summary>Server time used for the countdowns (the client adds the time elapsed since it received this).</summary>
+        public long ServerNowUnixMs { get; set; }
+    }
+
+    public sealed class ChestOpenRequest
+    {
+        /// <summary>Open a chest that is not ready yet by paying its skip cost in orbes.</summary>
+        public bool UseOrbes { get; set; }
+    }
+
+    public sealed class ChestOpenResponse
+    {
+        public string Type { get; set; }
+
+        public RewardDto Reward { get; set; }
+
+        public string FragmentsPet { get; set; }
+
+        public int PetFragments { get; set; }
+
+        public ChestsDto Chests { get; set; }
+
+        public PetsDto Pets { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public InventoryDto Inventory { get; set; }
+    }
+
     /// <summary>Batch of analytics events and client exceptions (sent every minute and when the app goes to background).</summary>
     public sealed class TelemetryRequest
     {
@@ -306,6 +357,8 @@ namespace CrushRoyale.Contracts
         public int ClaimableQuests { get; set; }
 
         public PetsDto Pets { get; set; }
+
+        public ChestsDto Chests { get; set; }
 
         public long SuspendedUntilUnixMs { get; set; }
     }

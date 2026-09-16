@@ -226,6 +226,35 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
     }
 
     [Fact]
+    public async Task Chests_UnlockOneAtATime_OpenWithOrbes()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync();
+        await _app.MutateAsync(id, s =>
+        {
+            s.Wallet.Orbes = 1000;
+            s.Chests.Slots = new List<CrushRoyale.Core.Progression.ChestSlot?>
+            {
+                new() { Type = CrushRoyale.Core.Progression.ChestType.Wood, UnlockSeconds = 10800 },
+                new() { Type = CrushRoyale.Core.Progression.ChestType.Gold, UnlockSeconds = 43200 },
+                null,
+                null
+            }!;
+        });
+
+        ChestsDto unlocking = await http.PostOk<ChestsDto>(ApiRoutes.Fill(ApiRoutes.ChestUnlock, "slot", 0));
+        Assert.Equal("Unlocking", unlocking.Slots[0].Status);
+        await http.PostError(ApiRoutes.Fill(ApiRoutes.ChestUnlock, "slot", 1), null, HttpStatusCode.Conflict);
+        await http.PostError(ApiRoutes.Fill(ApiRoutes.ChestOpen, "slot", 0), new ChestOpenRequest(), HttpStatusCode.Conflict);
+
+        ChestOpenResponse opened = await http.PostOk<ChestOpenResponse>(ApiRoutes.Fill(ApiRoutes.ChestOpen, "slot", 0), new ChestOpenRequest { UseOrbes = true });
+        Assert.Equal("Wood", opened.Type);
+        Assert.True(opened.Reward.Coins >= 40);
+        Assert.Equal(1000 - 18, opened.Wallet.Orbes); // 3 h = 18 blocks of 10 minutes
+        Assert.Null(opened.Chests.Slots[0]);
+        Assert.True(opened.PetFragments > 0);
+    }
+
+    [Fact]
     public async Task Telemetry_StoresValidEvents_AndGroupsErrors()
     {
         var (id, http, _) = await _app.NewPlayerAsync();
