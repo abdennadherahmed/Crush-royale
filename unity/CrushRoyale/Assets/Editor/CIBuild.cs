@@ -33,6 +33,7 @@ namespace CrushRoyale.EditorTools
             }
 
             ApplyReleaseSigning();
+            ApplyBuildSpeed(!appBundle && GetArgument("-fastTestBuild") == "true");
 
             string versionCode = GetArgument("-androidVersionCode");
             if (int.TryParse(versionCode, out int code) && code > 0)
@@ -53,6 +54,29 @@ namespace CrushRoyale.EditorTools
             if (summary.result != BuildResult.Succeeded)
             {
                 EditorApplication.Exit(1);
+            }
+        }
+
+        /// <summary>
+        /// Test APKs (installed by hand) only target 64-bit ARM phones and use the faster IL2CPP code generation,
+        /// which roughly halves native compilation. Play Store bundles keep 32 + 64 bit and the fastest runtime code.
+        /// </summary>
+        private static void ApplyBuildSpeed(bool fastTest)
+        {
+            var android = UnityEditor.Build.NamedBuildTarget.Android;
+            PlayerSettings.SetScriptingBackend(android, ScriptingImplementation.IL2CPP);
+            if (fastTest)
+            {
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
+                PlayerSettings.SetIl2CppCodeGeneration(android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
+                EditorUserBuildSettings.androidCreateSymbols = AndroidCreateSymbols.Disabled;
+                Debug.Log("CIBuild: fast test APK (ARM64 only, IL2CPP faster builds).");
+            }
+            else
+            {
+                PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARMv7 | AndroidArchitecture.ARM64;
+                PlayerSettings.SetIl2CppCodeGeneration(android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSpeed);
+                Debug.Log("CIBuild: release build (ARMv7 + ARM64, IL2CPP faster runtime).");
             }
         }
 

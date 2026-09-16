@@ -43,7 +43,7 @@ jobs:
 
   android:
     name: Unity Android APK
-    needs: tests
+    # Runs in parallel with the .NET tests (they only guard the shared engine; Unity compiles the same sources).
     # Windows: unity-setup installs Unity Hub reliably there (the Linux Hub install failed on hosted runners).
     runs-on: windows-latest
     timeout-minutes: 150
@@ -58,11 +58,13 @@ jobs:
         shell: pwsh
         run: ./tools/sync-unity.ps1
 
+      # Imported assets only change when art, audio or packages change: code-only commits reuse the exact cache
+      # (no 2-minute re-upload), and any other commit starts from the previous import.
       - name: Cache Unity Library
         uses: actions/cache@v6
         with:
           path: ${{ env.PROJECT_PATH }}/Library
-          key: Library-Android-win-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/Assets/**/*.cs') }}
+          key: Library-Android-win-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/ProjectSettings/**', 'unity/CrushRoyale/Assets/**', '!unity/CrushRoyale/Assets/**/*.cs') }}
           restore-keys: Library-Android-win-${{ env.UNITY_VERSION }}-
 
       - name: Install Unity with Android support
@@ -72,6 +74,9 @@ jobs:
           version-file: ${{ env.PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
           build-targets: Android
           modules: android-sdk-ndk-tools, android-open-jdk
+          # Reuse the installed editor between runs instead of downloading ~20 minutes of Unity every time.
+          cache-installation: true
+          auto-update-hub: false
 
       - name: Activate Unity Personal license
         uses: RageAgainstThePixel/activate-unity-license@v2
@@ -107,6 +112,7 @@ jobs:
             -executeMethod CrushRoyale.EditorTools.CIBuild.BuildAndroid
             -customBuildPath ${{ github.workspace }}/build/Android/CrushRoyale.${{ inputs.format || 'apk' }}
             -androidVersionCode ${{ github.run_number }}
+            -fastTestBuild ${{ (inputs.format || 'apk') == 'apk' && 'true' || 'false' }}
 
       - name: Upload build
         if: success()
