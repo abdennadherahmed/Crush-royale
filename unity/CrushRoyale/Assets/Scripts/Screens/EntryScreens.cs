@@ -326,85 +326,242 @@ namespace CrushRoyale.Game.Screens
         }
     }
 
-    /// <summary>Hub: currencies, profile card, quick play buttons (story, PvP, shop, guild...) and daily login bonus.</summary>
+    /// <summary>
+    /// Hub: the player's hero in the middle; profile and currencies on top; events, achievements, pass and ranking
+    /// on the top left; friends and map on the right; shop bottom left, guild bottom right, the two play buttons between.
+    /// </summary>
     public sealed class MainMenuScreen : UIScreen
     {
-        private static readonly (string Key, Type Screen, string Feature)[] Entries =
-        {
-            ("menu.story", typeof(WorldMapScreen), "Story"),
-            ("menu.pvp", typeof(PvpScreen), "Pvp"),
-            ("menu.shop", typeof(ShopScreen), "Shop"),
-            ("menu.guild", typeof(GuildScreen), "Guilds"),
-            ("menu.friends", typeof(FriendsScreen), "Friends"),
-            ("menu.leaderboard", typeof(LeaderboardScreen), "Pvp"),
-            ("menu.quests", typeof(QuestsScreen), "DailyQuests"),
-            ("menu.battlepass", typeof(BattlePassScreen), "BattlePass"),
-            ("menu.achievements", typeof(AchievementsScreen), null),
-            ("menu.settings", typeof(SettingsScreen), null)
-        };
-
         protected override void Build()
         {
-            Widgets.Backdrop(Root, CrushRoyale.Core.Story.Kingdom.Central, 0.6f);
+            Widgets.Backdrop(Root, CrushRoyale.Core.Story.Kingdom.Central, 0.78f);
+            Widgets.Fade(Root, top: true, 0.26f, 0.8f);
+            Widgets.Fade(Root, top: false, 0.34f, 0.9f);
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
             safe.gameObject.AddComponent<SafeArea>();
 
-            CurrencyBar bar = CurrencyBar.Create(safe);
-            UIFactory.Anchor((RectTransform)bar.transform, 0.02f, 0.925f, 0.98f, 0.99f);
-
             ProfileDto profile = Game.Backend.Profile;
-            Image card = UIFactory.Panel("Profile", safe, Theme.Panel);
-            UIFactory.Anchor(card.rectTransform, 0.02f, 0.78f, 0.98f, 0.915f);
-            string name = profile?.DisplayName ?? Game.Save.Settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
-            Text title = UIFactory.Label(card.transform, name, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(title.rectTransform, 0.05f, 0.5f, 0.7f, 0.95f);
+            PlayerSettings settings = Game.Save.Settings;
+            string gender = profile?.Hero?.Gender ?? settings.HeroGender ?? "female";
 
-            string detail = profile == null
-                ? Loc.T("menu.practiceBody")
-                : Loc.T("menu.profileLine", Loc.T("league." + profile.Pvp.League), profile.Pvp.Trophies, profile.Story.HighestUnlockedStage, profile.Vip.Tier);
-            Text sub = UIFactory.Label(card.transform, detail, Theme.SmallSize + 2, profile == null ? Theme.Warning : Theme.League(profile.Pvp.League), TextAnchor.MiddleLeft);
-            UIFactory.Anchor(sub.rectTransform, 0.05f, 0.05f, 0.95f, 0.5f);
+            BuildHero(safe, profile, settings, gender);
+            BuildTopBar(safe, profile, settings, gender);
 
-            Sprite crown = ArtLibrary.Icon("crown");
-            if (crown != null)
+            // Top left: events and progression.
+            float y = 0.815f;
+            SideButton(safe, "quests", "menu.quests", typeof(QuestsScreen), "DailyQuests", 0.015f, y, profile?.ClaimableQuests ?? 0);
+            SideButton(safe, "achievements", "menu.achievements", typeof(AchievementsScreen), null, 0.015f, y -= 0.108f, profile?.UnclaimedAchievements ?? 0);
+            SideButton(safe, "battlepass", "menu.battlepass", typeof(BattlePassScreen), "BattlePass", 0.015f, y -= 0.108f, 0);
+            SideButton(safe, "leaderboard", "menu.leaderboard", typeof(LeaderboardScreen), "Pvp", 0.015f, y -= 0.108f, 0);
+
+            // Right: social and the world map.
+            SideButton(safe, "friends", "menu.friends", typeof(FriendsScreen), "Friends", 0.815f, 0.815f, 0);
+            SideButton(safe, "map", "menu.map", typeof(WorldMapScreen), "Story", 0.815f, 0.707f, 0);
+
+            // Bottom: shop (left), play buttons (center), guild (right).
+            CornerButton(safe, "shop", "menu.shop", typeof(ShopScreen), "Shop", 0.01f);
+            CornerButton(safe, "guild", "menu.guild", typeof(GuildScreen), "Guilds", 0.77f);
+
+            int stage = profile?.Story?.HighestUnlockedStage ?? 0;
+            string storyLabel = Loc.T("menu.story") + (stage > 0 ? "\n" + Loc.T("menu.stageShort", stage) : string.Empty);
+            PlayButton(safe, storyLabel, "map", typeof(WorldMapScreen), "Story", Theme.GoldDark, 0.14f, 0.255f);
+            PlayButton(safe, Loc.T("menu.pvp"), "pvp", typeof(PvpScreen), "Pvp", Theme.Hex("B3263E"), 0.025f, 0.13f);
+        }
+
+        private void BuildHero(RectTransform safe, ProfileDto profile, PlayerSettings settings, string gender)
+        {
+            string id = gender == "male" ? "hero" : "heroine";
+            Sprite full = ArtLibrary.Character(id + "_full");
+            Sprite art = full ?? ArtLibrary.Character(id);
+
+            Image halo = UIFactory.Icon(safe, ProceduralSprites.Glow(128), new Color(Theme.Crystal.r, Theme.Crystal.g, Theme.Crystal.b, 0.38f), 0);
+            UIFactory.Anchor(halo.rectTransform, 0.08f, 0.36f, 0.92f, 0.86f);
+            halo.gameObject.AddComponent<Pulse>();
+
+            Image pedestal = UIFactory.Icon(safe, ProceduralSprites.Glow(128), new Color(0.02f, 0.01f, 0.06f, 0.75f), 0);
+            UIFactory.Anchor(pedestal.rectTransform, 0.22f, 0.3f, 0.78f, 0.36f);
+
+            if (art != null)
             {
-                UIFactory.Anchor(UIFactory.Icon(card.transform, crown, Color.white, 0).rectTransform, 0.74f, 0.1f, 0.95f, 0.9f);
+                Image hero = UIFactory.Icon(safe, art, Color.white, 0);
+                hero.preserveAspect = true;
+                hero.raycastTarget = false;
+                hero.rectTransform.pivot = new Vector2(0.5f, 0f);
+                UIFactory.Anchor(hero.rectTransform, 0.17f, full != null ? 0.315f : 0.36f, 0.83f, 0.87f);
+                hero.gameObject.AddComponent<Breathe>();
+            }
+
+            string name = profile?.DisplayName ?? settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
+            Image plate = UIFactory.Panel("NamePlate", safe, new Color(0.08f, 0.05f, 0.18f, 0.85f));
+            UIFactory.Anchor(plate.rectTransform, 0.24f, 0.27f, 0.76f, 0.315f);
+            Text label = UIFactory.Label(plate.transform, name, Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(label.rectTransform, 12, 12, 0, 0);
+        }
+
+        private void BuildTopBar(RectTransform safe, ProfileDto profile, PlayerSettings settings, string gender)
+        {
+            Button chip = UIFactory.Button(safe, string.Empty, () => UI.Show<SettingsScreen>(), new Color(0.1f, 0.07f, 0.22f, 0.9f));
+            RectTransform chipRect = UIFactory.Anchor(chip.GetComponent<RectTransform>(), 0.015f, 0.915f, 0.43f, 0.99f);
+            Image ring = UIFactory.Icon(chipRect, ProceduralSprites.Circle(), Theme.GoldDark, 0);
+            UIFactory.Anchor(ring.rectTransform, 0.02f, 0.06f, 0.29f, 0.94f).GetComponent<Image>().preserveAspect = true;
+            Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
+            if (portrait != null)
+            {
+                Image face = UIFactory.Icon(ring.transform, portrait, Color.white, 0);
+                face.preserveAspect = true;
+                UIFactory.Stretch(face.rectTransform, 6, 6, 6, 6);
+            }
+            string name = profile?.DisplayName ?? settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
+            Text title = UIFactory.Label(chipRect, name, Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.32f, 0.5f, 0.98f, 0.95f);
+            string detail = profile == null
+                ? Loc.T("common.offline")
+                : Loc.T("league." + profile.Pvp.League) + "  " + Loc.Number(profile.Pvp.Trophies);
+            Text sub = UIFactory.Label(chipRect, detail, Theme.SmallSize - 4, profile == null ? Theme.Warning : Theme.League(profile.Pvp.League), TextAnchor.MiddleLeft);
+            UIFactory.Anchor(sub.rectTransform, 0.32f, 0.06f, 0.98f, 0.5f);
+
+            CurrencyBar bar = CurrencyBar.Create(safe);
+            UIFactory.Anchor((RectTransform)bar.transform, 0.44f, 0.925f, 0.865f, 0.985f);
+
+            Button gear = IconButton(safe, "settings", () => UI.Show<SettingsScreen>());
+            UIFactory.Anchor(gear.GetComponent<RectTransform>(), 0.875f, 0.915f, 0.985f, 0.99f);
+        }
+
+        private void SideButton(RectTransform safe, string icon, string key, Type screen, string feature, float x, float yTop, int badge)
+        {
+            bool unlocked = IsUnlocked(screen, feature);
+            Button button = IconButton(safe, icon, () => Open(screen, feature, unlocked));
+            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), x, yTop - 0.1f, x + 0.17f, yTop);
+            Caption(rect, Loc.T(key), unlocked);
+            if (!unlocked)
+            {
+                LockBadge(rect);
+            }
+            else if (badge > 0)
+            {
+                CountBadge(rect, badge);
+            }
+        }
+
+        private void CornerButton(RectTransform safe, string icon, string key, Type screen, string feature, float x)
+        {
+            bool unlocked = IsUnlocked(screen, feature);
+            Button button = IconButton(safe, icon, () => Open(screen, feature, unlocked));
+            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), x, 0.05f, x + 0.22f, 0.21f);
+            Caption(rect, Loc.T(key), unlocked);
+            if (!unlocked)
+            {
+                LockBadge(rect);
+            }
+        }
+
+        private void PlayButton(RectTransform safe, string label, string icon, Type screen, string feature, Color color, float yMin, float yMax)
+        {
+            bool unlocked = IsUnlocked(screen, feature);
+            Button button = UIFactory.Button(safe, label, () => Open(screen, feature, unlocked), unlocked ? color : Theme.BackgroundLight, Theme.HeaderSize, Theme.Text);
+            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.25f, yMin, 0.75f, yMax);
+            Text text = button.GetComponentInChildren<Text>();
+            text.fontStyle = FontStyle.Bold;
+            UIFactory.Stretch(text.rectTransform, 130, 16, 0, 0);
+            Outline outline = text.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0f, 0f, 0f, 0.55f);
+            outline.effectDistance = new Vector2(3, -3);
+            Sprite art = ArtLibrary.Icon(icon);
+            if (art != null)
+            {
+                Image image = UIFactory.Icon(rect, art, Color.white, 0);
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+                UIFactory.Anchor(image.rectTransform, 0.02f, 0.06f, 0.26f, 0.94f);
+            }
+            if (unlocked && feature == "Story")
+            {
+                rect.gameObject.AddComponent<Breathe>().Amount = 0.025f;
+            }
+            if (!unlocked)
+            {
+                text.text = label + "\n" + Loc.T("menu.locked", LockHint(feature));
+                text.fontSize = Theme.SmallSize;
+            }
+        }
+
+        private Button IconButton(RectTransform parent, string icon, Action onClick)
+        {
+            Button button = UIFactory.Button(parent, string.Empty, onClick, new Color(0, 0, 0, 0));
+            Sprite art = ArtLibrary.Icon(icon);
+            if (art != null)
+            {
+                Image image = UIFactory.Icon(button.transform, art, Color.white, 0);
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+                UIFactory.Anchor(image.rectTransform, 0.04f, 0.2f, 0.96f, 1f);
+            }
+            return button;
+        }
+
+        private static void Caption(RectTransform rect, string text, bool unlocked)
+        {
+            Text caption = UIFactory.Label(rect, text, Theme.SmallSize - 6, unlocked ? Theme.Text : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(caption.rectTransform, -0.15f, -0.02f, 1.15f, 0.24f);
+            Outline outline = caption.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.03f, 0.01f, 0.08f, 0.95f);
+            outline.effectDistance = new Vector2(2, -2);
+            if (!unlocked)
+            {
+                foreach (Image image in rect.GetComponentsInChildren<Image>())
+                {
+                    if (image.sprite != null && image.transform != rect)
+                    {
+                        image.color = new Color(0.45f, 0.45f, 0.5f, 1f);
+                    }
+                }
+            }
+        }
+
+        private static void LockBadge(RectTransform rect)
+        {
+            Sprite lockArt = ArtLibrary.Icon("lock");
+            if (lockArt == null)
+            {
+                return;
+            }
+            Image image = UIFactory.Icon(rect, lockArt, Color.white, 0);
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            UIFactory.Anchor(image.rectTransform, 0.58f, 0.55f, 0.98f, 0.98f);
+        }
+
+        private static void CountBadge(RectTransform rect, int count)
+        {
+            Image dot = UIFactory.Icon(rect, ProceduralSprites.Circle(), Theme.Danger, 0);
+            dot.raycastTarget = false;
+            UIFactory.Anchor(dot.rectTransform, 0.66f, 0.7f, 0.98f, 1.02f);
+            dot.preserveAspect = true;
+            Text number = UIFactory.Label(dot.transform, count > 9 ? "9+" : count.ToString(), Theme.SmallSize - 4, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(number.rectTransform);
+            dot.gameObject.AddComponent<Pulse>().Scale = true;
+        }
+
+        private bool IsUnlocked(Type screen, string feature)
+        {
+            if (!Game.Backend.IsOnline)
+            {
+                // Offline practice: story and PvP against a bot only.
+                return screen == typeof(WorldMapScreen) || screen == typeof(PvpScreen) || screen == typeof(SettingsScreen);
+            }
+            return feature == null || Widgets.FeatureUnlocked(feature);
+        }
+
+        private void Open(Type screen, string feature, bool unlocked)
+        {
+            Game.Audio.PlaySFX(SoundIds.Click);
+            if (unlocked)
+            {
+                UI.Show(screen);
             }
             else
             {
-                Text logo = UIFactory.Label(card.transform, "CR", 80, Theme.Gold, TextAnchor.MiddleRight, FontStyle.Bold);
-                UIFactory.Anchor(logo.rectTransform, 0.7f, 0.1f, 0.95f, 0.9f);
-            }
-
-            RectTransform grid = UIFactory.Anchor(UIFactory.Rect("Grid", safe), 0.03f, 0.04f, 0.97f, 0.76f);
-            GridLayoutGroup layout = grid.gameObject.AddComponent<GridLayoutGroup>();
-            layout.cellSize = new Vector2(480, 230);
-            layout.spacing = new Vector2(28, 28);
-            layout.childAlignment = TextAnchor.UpperCenter;
-            layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            layout.constraintCount = 2;
-
-            foreach ((string key, Type screen, string feature) in Entries)
-            {
-                bool unlocked = feature == null || Widgets.FeatureUnlocked(feature) || (feature == "Pvp" && !Game.Backend.IsOnline && screen == typeof(PvpScreen));
-                if (!Game.Backend.IsOnline && feature == null && screen != typeof(SettingsScreen))
-                {
-                    unlocked = false;
-                }
-                string label = Loc.T(key) + (unlocked ? string.Empty : "\n" + Loc.T("menu.locked", LockHint(feature)));
-                Type target = screen;
-                bool open = unlocked;
-                UIFactory.Button(grid, label, () =>
-                {
-                    if (open)
-                    {
-                        UI.Show(target);
-                    }
-                    else
-                    {
-                        UI.Toast(Loc.T("menu.lockedToast", LockHint(feature)));
-                    }
-                }, unlocked ? (key == "menu.story" || key == "menu.pvp" ? Theme.GoldDark : Theme.PanelLight) : Theme.BackgroundLight, Theme.HeaderSize - 4, Theme.Text);
+                UI.Toast(Loc.T("menu.lockedToast", LockHint(feature)));
             }
         }
 

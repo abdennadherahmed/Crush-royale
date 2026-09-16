@@ -151,6 +151,19 @@ namespace CrushRoyale.Game.UI
         }
 
         /// <summary>Full-screen kingdom illustration behind everything else, darkened so text stays readable. Null without art.</summary>
+        /// <summary>Dark gradient over the top or bottom of the screen so HUD elements stay readable on bright art.</summary>
+        public static Image Fade(Transform parent, bool top, float height, float alpha)
+        {
+            RectTransform rect = UIFactory.Rect(top ? "FadeTop" : "FadeBottom", parent);
+            UIFactory.Anchor(rect, 0, top ? 1f - height : 0f, 1, top ? 1f : height);
+            rect.SetSiblingIndex(Mathf.Min(1, parent.childCount - 1));
+            Image image = rect.gameObject.AddComponent<Image>();
+            image.sprite = ProceduralSprites.VerticalFade(top);
+            image.color = new Color(0.03f, 0.015f, 0.08f, alpha);
+            image.raycastTarget = false;
+            return image;
+        }
+
         public static Image Backdrop(Transform parent, CrushRoyale.Core.Story.Kingdom kingdom, float brightness = 0.72f)
         {
             Sprite sprite = ArtLibrary.Background(kingdom);
@@ -169,6 +182,53 @@ namespace CrushRoyale.Game.UI
             fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = sprite.rect.width / sprite.rect.height;
             return image;
+        }
+    }
+
+    /// <summary>Idle "breathing" of a character or a call-to-action (scale around the pivot).</summary>
+    public sealed class Breathe : MonoBehaviour
+    {
+        public float Amount = 0.014f;
+        public float Speed = 1.7f;
+
+        private float _phase;
+
+        private void Awake() => _phase = UnityEngine.Random.value * 6f;
+
+        private void Update()
+        {
+            float k = Mathf.Sin(Time.unscaledTime * Speed + _phase);
+            transform.localScale = new Vector3(1f - k * Amount * 0.4f, 1f + k * Amount, 1f);
+        }
+    }
+
+    /// <summary>Soft alpha (or scale) pulse for halos and notification badges.</summary>
+    public sealed class Pulse : MonoBehaviour
+    {
+        public bool Scale;
+        public float Speed = 2.2f;
+
+        private Image _image;
+        private float _baseAlpha;
+
+        private void Awake()
+        {
+            _image = GetComponent<Image>();
+            _baseAlpha = _image != null ? _image.color.a : 1f;
+        }
+
+        private void Update()
+        {
+            float k = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * Speed);
+            if (Scale)
+            {
+                transform.localScale = Vector3.one * (1f + 0.12f * k);
+            }
+            else if (_image != null)
+            {
+                Color c = _image.color;
+                _image.color = new Color(c.r, c.g, c.b, _baseAlpha * (0.65f + 0.35f * k));
+            }
         }
     }
 

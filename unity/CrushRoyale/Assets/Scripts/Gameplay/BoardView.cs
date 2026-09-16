@@ -30,6 +30,7 @@ namespace CrushRoyale.Game.Gameplay
         private Image _hintA;
         private Image _hintB;
         private TimingBalance _timing;
+        private BoardFx _fx;
 
         public RectTransform Rect { get; private set; }
 
@@ -115,6 +116,10 @@ namespace CrushRoyale.Game.Gameplay
 
             if (!IsGhost)
             {
+                if (_fx == null)
+                {
+                    _fx = BoardFx.Create(_fxLayer, Rect, Cell);
+                }
                 _hintA = UIFactory.Icon(_fxLayer, ProceduralSprites.Ring(), new Color(1, 1, 1, 0), Cell);
                 _hintB = UIFactory.Icon(_fxLayer, ProceduralSprites.Ring(), new Color(1, 1, 1, 0), Cell);
             }
@@ -269,7 +274,25 @@ namespace CrushRoyale.Game.Gameplay
             }
             else if (action.Type == ActionType.PowerUp)
             {
-                yield return Flash(action.HasTarget ? CellPosition(action.Target) : Vector2.zero, _timing.PowerUpAnimationMs / 1000f / speed);
+                Vector2 center = action.HasTarget ? CellPosition(action.Target) : Vector2.zero;
+                if (_fx != null)
+                {
+                    var cleared = new List<Vector2>();
+                    if (outcome.Resolution != null && outcome.Resolution.Steps.Count > 0)
+                    {
+                        foreach (ClearedPiece piece in outcome.Resolution.Steps[0].Cleared)
+                        {
+                            cleared.Add(CellPosition(piece.Position));
+                        }
+                    }
+                    _fx.PowerUp(action.PowerUp, center, cleared);
+                }
+                yield return Flash(center, _timing.PowerUpAnimationMs / 1000f / speed);
+            }
+
+            if (_fx != null && outcome.RedSurgeActivated)
+            {
+                _fx.RedSurge();
             }
 
             if (outcome.Resolution != null)
@@ -288,7 +311,7 @@ namespace CrushRoyale.Game.Gameplay
 
             if (outcome.BossStones.Count > 0)
             {
-                yield return Shake(0.35f / speed);
+                yield return Shake(0.35f / speed, 22f);
             }
 
             SyncTo(finalBoard);
@@ -310,6 +333,10 @@ namespace CrushRoyale.Game.Gameplay
                         StartCoroutine(Burst(CellPosition(cleared.Position), (ColorBlind ? Theme.GemsColorBlind : Theme.Gems)[(int)cleared.Piece.Color]));
                     }
                 }
+            }
+            if (_fx != null)
+            {
+                PlayStepFx(step);
             }
             foreach (StoneHit hit in step.StoneHits)
             {
@@ -366,12 +393,13 @@ namespace CrushRoyale.Game.Gameplay
                 if (!IsGhost)
                 {
                     StartCoroutine(SpecialGlow(CellPosition(special.Position)));
+                    _fx?.BonusCreated(CellPosition(special.Position));
                 }
             }
             // Big clears (a line/bomb going off, or a large combo) shake the board a little.
-            if (!IsGhost && step.Cleared.Count >= 10)
+            if (_fx != null && step.Cleared.Count >= 10)
             {
-                StartCoroutine(Shake(0.18f));
+                _fx.Shake(0.18f, 12f);
             }
 
             var moves = new List<(PieceView View, Vector2 From, Vector2 To)>();
@@ -451,10 +479,7 @@ namespace CrushRoyale.Game.Gameplay
             flash.rectTransform.anchoredPosition = center;
             Image wave = UIFactory.Icon(_fxLayer, ProceduralSprites.Ring(128), Theme.Crystal, Cell);
             wave.rectTransform.anchoredPosition = center;
-            if (!IsGhost)
-            {
-                StartCoroutine(Shake(Mathf.Min(0.3f, seconds)));
-            }
+            _fx?.Shake(Mathf.Min(0.3f, seconds), 14f);
             yield return CoroutineTask.Tween(seconds, k =>
             {
                 float size = Cell * (1 + k * 5);
@@ -468,15 +493,48 @@ namespace CrushRoyale.Game.Gameplay
             Destroy(wave.gameObject);
         }
 
-        private IEnumerator Shake(float seconds)
+        /// <summary>Waits the given time while the board shakes (the shake itself is driven by <see cref="BoardFx"/>).</summary>
+        private IEnumerator Shake(float seconds, float strength)
         {
-            Vector2 origin = Rect.anchoredPosition;
-            yield return CoroutineTask.Tween(seconds, k =>
+            _fx?.Shake(seconds, strength);
+            yield return CoroutineTask.Tween(seconds, _ => { });
+        }
+
+        /// <summary>Fireworks for bonus gems going off, rainbow sparks for color blasts, praise for long cascades.</summary>
+        private void PlayStepFx(ResolutionStep step)
+        {
+            float boardSize = Cell * Mathf.Max(Width, Height);
+            Color[] palette = ColorBlind ? Theme.GemsColorBlind : Theme.Gems;
+            List<Vector2> colorBlast = null;
+            Color blastColor = Theme.Orbe;
+            foreach (ClearedPiece cleared in step.Cleared)
             {
-                float strength = (1 - k) * 18f;
-                Rect.anchoredPosition = origin + new Vector2(Mathf.Sin(k * 60) * strength, Mathf.Cos(k * 50) * strength * 0.5f);
-            });
-            Rect.anchoredPosition = origin;
+                Vector2 at = CellPosition(cleared.Position);
+                Color color = palette[(int)cleared.Piece.Color];
+                switch (cleared.Piece.Type)
+                {
+                    case PieceType.LineHorizontal:
+                        _fx.LineBlast(at, true, color, boardSize);
+                        break;
+                    case PieceType.LineVertical:
+                        _fx.LineBlast(at, false, color, boardSize);
+                        break;
+                    case PieceType.AreaBomb:
+                        _fx.Firework(at, color, 1.25f);
+                        break;
+                }
+                if (cleared.Cause == ClearCause.ColorBlast)
+                {
+                    colorBlast = colorBlast ?? new List<Vector2>();
+                    colorBlast.Add(at);
+                    blastColor = color;
+                }
+            }
+            if (colorBlast != null)
+            {
+                _fx.ColorBlast(colorBlast, blastColor);
+            }
+            _fx.Combo(step.CascadeLevel);
         }
 
         /// <summary>Gem shatter: a white pop ring, star sparks that fly out and fall, and small colored shards.</summary>

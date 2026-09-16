@@ -104,6 +104,83 @@ namespace CrushRoyale.Game.UI
             return Cache[key] = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
         }
 
+        /// <summary>Soft radial glow (bright core, smooth falloff): the base of every particle effect.</summary>
+        public static Sprite Glow(int size = 64)
+        {
+            string key = "glow" + size;
+            if (Cache.TryGetValue(key, out Sprite cached))
+            {
+                return cached;
+            }
+            Texture2D tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+            float c = size / 2f;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float d = Mathf.Clamp01(Vector2.Distance(new Vector2(x + 0.5f, y + 0.5f), new Vector2(c, c)) / c);
+                    float a = Mathf.Pow(1f - d, 2.2f);
+                    pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                }
+            }
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return Cache[key] = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        /// <summary>Vertical alpha ramp: opaque at the top (or bottom) edge, transparent at the other.</summary>
+        public static Sprite VerticalFade(bool opaqueTop)
+        {
+            string key = "fade" + opaqueTop;
+            if (Cache.TryGetValue(key, out Sprite cached))
+            {
+                return cached;
+            }
+            const int height = 64;
+            Texture2D tex = NewTexture(4, height);
+            var pixels = new Color32[4 * height];
+            for (int y = 0; y < height; y++)
+            {
+                float t = (y + 0.5f) / height;
+                float a = Mathf.SmoothStep(0f, 1f, opaqueTop ? t : 1f - t);
+                for (int x = 0; x < 4; x++)
+                {
+                    pixels[y * 4 + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                }
+            }
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return Cache[key] = Sprite.Create(tex, new Rect(0, 0, 4, height), new Vector2(0.5f, 0.5f), 100f);
+        }
+
+        /// <summary>Four-point twinkle star with a glowing core.</summary>
+        public static Sprite Spark(int size = 64)
+        {
+            string key = "spark" + size;
+            if (Cache.TryGetValue(key, out Sprite cached))
+            {
+                return cached;
+            }
+            Texture2D tex = NewTexture(size, size);
+            var pixels = new Color32[size * size];
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = Mathf.Abs((x + 0.5f) / size * 2 - 1);
+                    float ny = Mathf.Abs((y + 0.5f) / size * 2 - 1);
+                    float core = Mathf.Pow(Mathf.Clamp01(1f - Mathf.Sqrt(nx * nx + ny * ny) * 2.2f), 1.5f);
+                    float cross = Mathf.Max(Mathf.Exp(-nx * 22f) * (1f - ny), Mathf.Exp(-ny * 22f) * (1f - nx));
+                    float a = Mathf.Clamp01(Mathf.Max(core, cross));
+                    pixels[y * size + x] = new Color32(255, 255, 255, (byte)(a * 255));
+                }
+            }
+            tex.SetPixels32(pixels);
+            tex.Apply();
+            return Cache[key] = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
+        }
+
         /// <summary>Cracked rock used for stones.</summary>
         public static Sprite Stone(int size = 128)
         {
