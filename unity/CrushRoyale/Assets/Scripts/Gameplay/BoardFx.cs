@@ -125,6 +125,22 @@ namespace CrushRoyale.Game.Gameplay
             }
         }
 
+        /// <summary>The pet plays a free move: paw-print sparkles on both gems and a short caption.</summary>
+        public void PetAssist(Vector2 from, Vector2 to)
+        {
+            Color pet = new Color(0.55f, 1f, 0.75f);
+            foreach (Vector2 at in new[] { from, to })
+            {
+                Emit(at, Vector2.zero, 0.45f, _cell * 0.5f, _cell * 1.8f, new Color(pet.r, pet.g, pet.b, 0.8f), ProceduralSprites.Glow());
+                for (int i = 0; i < 6; i++)
+                {
+                    Emit(at, Dir(Random.Range(0f, Mathf.PI * 2f)) * _cell * Random.Range(1.5f, 3f), Random.Range(0.4f, 0.7f),
+                        _cell * 0.35f, 0f, pet, ProceduralSprites.Spark(), drag: 2f, spin: 200f, twinkle: true);
+                }
+            }
+            Text(GameRoot.Instance.Loc.T("hud.petMove"), pet, (from + to) * 0.5f + new Vector2(0, _cell * 1.4f), 70);
+        }
+
         /// <summary>Color blast (match 5): rainbow sparks from every cleared gem.</summary>
         public void ColorBlast(IList<Vector2> positions, Color color)
         {

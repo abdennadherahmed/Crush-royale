@@ -33,6 +33,7 @@ namespace CrushRoyale.Game.Screens
         private readonly List<(PowerUpType Type, Button Button, Text Label)> _powerUps = new List<(PowerUpType, Button, Text)>();
         private RectTransform _pausePanel;
         private bool _submitting;
+        private RectTransform _petIcon;
 
         public override System.Type BackTarget => null;
 
@@ -115,10 +116,19 @@ namespace CrushRoyale.Game.Screens
                 Widgets.AddPowerUpIcon(button, type);
                 _powerUps.Add((type, button, button.GetComponentInChildren<Text>()));
             }
-            if (config.Loadout.Count == 0)
+            PowerUpType? petGift = session.PowerUps.PetGift;
+            if (petGift.HasValue && !config.Loadout.Exists(e => e.Type == petGift.Value))
+            {
+                PowerUpType type = petGift.Value;
+                Button button = UIFactory.Button(bar, Loc.T("powerup." + type), () => OnPowerUp(type), Theme.Hex("2F6B4F"), Theme.SmallSize, Theme.Text);
+                Widgets.AddPowerUpIcon(button, type);
+                _powerUps.Add((type, button, button.GetComponentInChildren<Text>()));
+            }
+            if (config.Loadout.Count == 0 && !petGift.HasValue)
             {
                 UIFactory.Label(bar, Loc.T("hud.noPowerUps"), Theme.SmallSize, Theme.TextMuted);
             }
+            AddPetBadge(safe, config);
 
             bossBar.gameObject.SetActive(config.BossHp > 0);
 
@@ -126,6 +136,13 @@ namespace CrushRoyale.Game.Screens
             _controller.Changed += RefreshHud;
             _controller.Finished += result => _ = OnFinishedAsync(result);
             _controller.Begin(session, board, input, ghost, ghostBoard);
+            _controller.ActionPresented += outcome =>
+            {
+                if (outcome.PetMove.HasValue && _petIcon != null)
+                {
+                    StartCoroutine(HopPet());
+                }
+            };
             input.TargetPicked += cell => _controller.UsePowerUp(PowerUpType.NuclearBomb, cell);
         }
 
@@ -319,6 +336,45 @@ namespace CrushRoyale.Game.Screens
                 ErrorCode can = s.PowerUps.CanActivate(type, true);
                 button.interactable = s.IsRunning && can == ErrorCode.None;
                 label.text = Loc.T("powerup." + type) + " x" + s.PowerUps.Remaining(type);
+            }
+        }
+
+        /// <summary>Equipped pet under the board: portrait, level and auto-move chance; it hops when the pet plays.</summary>
+        private void AddPetBadge(RectTransform safe, SessionConfig config)
+        {
+            if (config.Pet == PetType.None)
+            {
+                return;
+            }
+            Image badge = UIFactory.Panel("Pet", safe, new Color(0.08f, 0.2f, 0.14f, 0.85f));
+            RectTransform rect = UIFactory.Anchor(badge.rectTransform, 0.02f, 0.123f, 0.36f, 0.168f);
+            Sprite art = PetsScreen.PetArt(config.Pet.ToString());
+            if (art != null)
+            {
+                Image image = UIFactory.Icon(rect, art, Color.white, 0);
+                UIFactory.Anchor(image.rectTransform, 0.0f, -0.35f, 0.34f, 1.35f);
+                image.gameObject.AddComponent<Breathe>().Amount = 0.04f;
+                _petIcon = image.rectTransform;
+            }
+            Text label = UIFactory.Label(rect, Loc.T("pets.level", config.PetLevel) + " · " + Loc.T("pets.chance", config.PetLevel * Game.Backend.Balance.Pets.AutoMovePermillePerLevel / 10),
+                Theme.SmallSize - 6, new Color(0.7f, 1f, 0.8f), TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(label.rectTransform, 0.36f, 0f, 0.99f, 1f);
+        }
+
+        private System.Collections.IEnumerator HopPet()
+        {
+            RectTransform icon = _petIcon;
+            for (float t = 0; t < 0.45f && icon != null; t += Time.deltaTime)
+            {
+                float k = t / 0.45f;
+                icon.anchoredPosition = new Vector2(0, Mathf.Sin(k * Mathf.PI) * 40f);
+                icon.localEulerAngles = new Vector3(0, 0, Mathf.Sin(k * Mathf.PI * 2f) * 12f);
+                yield return null;
+            }
+            if (icon != null)
+            {
+                icon.anchoredPosition = Vector2.zero;
+                icon.localEulerAngles = Vector3.zero;
             }
         }
 

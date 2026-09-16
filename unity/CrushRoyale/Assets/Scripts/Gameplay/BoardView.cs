@@ -309,6 +309,41 @@ namespace CrushRoyale.Game.Gameplay
                 }
             }
 
+            // The pet's free move follows immediately (same timings as a player swap, as the simulation counts them).
+            if (outcome.PetMove.HasValue && outcome.PetResolution != null)
+            {
+                Move petMove = outcome.PetMove.Value;
+                _fx?.PetAssist(CellPosition(petMove.From), CellPosition(petMove.To));
+                PieceView pa = FindAt(petMove.From);
+                PieceView pb = FindAt(petMove.To);
+                if (pa != null && pb != null)
+                {
+                    Vector2 a = CellPosition(petMove.From);
+                    Vector2 b = CellPosition(petMove.To);
+                    yield return CoroutineTask.Tween(_timing.SwapAnimationMs / 1000f / speed, k =>
+                    {
+                        float e = Ease.OutCubic(k);
+                        pa.Rect.anchoredPosition = Vector2.Lerp(a, b, e);
+                        pb.Rect.anchoredPosition = Vector2.Lerp(b, a, e);
+                    });
+                    pa.Cell = petMove.To;
+                    pb.Cell = petMove.From;
+                }
+                else
+                {
+                    yield return CoroutineTask.Tween(_timing.SwapAnimationMs / 1000f / speed, _ => { });
+                }
+                foreach (ResolutionStep step in outcome.PetResolution.Steps)
+                {
+                    onStep?.Invoke(step);
+                    yield return PlayStep(step, _timing.CascadeStepMs / 1000f / speed);
+                }
+                if (outcome.PetResolution.Shuffled && outcome.PetResolution.BoardAfterShuffle != null)
+                {
+                    yield return MoveTo(outcome.PetResolution.BoardAfterShuffle, _timing.ShuffleAnimationMs / 1000f / speed);
+                }
+            }
+
             if (outcome.BossStones.Count > 0)
             {
                 yield return Shake(0.35f / speed, 22f);

@@ -357,6 +357,7 @@ namespace CrushRoyale.Game.Screens
             // Right: social and the world map.
             SideButton(safe, "friends", "menu.friends", typeof(FriendsScreen), "Friends", 0.815f, 0.815f, 0);
             SideButton(safe, "map", "menu.map", typeof(WorldMapScreen), "Story", 0.815f, 0.707f, 0);
+            SideButton(safe, "pets", "menu.pets", typeof(PetsScreen), null, 0.815f, 0.599f, 0);
 
             // Bottom: shop (left), play buttons (center), guild (right).
             CornerButton(safe, "shop", "menu.shop", typeof(ShopScreen), "Shop", 0.01f);
@@ -389,6 +390,19 @@ namespace CrushRoyale.Game.Screens
                 hero.rectTransform.pivot = new Vector2(0.5f, 0f);
                 UIFactory.Anchor(hero.rectTransform, 0.17f, full != null ? 0.315f : 0.36f, 0.83f, 0.87f);
                 hero.gameObject.AddComponent<Breathe>();
+            }
+
+            string equippedPet = profile?.Pets?.Equipped;
+            Sprite petArt = string.IsNullOrEmpty(equippedPet) ? null : PetsScreen.PetArt(equippedPet);
+            if (petArt != null)
+            {
+                Image pet = UIFactory.Icon(safe, petArt, Color.white, 0);
+                pet.raycastTarget = false;
+                pet.rectTransform.pivot = new Vector2(0.5f, 0f);
+                UIFactory.Anchor(pet.rectTransform, 0.6f, 0.3f, 0.86f, 0.45f);
+                Breathe hop = pet.gameObject.AddComponent<Breathe>();
+                hop.Amount = 0.05f;
+                hop.Speed = 3f;
             }
 
             string name = profile?.DisplayName ?? settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
