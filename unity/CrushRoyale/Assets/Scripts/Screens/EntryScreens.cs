@@ -592,6 +592,7 @@ namespace CrushRoyale.Game.Screens
                 UI.ShowRoot<HeroSelectScreen>();
                 return;
             }
+            await ChallengeFlow.CheckClipboardAsync(UI, Game);
             if (profile == null || !profile.LoginBonusAvailable)
             {
                 return;

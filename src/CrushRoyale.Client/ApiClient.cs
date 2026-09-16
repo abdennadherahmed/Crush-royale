@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -194,6 +195,11 @@ namespace CrushRoyale.Client
         // Economy
         public Task<PurchaseResponse> BuyLivesAsync(int count, CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.LivesBuy, new BuyLivesRequest { Count = count }, ct);
         public Task<PurchaseResponse> ClaimVipLifeAsync(CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.LivesVipClaim, null, ct);
+        public Task<ChallengeCreateResponse> CreateChallengeAsync(CancellationToken ct = default) => Transport.PostAsync<ChallengeCreateResponse>(ApiRoutes.ChallengeCreate, null, ct);
+
+        public Task<MatchStartResponse> AcceptChallengeAsync(string code, List<string> loadout, CancellationToken ct = default) =>
+            Transport.PostAsync<MatchStartResponse>(ApiRoutes.Fill(ApiRoutes.ChallengeStart, "code", Uri.EscapeDataString(code)), new StartStageRequest { Loadout = loadout ?? new List<string>() }, ct);
+
         public Task<ChestsDto> UnlockChestAsync(int slot, CancellationToken ct = default) => Transport.PostAsync<ChestsDto>(ApiRoutes.Fill(ApiRoutes.ChestUnlock, "slot", slot), null, ct);
 
         public Task<ChestOpenResponse> OpenChestAsync(int slot, bool useOrbes, CancellationToken ct = default) => Transport.PostAsync<ChestOpenResponse>(ApiRoutes.Fill(ApiRoutes.ChestOpen, "slot", slot), new ChestOpenRequest { UseOrbes = useOrbes }, ct);

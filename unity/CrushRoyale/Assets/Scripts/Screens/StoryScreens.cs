@@ -346,6 +346,11 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Anchor(_status.rectTransform, 0.05f, 0.13f, 0.95f, 0.19f);
             _find = UIFactory.Button(body, Loc.T(profile != null ? "pvp.find" : "pvp.practice"), () => _ = FindAsync());
             UIFactory.Anchor(_find.GetComponent<RectTransform>(), 0.15f, 0.02f, 0.85f, 0.11f);
+            if (profile != null)
+            {
+                Button code = UIFactory.Button(body, Loc.T("challenge.haveCode"), () => _ = ChallengeFlow.PromptCodeAsync(UI, Game), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                UIFactory.Anchor(code.GetComponent<RectTransform>(), 0.25f, 0.195f, 0.75f, 0.245f);
+            }
         }
 
         public override bool HandleBack()

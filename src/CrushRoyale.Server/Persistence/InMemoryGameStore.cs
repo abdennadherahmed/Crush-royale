@@ -401,6 +401,17 @@ public sealed class InMemoryGameStore : IGameStore
             }
         }
 
+        public Task<ReplayRow?> LatestChallengeReplayAsync(Guid playerId)
+        {
+            lock (_s._lock)
+            {
+                ReplayRow? r = _s._replays.Values
+                    .Where(x => x.PlayerId == playerId && (x.Mode == GameMode.PvpRanked || x.Mode == GameMode.FriendlyChallenge))
+                    .OrderByDescending(x => x.CreatedAt).ThenByDescending(x => x.Id).FirstOrDefault();
+                return Task.FromResult(r == null ? null : CloneReplay(r));
+            }
+        }
+
         public Task<MatchRow?> GetMatchAsync(string id, bool forUpdate = true)
         {
             lock (_s._lock)

@@ -527,6 +527,13 @@ public sealed class PostgresGameStore : IGameStore
             return await ReadReplay(cmd).ConfigureAwait(false);
         }
 
+        public async Task<ReplayRow?> LatestChallengeReplayAsync(Guid playerId)
+        {
+            await using NpgsqlCommand cmd = Cmd(ReplaySelect + " where player_id = @player and mode in (1, 2) order by created_at desc, id desc limit 1");
+            cmd.Parameters.AddWithValue("player", playerId);
+            return await ReadReplay(cmd).ConfigureAwait(false);
+        }
+
         public async Task<MatchRow?> GetMatchAsync(string id, bool forUpdate = true)
         {
             string sql = @"

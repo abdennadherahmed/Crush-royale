@@ -177,6 +177,10 @@ namespace CrushRoyale.Game.Screens
             row.childControlWidth = row.childControlHeight = true;
             row.childForceExpandWidth = row.childForceExpandHeight = true;
             UIFactory.Button(buttons, Loc.T("common.menu"), () => UI.ShowRoot<MainMenuScreen>(), Theme.PanelLight);
+            if (_args.Server != null && _args.Server.Accepted && Game.Backend.IsOnline)
+            {
+                UIFactory.Button(buttons, Loc.T("challenge.share"), () => _ = ChallengeFlow.ShareAsync(UI, Game), Theme.Hex("2F6B4F"));
+            }
             UIFactory.Button(buttons, Loc.T("pvp.again"), () => UI.Show<PvpScreen>(null, addToHistory: false));
         }
 

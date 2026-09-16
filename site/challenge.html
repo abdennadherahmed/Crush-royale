@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Défi Crush Royale</title>
+<meta name="description" content="Un ami te défie sur Crush Royale : même plateau, qui fera le meilleur score ?">
+<meta property="og:title" content="Tu peux battre mon score sur Crush Royale ?">
+<meta property="og:description" content="Même plateau, 90 secondes, un seul gagnant. Relève le défi !">
+<meta property="og:image" content="https://crushroyale-legal.onrender.com/img/logo.png">
+<meta name="theme-color" content="#0f0b24">
+<link rel="icon" href="img/icon.png">
+<link rel="stylesheet" href="style.css">
+<style>
+  .challenge { text-align: center; padding-top: 24px; }
+  .challenge img.logo { width: min(420px, 90%); height: auto; filter: drop-shadow(0 12px 32px rgba(111, 227, 255, 0.25)); }
+  .challenge h1 { font-size: clamp(26px, 6vw, 38px); margin-top: 8px; }
+  .code { display: inline-block; margin: 12px 0 4px; padding: 12px 22px; border-radius: 14px; border: 1px dashed var(--gold);
+          color: var(--gold); font: 700 26px/1.2 ui-monospace, "SFMono-Regular", Consolas, monospace; letter-spacing: 0.08em; }
+  .actions { display: grid; gap: 12px; max-width: 420px; margin: 20px auto 8px; }
+  .btn { display: block; min-height: 52px; padding: 14px 18px; border-radius: 14px; font-weight: 700; font-size: 17px; text-decoration: none; border: 0; cursor: pointer; }
+  .btn.primary { background: linear-gradient(180deg, #f3c65a, #b8862b); color: #1b1230; box-shadow: 0 8px 24px rgba(232, 184, 74, 0.3); }
+  .btn.secondary { background: var(--panel); color: var(--text); border: 1px solid var(--line); }
+  .btn:focus-visible { outline: 3px solid var(--crystal); outline-offset: 3px; }
+  .steps { text-align: left; max-width: 420px; margin: 16px auto 0; color: var(--muted); font-size: 15px; }
+  .toast { min-height: 24px; color: var(--crystal); font-size: 15px; }
+</style>
+</head>
+<body>
+<main class="challenge">
+  <img class="logo" src="img/logo.png" alt="Crush Royale" width="720" height="406">
+  <h1 id="title">Un ami te défie !</h1>
+  <p id="subtitle">Même plateau, 90 secondes : fais un meilleur score que lui.</p>
+  <div class="code" id="code" aria-live="polite">—</div>
+  <p class="toast" id="toast" role="status"></p>
+  <div class="actions">
+    <button class="btn primary" id="play" type="button">Copier le code et jouer</button>
+    <a class="btn secondary" id="store" href="https://play.google.com/store/apps/details?id=com.crushroyale.game">Installer Crush Royale (gratuit)</a>
+  </div>
+  <ol class="steps" id="steps">
+    <li>Installe Crush Royale si ce n'est pas déjà fait.</li>
+    <li>Touche « Copier le code et jouer ».</li>
+    <li>Le jeu te propose de relever le défi dès l'accueil.</li>
+  </ol>
+</main>
+<script>
+  (function () {
+    var fr = (navigator.language || "fr").toLowerCase().indexOf("fr") === 0;
+    var t = fr ? {
+      title: "Un ami te défie !", subtitle: "Même plateau, 90 secondes : fais un meilleur score que lui.",
+      play: "Copier le code et jouer", store: "Installer Crush Royale (gratuit)", copied: "Code copié ! Ouverture du jeu…",
+      invalid: "Ce lien de défi est incomplet.",
+      steps: ["Installe Crush Royale si ce n'est pas déjà fait.", "Touche « Copier le code et jouer ».", "Le jeu te propose de relever le défi dès l'accueil."]
+    } : {
+      title: "A friend challenges you!", subtitle: "Same board, 90 seconds: beat their score.",
+      play: "Copy the code and play", store: "Get Crush Royale (free)", copied: "Code copied! Opening the game…",
+      invalid: "This challenge link is incomplete.",
+      steps: ["Install Crush Royale if you haven't yet.", "Tap \"Copy the code and play\".", "The game offers the challenge right on the home screen."]
+    };
+    document.documentElement.lang = fr ? "fr" : "en";
+    document.getElementById("title").textContent = t.title;
+    document.getElementById("subtitle").textContent = t.subtitle;
+    document.getElementById("play").textContent = t.play;
+    document.getElementById("store").textContent = t.store;
+    var steps = document.getElementById("steps");
+    steps.innerHTML = "";
+    t.steps.forEach(function (s) { var li = document.createElement("li"); li.textContent = s; steps.appendChild(li); });
+
+    var code = (new URLSearchParams(location.search).get("c") || "").toUpperCase();
+    var valid = /^CR-[0-9A-Z]{1,12}-[0-9A-F]{5}$/.test(code);
+    var toast = document.getElementById("toast");
+    document.getElementById("code").textContent = valid ? code : "—";
+    if (!valid) { toast.textContent = t.invalid; document.getElementById("play").disabled = true; return; }
+
+    function openGame() {
+      // Launches the installed game (Android); the game reads the copied code on its home screen.
+      location.href = "intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.crushroyale.game;S.browser_fallback_url=" +
+        encodeURIComponent("https://play.google.com/store/apps/details?id=com.crushroyale.game") + ";end";
+    }
+    document.getElementById("play").addEventListener("click", function () {
+      var done = function () { toast.textContent = t.copied; setTimeout(openGame, 600); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code).then(done, done);
+      } else {
+        var area = document.createElement("textarea");
+        area.value = code; document.body.appendChild(area); area.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        area.remove(); done();
+      }
+    });
+  })();
+</script>
+</body>
+</html>

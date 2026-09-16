@@ -72,6 +72,9 @@ public interface IStoreTransaction
 
     Task<ReplayRow?> LatestGhostOfPlayerAsync(Guid playerId);
 
+    /// <summary>Latest online duel replay (ranked or friendly) of a player, for "challenge me" links.</summary>
+    Task<ReplayRow?> LatestChallengeReplayAsync(Guid playerId);
+
     Task<MatchRow?> GetMatchAsync(string id, bool forUpdate = true);
 
     Task InsertMatchAsync(MatchRow match);

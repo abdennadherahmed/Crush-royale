@@ -427,6 +427,22 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         Assert.False(friendly.Ranked);
         Assert.Equal(0, friendly.TrophyDelta);
         await b.Http.PostError(ApiRoutes.Fill(ApiRoutes.FriendChallenge, "friendId", a.Id), new StartStageRequest(), HttpStatusCode.TooManyRequests);
+
+        // "Challenge me" link: anyone with the code plays the same board against the winner's duel, no friendship needed.
+        ChallengeCreateResponse link = await a.Http.PostOk<ChallengeCreateResponse>(ApiRoutes.ChallengeCreate);
+        Assert.StartsWith("CR-", link.Code);
+        Assert.EndsWith(link.Code, link.Url);
+        var stranger = await _app.NewPlayerAsync(unlockStage: 30);
+        MatchStartResponse accepted = await stranger.Http.PostOk<MatchStartResponse>(ApiRoutes.Fill(ApiRoutes.ChallengeStart, "code", link.Code), new StartStageRequest());
+        Assert.NotNull(accepted.Ghost);
+        Assert.Equal(sa.Match.Seed, accepted.Seed);
+        PvpResultDto linkResult = await stranger.Http.PostOk<PvpResultDto>(ApiRoutes.PvpRecord, _app.Play(stranger.Id, accepted));
+        Assert.True(linkResult.Accepted, linkResult.Error);
+        Assert.False(linkResult.Ranked);
+
+        string forged = link.Code[..^1] + (link.Code[^1] == '0' ? '1' : '0');
+        await stranger.Http.PostError(ApiRoutes.Fill(ApiRoutes.ChallengeStart, "code", forged), new StartStageRequest(), HttpStatusCode.NotFound);
+        await a.Http.PostError(ApiRoutes.Fill(ApiRoutes.ChallengeStart, "code", link.Code), new StartStageRequest(), HttpStatusCode.BadRequest);
     }
 
     [Fact]

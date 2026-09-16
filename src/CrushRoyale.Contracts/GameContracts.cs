@@ -309,6 +309,18 @@ namespace CrushRoyale.Contracts
         public MatchStartResponse Match { get; set; }
     }
 
+    /// <summary>A shareable "challenge me" code for the player's latest duel.</summary>
+    public sealed class ChallengeCreateResponse
+    {
+        public string Code { get; set; }
+
+        public string Url { get; set; }
+
+        public long Score { get; set; }
+
+        public string DisplayName { get; set; }
+    }
+
     public sealed class PvpResultDto
     {
         public bool Accepted { get; set; }
