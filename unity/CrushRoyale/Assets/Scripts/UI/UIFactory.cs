@@ -170,7 +170,9 @@ namespace CrushRoyale.Game.UI
         /// <summary>Vertical scroll list; returns the content transform (auto-sized, children laid out top to bottom).</summary>
         public static RectTransform ScrollList(Transform parent, float spacing = 16, int padding = 24)
         {
-            RectTransform scroll = Rect("Scroll", parent);
+            // Fills its parent by default: without this the list had a zero size and its content collapsed to a point
+            // (Settings, Guild, Friends, Battle Pass, Quests). Callers can still re-stretch it with margins.
+            RectTransform scroll = Stretch(Rect("Scroll", parent));
             ScrollRect scrollRect = scroll.gameObject.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
             scrollRect.movementType = ScrollRect.MovementType.Elastic;
