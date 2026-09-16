@@ -28,10 +28,10 @@ namespace CrushRoyale.Core.Config
         public int BossExtraTimeMs { get; set; } = 15000;
 
         /// <summary>Expected points per move used to derive target scores (validated by the balancing bot tests).</summary>
-        public int ExpectedPointsPerMove { get; set; } = 110;
+        public int ExpectedPointsPerMove { get; set; } = 420;
 
         /// <summary>Target = moves * expected * factor, factor going from Easy to Hard (permille).</summary>
-        public int EasyTargetFactorPermille { get; set; } = 450;
+        public int EasyTargetFactorPermille { get; set; } = 400;
 
         public int HardTargetFactorPermille { get; set; } = 1000;
 

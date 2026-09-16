@@ -9,7 +9,7 @@ namespace CrushRoyale.Core.Story
     /// <summary>
     /// Deterministic generator of the 1000 campaign stages (+ endless post-game stages).
     /// Structure: 5 acts x 10 chapters x 20 stages; mini-boss at stage 10 and boss at stage 20 of every chapter.
-    /// Difficulty follows the GDD (stage / 1000 * 100%) with a small relief right after each chapter boss.
+    /// Difficulty ramps quickly over the first chapters then flattens (see DifficultyKnots), with a small relief right after each chapter boss.
     /// Stage objectives rotate (score, collect, ice, stones) so 1000 stages don't feel identical.
     /// </summary>
     public sealed class StageCatalog
@@ -66,7 +66,16 @@ namespace CrushRoyale.Core.Story
             indexInChapter = (campaignId - 1) % s.StagesPerChapter + 1;
         }
 
-        /// <summary>Difficulty permille: 0 at stage 1, stage/total afterwards, -3% relief on the 3 stages after a boss.</summary>
+        /// <summary>
+        /// Difficulty curve knots (stage, permille): a fast ramp over the first chapters so progress is felt early,
+        /// flattening towards the end of the campaign. Integer interpolation keeps client and server identical.
+        /// </summary>
+        private static readonly int[,] DifficultyKnots =
+        {
+            { 1, 0 }, { 20, 120 }, { 50, 250 }, { 100, 400 }, { 200, 560 }, { 400, 750 }, { 700, 900 }, { 1000, 1000 }
+        };
+
+        /// <summary>Difficulty permille: 0 at stage 1, fast early ramp (see knots), -3% relief on the 3 stages after a boss.</summary>
         public int DifficultyForStage(int stageId)
         {
             StoryBalance s = _balance.Story;
@@ -79,7 +88,22 @@ namespace CrushRoyale.Core.Story
                 return 1000;
             }
 
-            int raw = (int)((long)stageId * 1000 / s.TotalStages);
+            // Knots are expressed for a 1000-stage campaign; other lengths are scaled.
+            long scaled = (long)stageId * 1000 / s.TotalStages;
+            int raw = 1000;
+            for (int i = 1; i < DifficultyKnots.GetLength(0); i++)
+            {
+                int x1 = DifficultyKnots[i, 0];
+                if (scaled <= x1)
+                {
+                    int x0 = DifficultyKnots[i - 1, 0];
+                    int y0 = DifficultyKnots[i - 1, 1];
+                    int y1 = DifficultyKnots[i, 1];
+                    raw = y0 + (int)((scaled - x0) * (y1 - y0) / Math.Max(1, x1 - x0));
+                    break;
+                }
+            }
+
             int index = (stageId - 1) % s.StagesPerChapter + 1;
             int chapter = (stageId - 1) / s.StagesPerChapter + 1;
             if (chapter > 1 && index <= 3)

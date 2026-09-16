@@ -100,6 +100,8 @@
 
   "splash.subtitle": "Esmague. Encadeie. Conquiste.",
   "splash.connecting": "Conectando a Crystalheim…",
+  "splash.playOffline": "Jogar offline",
+  "splash.online": "Conectado a Crystalheim!",
   "splash.offline": "Offline: modo treino (sem recompensas).",
   "splash.notConfigured": "Servidor não configurado: modo treino (sem recompensas).",
   "privacy.title": "Sua privacidade",
@@ -248,6 +250,8 @@
   "pvp.practice": "Treinar contra bot",
   "pvp.searching": "Buscando… {0} s (±{1} troféus)",
   "pvp.noOpponent": "Nenhum oponente encontrado. Tente de novo!",
+  "pvp.botTitle": "Ainda sem adversário",
+  "pvp.botBody": "Poucos jogadores online agora. Enfrentar um bot de treino da sua liga? (Sem troféus em jogo.)",
   "pvp.liveOpponent": "Oponente ao vivo",
   "pvp.again": "Jogar de novo",
   "pvp.win": "VITÓRIA",

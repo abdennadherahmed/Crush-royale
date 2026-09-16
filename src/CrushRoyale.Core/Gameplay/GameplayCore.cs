@@ -142,6 +142,76 @@ namespace CrushRoyale.Core.Gameplay
         }
     }
 
+    /// <summary>Bot whose thinking time changes from move to move (read by <see cref="HeadlessRunner"/>).</summary>
+    public interface IPacedBot
+    {
+        int NextThinkTimeMs();
+    }
+
+    /// <summary>
+    /// Human-like opponent: thinks 2-3 s at low leagues, sometimes misses the best move and plays an ordinary one.
+    /// Tuned per league so a new player wins about half of the practice duels while Master bots stay sharp.
+    /// </summary>
+    public sealed class SkilledBot : IBotStrategy, IActionSource, IPacedBot
+    {
+        private readonly Common.DeterministicRandom _rng;
+        private readonly int _bestMovePermille;
+        private readonly int _minThinkMs;
+        private readonly int _maxThinkMs;
+        private int _pendingThinkMs = -1;
+
+        public SkilledBot(ulong seed, int bestMovePermille, int minThinkMs, int maxThinkMs)
+        {
+            _rng = new Common.DeterministicRandom(seed, 0x5B07);
+            _bestMovePermille = Math.Max(0, Math.Min(1000, bestMovePermille));
+            _minThinkMs = Math.Max(0, minThinkMs);
+            _maxThinkMs = Math.Max(_minThinkMs, maxThinkMs);
+        }
+
+        /// <summary>Bronze 35% best moves / 2.2-3.4 s ... Master 90% / 1.0-1.5 s.</summary>
+        public static SkilledBot ForLeague(Config.League league, ulong seed)
+        {
+            switch (league)
+            {
+                case Config.League.Bronze: return new SkilledBot(seed, 350, 2200, 3400);
+                case Config.League.Silver: return new SkilledBot(seed, 500, 1800, 2800);
+                case Config.League.Gold: return new SkilledBot(seed, 600, 1600, 2600);
+                case Config.League.Platinum: return new SkilledBot(seed, 700, 1400, 2200);
+                case Config.League.Diamond: return new SkilledBot(seed, 800, 1200, 1800);
+                default: return new SkilledBot(seed, 900, 1000, 1500);
+            }
+        }
+
+        public int NextThinkTimeMs() => _rng.NextInt(_minThinkMs, _maxThinkMs + 1);
+
+        public PlayerAction ChooseAction(GameSession session, int nowMs)
+        {
+            List<Move> moves = session.BoardManager.GetValidMoves();
+            if (moves.Count == 0)
+            {
+                return null;
+            }
+            Move move = _rng.ChancePermille(_bestMovePermille) ? session.BoardManager.GetHint().Value : moves[_rng.NextInt(moves.Count)];
+            return PlayerAction.Swap(move.From, move.To, nowMs);
+        }
+
+        public bool TryGetAction(GameSession session, int nowMs, out PlayerAction action)
+        {
+            action = null;
+            if (_pendingThinkMs < 0)
+            {
+                _pendingThinkMs = NextThinkTimeMs();
+            }
+            if (nowMs < session.NextActionAllowedAtMs + _pendingThinkMs)
+            {
+                return false;
+            }
+            action = ChooseAction(session, nowMs);
+            _pendingThinkMs = -1;
+            return action != null;
+        }
+    }
+
     /// <summary>Uniformly random valid moves: a weak baseline player.</summary>
     public sealed class RandomBot : IBotStrategy
     {
@@ -181,7 +251,7 @@ namespace CrushRoyale.Core.Gameplay
             int guard = 0;
             while (session.IsRunning && guard++ < 100000)
             {
-                int t = session.NextActionAllowedAtMs + thinkTimeMs;
+                int t = session.NextActionAllowedAtMs + (bot is IPacedBot paced ? paced.NextThinkTimeMs() : thinkTimeMs);
                 if (t >= session.TimeLimitMs)
                 {
                     session.FinishByTime();

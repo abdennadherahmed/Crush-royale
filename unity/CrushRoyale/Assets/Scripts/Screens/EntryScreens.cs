@@ -16,6 +16,8 @@ namespace CrushRoyale.Game.Screens
     public sealed class SplashScreen : UIScreen
     {
         private Text _status;
+        private Button _offlineButton;
+        private bool _connecting;
 
         protected override void Build()
         {
@@ -61,7 +63,19 @@ namespace CrushRoyale.Game.Screens
             }
 
             _status.text = Loc.T("splash.connecting");
-            bool online = await Game.Backend.StartAsync(Loc.Language);
+            var playOffline = new TaskCompletionSource<bool>();
+            _connecting = true;
+            _ = RevealOfflineButtonAsync(playOffline);
+            bool online = await Game.Backend.StartAsync(Loc.Language, 8000, playOffline.Task);
+            _connecting = false;
+            if (this == null)
+            {
+                return;
+            }
+            if (_offlineButton != null)
+            {
+                Destroy(_offlineButton.gameObject);
+            }
 
             if (!online)
             {
@@ -77,28 +91,46 @@ namespace CrushRoyale.Game.Screens
                 return;
             }
 
-            EconomyBalance economy = Game.Backend.Balance.Economy;
+            await EnterOnlineAsync(Game, UI, Loc);
+        }
+
+        /// <summary>After a successful login (at boot, or later in the background): store, notifications, hero creation or menu.</summary>
+        public static async Task EnterOnlineAsync(GameRoot game, UIRoot ui, Localization loc)
+        {
+            EconomyBalance economy = game.Backend.Balance.Economy;
             var skus = economy.OrbePacks.Select(p => p.Sku).ToList();
             skus.Add(economy.RemoveAdsSku);
             skus.Add(economy.BattlePassSku);
             skus.Add(economy.RarePerkSku);
-            Game.Iap.Initialize(skus, "crushroyale.orbes");
-            Game.Notifications.RequestPermission();
+            game.Iap.Initialize(skus, "crushroyale.orbes");
+            game.Notifications.RequestPermission();
 
-            ProfileDto profile = Game.Backend.Profile;
+            ProfileDto profile = game.Backend.Profile;
             if (profile.SuspendedUntilUnixMs > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
             {
-                await UI.Alert(Loc.T("error.title"), Loc.T("error.Banned"));
+                await ui.Alert(loc.T("error.title"), loc.T("error.Banned"));
             }
 
             if (!profile.HeroChosen)
             {
-                UI.ShowRoot<HeroSelectScreen>();
+                ui.ShowRoot<HeroSelectScreen>();
             }
             else
             {
-                UI.ShowRoot<MainMenuScreen>();
+                ui.ShowRoot<MainMenuScreen>();
             }
+        }
+
+        /// <summary>A slow server (cold start, weak network) must never trap the player: offer offline play after 3 s.</summary>
+        private async Task RevealOfflineButtonAsync(TaskCompletionSource<bool> playOffline)
+        {
+            await Task.Delay(3000);
+            if (this == null || !_connecting)
+            {
+                return;
+            }
+            _offlineButton = UIFactory.Button(Root, Loc.T("splash.playOffline"), () => playOffline.TrySetResult(true), Theme.PanelLight, Theme.BodySize, Theme.Text);
+            UIFactory.Anchor(_offlineButton.GetComponent<RectTransform>(), 0.2f, 0.12f, 0.8f, 0.2f);
         }
     }
 
@@ -278,6 +310,11 @@ namespace CrushRoyale.Game.Screens
         {
             Game.Audio.PlayMusic(SoundIds.MenuMusic);
             ProfileDto profile = Game.Backend.Profile;
+            if (profile != null && !profile.HeroChosen)
+            {
+                UI.ShowRoot<HeroSelectScreen>();
+                return;
+            }
             if (profile == null || !profile.LoginBonusAvailable)
             {
                 return;

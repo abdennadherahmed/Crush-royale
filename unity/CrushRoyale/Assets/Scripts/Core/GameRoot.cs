@@ -1,5 +1,6 @@
 using CrushRoyale.Game.Audio;
 using CrushRoyale.Game.Networking;
+using CrushRoyale.Game.Screens;
 using CrushRoyale.Game.UI;
 using UnityEngine;
 
@@ -81,9 +82,37 @@ namespace CrushRoyale.Game
             UI = UIRoot.Create(transform, this);
         }
 
+        private const float ReconnectIntervalSeconds = 20f;
+        private float _nextReconnectAt;
+
         private void Start()
         {
+            Backend.CameOnline += OnCameOnline;
+            _nextReconnectAt = Time.realtimeSinceStartup + ReconnectIntervalSeconds;
             UI.Boot();
+        }
+
+        private void Update()
+        {
+            if (Time.realtimeSinceStartup < _nextReconnectAt)
+            {
+                return;
+            }
+            _nextReconnectAt = Time.realtimeSinceStartup + ReconnectIntervalSeconds;
+            if (!(UI.Current is SplashScreen))
+            {
+                Backend.TryReconnect();
+            }
+        }
+
+        /// <summary>The server answered after the splash moved on: switch the menu to online mode (matches in progress finish offline).</summary>
+        private void OnCameOnline()
+        {
+            UI.Toast(Loc.T("splash.online"), 2.5f);
+            if (UI.Current is MainMenuScreen || UI.Current is PvpScreen || UI.Current is WorldMapScreen)
+            {
+                _ = SplashScreen.EnterOnlineAsync(this, UI, Loc);
+            }
         }
 
         private void OnApplicationPause(bool paused)

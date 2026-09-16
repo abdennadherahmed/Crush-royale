@@ -41,12 +41,12 @@ namespace CrushRoyale.Game.Gameplay
             Offline = true
         };
 
-        /// <summary>Practice PvP: a greedy bot plays the same board first and becomes the ghost.</summary>
-        public static MatchLaunch OfflinePvp(GameBalance balance, ulong seed)
+        /// <summary>Practice PvP: a human-paced bot of the player's league plays the same board first and becomes the ghost.</summary>
+        public static MatchLaunch OfflinePvp(GameBalance balance, ulong seed, League league = League.Bronze)
         {
             SessionConfig config = SessionConfig.ForPvp(seed, balance, GameMode.FriendlyChallenge, null, League.Bronze);
             var bot = new GameSession(config, balance, "practice-bot");
-            HeadlessRunner.Run(bot, new GreedyBot(1400));
+            HeadlessRunner.Run(bot, SkilledBot.ForLeague(league, seed));
             return new MatchLaunch
             {
                 Mode = GameMode.FriendlyChallenge,

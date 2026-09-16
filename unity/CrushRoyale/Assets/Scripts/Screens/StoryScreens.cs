@@ -368,12 +368,7 @@ namespace CrushRoyale.Game.Screens
 
             if (!Game.Backend.IsOnline)
             {
-                using (UI.Loading())
-                {
-                    ulong seed = (ulong)Random.Range(1, int.MaxValue) * 2654435761UL;
-                    MatchLaunch launch = await Task.Run(() => MatchLaunch.OfflinePvp(Game.Backend.Balance, seed));
-                    UI.Show<GameplayScreen>(launch, addToHistory: false);
-                }
+                await PlayBotAsync(League.Bronze);
                 return;
             }
 
@@ -384,6 +379,7 @@ namespace CrushRoyale.Game.Screens
             }
 
             _searching = true;
+            bool offered = false;
             _find.GetComponentInChildren<Text>().text = Loc.T("common.cancel");
             while (_searching && this != null)
             {
@@ -400,7 +396,13 @@ namespace CrushRoyale.Game.Screens
                     _searching = false;
                     _status.text = Loc.T("pvp.noOpponent");
                     _find.GetComponentInChildren<Text>().text = Loc.T("pvp.find");
+                    await OfferBotAsync();
                     return;
+                }
+                if (status.WaitedMs >= BotOfferAfterMs && !offered)
+                {
+                    offered = true;
+                    _ = OfferBotWhileSearchingAsync();
                 }
 
                 await Task.Delay(1000);
@@ -416,6 +418,43 @@ namespace CrushRoyale.Game.Screens
                         _searching = false;
                     }
                 }
+            }
+        }
+
+        /// <summary>Few players online (launch, night): after this wait a training bot is offered instead of an empty queue.</summary>
+        private const int BotOfferAfterMs = 20000;
+
+        private async Task OfferBotWhileSearchingAsync()
+        {
+            if (await UI.Confirm(Loc.T("pvp.botTitle"), Loc.T("pvp.botBody")) && _searching && this != null)
+            {
+                await CancelAsync();
+                await PlayBotAsync(CurrentLeague());
+            }
+        }
+
+        private async Task OfferBotAsync()
+        {
+            if (await UI.Confirm(Loc.T("pvp.botTitle"), Loc.T("pvp.botBody")) && this != null)
+            {
+                await PlayBotAsync(CurrentLeague());
+            }
+        }
+
+        private League CurrentLeague()
+        {
+            ProfileDto profile = Game.Backend.Profile;
+            return profile != null && System.Enum.TryParse(profile.Pvp.League, out League league) ? league : League.Bronze;
+        }
+
+        /// <summary>Training duel (no trophies) against a human-paced bot of the given league.</summary>
+        private async Task PlayBotAsync(League league)
+        {
+            using (UI.Loading())
+            {
+                ulong seed = (ulong)Random.Range(1, int.MaxValue) * 2654435761UL;
+                MatchLaunch launch = await Task.Run(() => MatchLaunch.OfflinePvp(Game.Backend.Balance, seed, league));
+                UI.Show<GameplayScreen>(launch, addToHistory: false);
             }
         }
 

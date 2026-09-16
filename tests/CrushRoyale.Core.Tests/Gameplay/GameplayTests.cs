@@ -392,6 +392,18 @@ public class GameSessionTests
     }
 
     [Fact]
+    public void SkilledBots_GetStrongerWithTheLeague()
+    {
+        long bronze = 0, master = 0;
+        for (ulong seed = 1; seed <= 12; seed++)
+        {
+            bronze += HeadlessRunner.Run(Fixtures.PvpSession(seed), SkilledBot.ForLeague(League.Bronze, seed)).FinalScore;
+            master += HeadlessRunner.Run(Fixtures.PvpSession(seed), SkilledBot.ForLeague(League.Master, seed)).FinalScore;
+        }
+        Assert.True(master > bronze * 3 / 2, $"master {master} vs bronze {bronze}");
+    }
+
+    [Fact]
     public async Task GameplayCore_RunsAsyncLoop()
     {
         var core = new GameplayCore(Fixtures.Balance);

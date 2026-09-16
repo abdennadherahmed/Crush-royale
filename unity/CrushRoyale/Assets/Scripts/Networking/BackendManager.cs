@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
 using CrushRoyale.Client;
@@ -20,6 +21,8 @@ namespace CrushRoyale.Game.Networking
         private readonly LocalSave _save;
         private readonly GameBalance _offlineBalance = GameBalance.CreateDefault();
         private readonly StageCatalog _offlineCatalog;
+        private Task<bool> _login;
+        private bool _gaveUp;
 
         public BackendManager(ClientConfig config, LocalSave save)
         {
@@ -59,6 +62,9 @@ namespace CrushRoyale.Game.Networking
 
         public event Action<QueuedRequest, string> QueuedRequestDelivered;
 
+        /// <summary>A login that outlived the splash finally succeeded: the game can switch from practice to online.</summary>
+        public event Action CameOnline;
+
         public GameClient Client { get; }
 
         public bool IsConfigured => Client != null;
@@ -78,20 +84,57 @@ namespace CrushRoyale.Game.Networking
 
         public StageCatalog Catalog => IsOnline ? Client.Catalog : _offlineCatalog;
 
-        /// <summary>Signs in (guest by default) and logs into the game server. Returns false when offline.</summary>
-        public async Task<bool> StartAsync(string language)
+        /// <summary>True while a login is still running (possibly in the background after the splash gave up waiting).</summary>
+        public bool IsConnecting => _login != null && !_login.IsCompleted;
+
+        /// <summary>
+        /// Signs in (guest by default) and logs into the game server. Returns false when offline, or when the login takes
+        /// longer than <paramref name="budgetMs"/> or <paramref name="giveUp"/> completes first: a free Render instance
+        /// can need 30-50 s to wake up. The login then keeps running and raises <see cref="CameOnline"/> if it succeeds.
+        /// </summary>
+        public async Task<bool> StartAsync(string language, int budgetMs = 8000, Task giveUp = null)
         {
             if (Client == null)
             {
                 IsOnline = false;
                 return false;
             }
+            if (_login == null || _login.IsCompleted)
+            {
+                _gaveUp = false;
+                _login = LoginAsync(language);
+            }
+
+            var waits = new List<Task> { _login, Task.Delay(Math.Max(0, budgetMs)) };
+            if (giveUp != null)
+            {
+                waits.Add(giveUp);
+            }
+            await Task.WhenAny(waits);
+            if (_login.IsCompleted)
+            {
+                return _login.Result;
+            }
+            _gaveUp = true;
+            return false;
+        }
+
+        /// <summary>Background reconnection (resume, periodic retry while offline).</summary>
+        public void TryReconnect()
+        {
+            if (Client != null && !IsOnline && !IsConnecting)
+            {
+                _ = StartAsync(GameRoot.Instance.Loc.Language, 0);
+            }
+        }
+
+        private async Task<bool> LoginAsync(string language)
+        {
             try
             {
                 await Client.StartAsync(_save.DeviceHash(_config.DeviceSalt), RegionCode(), language);
                 IsOnline = true;
                 LastError = null;
-                return true;
             }
             catch (CrushApiException ex)
             {
@@ -100,6 +143,21 @@ namespace CrushRoyale.Game.Networking
                 IsOnline = false;
                 return false;
             }
+            catch (Exception ex)
+            {
+                // TLS / DNS / socket errors can surface as non-API exceptions on some Android devices: never hang on them.
+                Debug.LogWarning("Login failed: " + ex.GetType().Name + " " + ex.Message);
+                LastError = new CrushApiException("Network", 0, ex.Message, isNetwork: true);
+                IsOnline = false;
+                return false;
+            }
+
+            if (_gaveUp)
+            {
+                _gaveUp = false;
+                MainThread.Post(() => CameOnline?.Invoke());
+            }
+            return true;
         }
 
         /// <summary>Upgrades a guest account to Google (progress kept) or signs in with Google.</summary>
@@ -215,6 +273,7 @@ namespace CrushRoyale.Game.Networking
         {
             if (!IsOnline)
             {
+                TryReconnect();
                 return;
             }
             _ = FlushAndRefreshAsync();

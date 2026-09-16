@@ -100,6 +100,8 @@
 
   "splash.subtitle": "Crush. Cascade. Conquer.",
   "splash.connecting": "Connecting to Crystalheim…",
+  "splash.playOffline": "Play offline",
+  "splash.online": "Connected to Crystalheim!",
   "splash.offline": "Offline: practice mode (no rewards).",
   "splash.notConfigured": "Server not configured: practice mode (no rewards).",
   "privacy.title": "Your privacy",
@@ -248,6 +250,8 @@
   "pvp.practice": "Practice vs bot",
   "pvp.searching": "Searching… {0}s (±{1} trophies)",
   "pvp.noOpponent": "No opponent found. Try again!",
+  "pvp.botTitle": "No opponent yet",
+  "pvp.botBody": "Few players are online right now. Duel a training bot of your league? (No trophies at stake.)",
   "pvp.liveOpponent": "Live opponent",
   "pvp.again": "Play again",
   "pvp.win": "VICTORY",

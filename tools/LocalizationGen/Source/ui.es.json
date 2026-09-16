@@ -100,6 +100,8 @@
 
   "splash.subtitle": "Aplasta. Encadena. Conquista.",
   "splash.connecting": "Conectando con Crystalheim…",
+  "splash.playOffline": "Jugar sin conexión",
+  "splash.online": "¡Conectado a Crystalheim!",
   "splash.offline": "Sin conexión: modo práctica (sin recompensas).",
   "splash.notConfigured": "Servidor no configurado: modo práctica (sin recompensas).",
   "privacy.title": "Tu privacidad",
@@ -248,6 +250,8 @@
   "pvp.practice": "Practicar contra un bot",
   "pvp.searching": "Buscando… {0} s (±{1} trofeos)",
   "pvp.noOpponent": "No se encontró rival. ¡Inténtalo de nuevo!",
+  "pvp.botTitle": "Aún no hay rival",
+  "pvp.botBody": "Hay pocos jugadores conectados ahora mismo. ¿Enfrentarte a un bot de entrenamiento de tu liga? (Sin trofeos en juego.)",
   "pvp.liveOpponent": "Rival en directo",
   "pvp.again": "Jugar otra vez",
   "pvp.win": "VICTORIA",

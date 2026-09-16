@@ -100,6 +100,8 @@
 
   "splash.subtitle": "부수고. 연쇄하고. 정복하라.",
   "splash.connecting": "크리스탈하임에 연결 중…",
+  "splash.playOffline": "오프라인으로 플레이",
+  "splash.online": "크리스탈하임에 연결되었습니다!",
   "splash.offline": "오프라인: 연습 모드 (보상 없음)",
   "splash.notConfigured": "서버 미설정: 연습 모드 (보상 없음)",
   "privacy.title": "개인정보 보호",
@@ -248,6 +250,8 @@
   "pvp.practice": "봇과 연습",
   "pvp.searching": "찾는 중… {0}초 (±{1} 트로피)",
   "pvp.noOpponent": "상대를 찾지 못했습니다. 다시 시도하세요!",
+  "pvp.botTitle": "아직 상대가 없습니다",
+  "pvp.botBody": "지금 접속 중인 플레이어가 적습니다. 같은 리그의 연습 봇과 대결할까요? (트로피 변동 없음)",
   "pvp.liveOpponent": "실시간 상대",
   "pvp.again": "다시 하기",
   "pvp.win": "승리",

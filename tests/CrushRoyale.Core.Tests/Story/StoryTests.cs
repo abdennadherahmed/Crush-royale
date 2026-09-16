@@ -44,12 +44,23 @@ public class StageCatalogTests
 
     [Theory]
     [InlineData(1, 0)]
-    [InlineData(500, 500)]
+    [InlineData(20, 120)]
+    [InlineData(100, 400)]
+    [InlineData(500, 800)]
     [InlineData(1000, 1000)]
     [InlineData(1500, 1000)]
-    public void Difficulty_FollowsGdd(int id, int permille)
+    public void Difficulty_RampsFastEarly_ThenFlattens(int id, int permille)
     {
         Assert.Equal(permille, _catalog.Get(id).DifficultyPermille);
+    }
+
+    [Fact]
+    public void ScoreTargets_GrowAcrossTheCampaign()
+    {
+        int early = _catalog.Get(1).TargetScore;
+        int mid = _catalog.Get(101).TargetScore;
+        int late = _catalog.Get(901).TargetScore;
+        Assert.True(early < mid && mid < late, $"{early} < {mid} < {late}");
     }
 
     [Fact]

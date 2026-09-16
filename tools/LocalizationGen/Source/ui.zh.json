@@ -100,6 +100,8 @@
 
   "splash.subtitle": "粉碎。连锁。征服。",
   "splash.connecting": "正在连接水晶海姆…",
+  "splash.playOffline": "离线游戏",
+  "splash.online": "已连接水晶海姆！",
   "splash.offline": "离线：练习模式（无奖励）",
   "splash.notConfigured": "服务器未配置：练习模式（无奖励）",
   "privacy.title": "你的隐私",
@@ -248,6 +250,8 @@
   "pvp.practice": "与机器人练习",
   "pvp.searching": "匹配中… {0} 秒（±{1} 奖杯）",
   "pvp.noOpponent": "未找到对手。再试一次！",
+  "pvp.botTitle": "暂无对手",
+  "pvp.botBody": "当前在线玩家较少。要与同联赛的训练机器人对战吗？（不涉及奖杯）",
   "pvp.liveOpponent": "实时对手",
   "pvp.again": "再来一局",
   "pvp.win": "胜利",

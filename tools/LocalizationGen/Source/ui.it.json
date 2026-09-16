@@ -100,6 +100,8 @@
 
   "splash.subtitle": "Distruggi. Concatena. Conquista.",
   "splash.connecting": "Connessione a Crystalheim…",
+  "splash.playOffline": "Gioca offline",
+  "splash.online": "Connesso a Crystalheim!",
   "splash.offline": "Offline: modalità allenamento (nessuna ricompensa).",
   "splash.notConfigured": "Server non configurato: modalità allenamento (nessuna ricompensa).",
   "privacy.title": "La tua privacy",
@@ -248,6 +250,8 @@
   "pvp.practice": "Allenati contro un bot",
   "pvp.searching": "Ricerca… {0} s (±{1} trofei)",
   "pvp.noOpponent": "Nessun avversario trovato. Riprova!",
+  "pvp.botTitle": "Ancora nessun avversario",
+  "pvp.botBody": "Pochi giocatori online in questo momento. Sfidare un bot di allenamento della tua lega? (Nessun trofeo in palio.)",
   "pvp.liveOpponent": "Avversario dal vivo",
   "pvp.again": "Gioca ancora",
   "pvp.win": "VITTORIA",

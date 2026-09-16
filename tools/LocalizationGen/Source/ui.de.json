@@ -100,6 +100,8 @@
 
   "splash.subtitle": "Zerschmettern. Verketten. Erobern.",
   "splash.connecting": "Verbindung zu Crystalheim…",
+  "splash.playOffline": "Offline spielen",
+  "splash.online": "Mit Crystalheim verbunden!",
   "splash.offline": "Offline: Übungsmodus (keine Belohnungen).",
   "splash.notConfigured": "Server nicht konfiguriert: Übungsmodus (keine Belohnungen).",
   "privacy.title": "Deine Privatsphäre",
@@ -248,6 +250,8 @@
   "pvp.practice": "Gegen Bot üben",
   "pvp.searching": "Suche… {0} s (±{1} Trophäen)",
   "pvp.noOpponent": "Kein Gegner gefunden. Versuch es nochmal!",
+  "pvp.botTitle": "Noch kein Gegner",
+  "pvp.botBody": "Gerade sind nur wenige Spieler online. Gegen einen Trainingsbot deiner Liga antreten? (Keine Trophäen im Spiel.)",
   "pvp.liveOpponent": "Live-Gegner",
   "pvp.again": "Nochmal spielen",
   "pvp.win": "SIEG",
