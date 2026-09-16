@@ -46,6 +46,11 @@ namespace CrushRoyale.Contracts
 
         public int AssistExtraMoves { get; set; }
 
+        /// <summary>Equipped pet and the level it plays at in this match (capped in PvP).</summary>
+        public string Pet { get; set; }
+
+        public int PetLevel { get; set; }
+
         public long StartedAtUnixMs { get; set; }
 
         public string BalanceHash { get; set; }

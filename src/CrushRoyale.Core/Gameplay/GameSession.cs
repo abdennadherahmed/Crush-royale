@@ -108,6 +108,14 @@ namespace CrushRoyale.Core.Gameplay
 
         public long ScoreAfter { get; internal set; }
 
+        /// <summary>Free best move played by the equipped pet right after this swap (null when the pet did not act).</summary>
+        public Move? PetMove { get; internal set; }
+
+        public ResolutionResult PetResolution { get; internal set; }
+
+        /// <summary>Points of the pet move (already included in <see cref="PointsGained"/>).</summary>
+        public long PetPoints { get; internal set; }
+
         public int MovesLeft { get; internal set; }
 
         /// <summary>New boss phase reached by this action, or -1.</summary>
@@ -195,6 +203,7 @@ namespace CrushRoyale.Core.Gameplay
         private int _specialsCreated;
         private int _specialsActivated;
         private int _line5Matches;
+        private readonly DeterministicRandom _petRng;
 
         public GameSession(SessionConfig config, GameBalance balance, string playerId = null)
         {
@@ -216,6 +225,11 @@ namespace CrushRoyale.Core.Gameplay
             _cascade.AnimationTriggered += trigger => OnCascadeAnimation?.Invoke(trigger);
 
             MovesLeft = config.HasMoveLimit ? config.MoveLimit + config.AssistExtraMoves : 0;
+            if (config.Pet != PetType.None && config.PetLevel > 0)
+            {
+                // Own stream: pet rolls never disturb board refills, and replays re-simulate them identically.
+                _petRng = new DeterministicRandom(config.Seed, 0x9E7A11CE5UL);
+            }
             _nextCheckpointMs = balance.Timing.CheckpointIntervalMs;
             InitialBoardHash = _boardManager.Board.ComputeHash();
             State = SessionState.Running;
@@ -402,11 +416,24 @@ namespace CrushRoyale.Core.Gameplay
                 ScoreResolution(resolution, t, outcome);
             }
 
+            if (action.Type == ActionType.Swap)
+            {
+                TryPetMove(t, outcome);
+            }
+
             int duration = baseDuration;
             if (resolution != null)
             {
                 duration += resolution.Steps.Count * _balance.Timing.CascadeStepMs;
                 if (resolution.Shuffled)
+                {
+                    duration += _balance.Timing.ShuffleAnimationMs;
+                }
+            }
+            if (outcome.PetResolution != null)
+            {
+                duration += _balance.Timing.SwapAnimationMs + outcome.PetResolution.Steps.Count * _balance.Timing.CascadeStepMs;
+                if (outcome.PetResolution.Shuffled)
                 {
                     duration += _balance.Timing.ShuffleAnimationMs;
                 }
@@ -529,6 +556,46 @@ namespace CrushRoyale.Core.Gameplay
             GoldenChainArmed = _powerUps.GoldenChainArmed,
             BrightSparkActive = _powerUps.IsBrightSparkActive(t)
         };
+
+        /// <summary>
+        /// After every player swap the pet rolls Level x 1% (one roll per swap, always consumed so the sequence is
+        /// replay-stable). On success it plays the current best move for free: scored, but no move is spent.
+        /// </summary>
+        private void TryPetMove(int t, ActionOutcome outcome)
+        {
+            if (_petRng == null)
+            {
+                return;
+            }
+            bool acts = _petRng.ChancePermille(Config.PetLevel * _balance.Pets.AutoMovePermillePerLevel);
+            if (!acts || State != SessionState.Running)
+            {
+                return;
+            }
+            Move? hint = _boardManager.GetHint();
+            if (!hint.HasValue)
+            {
+                return;
+            }
+            OperationResult<ResolutionResult> swap = _boardManager.TrySwap(hint.Value.From, hint.Value.To, OptionsAt(t));
+            if (!swap.Success)
+            {
+                return;
+            }
+
+            var petOutcome = new ActionOutcome(outcome.Action);
+            if (swap.Value.GoldenChainConsumed)
+            {
+                _powerUps.OnGoldenChainConsumed();
+            }
+            ScoreResolution(swap.Value, t, petOutcome);
+            outcome.PetMove = hint;
+            outcome.PetResolution = swap.Value;
+            outcome.PetPoints = petOutcome.PointsGained;
+            outcome.PointsGained += petOutcome.PointsGained;
+            outcome.RedSurgeActivated |= petOutcome.RedSurgeActivated;
+            outcome.RedSurgeActive |= petOutcome.RedSurgeActive;
+        }
 
         private ErrorCode CheckTiming(int t)
         {

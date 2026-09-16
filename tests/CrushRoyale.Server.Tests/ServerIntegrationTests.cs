@@ -99,6 +99,7 @@ public sealed class CrushApp : WebApplicationFactory<Program>
             GameMode.GuildBoss => SessionConfig.ForGuildBoss(seed, start.StageId, Balance, loadout, league),
             _ => SessionConfig.ForPvp(seed, Balance, mode, loadout, league)
         };
+        config.WithPet(start.Pet == null ? PetType.None : Enum.Parse<PetType>(start.Pet), start.PetLevel, Balance);
 
         var session = new GameSession(config, Balance, player.ToString());
         HeadlessRunner.Run(session, bot ?? new GreedyBot());
@@ -222,6 +223,41 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
 
         await http.PostError(ApiRoutes.Fill(ApiRoutes.StageComplete, "matchId", start.MatchId), replay, HttpStatusCode.Conflict);
         await http.PostError(ApiRoutes.Fill(ApiRoutes.StageStart, "stageId", 5), new StartStageRequest(), HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Pets_SummonEquipAwaken_AndPlayInMatches()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync();
+        await http.PostError(ApiRoutes.PetSummon, new PetSummonRequest { Count = 10 }, HttpStatusCode.Conflict);
+
+        await _app.MutateAsync(id, s => s.Wallet.Orbes = 100_000);
+        PetSummonResponse summon = null!;
+        for (int i = 0; i < 12; i++)
+        {
+            summon = await http.PostOk<PetSummonResponse>(ApiRoutes.PetSummon, new PetSummonRequest { Count = 10 });
+            Assert.Equal(10, summon.Pulls.Count);
+        }
+        Assert.Contains(summon.Pets.Pets, p => p.Owned); // pity guarantees a pet within 120 pulls
+        Assert.NotNull(summon.Pets.Equipped);
+        Assert.Equal(100_000 - 12 * 270, summon.Wallet.Orbes);
+
+        string pet = summon.Pets.Equipped!;
+        await _app.MutateAsync(id, s =>
+        {
+            s.Pets.Pets[Enum.Parse<PetType>(pet)].Level = 10;
+            s.Pets.Pets[Enum.Parse<PetType>(pet)].Xp = _app.Balance.Pets.XpForLevel[9];
+        });
+
+        MatchStartResponse start = await http.PostOk<MatchStartResponse>(ApiRoutes.Fill(ApiRoutes.StageStart, "stageId", 1), new StartStageRequest());
+        Assert.Equal(pet, start.Pet);
+        Assert.Equal(10, start.PetLevel);
+        StageCompleteResponse result = await http.PostOk<StageCompleteResponse>(ApiRoutes.Fill(ApiRoutes.StageComplete, "matchId", start.MatchId), _app.Play(id, start));
+        Assert.True(result.Accepted, result.Error);
+
+        await http.PostError(ApiRoutes.PetEquip, new PetRequest { Pet = "Unicorn" }, HttpStatusCode.BadRequest);
+        PetActionResponse equip = await http.PostOk<PetActionResponse>(ApiRoutes.PetEquip, new PetRequest { Pet = pet });
+        Assert.Equal(pet, equip.Pets.Equipped);
     }
 
     [Fact]

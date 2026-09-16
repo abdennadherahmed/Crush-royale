@@ -194,6 +194,12 @@ namespace CrushRoyale.Client
         // Economy
         public Task<PurchaseResponse> BuyLivesAsync(int count, CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.LivesBuy, new BuyLivesRequest { Count = count }, ct);
         public Task<PurchaseResponse> ClaimVipLifeAsync(CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.LivesVipClaim, null, ct);
+        public Task<PetSummonResponse> SummonPetsAsync(int count, CancellationToken ct = default) => Transport.PostAsync<PetSummonResponse>(ApiRoutes.PetSummon, new PetSummonRequest { Count = count }, ct);
+
+        public Task<PetActionResponse> EquipPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetEquip, new PetRequest { Pet = pet }, ct);
+
+        public Task<PetActionResponse> AwakenPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetAwaken, new PetRequest { Pet = pet }, ct);
+
         public Task<ShopResponse> GetShopAsync(CancellationToken ct = default) => Transport.GetAsync<ShopResponse>(ApiRoutes.Shop, ct);
         public Task<ShopResponse> RefreshShopAsync(CancellationToken ct = default) => Transport.PostAsync<ShopResponse>(ApiRoutes.ShopRefresh, null, ct);
         public Task<PurchaseResponse> PurchaseAsync(string itemId, string method, CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.ShopPurchase, new PurchaseRequest { ItemId = itemId, Method = method }, ct);

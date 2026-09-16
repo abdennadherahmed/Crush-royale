@@ -57,6 +57,9 @@ public static class ApiEndpoints
     {
         api.MapPost(ApiRoutes.LivesBuy, (BuyLivesRequest body, ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.BuyLivesAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.LivesVipClaim, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.ClaimVipLifeAsync(Me(user), ct));
+        api.MapPost(ApiRoutes.PetSummon, (PetSummonRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.SummonAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.PetEquip, (PetRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.EquipAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.PetAwaken, (PetRequest body, ClaimsPrincipal user, PetService s, CancellationToken ct) => s.AwakenAsync(Me(user), body, ct));
         api.MapGet(ApiRoutes.Shop, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.GetShopAsync(Me(user), ct));
         api.MapPost(ApiRoutes.ShopRefresh, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.RefreshShopAsync(Me(user), ct));
         api.MapPost(ApiRoutes.ShopPurchase, (PurchaseRequest body, ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.PurchaseAsync(Me(user), body, ct));

@@ -65,7 +65,18 @@ namespace CrushRoyale.Core.PowerUps
             {
                 _remaining[entry.Type] = entry.Quantity;
             }
+
+            // Max-level pet: its signature power-up once per match, on top of the loadout and regardless of league.
+            PetDefinition pet = config.Pet == PetType.None ? null : balance.Pets.Get(config.Pet);
+            if (pet != null && config.PetLevel >= balance.Pets.PowerUpLevel && !balance.PowerUps.Get(pet.PowerUp).PvpOnly)
+            {
+                PetGift = pet.PowerUp;
+                _remaining[pet.PowerUp] = Remaining(pet.PowerUp) + 1;
+            }
         }
+
+        /// <summary>Power-up offered by a max-level pet in this match, if any.</summary>
+        public PowerUpType? PetGift { get; }
 
         public event Action<PowerUpType, int> PowerUpActivated;
 
@@ -96,7 +107,8 @@ namespace CrushRoyale.Core.PowerUps
             }
 
             PowerUpDefinition def = _balance.PowerUps.Get(type);
-            if (_config.HighestLeague < def.UnlockLeague)
+            bool gift = PetGift == type;
+            if (_config.HighestLeague < def.UnlockLeague && !gift)
             {
                 return ErrorCode.PowerUpLocked;
             }
@@ -104,7 +116,7 @@ namespace CrushRoyale.Core.PowerUps
             {
                 return ErrorCode.PowerUpNotAvailableInMode;
             }
-            if (def.OncePerMatch && UsedCount(type) > 0)
+            if (def.OncePerMatch && UsedCount(type) >= (gift && InLoadoutFromConfig(type) ? 2 : 1))
             {
                 return ErrorCode.PowerUpAlreadyUsed;
             }
@@ -121,6 +133,18 @@ namespace CrushRoyale.Core.PowerUps
                 return ErrorCode.PowerUpNeedsTarget;
             }
             return ErrorCode.None;
+        }
+
+        private bool InLoadoutFromConfig(PowerUpType type)
+        {
+            foreach (LoadoutEntry entry in _config.Loadout)
+            {
+                if (entry.Type == type)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         /// <summary>Spends one unit and starts its effect. Call only after <see cref="CanActivate"/> succeeded.</summary>

@@ -2,6 +2,8 @@ using CrushRoyale.Core.AntiCheat;
 using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Economy;
+using CrushRoyale.Core.Gameplay;
+using CrushRoyale.Core.Pets;
 using CrushRoyale.Core.Progression;
 using CrushRoyale.Core.Social;
 using CrushRoyale.Core.Story;
@@ -183,6 +185,27 @@ public sealed class PlayerWorkspace
         if (reward.BattlePassXp > 0)
         {
             AddBattlePassXp(reward.BattlePassXp);
+        }
+    }
+
+    public PetCollection Pets => new(State.Pets ??= new PetCollectionState(), Balance.Pets);
+
+    /// <summary>Freezes the equipped pet into a match snapshot (PvP modes use the capped level).</summary>
+    public void SnapshotPet(MatchConfigSnapshot snapshot, GameMode mode)
+    {
+        int level = Pets.MatchLevel(out PetType pet);
+        bool pvp = mode == GameMode.PvpRanked || mode == GameMode.FriendlyChallenge;
+        snapshot.Pet = pet;
+        snapshot.PetLevel = pet == PetType.None ? 0 : Math.Min(level, pvp ? Balance.Pets.PvpLevelCap : Balance.Pets.MaxLevel);
+    }
+
+    /// <summary>XP for the pet that played the match (if it is still owned and equipped).</summary>
+    public void AwardPetXp(MatchConfigSnapshot snapshot, GameMode mode, bool won)
+    {
+        PetCollection pets = Pets;
+        if (snapshot.Pet != PetType.None && pets.State.Equipped == snapshot.Pet)
+        {
+            pets.AddXp(pets.XpFor(mode, won));
         }
     }
 

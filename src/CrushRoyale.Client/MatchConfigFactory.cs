@@ -31,7 +31,9 @@ namespace CrushRoyale.Client
             var league = (League)Enum.Parse(typeof(League), start.HighestLeague, true);
             ulong seed = ulong.Parse(start.Seed, NumberStyles.None, CultureInfo.InvariantCulture);
             List<LoadoutEntry> loadout = ParseLoadout(start.Loadout);
+            PetType pet = !string.IsNullOrEmpty(start.Pet) && Enum.TryParse(start.Pet, true, out PetType parsed) ? parsed : PetType.None;
 
+            SessionConfig config;
             switch (mode)
             {
                 case GameMode.Story:
@@ -39,12 +41,16 @@ namespace CrushRoyale.Client
                     {
                         throw new ArgumentNullException(nameof(catalog));
                     }
-                    return SessionConfig.ForStage(catalog.Get(start.StageId), balance, loadout, league, start.AssistExtraMoves);
+                    config = SessionConfig.ForStage(catalog.Get(start.StageId), balance, loadout, league, start.AssistExtraMoves);
+                    break;
                 case GameMode.GuildBoss:
-                    return SessionConfig.ForGuildBoss(seed, start.StageId, balance, loadout, league);
+                    config = SessionConfig.ForGuildBoss(seed, start.StageId, balance, loadout, league);
+                    break;
                 default:
-                    return SessionConfig.ForPvp(seed, balance, mode, loadout, league);
+                    config = SessionConfig.ForPvp(seed, balance, mode, loadout, league);
+                    break;
             }
+            return config.WithPet(pet, start.PetLevel, balance);
         }
 
         public static GameSession CreateSession(MatchStartResponse start, GameBalance balance, StageCatalog catalog, string playerId)

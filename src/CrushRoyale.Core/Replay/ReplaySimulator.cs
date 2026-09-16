@@ -53,7 +53,8 @@ namespace CrushRoyale.Core.Replay
                 // Not cheating: the client runs other rules. The caller should ask for an update, not punish.
                 return ReplayVerification.Fail(ErrorCode.VersionMismatch, "Replay was recorded with different rules or balance.", null);
             }
-            if (replay.Mode != config.Mode || replay.Seed != config.Seed || replay.StageId != config.StageId)
+            if (replay.Mode != config.Mode || replay.Seed != config.Seed || replay.StageId != config.StageId
+                || replay.Pet != config.Pet || replay.PetLevel != config.PetLevel)
             {
                 return ReplayVerification.Fail(ErrorCode.ReplayMismatch, "Replay header does not match the expected match.", null);
             }

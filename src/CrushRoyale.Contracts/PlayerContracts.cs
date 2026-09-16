@@ -119,6 +119,97 @@ namespace CrushRoyale.Contracts
         public List<string> SeenEvents { get; set; } = new List<string>();
     }
 
+    /// <summary>One pet of the collection, with what the UI needs to show progress and the awakening button.</summary>
+    public sealed class PetDto
+    {
+        public string Type { get; set; }
+
+        public bool Owned { get; set; }
+
+        public int Level { get; set; }
+
+        public int Xp { get; set; }
+
+        /// <summary>Total XP of the next level (equals Xp at max level).</summary>
+        public int XpForNext { get; set; }
+
+        /// <summary>Total XP of the current level (progress bar start).</summary>
+        public int XpForCurrent { get; set; }
+
+        public int Fragments { get; set; }
+
+        public bool CanAwaken { get; set; }
+
+        public int AwakenFragments { get; set; }
+
+        public int AwakenCoins { get; set; }
+
+        /// <summary>Power-up offered once per match at max level.</summary>
+        public string PowerUp { get; set; }
+
+        /// <summary>Chance of a free automatic move per player move, in percent.</summary>
+        public int AutoMovePercent { get; set; }
+    }
+
+    public sealed class PetsDto
+    {
+        public string Equipped { get; set; }
+
+        public List<PetDto> Pets { get; set; } = new List<PetDto>();
+
+        public int PullsSinceWholePet { get; set; }
+
+        public int PityPulls { get; set; }
+
+        public int WholePetOneIn { get; set; }
+
+        public int SummonCostOrbes { get; set; }
+
+        public int Summon10CostOrbes { get; set; }
+
+        public int MaxLevel { get; set; }
+
+        public int PvpLevelCap { get; set; }
+    }
+
+    public sealed class PetSummonRequest
+    {
+        /// <summary>1 or 10.</summary>
+        public int Count { get; set; }
+    }
+
+    public sealed class PetPullDto
+    {
+        public string Pet { get; set; }
+
+        public bool WholePet { get; set; }
+
+        public bool Duplicate { get; set; }
+
+        public int Fragments { get; set; }
+    }
+
+    public sealed class PetSummonResponse
+    {
+        public List<PetPullDto> Pulls { get; set; } = new List<PetPullDto>();
+
+        public PetsDto Pets { get; set; }
+
+        public WalletDto Wallet { get; set; }
+    }
+
+    public sealed class PetRequest
+    {
+        public string Pet { get; set; }
+    }
+
+    public sealed class PetActionResponse
+    {
+        public PetsDto Pets { get; set; }
+
+        public WalletDto Wallet { get; set; }
+    }
+
     public sealed class InventoryDto
     {
         public Dictionary<string, int> PowerUps { get; set; } = new Dictionary<string, int>();
@@ -179,6 +270,8 @@ namespace CrushRoyale.Contracts
         public int UnclaimedAchievements { get; set; }
 
         public int ClaimableQuests { get; set; }
+
+        public PetsDto Pets { get; set; }
 
         public long SuspendedUntilUnixMs { get; set; }
     }

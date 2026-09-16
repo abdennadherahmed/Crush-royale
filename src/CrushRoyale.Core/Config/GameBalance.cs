@@ -47,6 +47,8 @@ namespace CrushRoyale.Core.Config
 
         public AntiCheatBalance AntiCheat { get; set; } = new AntiCheatBalance();
 
+        public PetBalance Pets { get; set; } = new PetBalance();
+
         public static GameBalance CreateDefault() => new GameBalance();
 
         /// <summary>Throws if a value would break the simulation (called when loading remote config).</summary>
@@ -63,6 +65,7 @@ namespace CrushRoyale.Core.Config
             Economy.Validate();
             Vip.Validate();
             Guild.Validate();
+            Pets.Validate();
         }
 
         /// <summary>Hash of every value that influences a match simulation (board, scoring, combo, timing, power-ups, pvp).</summary>
@@ -76,6 +79,7 @@ namespace CrushRoyale.Core.Config
             Timing.AddToHash(h);
             PowerUps.AddToHash(h);
             h.Add(Pvp.TimeLimitMs).Add(Pvp.PowerUpsAllowed ? 1 : 0);
+            Pets.AddToHash(h);
             return h.Value;
         }
 

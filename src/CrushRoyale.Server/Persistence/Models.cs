@@ -2,6 +2,7 @@ using CrushRoyale.Core.AntiCheat;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Economy;
 using CrushRoyale.Core.Gameplay;
+using CrushRoyale.Core.Pets;
 using CrushRoyale.Core.Progression;
 using CrushRoyale.Core.Pvp;
 using CrushRoyale.Core.Social;
@@ -71,6 +72,8 @@ public sealed class PlayerState
 
     public HashSet<StoryEnding> EndingsReached { get; set; } = new();
 
+    public PetCollectionState Pets { get; set; } = new();
+
     public long LastSeenUnixMs { get; set; }
 }
 
@@ -113,6 +116,11 @@ public sealed class MatchConfigSnapshot
     public long? GuildId { get; set; }
 
     public int GuildWeek { get; set; }
+
+    /// <summary>Pet equipped when the match started and the level it plays at (capped in PvP).</summary>
+    public PetType Pet { get; set; }
+
+    public int PetLevel { get; set; }
 
     /// <summary>VIP 9-10 friendly-challenge perk: a power-up copied from the friend (not taken from the inventory).</summary>
     public PowerUpType? StolenPowerUp { get; set; }

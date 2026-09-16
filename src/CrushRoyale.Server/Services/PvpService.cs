@@ -175,6 +175,7 @@ public sealed class PvpService
                     Ranked = true
                 }
             };
+            ws.SnapshotPet(match.Config, match.Mode);
             await ctx.Tx.InsertMatchAsync(match).ConfigureAwait(false);
             return Mappers.MatchStart(match, ws, _ops.Balance.HashHex, await GhostForAsync(ctx.Tx, match, ct).ConfigureAwait(false));
         }, ct).ConfigureAwait(false);
@@ -213,7 +214,8 @@ public sealed class PvpService
                 return new Submission(match.Id, await RejectAsync(ctx, match, header).ConfigureAwait(false), null);
             }
 
-            SessionConfig config = SessionConfig.ForPvp(match.Seed, ws.Balance, match.Mode, match.Config.Loadout, match.Config.HighestLeague);
+            SessionConfig config = SessionConfig.ForPvp(match.Seed, ws.Balance, match.Mode, match.Config.Loadout, match.Config.HighestLeague)
+                .WithPet(match.Config.Pet, match.Config.PetLevel, ws.Balance);
             bool timingOk = ws.AntiCheat.ValidateTimestamps(ws.State.Integrity, replay, TimeUtil.ToUnixMs(match.StartedAt), ws.NowMs, match.Id);
             ReplayVerification verification = ws.AntiCheat.ValidateReplay(ws.State.Integrity, replay, config, match.Id);
             if (!verification.Valid || !timingOk)
@@ -517,6 +519,7 @@ public sealed class PvpService
             ws.TrackQuest(QuestType.WinPvp, 1);
         }
         ws.AddBattlePassXp(outcome == MatchOutcome.Win ? balance.LiveOps.XpPvpWin : balance.LiveOps.XpPvpLoss);
+        ws.AwardPetXp(match.Config, match.Mode, outcome == MatchOutcome.Win);
 
         dto.ShowInterstitial = AdPolicy.OnEvent(ws.State.Ads, AdPlacement.PvpBattle, ws.Now, ws.State.Story.HighestUnlockedStage,
             ws.State.Inventory.AdsRemoved, new VipSystem(balance).GetBenefit(ws.State.Vip.Tier), balance);

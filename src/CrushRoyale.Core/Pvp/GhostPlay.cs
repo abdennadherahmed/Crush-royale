@@ -218,7 +218,7 @@ namespace CrushRoyale.Core.Pvp
 
         /// <summary>The config a ghost must be re-simulated with (its own loadout and league).</summary>
         public static SessionConfig GhostConfig(ReplayData replay, GameBalance balance) =>
-            SessionConfig.ForPvp(replay.Seed, balance, replay.Mode, replay.Loadout, replay.HighestLeague);
+            SessionConfig.ForPvp(replay.Seed, balance, replay.Mode, replay.Loadout, replay.HighestLeague).WithPet(replay.Pet, replay.PetLevel, balance);
 
         /// <summary>Compares two (already validated) replays of the same seed, applying Freezing Gel windows.</summary>
         public static PvpMatchResult ComputeResult(ReplayData challenger, ReplayData opponent, GameBalance balance)

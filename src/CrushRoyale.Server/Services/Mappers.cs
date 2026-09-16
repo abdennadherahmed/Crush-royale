@@ -4,6 +4,7 @@ using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Economy;
 using CrushRoyale.Core.Gameplay;
+using CrushRoyale.Core.Pets;
 using CrushRoyale.Core.Progression;
 using CrushRoyale.Core.Pvp;
 using CrushRoyale.Core.Replay;
@@ -129,8 +130,48 @@ public static class Mappers
             CollectionPagesCompleted = s.Achievements.PagesCompleted.Count,
             UnclaimedAchievements = ws.Achievements.GetUnclaimed().Count,
             ClaimableQuests = s.Quests.Day == TimeUtil.DayIndex(ws.Now) ? s.Quests.Quests.Count(q => q.IsComplete && !q.Claimed) : 0,
+            Pets = Pets(ws),
             SuspendedUntilUnixMs = s.Integrity.PermanentlyBanned ? long.MaxValue : s.Integrity.SuspendedUntilUnixMs
         };
+    }
+
+    public static PetsDto Pets(PlayerWorkspace ws)
+    {
+        PetCollection pets = ws.Pets;
+        PetBalance balance = ws.Balance.Pets;
+        var dto = new PetsDto
+        {
+            Equipped = pets.State.Equipped == PetType.None ? null : pets.State.Equipped.ToString(),
+            PullsSinceWholePet = pets.State.PullsSinceWholePet,
+            PityPulls = balance.PityPulls,
+            WholePetOneIn = balance.WholePetOneIn,
+            SummonCostOrbes = balance.SummonCostOrbes,
+            Summon10CostOrbes = balance.Summon10CostOrbes,
+            MaxLevel = balance.MaxLevel,
+            PvpLevelCap = balance.PvpLevelCap
+        };
+        foreach (PetDefinition def in balance.Pets)
+        {
+            PetState state = pets.State.Pets.TryGetValue(def.Type, out PetState s) ? s : new PetState();
+            int level = Math.Max(state.Owned ? 1 : 0, state.Level);
+            bool canAwaken = pets.CanAwaken(def.Type, out int fragments, out int coins);
+            dto.Pets.Add(new PetDto
+            {
+                Type = def.Type.ToString(),
+                Owned = state.Owned,
+                Level = level,
+                Xp = state.Xp,
+                XpForCurrent = level >= 1 ? balance.XpForLevel[Math.Min(level, balance.MaxLevel) - 1] : 0,
+                XpForNext = level >= 1 && level < balance.MaxLevel ? balance.XpForLevel[level] : state.Xp,
+                Fragments = state.Fragments,
+                CanAwaken = canAwaken,
+                AwakenFragments = fragments,
+                AwakenCoins = coins,
+                PowerUp = def.PowerUp.ToString(),
+                AutoMovePercent = level * balance.AutoMovePermillePerLevel / 10
+            });
+        }
+        return dto;
     }
 
     public static PublicProfileDto Public(PlayerSummary p) => new()
@@ -199,6 +240,8 @@ public static class Mappers
         Loadout = Loadout(match.Config.Loadout),
         HighestLeague = match.Config.HighestLeague.ToString(),
         AssistExtraMoves = match.Config.AssistExtraMoves,
+        Pet = match.Config.Pet == PetType.None ? null : match.Config.Pet.ToString(),
+        PetLevel = match.Config.PetLevel,
         StartedAtUnixMs = TimeUtil.ToUnixMs(match.StartedAt),
         BalanceHash = balanceHash,
         Lives = Lives(ws),

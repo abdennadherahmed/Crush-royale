@@ -18,7 +18,7 @@ namespace CrushRoyale.Core.Replay
     /// Compact binary replay format (little-endian, LEB128 varints, CRC-32 footer).
     ///
     ///   "CRRP" | u8 formatVersion | var rulesVersion | u64 balanceHash | u8 mode | u64 seed | zigzag stageId
-    ///   | string playerId | u8 highestLeague | var assistMoves
+    ///   | string playerId | u8 highestLeague | var assistMoves | [v2: u8 pet | u8 petLevel]
     ///   | var loadoutCount { u8 type, var qty }
     ///   | var actionCount { u8 type, var deltaMs, payload, var scoreDelta }
     ///       swap payload:    u8 from(x&lt;&lt;4|y), u8 to
@@ -29,7 +29,7 @@ namespace CrushRoyale.Core.Replay
     /// </summary>
     public static class ReplaySerializer
     {
-        public const byte FormatVersion = 1;
+        public const byte FormatVersion = 2;
         public const int MaxActions = 20000;
         public const int MaxCheckpoints = 2000;
         public const int MaxPlayerIdLength = 128;
@@ -58,6 +58,8 @@ namespace CrushRoyale.Core.Replay
             w.WriteString(data.PlayerId ?? string.Empty);
             w.WriteByte((byte)data.HighestLeague);
             w.WriteVarUInt((ulong)data.AssistExtraMoves);
+            w.WriteByte((byte)data.Pet);
+            w.WriteByte((byte)Math.Max(0, Math.Min(255, data.PetLevel)));
 
             w.WriteVarUInt((ulong)data.Loadout.Count);
             foreach (LoadoutEntry e in data.Loadout)
@@ -155,7 +157,7 @@ namespace CrushRoyale.Core.Replay
                 }
             }
             byte version = r.ReadByte();
-            if (version != FormatVersion)
+            if (version < 1 || version > FormatVersion)
             {
                 throw new ReplayFormatException("Unsupported replay format version " + version + ".");
             }
@@ -171,6 +173,11 @@ namespace CrushRoyale.Core.Replay
                 HighestLeague = ReadEnum<League>(r.ReadByte()),
                 AssistExtraMoves = checked((int)r.ReadVarUInt())
             };
+            if (version >= 2)
+            {
+                data.Pet = ReadEnum<PetType>(r.ReadByte());
+                data.PetLevel = r.ReadByte();
+            }
 
             int loadoutCount = ReadCount(r, 9);
             for (int i = 0; i < loadoutCount; i++)

@@ -55,4 +55,15 @@ namespace CrushRoyale.Core.Config
         /// <summary>Default: trophies above the floor are halved, so skill is preserved but the ladder stays fresh.</summary>
         Soft = 1
     }
+
+    /// <summary>Companion pets (one per kingdom). Persisted and sent over the network: never reorder.</summary>
+    public enum PetType : byte
+    {
+        None = 0,
+        FrostFox = 1,
+        SunFennec = 2,
+        ForestOwl = 3,
+        EmberSalamander = 4,
+        CrystalDrake = 5
+    }
 }

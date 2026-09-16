@@ -76,6 +76,11 @@ namespace CrushRoyale.Core.Replay
 
         public List<LoadoutEntry> Loadout { get; set; } = new List<LoadoutEntry>();
 
+        /// <summary>Pet equipped for the match and the level it played at (format v2+).</summary>
+        public PetType Pet { get; set; }
+
+        public int PetLevel { get; set; }
+
         public List<ReplayAction> Actions { get; set; } = new List<ReplayAction>();
 
         public List<ReplayCheckpoint> Checkpoints { get; set; } = new List<ReplayCheckpoint>();
@@ -168,7 +173,9 @@ namespace CrushRoyale.Core.Replay
                 StageId = config.StageId,
                 PlayerId = playerId ?? string.Empty,
                 HighestLeague = config.HighestLeague,
-                AssistExtraMoves = config.AssistExtraMoves
+                AssistExtraMoves = config.AssistExtraMoves,
+                Pet = config.Pet,
+                PetLevel = config.PetLevel
             };
             foreach (LoadoutEntry e in config.Loadout)
             {

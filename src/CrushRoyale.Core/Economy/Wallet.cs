@@ -32,7 +32,9 @@ namespace CrushRoyale.Core.Economy
         Chargeback = 21,
         RankUpBonus = 22,
         AdReward = 23,
-        GhostDefense = 24
+        GhostDefense = 24,
+        PetSummon = 25,
+        PetAwaken = 26
     }
 
     /// <summary>One immutable line of the currency ledger.</summary>

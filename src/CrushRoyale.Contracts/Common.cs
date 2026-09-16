@@ -32,6 +32,9 @@ namespace CrushRoyale.Contracts
         public const string IapValidate = Prefix + "/iap/validate";
         public const string Equip = Prefix + "/inventory/equip";
         public const string RewardedAd = Prefix + "/ads/rewarded";
+        public const string PetSummon = Prefix + "/pets/summon";
+        public const string PetEquip = Prefix + "/pets/equip";
+        public const string PetAwaken = Prefix + "/pets/awaken";
 
         public const string Matchmaking = Prefix + "/pvp/matchmaking";
         public const string PvpMatch = Prefix + "/pvp/match/{matchId}";

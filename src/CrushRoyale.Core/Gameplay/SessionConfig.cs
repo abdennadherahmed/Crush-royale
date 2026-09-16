@@ -73,9 +73,33 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Extra moves granted after repeated failures on the same stage (see Story.DifficultyAssist).</summary>
         public int AssistExtraMoves { get; set; }
 
+        /// <summary>Equipped companion pet (None when absent).</summary>
+        public PetType Pet { get; set; }
+
+        /// <summary>Level the pet plays at in this match (already capped for PvP).</summary>
+        public int PetLevel { get; set; }
+
         public bool IsPvp => Mode == GameMode.PvpRanked || Mode == GameMode.FriendlyChallenge;
 
         public bool HasMoveLimit => MoveLimit > 0;
+
+        /// <summary>Adds the equipped pet, capping its level in PvP. Returns this config for chaining.</summary>
+        public SessionConfig WithPet(PetType pet, int level, GameBalance balance)
+        {
+            if (balance == null)
+            {
+                throw new ArgumentNullException(nameof(balance));
+            }
+            if (pet == PetType.None || level <= 0 || balance.Pets.Get(pet) == null)
+            {
+                Pet = PetType.None;
+                PetLevel = 0;
+                return this;
+            }
+            Pet = pet;
+            PetLevel = Math.Min(level, IsPvp ? balance.Pets.PvpLevelCap : balance.Pets.MaxLevel);
+            return this;
+        }
 
         public static SessionConfig ForStage(StageData stage, GameBalance balance, IEnumerable<LoadoutEntry> loadout, League highestLeague, int assistExtraMoves = 0)
         {
@@ -205,6 +229,11 @@ namespace CrushRoyale.Core.Gameplay
                 return ErrorCode.InvalidArgument;
             }
             if (BossPhases < 0 || BossStonesPerPhase < 0 || BossHp < 0)
+            {
+                return ErrorCode.InvalidArgument;
+            }
+            if ((Pet == PetType.None) != (PetLevel == 0) || PetLevel < 0 || PetLevel > (IsPvp ? balance.Pets.PvpLevelCap : balance.Pets.MaxLevel)
+                || (Pet != PetType.None && balance.Pets.Get(Pet) == null))
             {
                 return ErrorCode.InvalidArgument;
             }

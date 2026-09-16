@@ -66,6 +66,7 @@ public sealed class StoryService
                     AssistExtraMoves = ws.Story.GetAssistExtraMoves(stageId)
                 }
             };
+            ws.SnapshotPet(match.Config, GameMode.Story);
             await ctx.Tx.InsertMatchAsync(match).ConfigureAwait(false);
             return Mappers.MatchStart(match, ws, _ops.Balance.HashHex);
         }, ct);
@@ -114,7 +115,8 @@ public sealed class StoryService
             }
 
             StageData stage = ws.Catalog.Get(match.StageId);
-            SessionConfig config = SessionConfig.ForStage(stage, ws.Balance, match.Config.Loadout, match.Config.HighestLeague, match.Config.AssistExtraMoves);
+            SessionConfig config = SessionConfig.ForStage(stage, ws.Balance, match.Config.Loadout, match.Config.HighestLeague, match.Config.AssistExtraMoves)
+                .WithPet(match.Config.Pet, match.Config.PetLevel, ws.Balance);
 
             bool timingOk = ws.AntiCheat.ValidateTimestamps(ws.State.Integrity, replay, TimeUtil.ToUnixMs(match.StartedAt), ws.NowMs, match.Id);
             ReplayVerification verification = ws.AntiCheat.ValidateReplay(ws.State.Integrity, replay, config, match.Id);
@@ -158,6 +160,7 @@ public sealed class StoryService
             ws.TrackQuest(QuestType.BreakStones, result.StonesDestroyed);
             ws.TrackQuest(QuestType.UsePowerUps, result.PowerUpsUsed.Values.Sum());
             ws.AddBattlePassXp(status == StageStatus.Won ? ws.Balance.LiveOps.XpStoryWin : ws.Balance.LiveOps.XpStoryLoss);
+            ws.AwardPetXp(match.Config, GameMode.Story, status == StageStatus.Won);
 
             bool showAd = status == StageStatus.Won && AdPolicy.OnEvent(ws.State.Ads, AdPlacement.StoryWin, ws.Now, ws.State.Story.HighestUnlockedStage,
                 ws.State.Inventory.AdsRemoved, new VipSystem(ws.Balance).GetBenefit(ws.State.Vip.Tier), ws.Balance);

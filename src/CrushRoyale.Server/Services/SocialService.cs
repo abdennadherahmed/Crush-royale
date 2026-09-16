@@ -126,6 +126,7 @@ public sealed class SocialService
                     StolenPowerUp = stolen
                 }
             };
+            ws.SnapshotPet(match.Config, GameMode.FriendlyChallenge);
             await ctx.Tx.InsertMatchAsync(match).ConfigureAwait(false);
             GhostDto ghostDto = await PvpService.BuildGhostAsync(_ops.Store, ws.Balance, ghost, ct).ConfigureAwait(false);
             return Mappers.MatchStart(match, ws, _ops.Balance.HashHex, ghostDto);

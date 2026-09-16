@@ -242,6 +242,7 @@ public sealed class GuildService
                     GuildWeek = week
                 }
             };
+            ws.SnapshotPet(match.Config, GameMode.GuildBoss);
             await ctx.Tx.InsertMatchAsync(match).ConfigureAwait(false);
             await ctx.Tx.UpdateGuildAsync(record).ConfigureAwait(false);
             return Mappers.MatchStart(match, ws, _ops.Balance.HashHex);
@@ -269,7 +270,8 @@ public sealed class GuildService
                 return await RejectAsync(ctx, match, header).ConfigureAwait(false);
             }
 
-            SessionConfig config = SessionConfig.ForGuildBoss(match.Seed, match.StageId, ws.Balance, match.Config.Loadout, match.Config.HighestLeague);
+            SessionConfig config = SessionConfig.ForGuildBoss(match.Seed, match.StageId, ws.Balance, match.Config.Loadout, match.Config.HighestLeague)
+                .WithPet(match.Config.Pet, match.Config.PetLevel, ws.Balance);
             bool timingOk = ws.AntiCheat.ValidateTimestamps(ws.State.Integrity, replay, TimeUtil.ToUnixMs(match.StartedAt), ws.NowMs, match.Id);
             ReplayVerification verification = ws.AntiCheat.ValidateReplay(ws.State.Integrity, replay, config, match.Id);
             if (!verification.Valid || !timingOk)
@@ -307,6 +309,7 @@ public sealed class GuildService
             ws.Achievements.RecordStageResult(result, null, null);
             ws.TrackQuest(QuestType.AttackGuildBoss, 1);
             ws.AddBattlePassXp(ws.Balance.LiveOps.XpGuildBossAttack);
+            ws.AwardPetXp(match.Config, GameMode.GuildBoss, true);
 
             long replayId = await ctx.Tx.InsertReplayAsync(new ReplayRow
             {
