@@ -24,13 +24,42 @@ namespace CrushRoyale.Core.Story
 
         private const int OnboardingTargetPermille = 450;
 
+        private const int StoneReliefPermille = 50;
+
+        private const int IceReliefPermille = 20;
+
+        private const int ObstacleReliefCapPermille = 450;
+
+        private const int BossHpPermille = 1100;
+
+        /// <summary>Goals are capped to these shares of the expert bot's reach (StageTuning.g.cs).</summary>
+        private const int TunedScoreEasyPermille = 600;
+
+        private const int TunedScoreHardPermille = 900;
+
+        private const int TunedBossReliefPermille = 60;
+
+        private const int TunedObstacleEasyPermille = 700;
+
+        private const int TunedObstacleHardPermille = 950;
+
+        /// <summary>Share of the ice layers / stones an obstacle goal asks for.</summary>
+        private const int GoalObstaclePermille = 750;
+
         private readonly GameBalance _balance;
         private readonly Dictionary<int, StageData> _cache = new Dictionary<int, StageData>();
         private readonly object _lock = new object();
+        private readonly bool _applyTuning;
 
-        public StageCatalog(GameBalance balance)
+        public StageCatalog(GameBalance balance) : this(balance, true)
+        {
+        }
+
+        /// <summary>Catalog; <paramref name="applyTuning"/> is false only for tools/StageAudit when it measures what bots can reach.</summary>
+        public StageCatalog(GameBalance balance, bool applyTuning)
         {
             _balance = balance ?? throw new ArgumentNullException(nameof(balance));
+            _applyTuning = applyTuning;
         }
 
         public int TotalCampaignStages => _balance.Story.TotalStages;
@@ -173,11 +202,16 @@ namespace CrushRoyale.Core.Story
             int campaignId = CampaignEquivalent(id);
             int stones = campaignId >= 21 && index % 3 != 1 ? 1 + d * 6 / 1000 : 0;
             int iceCells = campaignId >= 41 && index % 4 == 3 ? 4 + d * 12 / 1000 : 0;
+            int iceLayers = 1 + (d >= 600 ? 1 : 0) + (d >= 900 ? 1 : 0);
+
+            // Obstacles eat moves: score goals shrink with them (validated by tools/StageAudit on all 1000 stages).
+            int relief = Math.Min(ObstacleReliefCapPermille, stones * StoneReliefPermille + iceCells * iceLayers * IceReliefPermille);
+            target = RoundTo(Math.Max(200, target * (1000 - relief) / 1000), 50);
 
             if (stage.IsBoss)
             {
                 stage.BossPhases = BossPhasesFor(stage.BossKind);
-                stage.BossHp = RoundTo((int)((long)target * 13 / 10), 50);
+                stage.BossHp = RoundTo((int)((long)target * BossHpPermille / 1000), 50);
                 stage.BossStonesPerPhase = 1 + (int)stage.BossKind;
                 stage.TargetScore = stage.BossHp;
                 stage.Objectives.Add(new StageObjective { Type = ObjectiveType.DefeatBoss, Target = stage.BossHp });
@@ -192,14 +226,16 @@ namespace CrushRoyale.Core.Story
                         stage.Objectives.Add(CollectObjective(stage, rng));
                         break;
                     case 3 when campaignId >= 41:
+                        // Ice goals: at most 2 layers, and 75% of the layers must break (corners stay reachable).
                         iceCells = Math.Max(iceCells, 6 + d * 10 / 1000);
+                        iceLayers = Math.Min(iceLayers, 2);
                         stage.TargetScore = RoundTo(target / 2, 50);
-                        stage.Objectives.Add(new StageObjective { Type = ObjectiveType.ClearIce, Target = 0 });
+                        stage.Objectives.Add(new StageObjective { Type = ObjectiveType.ClearIce, Target = Math.Max(1, (Math.Min(iceCells, 24) * iceLayers * GoalObstaclePermille + 999) / 1000) });
                         break;
                     case 4 when campaignId >= 21:
                         stones = Math.Max(stones, 3 + d * 5 / 1000);
                         stage.TargetScore = RoundTo(target / 2, 50);
-                        stage.Objectives.Add(new StageObjective { Type = ObjectiveType.BreakStones, Target = 0 });
+                        stage.Objectives.Add(new StageObjective { Type = ObjectiveType.BreakStones, Target = Math.Max(1, (Math.Min(stones, 12) * GoalObstaclePermille + 999) / 1000) });
                         break;
                     case 0 when campaignId >= 11:
                         stage.TargetScore = RoundTo(target * 7 / 10, 50);
@@ -213,10 +249,15 @@ namespace CrushRoyale.Core.Story
                 }
             }
 
+            if (!endless && _applyTuning)
+            {
+                ApplyTuning(stage, id);
+            }
+
             stage.StoneCount = Math.Min(stones, 12);
             stage.StoneHp = d >= 700 ? 2 : 1;
             stage.IceCells = Math.Min(iceCells, 24);
-            stage.IceLayers = 1 + (d >= 600 ? 1 : 0) + (d >= 900 ? 1 : 0);
+            stage.IceLayers = iceLayers;
 
             int starBase = Math.Max(stage.TargetScore, 200);
             stage.TwoStarScore = RoundTo((int)((long)starBase * s.TwoStarPermille / 1000), 50);
@@ -284,6 +325,56 @@ namespace CrushRoyale.Core.Story
                 case BossKind.ChapterBoss: return 3;
                 case BossKind.ActBoss: return 4;
                 default: return 5;
+            }
+        }
+
+        /// <summary>
+        /// Caps every goal to a share of what an expert bot actually reaches on this exact stage (same seed, all moves,
+        /// see StageTuning.g.cs generated by tools/StageAudit). Unlucky boards can never produce an impossible stage.
+        /// </summary>
+        private static void ApplyTuning(StageData stage, int id)
+        {
+            if (id >= StageTuning.Score.Length)
+            {
+                return;
+            }
+            int score = StageTuning.Score[id];
+            int d = stage.DifficultyPermille;
+            // The share of the expert's reach grows with difficulty: generous early, demanding late (never above ~90%).
+            int scoreShare = TunedScoreEasyPermille + (TunedScoreHardPermille - TunedScoreEasyPermille) * d / 1000;
+            int bossShare = scoreShare - TunedBossReliefPermille;
+            int obstacleShare = TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000;
+            foreach (StageObjective objective in stage.Objectives)
+            {
+                switch (objective.Type)
+                {
+                    case ObjectiveType.ReachScore when score > 0:
+                        int cappedScore = Math.Max(200, RoundTo((int)((long)score * scoreShare / 1000), 50));
+                        if (objective.Target > cappedScore)
+                        {
+                            objective.Target = cappedScore;
+                            stage.TargetScore = cappedScore;
+                        }
+                        break;
+                    case ObjectiveType.DefeatBoss when score > 0:
+                        int cappedHp = Math.Max(200, RoundTo((int)((long)score * bossShare / 1000), 50));
+                        if (objective.Target > cappedHp)
+                        {
+                            objective.Target = cappedHp;
+                            stage.BossHp = cappedHp;
+                            stage.TargetScore = cappedHp;
+                        }
+                        break;
+                    case ObjectiveType.ClearIce when StageTuning.Ice[id] > 0:
+                        objective.Target = Math.Min(objective.Target, Math.Max(1, StageTuning.Ice[id] * obstacleShare / 1000));
+                        break;
+                    case ObjectiveType.BreakStones when StageTuning.Stones[id] > 0:
+                        objective.Target = Math.Min(objective.Target, Math.Max(1, StageTuning.Stones[id] * obstacleShare / 1000));
+                        break;
+                    case ObjectiveType.CollectColor when StageTuning.Collect[id] > 0:
+                        objective.Target = Math.Min(objective.Target, Math.Max(4, StageTuning.Collect[id] * obstacleShare / 1000));
+                        break;
+                }
             }
         }
 

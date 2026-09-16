@@ -55,12 +55,30 @@ public class StageCatalogTests
     }
 
     [Fact]
-    public void ScoreTargets_GrowAcrossTheCampaign()
+    public void EveryGoal_StaysWithinWhatTheExpertBotReaches()
     {
-        int early = _catalog.Get(1).TargetScore;
-        int mid = _catalog.Get(101).TargetScore;
-        int late = _catalog.Get(901).TargetScore;
-        Assert.True(early < mid && mid < late, $"{early} < {mid} < {late}");
+        // StageTuning.g.cs comes from tools/StageAudit --bake: re-bake when stage generation or scoring changes.
+        Assert.Equal(Fixtures.Balance.Story.TotalStages + 1, StageTuning.Score.Length);
+        for (int id = 1; id <= Fixtures.Balance.Story.TotalStages; id++)
+        {
+            StageData stage = _catalog.Get(id);
+            foreach (StageObjective goal in stage.Objectives)
+            {
+                switch (goal.Type)
+                {
+                    case ObjectiveType.ReachScore:
+                    case ObjectiveType.DefeatBoss:
+                        Assert.True(goal.Target <= Math.Max(200, StageTuning.Score[id] * 9 / 10 + 50), $"stage {id}: {goal.Target} vs reach {StageTuning.Score[id]}");
+                        break;
+                    case ObjectiveType.ClearIce:
+                        Assert.True(goal.Target <= Math.Max(1, StageTuning.Ice[id]), $"stage {id} ice");
+                        break;
+                    case ObjectiveType.BreakStones:
+                        Assert.True(goal.Target <= Math.Max(1, StageTuning.Stones[id]), $"stage {id} stones");
+                        break;
+                }
+            }
+        }
     }
 
     [Fact]
