@@ -585,7 +585,8 @@ def league_scene(T):
         text(d, (W / 2, 610), T["leaguename"], 60, fill=GOLD + (255,), stroke=6, title=True)
         rise = ease_out_cubic(clamp((lt - 0.5) / 1.8))
         trophies = int(2480 + (3150 - 2480) * rise)
-        you_rank = 6 - rise * 6
+        # The row slides up only as the trophy count actually passes each player (smooth 60-trophy crossover).
+        you_rank = sum(clamp((value - trophies) / 60 + 0.5) for _, value in others)
         rows = []
         for idx, (name, value) in enumerate(others):
             slot = idx + (1 if idx >= you_rank - 0.5 else 0)
@@ -656,7 +657,7 @@ def build_timeline(rec, lang):
         # (about 2.5 s late, 9% lower) so the duel bar stays tense in every scene.
         base = 0
         for t, s in own:
-            if t <= t_ms - 2500:
+            if t <= t_ms - 1200:
                 base = s
         wobble = 0
         for t, s in opponent:
