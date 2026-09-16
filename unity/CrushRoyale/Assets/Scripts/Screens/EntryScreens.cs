@@ -560,6 +560,11 @@ namespace CrushRoyale.Game.Screens
             dot.gameObject.AddComponent<Pulse>().Scale = true;
         }
 
+        private static string ProgressKey(ProfileDto p) => string.Join("|",
+            p.Story?.HighestUnlockedStage, p.Pvp?.Trophies, p.Pvp?.League, p.ClaimableQuests, p.UnclaimedAchievements, p.DisplayName,
+            p.Pets?.Equipped, p.Story?.UnlockedFeatures == null ? 0 : p.Story.UnlockedFeatures.Count,
+            p.Chests == null ? string.Empty : string.Join(",", p.Chests.Slots.Select(c => c == null ? "-" : c.Type + c.Status)));
+
         private bool IsUnlocked(Type screen, string feature)
         {
             if (!Game.Backend.IsOnline)
@@ -591,6 +596,22 @@ namespace CrushRoyale.Game.Screens
             {
                 UI.ShowRoot<HeroSelectScreen>();
                 return;
+            }
+
+            // Always show fresh progress (stage, trophies, badges, chests, pet) when coming back to the hub.
+            if (profile != null)
+            {
+                string before = ProgressKey(profile);
+                await Game.Backend.RefreshProfileAsync();
+                if (this == null)
+                {
+                    return;
+                }
+                profile = Game.Backend.Profile;
+                if (profile != null && ProgressKey(profile) != before)
+                {
+                    Rebuild();
+                }
             }
             await ChallengeFlow.CheckClipboardAsync(UI, Game);
             if (profile == null || !profile.LoginBonusAvailable)

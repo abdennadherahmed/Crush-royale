@@ -568,6 +568,8 @@ namespace CrushRoyale.Game.Screens
                     Game.Backend.ApplyWallet(args.Server.Wallet);
                     Game.Backend.ApplyLives(args.Server.Lives);
                     _ = Game.Ads.ShowInterstitialIfRequested(args.Server.ShowInterstitial);
+                    // Stage unlocked, stars, achievements, chests, pet XP: the hub and map must see the new progress.
+                    _ = Game.Backend.RefreshProfileAsync();
                 }
             }
             UI.Show<StoryResultScreen>(args, addToHistory: false);
@@ -600,6 +602,7 @@ namespace CrushRoyale.Game.Screens
                 {
                     Game.Backend.ApplyWallet(args.Server.Wallet);
                     _ = Game.Ads.ShowInterstitialIfRequested(args.Server.ShowInterstitial);
+                    _ = Game.Backend.RefreshProfileAsync();
                 }
             }
             UI.Show<PvpResultScreen>(args, addToHistory: false);
@@ -625,6 +628,10 @@ namespace CrushRoyale.Game.Screens
                 : response.Accepted
                     ? Loc.T(response.DefeatedNow ? "boss.defeated" : "boss.damage", Loc.Number(response.Damage), response.AttacksLeft)
                     : Loc.T("error." + response.Error);
+            if (response != null && response.Accepted)
+            {
+                _ = Game.Backend.RefreshProfileAsync();
+            }
             await UI.Alert(Loc.T("boss.title"), message);
             UI.ShowRoot<GuildScreen>();
         }
