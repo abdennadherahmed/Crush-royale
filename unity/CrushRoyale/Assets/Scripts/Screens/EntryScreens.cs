@@ -380,11 +380,11 @@ namespace CrushRoyale.Game.Screens
             Sprite art = full ?? ArtLibrary.Character(id);
 
             Image halo = UIFactory.Icon(safe, ProceduralSprites.Glow(128), new Color(Theme.Crystal.r, Theme.Crystal.g, Theme.Crystal.b, 0.38f), 0);
-            UIFactory.Anchor(halo.rectTransform, 0.08f, 0.36f, 0.92f, 0.86f);
+            UIFactory.Anchor(halo.rectTransform, 0.08f, 0.39f, 0.92f, 0.88f);
             halo.gameObject.AddComponent<Pulse>();
 
             Image pedestal = UIFactory.Icon(safe, ProceduralSprites.Glow(128), new Color(0.02f, 0.01f, 0.06f, 0.75f), 0);
-            UIFactory.Anchor(pedestal.rectTransform, 0.22f, 0.3f, 0.78f, 0.36f);
+            UIFactory.Anchor(pedestal.rectTransform, 0.22f, 0.325f, 0.78f, 0.385f);
 
             if (art != null)
             {
@@ -392,7 +392,7 @@ namespace CrushRoyale.Game.Screens
                 hero.preserveAspect = true;
                 hero.raycastTarget = false;
                 hero.rectTransform.pivot = new Vector2(0.5f, 0f);
-                UIFactory.Anchor(hero.rectTransform, 0.17f, full != null ? 0.315f : 0.36f, 0.83f, 0.87f);
+                UIFactory.Anchor(hero.rectTransform, 0.17f, full != null ? 0.345f : 0.39f, 0.83f, 0.885f);
                 hero.gameObject.AddComponent<Breathe>();
             }
 
@@ -403,17 +403,17 @@ namespace CrushRoyale.Game.Screens
                 Image pet = UIFactory.Icon(safe, petArt, Color.white, 0);
                 pet.raycastTarget = false;
                 pet.rectTransform.pivot = new Vector2(0.5f, 0f);
-                UIFactory.Anchor(pet.rectTransform, 0.6f, 0.3f, 0.86f, 0.45f);
+                UIFactory.Anchor(pet.rectTransform, 0.6f, 0.335f, 0.86f, 0.48f);
                 Breathe hop = pet.gameObject.AddComponent<Breathe>();
                 hop.Amount = 0.05f;
                 hop.Speed = 3f;
             }
 
-            string name = profile?.DisplayName ?? settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
-            Image plate = UIFactory.Panel("NamePlate", safe, new Color(0.08f, 0.05f, 0.18f, 0.85f));
-            UIFactory.Anchor(plate.rectTransform, 0.24f, 0.27f, 0.76f, 0.315f);
-            Text label = UIFactory.Label(plate.transform, name, Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Stretch(label.rectTransform, 12, 12, 0, 0);
+            if (profile != null)
+            {
+                ChestBar chests = ChestBar.Create(safe, UI);
+                UIFactory.Anchor((RectTransform)chests.transform, 0.03f, 0.262f, 0.97f, 0.34f);
+            }
         }
 
         private void BuildTopBar(RectTransform safe, ProfileDto profile, PlayerSettings settings, string gender)

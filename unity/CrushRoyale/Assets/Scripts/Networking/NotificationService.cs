@@ -53,6 +53,17 @@ namespace CrushRoyale.Game.Networking
                 Send(_loc.T("notif.lives.title"), _loc.T("notif.lives.body"), DateTime.Now.AddSeconds(secondsToFull));
             }
 
+            if (profile.Chests != null)
+            {
+                foreach (ChestSlotDto chest in profile.Chests.Slots)
+                {
+                    if (chest != null && chest.Status == "Unlocking" && chest.SecondsLeft > 60)
+                    {
+                        Send(_loc.T("notif.chest.title"), _loc.T("notif.chest.body"), DateTime.Now.AddSeconds(chest.SecondsLeft));
+                    }
+                }
+            }
+
             DateTime tomorrow = DateTime.Now.Date.AddDays(1).AddHours(19);
             Send(_loc.T("notif.daily.title"), _loc.T("notif.daily.body"), tomorrow);
 

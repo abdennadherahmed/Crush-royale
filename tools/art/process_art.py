@@ -6,6 +6,9 @@ centered on a transparent square and resized. Backgrounds are copied as-is.
 
 Usage (from the repository root):
     python tools/art/process_art.py sheet <source> <out_dir> <columns> <rows> <name1,name2,...> [size]
+    python tools/art/process_art.py cells <source> <out_dir> <columns> <rows> <name1,name2,...> [size]
+        (cells: only magenta connected to the cell border is removed, so pink/purple parts of a sprite survive,
+         and fragments of neighbouring sprites are dropped)
     python tools/art/process_art.py background <source> <out_file>
 
 Empty names ("") skip a cell. Requires Pillow and numpy.
@@ -14,6 +17,8 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from collections import deque
+
 from PIL import Image
 
 KEY_OPAQUE = 70     # below: fully opaque
@@ -82,6 +87,76 @@ def process_boxes(source: Path, out_dir: Path, boxes: dict[str, tuple[int, int, 
         print(f"  {target} ({size}x{size})")
 
 
+def _components(mask: np.ndarray) -> tuple[np.ndarray, list[tuple[int, float, float, int, int, int, int]]]:
+    """4-connected labelling: (size, centre y, centre x, top, bottom, left, right) per component."""
+    h, w = mask.shape
+    labels = np.zeros((h, w), np.int32)
+    comps = []
+    for y in range(h):
+        for x in np.nonzero(mask[y] & (labels[y] == 0))[0]:
+            if labels[y, x]:
+                continue
+            n = len(comps) + 1
+            queue = deque([(y, x)])
+            labels[y, x] = n
+            ys, xs = [], []
+            while queue:
+                cy, cx = queue.popleft()
+                ys.append(cy)
+                xs.append(cx)
+                for ny, nx in ((cy + 1, cx), (cy - 1, cx), (cy, cx + 1), (cy, cx - 1)):
+                    if 0 <= ny < h and 0 <= nx < w and mask[ny, nx] and not labels[ny, nx]:
+                        labels[ny, nx] = n
+                        queue.append((ny, nx))
+            comps.append((len(ys), sum(ys) / len(ys), sum(xs) / len(xs), min(ys), max(ys), min(xs), max(xs)))
+    return labels, comps
+
+
+def key_cell(cell: Image.Image) -> Image.Image:
+    """Removes only the magenta connected to the border, then drops fragments far from the main sprite."""
+    rgb = np.asarray(cell.convert("RGB")).astype(np.int32)
+    keyed = np.array(remove_magenta(cell))
+    candidate = (np.minimum(rgb[..., 0], rgb[..., 2]) - rgb[..., 1]) > 60
+    labels, comps = _components(candidate)
+    h, w = candidate.shape
+    border = set(labels[0, :]) | set(labels[h - 1, :]) | set(labels[:, 0]) | set(labels[:, w - 1])
+    border.discard(0)
+    background = np.isin(labels, list(border))
+    near = background | np.roll(background, 1, 0) | np.roll(background, -1, 0) | np.roll(background, 1, 1) | np.roll(background, -1, 1)
+    inside = ~near
+    keyed[inside, :3] = rgb[inside].astype(np.uint8)
+    keyed[inside, 3] = 255
+
+    labels, comps = _components(keyed[..., 3] > 30)
+    if comps:
+        main = max(range(len(comps)), key=lambda i: comps[i][0])
+        _, _, _, top, bottom, left, right = comps[main]
+        my, mx = (bottom - top) * 0.06, (right - left) * 0.06
+        keep = [i + 1 for i, c in enumerate(comps) if top - my <= c[1] <= bottom + my and left - mx <= c[2] <= right + mx]
+        kept = np.isin(labels, keep)
+        grown = kept | np.roll(kept, 1, 0) | np.roll(kept, -1, 0) | np.roll(kept, 1, 1) | np.roll(kept, -1, 1)
+        keyed[..., 3] = np.where(grown, keyed[..., 3], 0)
+    return Image.fromarray(keyed, "RGBA")
+
+
+def process_cells(source: Path, out_dir: Path, columns: int, rows: int, names: list[str], size: int) -> None:
+    sheet = Image.open(source).convert("RGB")
+    cell_w, cell_h = sheet.width / columns, sheet.height / rows
+    out_dir.mkdir(parents=True, exist_ok=True)
+    for index, name in enumerate(names):
+        if not name:
+            continue
+        col, row = index % columns, index // columns
+        box = (round(col * cell_w), round(row * cell_h), round((col + 1) * cell_w), round((row + 1) * cell_h))
+        sprite = trim_to_square(key_cell(sheet.crop(box)), size)
+        if sprite is None:
+            print(f"  skipped {name}: empty cell")
+            continue
+        target = out_dir / f"{name}.png"
+        sprite.save(target, optimize=True)
+        print(f"  {target} ({size}x{size})")
+
+
 def process_background(source: Path, out_file: Path) -> None:
     out_file.parent.mkdir(parents=True, exist_ok=True)
     image = Image.open(source).convert("RGB")
@@ -93,6 +168,10 @@ def main(argv: list[str]) -> int:
     if len(argv) >= 6 and argv[1] == "sheet":
         size = int(argv[7]) if len(argv) > 7 else 256
         process_sheet(Path(argv[2]), Path(argv[3]), int(argv[4]), int(argv[5]), argv[6].split(","), size)
+        return 0
+    if len(argv) >= 6 and argv[1] == "cells":
+        size = int(argv[7]) if len(argv) > 7 else 256
+        process_cells(Path(argv[2]), Path(argv[3]), int(argv[4]), int(argv[5]), argv[6].split(","), size)
         return 0
     if len(argv) == 4 and argv[1] == "background":
         process_background(Path(argv[2]), Path(argv[3]))

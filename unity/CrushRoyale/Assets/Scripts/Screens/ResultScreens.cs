@@ -24,6 +24,29 @@ namespace CrushRoyale.Game.Screens
     /// <summary>Win/lose screen with stars, rewards, unlocks, after-stage dialogues and branching choices.</summary>
     public sealed class StoryResultScreen : UIScreen
     {
+        /// <summary>"Chest won!" with its picture, or a hint that all slots were full.</summary>
+        public static void ChestLine(Transform list, string chest)
+        {
+            if (string.IsNullOrEmpty(chest))
+            {
+                return;
+            }
+            Localization loc = GameRoot.Instance.Loc;
+            if (chest == "Full")
+            {
+                UIFactory.Height(UIFactory.Label(list, loc.T("chest.full"), Theme.SmallSize, Theme.Warning), 70);
+                return;
+            }
+            RectTransform row = UIFactory.Rect("Chest", list);
+            UIFactory.Height(row.gameObject.AddComponent<Image>(), 150).GetComponent<Image>().color = new Color(0, 0, 0, 0);
+            Image art = UIFactory.Icon(row, ChestBar.ChestArt(chest), Color.white, 0);
+            UIFactory.Anchor(art.rectTransform, 0.08f, 0f, 0.36f, 1f);
+            art.gameObject.AddComponent<Breathe>().Amount = 0.05f;
+            Text text = UIFactory.Label(row, loc.T("chest.won"), Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(text.rectTransform, 0.4f, 0f, 1f, 1f);
+            GameRoot.Instance.Audio.PlaySFX(SoundIds.WinFanfare);
+        }
+
         private StoryResultArgs _args;
 
         public override System.Type BackTarget => typeof(WorldMapScreen);
@@ -72,6 +95,7 @@ namespace CrushRoyale.Game.Screens
                     UIFactory.Height(UIFactory.Label(list, Loc.T("result.rewards", Loc.Number(s.CoinsEarned), Loc.Number(s.OrbesEarned)), Theme.HeaderSize, Theme.Gold), 80);
                     Game.Audio.PlaySFX(SoundIds.Coins);
                 }
+                ChestLine(list, s.ChestEarned);
                 foreach (string feature in s.FeaturesUnlocked)
                 {
                     UIFactory.Height(UIFactory.Label(list, Loc.T("result.unlocked", Loc.T("feature." + feature)), Theme.BodySize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold), 70);
@@ -232,6 +256,7 @@ namespace CrushRoyale.Game.Screens
                     UIFactory.Height(UIFactory.Label(_list, Loc.T("pvp.friendly"), Theme.BodySize, Theme.TextMuted), 70);
                 }
                 UIFactory.Height(UIFactory.Label(_list, Loc.T("result.rewards", Loc.Number(s.CoinsEarned), 0), Theme.BodySize, Theme.Gold), 70);
+                StoryResultScreen.ChestLine(_list, s.ChestEarned);
                 foreach (string achievement in s.AchievementsUnlocked)
                 {
                     UIFactory.Height(UIFactory.Label(_list, Loc.T("result.achievement", Loc.T("ach." + achievement + ".title")), Theme.BodySize, Theme.Gold), 70);

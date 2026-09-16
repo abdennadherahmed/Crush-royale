@@ -27,6 +27,9 @@ namespace CrushRoyale.Game
         public string HeroGender;
         public string HeroPseudo;
         public int HeroAge;
+
+        /// <summary>The first duel is played against a gentle bot (onboarding).</summary>
+        public bool FirstDuelDone;
     }
 
     /// <summary>

@@ -372,6 +372,17 @@ namespace CrushRoyale.Game.Screens
                 return;
             }
 
+            // First minutes: the very first duel is a friendly one against a gentle bot, so it ends in a win.
+            ProfileDto me = Game.Backend.Profile;
+            if (me != null && me.Pvp.Wins + me.Pvp.Losses == 0 && !Game.Save.Settings.FirstDuelDone)
+            {
+                Game.Save.Settings.FirstDuelDone = true;
+                Game.Save.SaveSettings();
+                await UI.Alert(Loc.T("pvp.firstDuelTitle"), Loc.T("pvp.firstDuelBody"));
+                await PlayBotAsync(League.Bronze, easy: true);
+                return;
+            }
+
             MatchmakingStatusResponse status = await Api(api => api.RequestMatchAsync(new MatchmakingRequest { Loadout = _selected.ToList() }));
             if (status == null)
             {
@@ -448,12 +459,12 @@ namespace CrushRoyale.Game.Screens
         }
 
         /// <summary>Training duel (no trophies) against a human-paced bot of the given league.</summary>
-        private async Task PlayBotAsync(League league)
+        private async Task PlayBotAsync(League league, bool easy = false)
         {
             using (UI.Loading())
             {
                 ulong seed = (ulong)Random.Range(1, int.MaxValue) * 2654435761UL;
-                MatchLaunch launch = await Task.Run(() => MatchLaunch.OfflinePvp(Game.Backend.Balance, seed, league));
+                MatchLaunch launch = await Task.Run(() => MatchLaunch.OfflinePvp(Game.Backend.Balance, seed, league, easy));
                 UI.Show<GameplayScreen>(launch, addToHistory: false);
             }
         }
