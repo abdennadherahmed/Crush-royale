@@ -205,6 +205,22 @@ public sealed class InMemoryGameStore : IGameStore
 
     public Task<bool> PingAsync(CancellationToken cancellationToken) => Task.FromResult(true);
 
+    /// <summary>Kept in memory for tests (last batches only).</summary>
+    public List<(Guid PlayerId, TelemetryBatch Batch)> Telemetry { get; } = new();
+
+    public Task InsertTelemetryAsync(Guid playerId, TelemetryBatch batch, CancellationToken cancellationToken)
+    {
+        lock (Telemetry)
+        {
+            Telemetry.Add((playerId, batch));
+            if (Telemetry.Count > 1000)
+            {
+                Telemetry.RemoveAt(0);
+            }
+        }
+        return Task.CompletedTask;
+    }
+
     // ---------------------------------------------------------------- helpers
 
     private League LeagueOf(int trophies) => LeagueTable.GetLeague(trophies, _balance().Trophies);

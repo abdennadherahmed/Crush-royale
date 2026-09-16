@@ -66,8 +66,11 @@ namespace CrushRoyale.Game.Screens
             var playOffline = new TaskCompletionSource<bool>();
             _connecting = true;
             _ = RevealOfflineButtonAsync(playOffline);
+            float loginStarted = Time.realtimeSinceStartup;
             bool online = await Game.Backend.StartAsync(Loc.Language, 8000, playOffline.Task);
             _connecting = false;
+            Game.Telemetry.Track(online ? "login_online" : "login_offline", ("ms", (int)((Time.realtimeSinceStartup - loginStarted) * 1000)),
+                ("skipped", playOffline.Task.IsCompleted), ("error", Game.Backend.LastError?.Code ?? string.Empty));
             if (this == null)
             {
                 return;
@@ -277,6 +280,7 @@ namespace CrushRoyale.Game.Screens
             settings.HeroAge = int.TryParse(_age.text, out int age) && age >= 4 && age <= 120 ? age : 0;
             settings.HeroCreated = true;
             Game.Save.SaveSettings();
+            Game.Telemetry.Track("hero_created", ("gender", _gender), ("online", Game.Backend.IsOnline), ("age_given", settings.HeroAge > 0));
 
             _submitting = true;
             try

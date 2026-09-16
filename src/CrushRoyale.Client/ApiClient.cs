@@ -194,6 +194,8 @@ namespace CrushRoyale.Client
         // Economy
         public Task<PurchaseResponse> BuyLivesAsync(int count, CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.LivesBuy, new BuyLivesRequest { Count = count }, ct);
         public Task<PurchaseResponse> ClaimVipLifeAsync(CancellationToken ct = default) => Transport.PostAsync<PurchaseResponse>(ApiRoutes.LivesVipClaim, null, ct);
+        public Task<object> SendTelemetryAsync(TelemetryRequest request, CancellationToken ct = default) => Transport.PostAsync<object>(ApiRoutes.Telemetry, request, ct);
+
         public Task<PetSummonResponse> SummonPetsAsync(int count, CancellationToken ct = default) => Transport.PostAsync<PetSummonResponse>(ApiRoutes.PetSummon, new PetSummonRequest { Count = count }, ct);
 
         public Task<PetActionResponse> EquipPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetEquip, new PetRequest { Pet = pet }, ct);

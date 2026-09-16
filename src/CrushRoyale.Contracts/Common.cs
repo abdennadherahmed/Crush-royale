@@ -33,6 +33,7 @@ namespace CrushRoyale.Contracts
         public const string Equip = Prefix + "/inventory/equip";
         public const string RewardedAd = Prefix + "/ads/rewarded";
         public const string PetSummon = Prefix + "/pets/summon";
+        public const string Telemetry = Prefix + "/telemetry";
         public const string PetEquip = Prefix + "/pets/equip";
         public const string PetAwaken = Prefix + "/pets/awaken";
 

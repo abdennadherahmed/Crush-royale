@@ -226,6 +226,33 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
     }
 
     [Fact]
+    public async Task Telemetry_StoresValidEvents_AndGroupsErrors()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync();
+        var request = new TelemetryRequest
+        {
+            SessionId = "s1",
+            AppVersion = "1.0.3",
+            Device = "Pixel 8",
+            Events =
+            {
+                new TelemetryEventDto { Name = "stage_end", AtUnixMs = 1_790_000_000_000, Props = { ["stage"] = "3", ["result"] = "Won" } },
+                new TelemetryEventDto { Name = "DROP TABLE players;--" }
+            },
+            Errors = { new ClientErrorDto { Message = "NullReferenceException at 0x1234", Stack = "BoardView.PlayStep\nMatchController.Update", Count = 3 } }
+        };
+        await http.PostOk<object>(ApiRoutes.Telemetry, request);
+
+        var store = (InMemoryGameStore)_app.Store;
+        (Guid player, TelemetryBatch batch) = store.Telemetry.Last();
+        Assert.Equal(id, player);
+        Assert.Single(batch.Events);
+        Assert.Equal("stage_end", batch.Events[0].Name);
+        Assert.Contains("\"stage\":\"3\"", batch.Events[0].PropsJson);
+        Assert.Equal(3, batch.Errors.Single().Count);
+    }
+
+    [Fact]
     public async Task Pets_SummonEquipAwaken_AndPlayInMatches()
     {
         var (id, http, _) = await _app.NewPlayerAsync();

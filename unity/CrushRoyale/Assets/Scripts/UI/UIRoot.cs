@@ -170,6 +170,7 @@ namespace CrushRoyale.Game.UI
             }
 
             UIScreen previous = Current;
+            _game.Telemetry?.Track("screen_view", ("screen", type.Name));
             RectTransform rect = UIFactory.Stretch(UIFactory.Rect(type.Name, _screens));
             CanvasGroup group = rect.gameObject.AddComponent<CanvasGroup>();
             group.alpha = 0f;

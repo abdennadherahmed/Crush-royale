@@ -48,6 +48,8 @@ namespace CrushRoyale.Game
 
         public GoogleSignIn Google { get; private set; }
 
+        public Telemetry Telemetry { get; private set; }
+
         public UIRoot UI { get; private set; }
 
         private void Awake()
@@ -74,6 +76,8 @@ namespace CrushRoyale.Game
             Audio.Initialize(Save);
 
             Backend = new BackendManager(Config, Save);
+            Telemetry = new Telemetry(Backend);
+            Telemetry.Track("app_open", ("first_launch", !Save.Settings.HeroCreated), ("language", Loc.Language));
             Google = GoogleSignIn.Create(transform);
             Iap = new IapService(Backend, Config);
             Ads = new AdsService(Config);
@@ -94,6 +98,7 @@ namespace CrushRoyale.Game
 
         private void Update()
         {
+            Telemetry.Update();
             if (Time.realtimeSinceStartup < _nextReconnectAt)
             {
                 return;
@@ -124,6 +129,7 @@ namespace CrushRoyale.Game
             if (paused)
             {
                 Notifications.ScheduleReminders(Backend.Profile);
+                Telemetry.OnPause();
             }
             else
             {

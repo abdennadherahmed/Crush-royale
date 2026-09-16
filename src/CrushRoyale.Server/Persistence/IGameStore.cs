@@ -36,6 +36,9 @@ public interface IGameStore
 
     /// <summary>Probe used by the health endpoint.</summary>
     Task<bool> PingAsync(CancellationToken cancellationToken);
+
+    /// <summary>Analytics events and client exceptions (outside game transactions: best effort).</summary>
+    Task InsertTelemetryAsync(Guid playerId, TelemetryBatch batch, CancellationToken cancellationToken);
 }
 
 public interface IStoreTransaction

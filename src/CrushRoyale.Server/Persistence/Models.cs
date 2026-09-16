@@ -77,6 +77,22 @@ public sealed class PlayerState
     public long LastSeenUnixMs { get; set; }
 }
 
+/// <summary>Validated telemetry batch ready to be stored.</summary>
+public sealed class TelemetryBatch
+{
+    public string SessionId { get; init; } = string.Empty;
+
+    public string AppVersion { get; init; } = string.Empty;
+
+    public string Device { get; init; } = string.Empty;
+
+    public string Os { get; init; } = string.Empty;
+
+    public List<(string Name, DateTime? ClientAt, string PropsJson)> Events { get; } = new();
+
+    public List<(string Fingerprint, string Message, string Stack, int Count)> Errors { get; } = new();
+}
+
 public sealed class PlayerRecord
 {
     public Guid Id { get; init; }

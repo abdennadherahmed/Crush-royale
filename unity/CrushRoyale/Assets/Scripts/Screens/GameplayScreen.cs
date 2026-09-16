@@ -198,6 +198,7 @@ namespace CrushRoyale.Game.Screens
             {
                 _controller.Board.ShowHint(hint.Value);
             }
+            Game.Telemetry.Track("tutorial_step", ("step", 1));
             await CoachAsync("hud.tutoSwap");
             if (this == null)
             {
@@ -234,6 +235,7 @@ namespace CrushRoyale.Game.Screens
             _controller.Resume();
             Game.Save.Settings.TutorialDone = true;
             Game.Save.SaveSettings();
+            Game.Telemetry.Track("tutorial_done");
         }
 
         /// <summary>Speech bubble above the board (Lyra portrait), dismissed with a tap anywhere.</summary>
@@ -337,6 +339,20 @@ namespace CrushRoyale.Game.Screens
                 button.interactable = s.IsRunning && can == ErrorCode.None;
                 label.text = Loc.T("powerup." + type) + " x" + s.PowerUps.Remaining(type);
             }
+        }
+
+        private void TrackResult(StageResult result)
+        {
+            GameSession s = _controller.Session;
+            string name = _launch.Mode == GameMode.Story ? "stage_end" : _launch.Mode == GameMode.GuildBoss ? "boss_end" : "pvp_end";
+            string outcome = result.State.ToString();
+            if (_launch.Mode != GameMode.Story && _controller.Ghost != null)
+            {
+                outcome = result.FinalScore > _controller.Ghost.CurrentScore ? "Won" : result.FinalScore == _controller.Ghost.CurrentScore ? "Draw" : "Lost";
+            }
+            Game.Telemetry.Track(name, ("stage", _launch.StageId), ("result", outcome), ("score", result.FinalScore), ("moves", result.MovesUsed),
+                ("ms", result.DurationMs), ("offline", _launch.Offline), ("pet_level", s.Config.PetLevel), ("powerups", result.PowerUpsUsed.Count),
+                ("continues", result.ContinuesUsed), ("bot", _launch.OfflineGhost != null));
         }
 
         /// <summary>Equipped pet under the board: portrait, level and auto-move chance; it hops when the pet plays.</summary>
@@ -455,6 +471,7 @@ namespace CrushRoyale.Game.Screens
             {
                 return;
             }
+            TrackResult(result);
             GameSession session = _controller.Session;
 
             if (_launch.Mode == GameMode.Story && result.State == SessionState.Lost && !_launch.Offline && Game.Backend.IsOnline)

@@ -236,6 +236,48 @@ public sealed class PostgresGameStore : IGameStore
         return await cmd.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false) as string;
     }
 
+    public async Task InsertTelemetryAsync(Guid playerId, TelemetryBatch batch, CancellationToken cancellationToken)
+    {
+        if (batch.Events.Count > 0)
+        {
+            const string sql = @"
+                insert into public.telemetry_events (player_id, session_id, name, props, app_version, device, client_at)
+                select @player, @session, e.name, e.props::jsonb, @version, @device, e.client_at
+                from unnest(@names, @props, @times) as e(name, props, client_at)";
+            await using NpgsqlCommand cmd = _dataSource.CreateCommand(sql);
+            cmd.Parameters.AddWithValue("player", playerId);
+            cmd.Parameters.AddWithValue("session", batch.SessionId);
+            cmd.Parameters.AddWithValue("version", batch.AppVersion);
+            cmd.Parameters.AddWithValue("device", batch.Device);
+            cmd.Parameters.AddWithValue("names", batch.Events.Select(e => e.Name).ToArray());
+            cmd.Parameters.AddWithValue("props", batch.Events.Select(e => e.PropsJson).ToArray());
+            cmd.Parameters.Add(new NpgsqlParameter("times", NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.TimestampTz)
+            {
+                Value = batch.Events.Select(e => e.ClientAt.HasValue ? (object)DateTime.SpecifyKind(e.ClientAt.Value, DateTimeKind.Utc) : DBNull.Value).ToArray()
+            });
+            await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        foreach ((string fingerprint, string message, string stack, int count) in batch.Errors)
+        {
+            const string sql = @"
+                insert into public.client_errors (player_id, fingerprint, message, stack, app_version, device, os, occurrences)
+                values (@player, @fingerprint, @message, @stack, @version, @device, @os, @count)
+                on conflict (fingerprint, app_version) do update
+                set occurrences = public.client_errors.occurrences + excluded.occurrences, last_seen = now(), player_id = excluded.player_id";
+            await using NpgsqlCommand cmd = _dataSource.CreateCommand(sql);
+            cmd.Parameters.AddWithValue("player", playerId);
+            cmd.Parameters.AddWithValue("fingerprint", fingerprint);
+            cmd.Parameters.AddWithValue("message", message);
+            cmd.Parameters.AddWithValue("stack", stack);
+            cmd.Parameters.AddWithValue("version", batch.AppVersion);
+            cmd.Parameters.AddWithValue("device", batch.Device);
+            cmd.Parameters.AddWithValue("os", batch.Os);
+            cmd.Parameters.AddWithValue("count", count);
+            await cmd.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
+        }
+    }
+
     public async Task<bool> PingAsync(CancellationToken cancellationToken)
     {
         try

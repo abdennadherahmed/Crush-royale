@@ -172,6 +172,40 @@ namespace CrushRoyale.Contracts
         public int PvpLevelCap { get; set; }
     }
 
+    /// <summary>Batch of analytics events and client exceptions (sent every minute and when the app goes to background).</summary>
+    public sealed class TelemetryRequest
+    {
+        public string SessionId { get; set; }
+
+        public string AppVersion { get; set; }
+
+        public string Device { get; set; }
+
+        public string Os { get; set; }
+
+        public List<TelemetryEventDto> Events { get; set; } = new List<TelemetryEventDto>();
+
+        public List<ClientErrorDto> Errors { get; set; } = new List<ClientErrorDto>();
+    }
+
+    public sealed class TelemetryEventDto
+    {
+        public string Name { get; set; }
+
+        public long AtUnixMs { get; set; }
+
+        public Dictionary<string, string> Props { get; set; } = new Dictionary<string, string>();
+    }
+
+    public sealed class ClientErrorDto
+    {
+        public string Message { get; set; }
+
+        public string Stack { get; set; }
+
+        public int Count { get; set; } = 1;
+    }
+
     public sealed class PetSummonRequest
     {
         /// <summary>1 or 10.</summary>

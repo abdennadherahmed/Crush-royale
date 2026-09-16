@@ -165,6 +165,7 @@ namespace CrushRoyale.Game.Screens
                 return;
             }
             Apply(response.Pets, response.Wallet);
+            Game.Telemetry.Track("pet_summon", ("count", count), ("whole", response.Pulls.FindAll(p => p.WholePet && !p.Duplicate).Count));
             await ShowPullsAsync(response.Pulls);
             Rebuild();
         }
