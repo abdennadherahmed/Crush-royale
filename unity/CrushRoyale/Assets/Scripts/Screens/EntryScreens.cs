@@ -252,7 +252,7 @@ namespace CrushRoyale.Game.Screens
 
         private static void Style(RectTransform card, bool selected)
         {
-            card.GetComponent<Image>().color = selected ? Theme.GoldDark : Theme.Panel;
+            UiKit.Recolor(card.GetComponent<Image>(), selected ? Theme.GoldDark : Theme.Panel);
             card.localScale = Vector3.one * (selected ? 1f : 0.92f);
             Transform portrait = card.Find("Portrait");
             if (portrait != null)
