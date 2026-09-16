@@ -87,7 +87,14 @@ namespace CrushRoyale.Game.Screens
                     return;
                 }
                 UI.Toast(Game.Backend.IsConfigured ? Loc.T("splash.offline") : Loc.T("splash.notConfigured"), 3.5f);
-                UI.ShowRoot<MainMenuScreen>();
+                if (Game.Save.Settings.HeroCreated)
+                {
+                    UI.ShowRoot<MainMenuScreen>();
+                }
+                else
+                {
+                    UI.ShowRoot<HeroSelectScreen>();
+                }
                 return;
             }
 
@@ -109,6 +116,27 @@ namespace CrushRoyale.Game.Screens
             if (profile.SuspendedUntilUnixMs > DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
             {
                 await ui.Alert(loc.T("error.title"), loc.T("error.Banned"));
+            }
+
+            PlayerSettings settings = game.Save.Settings;
+            if (!profile.HeroChosen && settings.HeroCreated && HeroSelectScreen.IsValidPseudo(settings.HeroPseudo))
+            {
+                // Hero created offline: send it now (a refused pseudo reopens the creation screen, pre-filled).
+                try
+                {
+                    await game.Backend.Client.Api.SetHeroAsync(HeroSelectScreen.HeroRequest(settings, loc.Language));
+                    await game.Backend.RefreshProfileAsync();
+                    profile = game.Backend.Profile;
+                }
+                catch (CrushApiException ex)
+                {
+                    Debug.LogWarning("Offline hero sync failed: " + ex.Code);
+                }
+            }
+            if (profile.HeroChosen && !settings.HeroCreated)
+            {
+                settings.HeroCreated = true;
+                game.Save.SaveSettings();
             }
 
             if (!profile.HeroChosen)
@@ -134,93 +162,167 @@ namespace CrushRoyale.Game.Screens
         }
     }
 
-    /// <summary>First launch: choose the hero (GDD male/female + name), a display name and declare an age (purchase protection).</summary>
+    /// <summary>
+    /// First launch: pick the hero (big portraits) and a pseudo, optional age (purchase protection). Works offline:
+    /// the choice is kept on the device and sent to the server as soon as the game connects.
+    /// </summary>
     public sealed class HeroSelectScreen : UIScreen
     {
         private string _gender = "female";
-        private Image _male;
-        private Image _female;
-        private InputField _heroName;
-        private InputField _displayName;
+        private RectTransform _femaleCard;
+        private RectTransform _maleCard;
+        private InputField _pseudo;
         private InputField _age;
+        private bool _submitting;
 
         protected override void Build()
         {
-            RectTransform body = Frame("hero.title", backButton: false);
-            RectTransform list = UIFactory.ScrollList(body, 28, 56);
+            PlayerSettings settings = Game.Save.Settings;
+            if (!string.IsNullOrEmpty(settings.HeroGender))
+            {
+                _gender = settings.HeroGender;
+            }
 
-            Widgets.SectionTitle(list, Loc.T("hero.choose"));
-            HorizontalLayoutGroup genders = UIFactory.Row(list, 320, 32);
-            _female = HeroCard(genders.transform, "female");
-            _male = HeroCard(genders.transform, "male");
+            RectTransform body = Frame("hero.title", backButton: false);
+
+            Text choose = UIFactory.Label(body, Loc.T("hero.choose"), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(choose.rectTransform, 0.04f, 0.9f, 0.96f, 0.98f);
+
+            _femaleCard = HeroCard(body, "female", 0.04f, 0.49f);
+            _maleCard = HeroCard(body, "male", 0.51f, 0.96f);
             Highlight();
 
-            UIFactory.Height(UIFactory.Label(list, Loc.T("hero.story"), Theme.SmallSize + 2, Theme.TextMuted), 130);
-            UIFactory.Height(_heroName = Widgets.Input(list, Loc.T("hero.namePlaceholder"), 16), 120);
-            UIFactory.Height(_displayName = Widgets.Input(list, Loc.T("hero.displayPlaceholder"), 20), 120);
-            UIFactory.Height(_age = Widgets.Input(list, Loc.T("hero.agePlaceholder"), 3, InputField.ContentType.IntegerNumber), 120);
-            UIFactory.Height(UIFactory.Label(list, Loc.T("hero.ageWhy"), Theme.SmallSize, Theme.TextMuted), 90);
+            Text story = UIFactory.Label(body, Loc.T("hero.story"), Theme.SmallSize + 2, Theme.TextMuted, TextAnchor.MiddleCenter);
+            UIFactory.Anchor(story.rectTransform, 0.06f, 0.4f, 0.94f, 0.48f);
 
-            UIFactory.Height(UIFactory.Button(list, Loc.T("hero.confirm"), () => _ = SubmitAsync()), 140);
+            _pseudo = Widgets.Input(body, Loc.T("hero.pseudoPlaceholder"), 20);
+            UIFactory.Anchor(_pseudo.GetComponent<RectTransform>(), 0.1f, 0.3f, 0.9f, 0.38f);
+            _pseudo.text = settings.HeroPseudo ?? string.Empty;
+
+            _age = Widgets.Input(body, Loc.T("hero.agePlaceholder"), 3, InputField.ContentType.IntegerNumber);
+            UIFactory.Anchor(_age.GetComponent<RectTransform>(), 0.3f, 0.215f, 0.7f, 0.28f);
+            if (settings.HeroAge > 0)
+            {
+                _age.text = settings.HeroAge.ToString();
+            }
+            Text why = UIFactory.Label(body, Loc.T("hero.ageWhy"), Theme.SmallSize - 2, Theme.TextMuted, TextAnchor.MiddleCenter);
+            UIFactory.Anchor(why.rectTransform, 0.08f, 0.15f, 0.92f, 0.21f);
+
+            Button confirm = UIFactory.Button(body, Loc.T("hero.confirm"), () => _ = SubmitAsync(), Theme.GoldDark, Theme.HeaderSize, Theme.Text);
+            UIFactory.Anchor(confirm.GetComponent<RectTransform>(), 0.12f, 0.03f, 0.88f, 0.13f);
         }
 
-        private Image HeroCard(Transform parent, string gender)
+        private RectTransform HeroCard(RectTransform parent, string gender, float xMin, float xMax)
         {
-            Button button = UIFactory.Button(parent, Loc.T("hero." + gender), () =>
+            Button button = UIFactory.Button(parent, string.Empty, () =>
             {
                 _gender = gender;
+                Game.Audio.PlaySFX(SoundIds.Click);
                 Highlight();
-            }, Theme.PanelLight, Theme.HeaderSize, Theme.Text);
+            }, Theme.Panel, Theme.BodySize, Theme.Text);
+            RectTransform card = UIFactory.Anchor(button.GetComponent<RectTransform>(), xMin, 0.5f, xMax, 0.89f);
+
             Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
             if (portrait != null)
             {
-                Image art = UIFactory.Icon(button.transform, portrait, Color.white, 0);
-                UIFactory.Anchor(art.rectTransform, 0.08f, 0.28f, 0.92f, 0.98f);
+                Image art = UIFactory.Icon(card, portrait, Color.white, 0);
+                art.name = "Portrait";
+                UIFactory.Anchor(art.rectTransform, 0.04f, 0.14f, 0.96f, 0.98f);
             }
             else
             {
-                Image silhouette = UIFactory.Icon(button.transform, ProceduralSprites.Gem(gender == "male" ? ProceduralSprites.GemShape.Diamond : ProceduralSprites.GemShape.Hexagon), gender == "male" ? Theme.Crystal : Theme.Orbe, 150);
-                silhouette.rectTransform.anchorMin = silhouette.rectTransform.anchorMax = new Vector2(0.5f, 0.66f);
+                Image silhouette = UIFactory.Icon(card, ProceduralSprites.Gem(gender == "male" ? ProceduralSprites.GemShape.Diamond : ProceduralSprites.GemShape.Hexagon), gender == "male" ? Theme.Crystal : Theme.Orbe, 220);
+                silhouette.name = "Portrait";
+                silhouette.rectTransform.anchorMin = silhouette.rectTransform.anchorMax = new Vector2(0.5f, 0.58f);
             }
-            return button.GetComponent<Image>();
+
+            Text label = UIFactory.Label(card, Loc.T("hero." + gender), Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(label.rectTransform, 0, 0.01f, 1, 0.14f);
+            return card;
         }
 
         private void Highlight()
         {
-            _male.color = _gender == "male" ? Theme.GoldDark : Theme.PanelLight;
-            _female.color = _gender == "female" ? Theme.GoldDark : Theme.PanelLight;
+            Style(_femaleCard, _gender == "female");
+            Style(_maleCard, _gender == "male");
+        }
+
+        private static void Style(RectTransform card, bool selected)
+        {
+            card.GetComponent<Image>().color = selected ? Theme.GoldDark : Theme.Panel;
+            card.localScale = Vector3.one * (selected ? 1f : 0.92f);
+            Transform portrait = card.Find("Portrait");
+            if (portrait != null)
+            {
+                portrait.GetComponent<Image>().color = selected ? Color.white : new Color(0.55f, 0.55f, 0.6f, 1f);
+            }
         }
 
         private async Task SubmitAsync()
         {
-            int? age = int.TryParse(_age.text, out int parsed) ? parsed : (int?)null;
-            if (string.IsNullOrWhiteSpace(_heroName.text))
+            if (_submitting)
             {
-                UI.Toast(Loc.T("hero.nameRequired"));
+                return;
+            }
+            string pseudo = _pseudo.text.Trim();
+            if (!IsValidPseudo(pseudo))
+            {
+                UI.Toast(Loc.T("hero.pseudoInvalid"));
                 return;
             }
 
-            var request = new SetHeroRequest
-            {
-                Gender = _gender,
-                HeroName = _heroName.text.Trim(),
-                DisplayName = string.IsNullOrWhiteSpace(_displayName.text) ? null : _displayName.text.Trim(),
-                Age = age,
-                Language = Loc.Language
-            };
+            PlayerSettings settings = Game.Save.Settings;
+            settings.HeroGender = _gender;
+            settings.HeroPseudo = pseudo;
+            settings.HeroAge = int.TryParse(_age.text, out int age) && age >= 4 && age <= 120 ? age : 0;
+            settings.HeroCreated = true;
+            Game.Save.SaveSettings();
 
-            if (!Game.Backend.IsOnline)
+            _submitting = true;
+            try
             {
-                UI.ShowRoot<MainMenuScreen>();
-                return;
-            }
-            ProfileDto profile = await Api(api => api.SetHeroAsync(request));
-            if (profile != null)
-            {
-                await Game.Backend.RefreshProfileAsync();
+                if (Game.Backend.IsOnline)
+                {
+                    ProfileDto profile = await Api(api => api.SetHeroAsync(HeroRequest(settings, Loc.Language)));
+                    if (profile == null)
+                    {
+                        return;
+                    }
+                    await Game.Backend.RefreshProfileAsync();
+                }
                 await DialogueOverlay.PlayAsync(UI, Loc, "dlg.prologue");
                 UI.ShowRoot<MainMenuScreen>();
             }
+            finally
+            {
+                _submitting = false;
+            }
+        }
+
+        /// <summary>Same rules as the server: 3-20 letters, digits, spaces, '_' or '-'.</summary>
+        public static bool IsValidPseudo(string pseudo) =>
+            pseudo != null && pseudo.Length >= 3 && pseudo.Length <= 20 && pseudo.All(c => char.IsLetterOrDigit(c) || c == ' ' || c == '_' || c == '-');
+
+        /// <summary>The pseudo doubles as the hero's name (letters only on the server, 16 max).</summary>
+        public static SetHeroRequest HeroRequest(PlayerSettings settings, string language)
+        {
+            string heroName = new string((settings.HeroPseudo ?? string.Empty).Where(c => char.IsLetter(c) || c == ' ' || c == '-').ToArray()).Trim();
+            if (heroName.Length > 16)
+            {
+                heroName = heroName.Substring(0, 16).Trim();
+            }
+            if (heroName.Length == 0)
+            {
+                heroName = "Crusher";
+            }
+            return new SetHeroRequest
+            {
+                Gender = settings.HeroGender == "male" ? "male" : "female",
+                HeroName = heroName,
+                DisplayName = settings.HeroPseudo,
+                Age = settings.HeroAge > 0 ? settings.HeroAge : (int?)null,
+                Language = language
+            };
         }
     }
 
@@ -253,7 +355,7 @@ namespace CrushRoyale.Game.Screens
             ProfileDto profile = Game.Backend.Profile;
             Image card = UIFactory.Panel("Profile", safe, Theme.Panel);
             UIFactory.Anchor(card.rectTransform, 0.02f, 0.78f, 0.98f, 0.915f);
-            string name = profile?.DisplayName ?? Loc.T("menu.practiceTitle");
+            string name = profile?.DisplayName ?? Game.Save.Settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
             Text title = UIFactory.Label(card.transform, name, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
             UIFactory.Anchor(title.rectTransform, 0.05f, 0.5f, 0.7f, 0.95f);
 

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CrushRoyale.Client;
 using CrushRoyale.Contracts;
+using CrushRoyale.Core.Board;
 using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Gameplay;
@@ -159,10 +160,114 @@ namespace CrushRoyale.Game.Screens
                     }
                     _controller.Resume();
                 }
+
+                if (stage.Id == 1 && !Game.Save.Settings.TutorialDone)
+                {
+                    await RunTutorialAsync();
+                }
             }
             else
             {
                 Game.Audio.PlayMusic(SoundIds.PvpMusic);
+            }
+        }
+
+        /// <summary>Stage 1 only, three short tips from Lyra (everyone knows match-3: no forced moves).</summary>
+        private async Task RunTutorialAsync()
+        {
+            _controller.Pause();
+            Move? hint = _controller.Session.BoardManager.GetHint();
+            if (hint.HasValue)
+            {
+                _controller.Board.ShowHint(hint.Value);
+            }
+            await CoachAsync("hud.tutoSwap");
+            if (this == null)
+            {
+                return;
+            }
+            _controller.Resume();
+
+            var moved = new TaskCompletionSource<bool>();
+            System.Action<ActionOutcome> onMove = _ => moved.TrySetResult(true);
+            _controller.ActionPresented += onMove;
+            await moved.Task;
+            if (this == null || _controller == null)
+            {
+                return;
+            }
+            _controller.ActionPresented -= onMove;
+            if (!_controller.Session.IsRunning)
+            {
+                return;
+            }
+
+            await Task.Delay(500);
+            if (this == null)
+            {
+                return;
+            }
+            _controller.Pause();
+            await CoachAsync("hud.tutoBonus");
+            await CoachAsync("hud.tutoSurge");
+            if (this == null)
+            {
+                return;
+            }
+            _controller.Resume();
+            Game.Save.Settings.TutorialDone = true;
+            Game.Save.SaveSettings();
+        }
+
+        /// <summary>Speech bubble above the board (Lyra portrait), dismissed with a tap anywhere.</summary>
+        private async Task CoachAsync(string key)
+        {
+            var done = new TaskCompletionSource<bool>();
+            Image shade = UIFactory.Panel("Coach", Root, new Color(0f, 0f, 0f, 0.3f), rounded: false);
+            UIFactory.Stretch(shade.rectTransform);
+            Button tap = shade.gameObject.AddComponent<Button>();
+            tap.transition = Selectable.Transition.None;
+            tap.onClick.AddListener(() => done.TrySetResult(true));
+
+            Image bubble = UIFactory.Panel("Bubble", shade.transform, Theme.Panel);
+            UIFactory.Anchor(bubble.rectTransform, 0.03f, 0.715f, 0.97f, 0.875f);
+
+            Sprite lyra = ArtLibrary.Character("lyra");
+            float textLeft = 0.05f;
+            if (lyra != null)
+            {
+                Image portrait = UIFactory.Icon(bubble.transform, lyra, Color.white, 0);
+                portrait.preserveAspect = true;
+                UIFactory.Anchor(portrait.rectTransform, -0.02f, -0.05f, 0.24f, 1.25f);
+                textLeft = 0.25f;
+            }
+            Text speaker = UIFactory.Label(bubble.transform, Loc.T("char.lyra"), Theme.BodySize, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(speaker.rectTransform, textLeft, 0.74f, 0.97f, 0.97f);
+            Text text = UIFactory.Label(bubble.transform, Loc.T(key), Theme.SmallSize + 4, Theme.Text, TextAnchor.UpperLeft);
+            UIFactory.Anchor(text.rectTransform, textLeft, 0.2f, 0.97f, 0.74f);
+            Text next = UIFactory.Label(bubble.transform, Loc.T("hud.tutoTap"), Theme.SmallSize, Theme.Crystal, TextAnchor.LowerRight);
+            UIFactory.Anchor(next.rectTransform, 0.4f, 0.03f, 0.97f, 0.22f);
+
+            Game.Audio.PlaySFX(SoundIds.Click);
+            StartCoroutine(PopIn(bubble.rectTransform));
+            await done.Task;
+            if (shade != null)
+            {
+                Destroy(shade.gameObject);
+            }
+        }
+
+        private static System.Collections.IEnumerator PopIn(RectTransform rect)
+        {
+            for (float t = 0; t < 1f && rect != null; t += Time.unscaledDeltaTime / 0.22f)
+            {
+                float k = 1f + 0.12f * Mathf.Sin(t * Mathf.PI) - 0.2f * (1f - t);
+                rect.localScale = Vector3.one * k;
+                yield return null;
+            }
+            if (rect != null)
+            {
+                rect.localScale = Vector3.one;
             }
         }
 
