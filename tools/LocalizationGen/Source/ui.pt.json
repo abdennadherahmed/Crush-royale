@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Tapete real",
   "kingdom.z5.t4": "Lustre de cristal",
   "kingdom.z5.t5": "O trono",
-  "kingdom.z5.t6": "Coroa de cristal"
+  "kingdom.z5.t6": "Coroa de cristal",
+  "guild.tech.ChestSpeed": "Baús expressos",
+  "guild.tech.ChestSpeed.desc": "Baús abrem 5% mais rápido por nível.",
+  "guild.tech.PetXp": "Canil real",
+  "guild.tech.PetXp.desc": "+10% de XP de mascote por nível."
 }

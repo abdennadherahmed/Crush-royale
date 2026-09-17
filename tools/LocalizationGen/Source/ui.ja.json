@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "王家の絨毯",
   "kingdom.z5.t4": "水晶のシャンデリア",
   "kingdom.z5.t5": "玉座",
-  "kingdom.z5.t6": "水晶の冠"
+  "kingdom.z5.t6": "水晶の冠",
+  "guild.tech.ChestSpeed": "急速宝箱",
+  "guild.tech.ChestSpeed.desc": "ランクごとに宝箱の開封が5%速くなる。",
+  "guild.tech.PetXp": "王家の飼育小屋",
+  "guild.tech.PetXp.desc": "ランクごとにペットXP+10%。"
 }

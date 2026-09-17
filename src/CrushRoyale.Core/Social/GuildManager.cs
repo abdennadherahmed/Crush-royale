@@ -21,7 +21,9 @@ namespace CrushRoyale.Core.Social
         LifeRecharge = 2,
         MaxLives = 3,
         PowerUpDiscount = 4,
-        BattlePassXp = 5
+        BattlePassXp = 5,
+        ChestSpeed = 6,
+        PetXp = 7
     }
 
     public sealed class GuildTechDefinition
@@ -36,15 +38,20 @@ namespace CrushRoyale.Core.Social
 
     public static class GuildTechTree
     {
-        /// <summary>21 ranks in total for 19 tech points: guilds must choose.</summary>
+        /// <summary>
+        /// 49 ranks for the 49 tech points of a level-50 guild: early levels force choices, a maxed guild completes the
+        /// whole tree.
+        /// </summary>
         public static readonly IReadOnlyList<GuildTechDefinition> Definitions = new List<GuildTechDefinition>
         {
-            new GuildTechDefinition { Tech = GuildTech.CoinBonus, MaxRank = 5, ValuePerRank = 20 },
-            new GuildTechDefinition { Tech = GuildTech.BossDamage, MaxRank = 5, ValuePerRank = 30 },
-            new GuildTechDefinition { Tech = GuildTech.LifeRecharge, MaxRank = 3, ValuePerRank = 50 },
+            new GuildTechDefinition { Tech = GuildTech.CoinBonus, MaxRank = 9, ValuePerRank = 20 },
+            new GuildTechDefinition { Tech = GuildTech.BossDamage, MaxRank = 10, ValuePerRank = 30 },
+            new GuildTechDefinition { Tech = GuildTech.LifeRecharge, MaxRank = 6, ValuePerRank = 50 },
             new GuildTechDefinition { Tech = GuildTech.MaxLives, MaxRank = 2, ValuePerRank = 1 },
-            new GuildTechDefinition { Tech = GuildTech.PowerUpDiscount, MaxRank = 3, ValuePerRank = 20 },
-            new GuildTechDefinition { Tech = GuildTech.BattlePassXp, MaxRank = 3, ValuePerRank = 50 }
+            new GuildTechDefinition { Tech = GuildTech.PowerUpDiscount, MaxRank = 6, ValuePerRank = 20 },
+            new GuildTechDefinition { Tech = GuildTech.BattlePassXp, MaxRank = 6, ValuePerRank = 50 },
+            new GuildTechDefinition { Tech = GuildTech.ChestSpeed, MaxRank = 5, ValuePerRank = 50 },
+            new GuildTechDefinition { Tech = GuildTech.PetXp, MaxRank = 5, ValuePerRank = 100 }
         };
 
         public static GuildTechDefinition Get(GuildTech tech) => Definitions.First(d => d.Tech == tech);
@@ -379,7 +386,9 @@ namespace CrushRoyale.Core.Social
             long cost = _balance.Guild.OrbeLevelBaseCost;
             for (int level = 3; level < next; level++)
             {
-                cost = cost * _balance.Guild.OrbeLevelEscalationPermille / 1000;
+                // Steep up to level 20, then a gentler climb to level 50 (a long-term goal for big guilds).
+                int escalation = level < _balance.Guild.GentleEscalationFromLevel ? _balance.Guild.OrbeLevelEscalationPermille : _balance.Guild.LateLevelEscalationPermille;
+                cost = cost * escalation / 1000;
             }
             return cost;
         }

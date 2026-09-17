@@ -20,7 +20,7 @@ namespace CrushRoyale.Game.Screens
     public sealed class GuildScreen : UIScreen
     {
         private static readonly string[] MemberTabs = { "guild.tab.members", "guild.tab.upgrades", "guild.tab.boss", "guild.tab.chat" };
-        private static readonly string[] Techs = { "CoinBonus", "BossDamage", "LifeRecharge", "MaxLives", "PowerUpDiscount", "BattlePassXp" };
+        private static readonly string[] Techs = { "CoinBonus", "BossDamage", "LifeRecharge", "MaxLives", "PowerUpDiscount", "BattlePassXp", "ChestSpeed", "PetXp" };
 
         private GuildDto _guild;
         private GuildSearchResponse _search;
@@ -134,7 +134,10 @@ namespace CrushRoyale.Game.Screens
                 icon.preserveAspect = true;
                 UIFactory.Anchor(icon.rectTransform, 0.02f, 0.05f, 0.3f, 0.95f);
             }
-            Text text = UIFactory.Label(chip.transform, value, Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+            Text text = UIFactory.Label(chip.transform, value, Theme.SmallSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = Theme.SmallSize - 10;
+            text.resizeTextMaxSize = Theme.SmallSize + 2;
             UIFactory.Anchor(text.rectTransform, 0.33f, 0f, 0.98f, 1f);
             Widgets.TitleOutline(text);
         }
@@ -149,7 +152,9 @@ namespace CrushRoyale.Game.Screens
         /// <summary>Round portrait with the member's initial (gold for the leader, silver for officers).</summary>
         private static void Initial(Transform parent, string name, string role, float x0, float y0, float x1, float y1)
         {
-            RectTransform holder = UIFactory.Anchor(UIFactory.Rect("Avatar", parent), x0, y0, x1, y1);
+            // The aspect fitter works inside its own area (on the card itself it filled the whole card).
+            RectTransform area = UIFactory.Anchor(UIFactory.Rect("AvatarArea", parent), x0, y0, x1, y1);
+            RectTransform holder = UIFactory.Stretch(UIFactory.Rect("Avatar", area));
             holder.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.FitInParent;
             UiKit.RoundBadge(holder, crystal: role != "Leader");
             string letter = string.IsNullOrEmpty(name) ? "?" : name.Substring(0, 1).ToUpperInvariant();
@@ -319,7 +324,7 @@ namespace CrushRoyale.Game.Screens
                 bool mine = member.PlayerId == Game.Backend.PlayerId;
                 bool canManage = !mine && (myRole == "Leader" || (myRole == "Officer" && member.Role == "Member"));
                 Image card = UIFactory.Panel("Member", list, Theme.Panel);
-                UIFactory.Height(card, canManage ? 330 : 240);
+                UIFactory.Height(card, canManage ? 380 : 290);
                 UiKit.CardFrame(card);
                 card.gameObject.AddComponent<PopIn>().Delay = Mathf.Min(0.6f, index++ * 0.04f);
                 if (mine)
@@ -517,6 +522,8 @@ namespace CrushRoyale.Game.Screens
                 case "LifeRecharge": return "item_hourglass";
                 case "MaxLives": return "item_heart";
                 case "PowerUpDiscount": return "item_ticket";
+                case "ChestSpeed": return "item_gift";
+                case "PetXp": return "item_fragment";
                 default: return "item_xp";
             }
         }

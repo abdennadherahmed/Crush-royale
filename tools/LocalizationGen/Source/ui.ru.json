@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Королевский ковёр",
   "kingdom.z5.t4": "Хрустальная люстра",
   "kingdom.z5.t5": "Трон",
-  "kingdom.z5.t6": "Хрустальная корона"
+  "kingdom.z5.t6": "Хрустальная корона",
+  "guild.tech.ChestSpeed": "Быстрые сундуки",
+  "guild.tech.ChestSpeed.desc": "Сундуки открываются на 5% быстрее за ранг.",
+  "guild.tech.PetXp": "Королевский питомник",
+  "guild.tech.PetXp.desc": "+10% опыта питомца за ранг."
 }

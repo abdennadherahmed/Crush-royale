@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Royal carpet",
   "kingdom.z5.t4": "Crystal chandelier",
   "kingdom.z5.t5": "The throne",
-  "kingdom.z5.t6": "Crystal crown"
+  "kingdom.z5.t6": "Crystal crown",
+  "guild.tech.ChestSpeed": "Express Chests",
+  "guild.tech.ChestSpeed.desc": "Chests open 5% faster per rank.",
+  "guild.tech.PetXp": "Royal Kennel",
+  "guild.tech.PetXp.desc": "+10% pet XP per rank."
 }

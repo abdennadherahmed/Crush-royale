@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "السجادة الملكية",
   "kingdom.z5.t4": "ثريا الكريستال",
   "kingdom.z5.t5": "العرش",
-  "kingdom.z5.t6": "تاج الكريستال"
+  "kingdom.z5.t6": "تاج الكريستال",
+  "guild.tech.ChestSpeed": "صناديق سريعة",
+  "guild.tech.ChestSpeed.desc": "تُفتح الصناديق أسرع بنسبة 5% لكل رتبة.",
+  "guild.tech.PetXp": "الوكر الملكي",
+  "guild.tech.PetXp.desc": "+10% خبرة للرفيق لكل رتبة."
 }

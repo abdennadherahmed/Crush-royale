@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Königsteppich",
   "kingdom.z5.t4": "Kristallleuchter",
   "kingdom.z5.t5": "Der Thron",
-  "kingdom.z5.t6": "Kristallkrone"
+  "kingdom.z5.t6": "Kristallkrone",
+  "guild.tech.ChestSpeed": "Express-Truhen",
+  "guild.tech.ChestSpeed.desc": "Truhen öffnen sich pro Rang 5 % schneller.",
+  "guild.tech.PetXp": "Königlicher Zwinger",
+  "guild.tech.PetXp.desc": "+10 % Begleiter-EP pro Rang."
 }

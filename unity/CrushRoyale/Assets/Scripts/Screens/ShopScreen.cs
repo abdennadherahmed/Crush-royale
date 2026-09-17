@@ -429,10 +429,13 @@ namespace CrushRoyale.Game.Screens
             Sprite art = UiKit.Art(icon);
             if (art != null)
             {
+                // Icon kept inside the button, proportions preserved (wide coin piles used to spill out).
                 Image image = UIFactory.Icon(rect, art, Color.white, 0);
-                UIFactory.Anchor(image.rectTransform, 0.03f, 0.1f, 0.3f, 0.9f);
+                image.preserveAspect = true;
+                image.raycastTarget = false;
+                UIFactory.Anchor(image.rectTransform, 0.07f, 0.16f, 0.3f, 0.84f);
                 Text label = button.GetComponentInChildren<Text>();
-                UIFactory.Anchor(label.rectTransform, 0.28f, 0.08f, 0.96f, 0.92f);
+                UIFactory.Anchor(label.rectTransform, 0.3f, 0.08f, 0.94f, 0.92f);
             }
         }
 

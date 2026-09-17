@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "왕실 카펫",
   "kingdom.z5.t4": "수정 샹들리에",
   "kingdom.z5.t5": "왕좌",
-  "kingdom.z5.t6": "수정 왕관"
+  "kingdom.z5.t6": "수정 왕관",
+  "guild.tech.ChestSpeed": "급속 상자",
+  "guild.tech.ChestSpeed.desc": "등급당 상자가 5% 더 빨리 열려요.",
+  "guild.tech.PetXp": "왕실 사육장",
+  "guild.tech.PetXp.desc": "등급당 펫 XP +10%."
 }

@@ -86,7 +86,7 @@ public class GuildTests
     public void Donations_LevelUpTo20_WithEscalatingCosts()
     {
         var m = Manager();
-        var wallet = EconomyFixtures.Wallet(_clock, 10000, 50000);
+        var wallet = EconomyFixtures.Wallet(_clock, 10000, 5_000_000);
         var guild = NewGuild(m, wallet);
 
         Assert.Equal(5, m.GetNextLevelPoints(guild));
@@ -118,20 +118,27 @@ public class GuildTests
         Assert.Equal(need + 10, big.Paid);
         Assert.Equal(10, guild.DonationProgress);
 
-        while (guild.Level < 20)
+        // Level 20 costs follow +25% steps, then +4% per level up to 50.
+        Assert.Equal(m.PointsForLevel(21) * 1040 / 1000, m.PointsForLevel(22));
+        while (guild.Level < 50)
         {
-            Assert.True(m.DonateTechPoints(guild, "leader", wallet, 100000).Success);
+            Assert.True(m.DonateTechPoints(guild, "leader", wallet, 200000).Success);
         }
         Assert.Equal(ErrorCode.LimitReached, m.Donate(guild, "leader", wallet, 1).Error);
-        Assert.Equal(19, guild.TechPointsAvailable);
+        Assert.Equal(49, guild.TechPointsAvailable);
         Assert.Equal(ErrorCode.NotMember, m.Donate(guild, "stranger", wallet, 1).Error);
 
-        for (int i = 0; i < 5; i++)
+        // A maxed guild can complete the whole tech tree, exactly.
+        foreach (GuildTechDefinition definition in GuildTechTree.Definitions)
         {
-            Assert.True(m.SpendTechPoint(guild, "leader", GuildTech.BossDamage).Success);
+            for (int i = 0; i < definition.MaxRank; i++)
+            {
+                Assert.True(m.SpendTechPoint(guild, "leader", definition.Tech).Success);
+            }
+            Assert.False(m.SpendTechPoint(guild, "leader", definition.Tech).Success);
         }
-        Assert.Equal(ErrorCode.LimitReached, m.SpendTechPoint(guild, "leader", GuildTech.BossDamage).Error);
-        Assert.Equal(150, GuildManager.GetTechValue(guild, GuildTech.BossDamage));
+        Assert.Equal(0, guild.TechPointsAvailable);
+        Assert.Equal(300, GuildManager.GetTechValue(guild, GuildTech.BossDamage));
     }
 
     [Fact]

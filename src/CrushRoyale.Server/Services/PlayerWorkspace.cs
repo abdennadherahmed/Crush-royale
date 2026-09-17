@@ -194,8 +194,13 @@ public sealed class PlayerWorkspace
     public ChestSystem Chests => new(State.Chests ??= new ChestState(), Balance);
 
     /// <summary>Grants a chest; returns its type name, "Full" when no slot is free.</summary>
-    public string GrantChest(ChestType type, string source, int? unlockSeconds = null) =>
-        Chests.Grant(type, source, unlockSeconds) >= 0 ? type.ToString() : "Full";
+    public string GrantChest(ChestType type, string source, int? unlockSeconds = null)
+    {
+        // Guild "Chest speed" tech shortens every unlock timer.
+        int seconds = unlockSeconds ?? Balance.Chests.Get(type).UnlockSeconds;
+        seconds = (int)((long)seconds * Math.Max(100, 1000 - GuildTech(Core.Social.GuildTech.ChestSpeed)) / 1000);
+        return Chests.Grant(type, source, seconds) >= 0 ? type.ToString() : "Full";
+    }
 
     /// <summary>Freezes the equipped pet into a match snapshot (PvP modes use the capped level).</summary>
     public void SnapshotPet(MatchConfigSnapshot snapshot, GameMode mode)
@@ -212,7 +217,8 @@ public sealed class PlayerWorkspace
         PetCollection pets = Pets;
         if (snapshot.Pet != PetType.None && pets.State.Equipped == snapshot.Pet)
         {
-            pets.AddXp(pets.XpFor(mode, won));
+            int xp = pets.XpFor(mode, won);
+            pets.AddXp((int)((long)xp * (1000 + GuildTech(Core.Social.GuildTech.PetXp)) / 1000));
         }
     }
 

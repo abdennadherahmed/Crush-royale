@@ -352,17 +352,18 @@ namespace CrushRoyale.Game.Screens
             BuildTopBar(safe, profile, settings, gender);
 
             // Top left: events and progression.
+            // Five buttons per column must stay above the chest bar (which starts at 0.34).
             float y = 0.815f;
             SideButton(safe, "quests", "menu.quests", typeof(QuestsScreen), "DailyQuests", 0.015f, y, profile?.ClaimableQuests ?? 0);
-            SideButton(safe, "achievements", "menu.achievements", typeof(AchievementsScreen), null, 0.015f, y -= 0.108f, profile?.UnclaimedAchievements ?? 0);
-            SideButton(safe, "battlepass", "menu.battlepass", typeof(BattlePassScreen), "BattlePass", 0.015f, y -= 0.108f, 0);
-            SideButton(safe, "leaderboard", "menu.leaderboard", typeof(LeaderboardScreen), "Pvp", 0.015f, y -= 0.108f, 0);
-            SideButton(safe, "castle", "menu.kingdom", typeof(KingdomScreen), null, 0.015f, y -= 0.108f, profile?.Story?.Restoration?.CanBuild == true ? 1 : 0);
+            SideButton(safe, "achievements", "menu.achievements", typeof(AchievementsScreen), null, 0.015f, y -= SideStep, profile?.UnclaimedAchievements ?? 0);
+            SideButton(safe, "battlepass", "menu.battlepass", typeof(BattlePassScreen), "BattlePass", 0.015f, y -= SideStep, 0);
+            SideButton(safe, "leaderboard", "menu.leaderboard", typeof(LeaderboardScreen), "Pvp", 0.015f, y -= SideStep, 0);
+            SideButton(safe, "castle", "menu.kingdom", typeof(KingdomScreen), null, 0.015f, y -= SideStep, profile?.Story?.Restoration?.CanBuild == true ? 1 : 0);
 
             // Right: social and the world map.
             SideButton(safe, "friends", "menu.friends", typeof(FriendsScreen), "Friends", 0.815f, 0.815f, 0);
-            SideButton(safe, "map", "menu.map", typeof(WorldMapScreen), "Story", 0.815f, 0.707f, 0);
-            SideButton(safe, "pets", "menu.pets", typeof(PetsScreen), null, 0.815f, 0.599f, 0);
+            SideButton(safe, "map", "menu.map", typeof(WorldMapScreen), "Story", 0.815f, 0.815f - SideStep, 0);
+            SideButton(safe, "pets", "menu.pets", typeof(PetsScreen), null, 0.815f, 0.815f - 2 * SideStep, 0);
             WheelButton(safe, profile);
 
             // Bottom: shop (left), play buttons (center), guild (right).
@@ -527,7 +528,8 @@ namespace CrushRoyale.Game.Screens
                 }
                 DailyWheelPopup.Show();
             });
-            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.815f, 0.391f, 0.985f, 0.491f);
+            float top = 0.815f - 3 * SideStep;
+            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.815f, top - SideHeight, 0.985f, top);
             Transform wheelIcon = rect.childCount > 0 ? rect.GetChild(0) : null;
             Caption(rect, Loc.T("menu.wheel"), Game.Backend.IsOnline);
             if (available)
@@ -590,11 +592,15 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
+        private const float SideStep = 0.094f;
+
+        private const float SideHeight = 0.086f;
+
         private void SideButton(RectTransform safe, string icon, string key, Type screen, string feature, float x, float yTop, int badge)
         {
             bool unlocked = IsUnlocked(screen, feature);
             Button button = IconButton(safe, icon, () => Open(screen, feature, unlocked));
-            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), x, yTop - 0.1f, x + 0.17f, yTop);
+            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), x, yTop - SideHeight, x + 0.17f, yTop);
             Caption(rect, Loc.T(key), unlocked);
             if (!unlocked)
             {

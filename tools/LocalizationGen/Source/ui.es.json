@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Alfombra real",
   "kingdom.z5.t4": "Lámpara de cristal",
   "kingdom.z5.t5": "El trono",
-  "kingdom.z5.t6": "Corona de cristal"
+  "kingdom.z5.t6": "Corona de cristal",
+  "guild.tech.ChestSpeed": "Cofres exprés",
+  "guild.tech.ChestSpeed.desc": "Los cofres se abren un 5% más rápido por rango.",
+  "guild.tech.PetXp": "Perrera real",
+  "guild.tech.PetXp.desc": "+10% de XP de mascota por rango."
 }

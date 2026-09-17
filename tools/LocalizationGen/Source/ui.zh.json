@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "皇家地毯",
   "kingdom.z5.t4": "水晶吊灯",
   "kingdom.z5.t5": "王座",
-  "kingdom.z5.t6": "水晶王冠"
+  "kingdom.z5.t6": "水晶王冠",
+  "guild.tech.ChestSpeed": "极速宝箱",
+  "guild.tech.ChestSpeed.desc": "每级宝箱开启速度提升5%。",
+  "guild.tech.PetXp": "皇家兽舍",
+  "guild.tech.PetXp.desc": "每级宠物经验+10%。"
 }

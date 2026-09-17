@@ -68,6 +68,9 @@ jobs:
           restore-keys: Library-Android-win-${{ env.UNITY_VERSION }}-
 
       - name: Install Unity with Android support
+        id: unity_setup
+        # The Unity Hub download sometimes times out on hosted runners: one automatic retry below.
+        continue-on-error: true
         uses: RageAgainstThePixel/unity-setup@v2
         with:
           unity-version: ${{ env.UNITY_VERSION }}
@@ -76,6 +79,17 @@ jobs:
           modules: android-sdk-ndk-tools, android-open-jdk
           # No installation cache: a restored editor took as long as a fresh install and then failed to start
           # (exit 0x8007007E, missing module), so every build installs Unity cleanly.
+          cache-installation: false
+          auto-update-hub: false
+
+      - name: Install Unity with Android support (retry)
+        if: steps.unity_setup.outcome == 'failure'
+        uses: RageAgainstThePixel/unity-setup@v2
+        with:
+          unity-version: ${{ env.UNITY_VERSION }}
+          version-file: ${{ env.PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
+          build-targets: Android
+          modules: android-sdk-ndk-tools, android-open-jdk
           cache-installation: false
           auto-update-hub: false
 

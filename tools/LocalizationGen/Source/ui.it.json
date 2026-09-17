@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Tappeto reale",
   "kingdom.z5.t4": "Lampadario di cristallo",
   "kingdom.z5.t5": "Il trono",
-  "kingdom.z5.t6": "Corona di cristallo"
+  "kingdom.z5.t6": "Corona di cristallo",
+  "guild.tech.ChestSpeed": "Forzieri express",
+  "guild.tech.ChestSpeed.desc": "I forzieri si aprono il 5% più in fretta per grado.",
+  "guild.tech.PetXp": "Canile reale",
+  "guild.tech.PetXp.desc": "+10% XP famiglio per grado."
 }

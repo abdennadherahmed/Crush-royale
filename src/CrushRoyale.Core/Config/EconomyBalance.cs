@@ -182,7 +182,7 @@ namespace CrushRoyale.Core.Config
     {
         public int MaxMembers { get; set; } = 20;
 
-        public int MaxLevel { get; set; } = 20;
+        public int MaxLevel { get; set; } = 50;
 
         public int CreateCostCoins { get; set; } = 100;
 
@@ -205,6 +205,11 @@ namespace CrushRoyale.Core.Config
         public int OrbeLevelBaseCost { get; set; } = 100;
 
         public int OrbeLevelEscalationPermille { get; set; } = 1250;
+
+        /// <summary>From this level on, each level costs <see cref="LateLevelEscalationPermille"/> of the previous one.</summary>
+        public int GentleEscalationFromLevel { get; set; } = 20;
+
+        public int LateLevelEscalationPermille { get; set; } = 1040;
 
         /// <summary>Tech points granted per level-up.</summary>
         public int TechPointsPerLevel { get; set; } = 1;

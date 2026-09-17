@@ -927,5 +927,9 @@
   "kingdom.z5.t3": "Tapis royal",
   "kingdom.z5.t4": "Lustre de cristal",
   "kingdom.z5.t5": "Le trône",
-  "kingdom.z5.t6": "Couronne de cristal"
+  "kingdom.z5.t6": "Couronne de cristal",
+  "guild.tech.ChestSpeed": "Coffres express",
+  "guild.tech.ChestSpeed.desc": "Les coffres s'ouvrent 5 % plus vite par rang.",
+  "guild.tech.PetXp": "Chenil royal",
+  "guild.tech.PetXp.desc": "+10 % d'XP de familier par rang."
 }
