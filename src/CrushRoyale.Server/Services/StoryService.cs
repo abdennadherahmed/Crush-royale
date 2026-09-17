@@ -220,6 +220,32 @@ public sealed class StoryService
             };
         }, ct);
 
+    public Task<RestorationBuildResponse> BuildRestorationAsync(Guid userId, RestorationBuildRequest request, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            RestorationBuildResult built = Restoration.Build(ws.State.Story, request?.TaskId ?? string.Empty).ValueOrThrow();
+            var response = new RestorationBuildResponse();
+            if (built.CompletedZone != null)
+            {
+                string key = "restoration:" + built.CompletedZone.Id;
+                ws.GrantReward(built.ZoneReward, TransactionReason.Restoration, key, key);
+                if (built.ZonePetFragments > 0)
+                {
+                    ws.Pets.Get(built.ZoneFragmentsPet).Fragments += built.ZonePetFragments;
+                    response.PetFragments = built.ZonePetFragments;
+                    response.FragmentsPet = built.ZoneFragmentsPet.ToString();
+                }
+                response.ZoneCompleted = built.CompletedZone.Number;
+                response.Reward = Mappers.Reward(built.ZoneReward);
+            }
+            response.Restoration = Mappers.Restoration(ws.State.Story);
+            response.Wallet = Mappers.Wallet(ws);
+            response.Inventory = Mappers.Inventory(ws);
+            response.Pets = Mappers.Pets(ws);
+            return response;
+        }, ct);
+
     public Task<ChapterChestResponse> ClaimChapterChestAsync(Guid userId, ChapterChestRequest request, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx =>
         {

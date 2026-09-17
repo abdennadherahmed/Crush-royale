@@ -29,6 +29,8 @@ namespace CrushRoyale.Contracts
         public const string VipGift = Prefix + "/vip/gift";
 
         public const string WheelSpin = Prefix + "/wheel/spin";
+
+        public const string RestorationBuild = Prefix + "/restoration/build";
         public const string Shop = Prefix + "/shop";
         public const string ShopRefresh = Prefix + "/shop/refresh";
         public const string ShopPurchase = Prefix + "/shop/purchase";

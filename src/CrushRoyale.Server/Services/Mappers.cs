@@ -64,6 +64,19 @@ public static class Mappers
         };
     }
 
+    public static RestorationDto Restoration(StoryProgress p)
+    {
+        RestorationState state = p.Restoration ?? new RestorationState();
+        return new RestorationDto
+        {
+            StarsAvailable = Core.Story.Restoration.AvailableStars(p),
+            StarsSpent = state.StarsSpent,
+            Built = state.Built.OrderBy(b => b, StringComparer.Ordinal).ToList(),
+            CurrentZone = Core.Story.Restoration.CurrentZone(state)?.Number ?? 0,
+            CanBuild = Core.Story.Restoration.CanBuildSomething(p)
+        };
+    }
+
     public static StoryDto Story(PlayerWorkspace ws)
     {
         StoryProgress p = ws.State.Story;
@@ -88,7 +101,8 @@ public static class Mappers
             SeenEvents = p.SeenEvents.OrderBy(e => e, StringComparer.Ordinal).ToList(),
             ClaimedChapterChests = (p.ClaimedChapterChests ?? new HashSet<string>()).OrderBy(c => c, StringComparer.Ordinal).ToList(),
             WinStreak = p.WinStreak,
-            BestWinStreak = p.BestWinStreak
+            BestWinStreak = p.BestWinStreak,
+            Restoration = Restoration(p)
         };
     }
 

@@ -49,6 +49,7 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.StageStart, (int stageId, StartStageRequest? body, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.StartAsync(Me(user), stageId, body ?? new StartStageRequest(), ct));
         api.MapPost(ApiRoutes.StageContinue, (string matchId, ContinueRequest? body, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.ContinueAsync(Me(user), matchId, body ?? new ContinueRequest(), ct));
         api.MapPost(ApiRoutes.StageComplete, (string matchId, SubmitReplayRequest body, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.CompleteAsync(Me(user), matchId, body.ReplayBase64, ct));
+        api.MapPost(ApiRoutes.RestorationBuild, (RestorationBuildRequest body, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.BuildRestorationAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.ChapterChest, (ChapterChestRequest body, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.ClaimChapterChestAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.StoryChoice, (ChoiceRequest body, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.MakeChoiceAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.StoryEventSeen, (string eventId, ClaimsPrincipal user, StoryService s, CancellationToken ct) => s.MarkEventSeenAsync(Me(user), eventId, ct));

@@ -324,6 +324,25 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
     }
 
     [Fact]
+    public async Task Restoration_SpendsStars_ZoneByZone_WithReward()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync();
+        await http.PostError(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = "z1.t1" }, HttpStatusCode.Conflict);
+        await _app.MutateAsync(id, s => s.Story.TotalStars = 20);
+
+        await http.PostError(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = "z2.t1" }, HttpStatusCode.Forbidden);
+        RestorationBuildResponse last = null!;
+        foreach (string task in new[] { "z1.t1", "z1.t2", "z1.t3", "z1.t4", "z1.t5", "z1.t6" })
+        {
+            last = await http.PostOk<RestorationBuildResponse>(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = task });
+        }
+        Assert.Equal(1, last.ZoneCompleted);
+        Assert.True(last.Reward.Coins >= 1500);
+        Assert.Equal(9, last.Restoration.StarsAvailable);
+        Assert.Equal(2, last.Restoration.CurrentZone);
+    }
+
+    [Fact]
     public async Task Pets_SummonEquipAwaken_AndPlayInMatches()
     {
         var (id, http, _) = await _app.NewPlayerAsync();

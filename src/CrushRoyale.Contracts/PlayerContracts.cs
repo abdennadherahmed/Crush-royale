@@ -121,10 +121,55 @@ namespace CrushRoyale.Contracts
         /// <summary>Chapter star chests already opened ("chapter:tier", tier 0-2 for 30/45/60 stars).</summary>
         public List<string> ClaimedChapterChests { get; set; } = new List<string>();
 
+        /// <summary>Rebuilding Crystalheim with stars.</summary>
+        public RestorationDto Restoration { get; set; }
+
         /// <summary>First wins in a row on new stages (3, 5 and 7 give starting bonuses).</summary>
         public int WinStreak { get; set; }
 
         public int BestWinStreak { get; set; }
+    }
+
+    public sealed class RestorationDto
+    {
+        /// <summary>Stars that can still be spent (earned stars minus spent ones).</summary>
+        public int StarsAvailable { get; set; }
+
+        public int StarsSpent { get; set; }
+
+        /// <summary>Built task ids ("z1.t3").</summary>
+        public List<string> Built { get; set; } = new List<string>();
+
+        /// <summary>1-based open zone, 0 when everything is rebuilt.</summary>
+        public int CurrentZone { get; set; }
+
+        /// <summary>A task of the open zone is affordable (hub badge).</summary>
+        public bool CanBuild { get; set; }
+    }
+
+    public sealed class RestorationBuildRequest
+    {
+        public string TaskId { get; set; }
+    }
+
+    public sealed class RestorationBuildResponse
+    {
+        public RestorationDto Restoration { get; set; }
+
+        /// <summary>Zone number finished by this task (0 otherwise), with its reward.</summary>
+        public int ZoneCompleted { get; set; }
+
+        public RewardDto Reward { get; set; }
+
+        public int PetFragments { get; set; }
+
+        public string FragmentsPet { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public InventoryDto Inventory { get; set; }
+
+        public PetsDto Pets { get; set; }
     }
 
     /// <summary>Daily wheel result: the slice index (see Core DailyWheel.Slices) and what it granted.</summary>

@@ -74,6 +74,9 @@ namespace CrushRoyale.Core.Story
         public int WinStreak { get; set; }
 
         public int BestWinStreak { get; set; }
+
+        /// <summary>Stars spent rebuilding Crystalheim.</summary>
+        public RestorationState Restoration { get; set; } = new RestorationState();
     }
 
     public sealed class StageCompletion

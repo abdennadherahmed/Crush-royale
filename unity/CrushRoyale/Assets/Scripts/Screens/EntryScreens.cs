@@ -357,6 +357,7 @@ namespace CrushRoyale.Game.Screens
             SideButton(safe, "achievements", "menu.achievements", typeof(AchievementsScreen), null, 0.015f, y -= 0.108f, profile?.UnclaimedAchievements ?? 0);
             SideButton(safe, "battlepass", "menu.battlepass", typeof(BattlePassScreen), "BattlePass", 0.015f, y -= 0.108f, 0);
             SideButton(safe, "leaderboard", "menu.leaderboard", typeof(LeaderboardScreen), "Pvp", 0.015f, y -= 0.108f, 0);
+            SideButton(safe, "castle", "menu.kingdom", typeof(KingdomScreen), null, 0.015f, y -= 0.108f, profile?.Story?.Restoration?.CanBuild == true ? 1 : 0);
 
             // Right: social and the world map.
             SideButton(safe, "friends", "menu.friends", typeof(FriendsScreen), "Friends", 0.815f, 0.815f, 0);
