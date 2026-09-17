@@ -59,6 +59,26 @@ public class PetCollectionTests
     }
 
     [Fact]
+    public void Convert_OwnedSurplus_ThreeForOne_IntoLockedPet()
+    {
+        var state = new PetCollectionState();
+        var pets = new PetCollection(state, Balance);
+        state.Pets[PetType.FrostFox] = new PetState { Owned = true, Level = 1, Fragments = 10 };
+
+        Assert.Equal(ErrorCode.None, pets.ConvertFragments(PetType.FrostFox, PetType.ForestOwl, 3));
+        Assert.Equal(1, pets.Get(PetType.FrostFox).Fragments);
+        Assert.Equal(3, pets.Get(PetType.ForestOwl).Fragments);
+
+        Assert.Equal(ErrorCode.NotEnoughItems, pets.ConvertFragments(PetType.FrostFox, PetType.ForestOwl, 1));
+        Assert.Equal(ErrorCode.PermissionDenied, pets.ConvertFragments(PetType.ForestOwl, PetType.FrostFox, 1));
+        pets.Get(PetType.FrostFox).Fragments = 30;
+        pets.Get(PetType.ForestOwl).Owned = true;
+        Assert.Equal(ErrorCode.AlreadyClaimed, pets.ConvertFragments(PetType.FrostFox, PetType.ForestOwl, 1));
+        Assert.Equal(ErrorCode.NotFound, pets.ConvertFragments(PetType.FrostFox, PetType.FrostFox, 1));
+        Assert.Equal(ErrorCode.InvalidArgument, pets.ConvertFragments(PetType.FrostFox, PetType.ForestOwl, 0));
+    }
+
+    [Fact]
     public void Duplicate_BecomesFragments()
     {
         var state = new PetCollectionState();

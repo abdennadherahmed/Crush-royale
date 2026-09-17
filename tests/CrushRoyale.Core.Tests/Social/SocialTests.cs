@@ -89,17 +89,34 @@ public class GuildTests
         var wallet = EconomyFixtures.Wallet(_clock, 10000, 50000);
         var guild = NewGuild(m, wallet);
 
-        Assert.Equal(new KeyValuePair<Currency, long>(Currency.Coins, 500), m.GetNextLevelCost(guild));
-        Assert.False(m.Donate(guild, "leader", wallet, 200).Value.LeveledUp);
-        var second = m.Donate(guild, "leader", wallet, 400).Value;
-        Assert.Equal(300, second.Paid);
+        Assert.Equal(5, m.GetNextLevelPoints(guild));
+        // Coins: 100 per point, odd change is not taken.
+        GuildDonationResult first = m.Donate(guild, "leader", wallet, Currency.Coins, 250).Value;
+        Assert.False(first.LeveledUp);
+        Assert.Equal(200, first.Paid);
+        Assert.Equal(2, guild.DonationProgress);
+        var second = m.Donate(guild, "leader", wallet, Currency.Coins, 900).Value;
+        Assert.Equal(900, second.Paid);
         Assert.True(second.LeveledUp);
-        Assert.Equal(new KeyValuePair<Currency, long>(Currency.Orbes, 100), m.GetNextLevelCost(guild));
+        Assert.Equal(6, guild.DonationProgress);
+        Assert.Equal(100, m.GetNextLevelPoints(guild));
 
-        m.Donate(guild, "leader", wallet, 100);
-        Assert.Equal(new KeyValuePair<Currency, long>(Currency.Orbes, 125), m.GetNextLevelCost(guild));
-        m.Donate(guild, "leader", wallet, 125);
-        Assert.Equal(156, m.GetNextLevelCost(guild).Value);
+        // The coin allowance is daily: 5000 per member, then only orbes until tomorrow.
+        GuildMember leader = guild.Find("leader");
+        Assert.Equal(3900, m.CoinsLeftToday(leader));
+        Assert.Equal(3900, m.Donate(guild, "leader", wallet, Currency.Coins, 9000).Value.Paid);
+        Assert.Equal(ErrorCode.LimitReached, m.Donate(guild, "leader", wallet, Currency.Coins, 100).Error);
+        _clock.Advance(TimeSpan.FromDays(1));
+        Assert.Equal(5000, m.CoinsLeftToday(leader));
+
+        // One orbe donation covering several levels climbs them all and keeps the rest as progress.
+        long progress = guild.DonationProgress;
+        int level = guild.Level;
+        long need = m.PointsForLevel(level + 1) - progress + m.PointsForLevel(level + 2);
+        GuildDonationResult big = m.Donate(guild, "leader", wallet, Currency.Orbes, need + 10).Value;
+        Assert.Equal(2, big.LevelsGained);
+        Assert.Equal(need + 10, big.Paid);
+        Assert.Equal(10, guild.DonationProgress);
 
         while (guild.Level < 20)
         {
@@ -140,6 +157,16 @@ public class GuildTests
         Assert.Equal(2, killing.RewardedPlayers.Count);
         Assert.Equal(500, killing.RewardPerMember.Coins);
         Assert.Equal(ErrorCode.SessionOver, m.SubmitBossDamage(guild, "leader", 1, week).Error);
+
+        // m1 started an attack before the boss fell: it is not lost.
+        long defeatedAt = guild.Boss.DefeatedAtUnixMs;
+        Assert.Equal(ErrorCode.SessionOver, m.SubmitBossDamage(guild, "leader", 1, week, defeatedAt + 1).Error);
+        GuildMember m1 = guild.Find("m1");
+        long before = m1.BossDamageThisWeek;
+        var late = m.SubmitBossDamage(guild, "m1", 500, week, defeatedAt - 1000).Value;
+        Assert.True(late.DefeatedDuringAttack);
+        Assert.False(late.DefeatedNow);
+        Assert.Equal(before + late.DamageApplied, m1.BossDamageThisWeek);
 
         Assert.Equal(2, m.EnsureBossWeek(guild, week + 1).BossIndex);
         Assert.True(m.SubmitBossDamage(guild, "m1", 10, week + 1).Success);

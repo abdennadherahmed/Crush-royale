@@ -268,18 +268,22 @@ namespace CrushRoyale.Game.Gameplay
             Vector2 posA = CellPosition(a);
             Vector2 posB = CellPosition(b);
             float half = (_timing?.InvalidSwapAnimationMs ?? 300) / 2000f;
+            pa.Rect.SetAsLastSibling();
             yield return CoroutineTask.Tween(half, k =>
             {
                 float e = Ease.OutCubic(k) * 0.45f;
                 pa.Rect.anchoredPosition = Vector2.Lerp(posA, posB, e);
                 pb.Rect.anchoredPosition = Vector2.Lerp(posB, posA, e);
+                pa.Rect.localScale = Vector3.one * (1f + 0.12f * k);
             });
             yield return CoroutineTask.Tween(half, k =>
             {
                 float e = (1 - Ease.OutCubic(k)) * 0.45f;
                 pa.Rect.anchoredPosition = Vector2.Lerp(posA, posB, e);
                 pb.Rect.anchoredPosition = Vector2.Lerp(posB, posA, e);
+                pa.Rect.localScale = Vector3.one * (1.12f - 0.12f * k);
             });
+            pa.Rect.localScale = Vector3.one;
         }
 
         /// <summary>Animates an accepted action, then snaps to the final simulated board.</summary>
@@ -298,12 +302,19 @@ namespace CrushRoyale.Game.Gameplay
                     pb.Surprise();
                     Vector2 a = CellPosition(action.From);
                     Vector2 b = CellPosition(action.To);
+                    // 2.5D pass-over: the dragged gem rises above the other (bigger, on top), the other dips under.
+                    pa.Rect.SetAsLastSibling();
                     yield return CoroutineTask.Tween(_timing.SwapAnimationMs / 1000f / speed, k =>
                     {
                         float e = Ease.OutCubic(k);
+                        float arc = Mathf.Sin(k * Mathf.PI);
                         pa.Rect.anchoredPosition = Vector2.Lerp(a, b, e);
                         pb.Rect.anchoredPosition = Vector2.Lerp(b, a, e);
+                        pa.Rect.localScale = Vector3.one * (1f + 0.18f * arc);
+                        pb.Rect.localScale = Vector3.one * (1f - 0.1f * arc);
                     });
+                    pa.Rect.localScale = Vector3.one;
+                    pb.Rect.localScale = Vector3.one;
                     pa.Cell = action.To;
                     pb.Cell = action.From;
                 }
@@ -516,6 +527,13 @@ namespace CrushRoyale.Game.Gameplay
                     }
                 }
             });
+            foreach ((PieceView view, Vector2 from, Vector2 to) in moves)
+            {
+                if (view != null && (from - to).sqrMagnitude > 1f)
+                {
+                    view.Land();
+                }
+            }
         }
 
         private IEnumerator MoveTo(GameBoard target, float seconds)

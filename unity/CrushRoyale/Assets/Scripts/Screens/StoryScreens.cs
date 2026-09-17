@@ -209,17 +209,75 @@ namespace CrushRoyale.Game.Screens
                 earned += Mathf.Max(0, stars[id - 1] - '0');
             }
             int max = story.StagesPerChapter * 3;
+
+            // Star count on its own bar (left), the three star chests as real buttons (right): nothing overlaps the count.
             UIFactory.ProgressBar(bar.transform, earned / (float)Mathf.Max(1, max), Theme.Gold, out RectTransform progress);
-            UIFactory.Anchor(progress, 0.2f, 0.1f, 0.74f, 0.42f);
+            UIFactory.Anchor(progress, 0.16f, 0.1f, 0.52f, 0.42f);
             Text starText = UIFactory.Label(progress, "★ " + earned + " / " + max, Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Stretch(starText.rectTransform);
             Widgets.TitleOutline(starText);
             for (int tier = 0; tier < ChapterChests.Tiers; tier++)
             {
-                float x = ChapterChests.StarsNeeded(story, tier) / (float)max;
-                bool claimed = IsChestClaimed(_chapter, tier);
-                Image mark = UIFactory.Icon(progress, ChestArtFor(tier, open: claimed), earned >= ChapterChests.StarsNeeded(story, tier) || claimed ? Color.white : new Color(0.45f, 0.45f, 0.55f, 1f), 0);
-                UIFactory.Anchor(mark.rectTransform, x - 0.07f, 0.1f, x + 0.07f, 1.6f);
+                float x0 = 0.545f + tier * 0.1f;
+                RectTransform slot = UIFactory.Anchor(UIFactory.Rect("BarChest" + tier, bar.transform), x0, 0.04f, x0 + 0.095f, 0.5f);
+                BarChest(slot, tier, earned, story);
+            }
+        }
+
+        /// <summary>Compact star chest in the chapter bar: tap to open once the stars are there.</summary>
+        private void BarChest(RectTransform slot, int tier, int earned, StoryBalance story)
+        {
+            int need = ChapterChests.StarsNeeded(story, tier);
+            bool claimed = IsChestClaimed(_chapter, tier);
+            bool ready = !claimed && earned >= need;
+            int chapter = _chapter;
+
+            Image hit = slot.gameObject.AddComponent<Image>();
+            hit.color = new Color(0, 0, 0, 0);
+            Button button = slot.gameObject.AddComponent<Button>();
+            button.targetGraphic = hit;
+            slot.gameObject.AddComponent<ButtonFeedback>();
+            if (ready)
+            {
+                Image glow = UIFactory.Icon(slot, ProceduralSprites.Glow(128), new Color(1f, 0.85f, 0.35f, 0.9f), 0);
+                UIFactory.Stretch(glow.rectTransform, -24, -24, -24, -24);
+                glow.raycastTarget = false;
+                glow.gameObject.AddComponent<Pulse>();
+            }
+            Image art = UIFactory.Icon(slot, ChestArtFor(tier, open: claimed), ready || claimed ? Color.white : new Color(0.5f, 0.5f, 0.6f, 1f), 0);
+            art.preserveAspect = true;
+            art.raycastTarget = false;
+            UIFactory.Anchor(art.rectTransform, 0f, 0.28f, 1f, 1.25f);
+            if (ready)
+            {
+                Breathe breathe = art.gameObject.AddComponent<Breathe>();
+                breathe.Amount = 0.07f;
+                breathe.Speed = 5f;
+            }
+            Text label = UIFactory.Label(slot, claimed ? "✔" : ready ? "!" : need + "★", Theme.SmallSize - 8, claimed ? Theme.Success : ready ? Theme.Gold : Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            label.raycastTarget = false;
+            UIFactory.Anchor(label.rectTransform, -0.2f, -0.05f, 1.2f, 0.34f);
+            Widgets.TitleOutline(label);
+            button.onClick.AddListener(() => TapChest(chapter, tier, earned, need, claimed));
+        }
+
+        private void TapChest(int chapter, int tier, int earned, int need, bool claimed)
+        {
+            if (claimed)
+            {
+                UI.Toast(Loc.T("map.chestClaimed"));
+            }
+            else if (earned < need)
+            {
+                UI.Toast(Loc.T("map.chestNeed", need - earned, need));
+            }
+            else if (!Game.Backend.IsOnline)
+            {
+                UI.Toast(Loc.T("error.offline"));
+            }
+            else
+            {
+                _ = ClaimChestAsync(chapter, tier);
             }
         }
 
@@ -315,7 +373,8 @@ namespace CrushRoyale.Game.Screens
                 int stageId = firstStage + besides[tier] - 1;
                 if (_nodePositions.TryGetValue(stageId, out Vector2 at))
                 {
-                    ChestNode(content, tier, new Vector2(at.x > 0 ? at.x - 330f : at.x + 330f, at.y + 40f), earned, story);
+                    // Opposite side of the path, kept well inside the narrowest phone width.
+                    ChestNode(content, tier, new Vector2(at.x > 0 ? -250f : 250f, at.y + 20f), earned, story);
                 }
             }
 
@@ -443,21 +502,7 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Stretch(text.rectTransform, 4, 4, 2, 2);
             Widgets.TitleOutline(text);
 
-            button.onClick.AddListener(() =>
-            {
-                if (claimed)
-                {
-                    UI.Toast(Loc.T("map.chestClaimed"));
-                }
-                else if (!ready)
-                {
-                    UI.Toast(Loc.T("map.chestNeed", need - earned, need));
-                }
-                else
-                {
-                    _ = ClaimChestAsync(chapter, tier);
-                }
-            });
+            button.onClick.AddListener(() => TapChest(chapter, tier, earned, need, claimed));
         }
 
         private async Task ClaimChestAsync(int chapter, int tier)

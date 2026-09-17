@@ -282,6 +282,33 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
     }
 
     [Fact]
+    public async Task ChapterChest_ClaimOnceWithEnoughStars_AndPetFragmentsConvert()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync(unlockStage: 21);
+        await http.PostError(ApiRoutes.ChapterChest, new ChapterChestRequest { Chapter = 1, Tier = 0 }, HttpStatusCode.Conflict);
+
+        await _app.MutateAsync(id, s =>
+        {
+            for (int stage = 1; stage <= 12; stage++)
+            {
+                s.Story.Stages[stage] = new StageProgress { StageId = stage, EverWon = true, BestStars = 3 };
+            }
+        });
+        ChapterChestResponse chest = await http.PostOk<ChapterChestResponse>(ApiRoutes.ChapterChest, new ChapterChestRequest { Chapter = 1, Tier = 0 });
+        Assert.True(chest.Reward.Coins > 0);
+        Assert.Contains("1:0", chest.Story.ClaimedChapterChests);
+        await http.PostError(ApiRoutes.ChapterChest, new ChapterChestRequest { Chapter = 1, Tier = 0 }, HttpStatusCode.Conflict);
+
+        await _app.MutateAsync(id, s =>
+        {
+            s.Pets.Pets[PetType.FrostFox] = new CrushRoyale.Core.Pets.PetState { Owned = true, Level = 1, Fragments = 9 };
+        });
+        PetActionResponse converted = await http.PostOk<PetActionResponse>(ApiRoutes.PetConvert, new PetConvertRequest { From = "FrostFox", To = "ForestOwl", Count = 3 });
+        Assert.Equal(0, converted.Pets.Pets.Single(p => p.Type == "FrostFox").Fragments);
+        Assert.Equal(3, converted.Pets.Pets.Single(p => p.Type == "ForestOwl").Fragments);
+    }
+
+    [Fact]
     public async Task Pets_SummonEquipAwaken_AndPlayInMatches()
     {
         var (id, http, _) = await _app.NewPlayerAsync();
@@ -465,7 +492,7 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
 
         HttpClient admin = _app.ClientFor(Guid.NewGuid(), admin: true);
         await admin.PostOk<WalletDto>(ApiRoutes.AdminGrant, new AdminGrantRequest { PlayerId = leader.Id.ToString(), Coins = 1000, Note = "test donation budget" });
-        DonateResponse donation = await leader.Http.PostOk<DonateResponse>(ApiRoutes.GuildDonate, new DonateRequest { Amount = 500 });
+        DonateResponse donation = await leader.Http.PostOk<DonateResponse>(ApiRoutes.GuildDonate, new DonateRequest { Amount = 500, Currency = "Coins" });
         Assert.True(donation.LeveledUp);
         Assert.Equal(2, donation.Guild.Level);
 

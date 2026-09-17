@@ -428,7 +428,7 @@ namespace CrushRoyale.Game.Screens
                 case ObjectiveType.BreakStones: return ArtLibrary.Stone();
                 case ObjectiveType.DefeatBoss:
                     return (_launch.Mode == GameMode.Story && _launch.StageId > 0 ? ArtLibrary.Boss(Game.Backend.Catalog.Get(_launch.StageId)) : null)
-                        ?? ArtLibrary.GuildBoss();
+                        ?? (_launch.Mode == GameMode.GuildBoss ? ArtLibrary.GuildBoss(_launch.StageId) : ArtLibrary.GuildBoss());
                 default: return UiKit.Art("item_stars") ?? ArtLibrary.Icon("star");
             }
         }
@@ -811,9 +811,11 @@ namespace CrushRoyale.Game.Screens
 
             string message = response == null
                 ? Loc.T("boss.queued")
-                : response.Accepted
-                    ? Loc.T(response.DefeatedNow ? "boss.defeated" : "boss.damage", Loc.Number(response.Damage), response.AttacksLeft)
-                    : Loc.T("error." + response.Error);
+                : !response.Accepted
+                    ? Loc.T("error." + response.Error)
+                    : response.DefeatedDuringAttack
+                        ? Loc.T("boss.defeatedDuring", Loc.Number(response.Damage))
+                        : Loc.T(response.DefeatedNow ? "boss.defeated" : "boss.damage", Loc.Number(response.Damage), response.AttacksLeft);
             if (response != null && response.Accepted)
             {
                 _ = Game.Backend.RefreshProfileAsync();

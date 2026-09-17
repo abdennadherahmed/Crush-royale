@@ -336,6 +336,17 @@ namespace CrushRoyale.Contracts
         public string Pet { get; set; }
     }
 
+    /// <summary>Trade surplus fragments of an owned pet (<see cref="From"/>) for fragments of a locked pet, 3 for 1.</summary>
+    public sealed class PetConvertRequest
+    {
+        public string From { get; set; }
+
+        public string To { get; set; }
+
+        /// <summary>Fragments to receive.</summary>
+        public int Count { get; set; }
+    }
+
     public sealed class PetActionResponse
     {
         public PetsDto Pets { get; set; }

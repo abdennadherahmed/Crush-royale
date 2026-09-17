@@ -208,8 +208,12 @@ namespace CrushRoyale.Game.UI
                 return null;
             }
 
-            RectTransform rect = UIFactory.Stretch(UIFactory.Rect("Backdrop", parent));
-            rect.SetAsFirstSibling();
+            // Wrapper slightly larger than the screen that drifts with the phone's tilt (2.5D parallax depth).
+            RectTransform holder = UIFactory.Stretch(UIFactory.Rect("Backdrop", parent));
+            holder.SetAsFirstSibling();
+            holder.localScale = new Vector3(1.06f, 1.06f, 1f);
+            holder.gameObject.AddComponent<Parallax>();
+            RectTransform rect = UIFactory.Stretch(UIFactory.Rect("Art", holder));
             Image image = rect.gameObject.AddComponent<Image>();
             image.sprite = sprite;
             image.raycastTarget = false;
@@ -307,6 +311,42 @@ namespace CrushRoyale.Game.UI
             const float c3 = c1 + 1f;
             float k = 1f + c3 * Mathf.Pow(t - 1f, 3) + c1 * Mathf.Pow(t - 1f, 2);
             transform.localScale = Vector3.one * Mathf.LerpUnclamped(0.6f, 1f, k);
+        }
+    }
+
+    /// <summary>
+    /// Tilt parallax: the layer drifts a few pixels against the phone's tilt (accelerometer), smoothed, so backgrounds
+    /// feel deeper than the UI in front of them. Without an accelerometer (editor) it slowly sways instead.
+    /// Disabled with reduced motion.
+    /// </summary>
+    public sealed class Parallax : MonoBehaviour
+    {
+        public float Range = 26f;
+
+        private RectTransform _rect;
+        private Vector2 _offset;
+        private float _phase;
+        private bool _reduceMotion;
+
+        private void Awake()
+        {
+            _rect = (RectTransform)transform;
+            _phase = UnityEngine.Random.value * 6f;
+            _reduceMotion = GameRoot.Instance != null && GameRoot.Instance.Save.Settings.ReduceMotion;
+        }
+
+        private void Update()
+        {
+            if (_reduceMotion)
+            {
+                return;
+            }
+            Vector3 tilt = Input.acceleration;
+            Vector2 target = tilt.sqrMagnitude > 0.01f
+                ? new Vector2(Mathf.Clamp(-tilt.x, -1f, 1f), Mathf.Clamp(-(tilt.y + 0.55f), -1f, 1f)) * Range
+                : new Vector2(Mathf.Sin(Time.unscaledTime * 0.21f + _phase), Mathf.Sin(Time.unscaledTime * 0.17f + _phase) * 0.6f) * Range * 0.5f;
+            _offset = Vector2.Lerp(_offset, target, 1f - Mathf.Exp(-Time.unscaledDeltaTime * 4f));
+            _rect.anchoredPosition = _offset;
         }
     }
 

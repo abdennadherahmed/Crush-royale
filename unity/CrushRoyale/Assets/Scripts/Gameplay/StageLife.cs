@@ -113,8 +113,10 @@ namespace CrushRoyale.Game.Gameplay
             if (bossFight)
             {
                 StageData stage = _launch.Mode == GameMode.Story && _launch.StageId > 0 ? _game.Backend.Catalog.Get(_launch.StageId) : null;
-                Sprite art = stage != null ? ArtLibrary.Boss(stage) : ArtLibrary.GuildBoss();
-                string name = stage != null && !string.IsNullOrEmpty(stage.BossId) ? Loc.T(stage.BossId + ".name") : Loc.T("boss.guildName");
+                bool guild = _launch.Mode == GameMode.GuildBoss;
+                Sprite art = stage != null ? ArtLibrary.Boss(stage) : guild ? ArtLibrary.GuildBoss(_launch.StageId) : ArtLibrary.GuildBoss();
+                string name = stage != null && !string.IsNullOrEmpty(stage.BossId) ? Loc.T(stage.BossId + ".name")
+                    : guild ? CrushRoyale.Game.Screens.GuildScreen.GuildBossName(Loc, _launch.StageId) : Loc.T("boss.guildName");
                 _boss = BossView.Create(_safe, art ?? ArtLibrary.GuildBoss(), name, _config.BossHp > 0 ? _config.BossHp : _guildBossRemaining, _board, showDamage: _launch.Mode == GameMode.GuildBoss);
             }
 

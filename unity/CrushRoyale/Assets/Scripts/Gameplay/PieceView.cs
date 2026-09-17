@@ -22,6 +22,13 @@ namespace CrushRoyale.Game.Gameplay
         private float _surprise;
         private float _panic;
 
+        // Depth and life: a twinkle glint that flashes now and then, a squash-and-stretch bounce on landing.
+        private RectTransform _glint;
+        private float _nextGlint;
+        private float _glintTime = -1f;
+        private float _land = -1f;
+        private static bool? _reduceMotion;
+
         /// <summary>Board-local point the gems look at (last touch) and until when.</summary>
         public static Vector2 LookTarget;
 
@@ -54,6 +61,11 @@ namespace CrushRoyale.Game.Gameplay
             view._body.raycastTarget = false;
             view._body.preserveAspect = true;
 
+            // Soft drop shadow under the gem: the board reads as stacked jewels rather than flat stickers.
+            Shadow shadow = rect.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0.02f, 0f, 0.08f, 0.45f);
+            shadow.effectDistance = new Vector2(size * 0.035f, -size * 0.06f);
+
             RectTransform overlayRect = UIFactory.Stretch(UIFactory.Rect("Overlay", rect));
             view._overlay = overlayRect.gameObject.AddComponent<Image>();
             view._overlay.raycastTarget = false;
@@ -63,6 +75,17 @@ namespace CrushRoyale.Game.Gameplay
             {
                 view.BuildEyes(size * 0.9f);
             }
+
+            RectTransform glint = UIFactory.Rect("Glint", rect);
+            glint.anchorMin = glint.anchorMax = new Vector2(0.3f, 0.72f);
+            glint.sizeDelta = new Vector2(size * 0.42f, size * 0.42f);
+            Image glintImage = glint.gameObject.AddComponent<Image>();
+            glintImage.sprite = ProceduralSprites.Spark();
+            glintImage.raycastTarget = false;
+            glint.localScale = Vector3.zero;
+            view._glint = glint;
+            view._nextGlint = Time.unscaledTime + Random.Range(1f, 12f);
+
             view.SetPiece(piece, colorBlind);
             return view;
         }
@@ -93,6 +116,27 @@ namespace CrushRoyale.Game.Gameplay
 
         /// <summary>Wide eyes for a moment (being swapped).</summary>
         public void Surprise() => _surprise = 0.45f;
+
+        /// <summary>Squash-and-stretch after a fall (skipped with reduced motion).</summary>
+        public void Land()
+        {
+            if (!ReduceMotion)
+            {
+                _land = 0f;
+            }
+        }
+
+        private static bool ReduceMotion
+        {
+            get
+            {
+                if (!_reduceMotion.HasValue || Time.frameCount % 120 == 0)
+                {
+                    _reduceMotion = GameRoot.Instance != null && GameRoot.Instance.Save.Settings.ReduceMotion;
+                }
+                return _reduceMotion.Value;
+            }
+        }
 
         /// <summary>Trembling eyes just before being cleared.</summary>
         public void Panic() => _panic = 0.4f;
@@ -200,6 +244,34 @@ namespace CrushRoyale.Game.Gameplay
             }
         }
 
+        private void UpdateGlint()
+        {
+            if (_glint == null)
+            {
+                return;
+            }
+            float now = Time.unscaledTime;
+            if (_glintTime < 0f)
+            {
+                if (now < _nextGlint || Piece.IsStone)
+                {
+                    return;
+                }
+                _glintTime = 0f;
+            }
+            _glintTime += Time.unscaledDeltaTime;
+            float k = Mathf.Clamp01(_glintTime / 0.5f);
+            float s = Mathf.Sin(k * Mathf.PI);
+            _glint.localScale = new Vector3(s, s, 1f);
+            _glint.localRotation = Quaternion.Euler(0f, 0f, k * 90f);
+            if (k >= 1f)
+            {
+                _glint.localScale = Vector3.zero;
+                _glintTime = -1f;
+                _nextGlint = now + Random.Range(4f, 14f);
+            }
+        }
+
         public static ProceduralSprites.GemShape ShapeFor(PieceColor color)
         {
             switch (color)
@@ -216,6 +288,19 @@ namespace CrushRoyale.Game.Gameplay
         private void Update()
         {
             UpdateEyes();
+            UpdateGlint();
+            if (_land >= 0f)
+            {
+                _land += Time.unscaledDeltaTime;
+                float k = Mathf.Clamp01(_land / 0.24f);
+                float wobble = Mathf.Sin(k * Mathf.PI * 2f) * (1f - k);
+                Rect.localScale = new Vector3(1f + wobble * 0.14f, 1f - wobble * 0.16f, 1f);
+                if (k >= 1f)
+                {
+                    Rect.localScale = Vector3.one;
+                    _land = -1f;
+                }
+            }
             // Specials pulse gently so players notice them.
             if (_overlay.enabled && Piece.IsSpecial)
             {

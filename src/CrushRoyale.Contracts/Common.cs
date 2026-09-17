@@ -44,6 +44,8 @@ namespace CrushRoyale.Contracts
         public const string PetAwaken = Prefix + "/pets/awaken";
         public const string PetUnlock = Prefix + "/pets/unlock";
 
+        public const string PetConvert = Prefix + "/pets/convert";
+
         public const string Matchmaking = Prefix + "/pvp/matchmaking";
         public const string PvpMatch = Prefix + "/pvp/match/{matchId}";
         public const string PvpRecord = Prefix + "/pvp/match/record";

@@ -53,6 +53,9 @@ namespace CrushRoyale.Core.Config
         /// <summary>Collecting this many fragments of a pet you do not own lets you unlock it without luck.</summary>
         public int UnlockFragments { get; set; } = 100;
 
+        /// <summary>Fragments of an owned pet traded for one fragment of a pet not owned yet.</summary>
+        public int ConvertRatio { get; set; } = 3;
+
         public int StoryWinXp { get; set; } = 30;
 
         public int StoryLossXp { get; set; } = 10;

@@ -129,8 +129,14 @@ namespace CrushRoyale.Game.UI
         private async Task OnTapAsync(int index)
         {
             ChestSlotDto slot = Slot(index);
-            if (slot == null || _busy)
+            if (_busy)
             {
+                return;
+            }
+            if (slot == null)
+            {
+                // Empty slot: explain where timed chests come from.
+                _ui.Toast(Game.Loc.T("chest.howTo"), 4f);
                 return;
             }
             if (!Game.Backend.IsOnline)

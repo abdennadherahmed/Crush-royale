@@ -64,6 +64,11 @@ namespace CrushRoyale.Core.Social
 
         public long DonatedOrbes { get; set; }
 
+        /// <summary>Day index of <see cref="CoinsDonatedToday"/> (the coin allowance resets daily).</summary>
+        public int CoinDonationDay { get; set; } = -1;
+
+        public long CoinsDonatedToday { get; set; }
+
         public int Trophies { get; set; }
 
         public int BossWeek { get; set; } = -1;
@@ -134,6 +139,14 @@ namespace CrushRoyale.Core.Social
 
         public bool LeveledUp { get; internal set; }
 
+        /// <summary>How many levels this donation climbed.</summary>
+        public int LevelsGained { get; internal set; }
+
+        /// <summary>Guild points added.</summary>
+        public long Points { get; internal set; }
+
+        public long CoinsLeftToday { get; internal set; }
+
         public int NewLevel { get; internal set; }
     }
 
@@ -144,6 +157,12 @@ namespace CrushRoyale.Core.Social
         public int AttacksLeft { get; internal set; }
 
         public bool DefeatedNow { get; internal set; }
+
+        /// <summary>
+        /// The boss fell to other members while this attack was being played: the damage still counts on the damage
+        /// board, the attack is not consumed, and the defeat reward is shared with everyone anyway.
+        /// </summary>
+        public bool DefeatedDuringAttack { get; internal set; }
 
         /// <summary>Players rewarded (all current members) when the boss falls.</summary>
         public List<string> RewardedPlayers { get; } = new List<string>();
@@ -347,24 +366,45 @@ namespace CrushRoyale.Core.Social
             return OperationResult.Ok();
         }
 
-        /// <summary>Cost of the next level: level 2 in coins, then orbes 100, 125, 156... (+25% each).</summary>
-        public KeyValuePair<Currency, long> GetNextLevelCost(Guild guild)
+        /// <summary>Guild points needed for the next level: 5 for level 2, then 100, 125, 156... (+25% each).</summary>
+        public long GetNextLevelPoints(Guild guild) => PointsForLevel(guild.Level + 1);
+
+        /// <summary>Guild points needed to reach <paramref name="next"/>.</summary>
+        public long PointsForLevel(int next)
         {
-            int next = guild.Level + 1;
             if (next <= 2)
             {
-                return new KeyValuePair<Currency, long>(Currency.Coins, _balance.Guild.Level2CostCoins);
+                return _balance.Guild.Level2CostPoints;
             }
             long cost = _balance.Guild.OrbeLevelBaseCost;
             for (int level = 3; level < next; level++)
             {
                 cost = cost * _balance.Guild.OrbeLevelEscalationPermille / 1000;
             }
-            return new KeyValuePair<Currency, long>(Currency.Orbes, cost);
+            return cost;
         }
 
-        /// <summary>Contributes toward the next guild level (partial contributions allowed, overpayment is not taken).</summary>
-        public OperationResult<GuildDonationResult> Donate(Guild guild, string playerId, IWallet wallet, long amount)
+        /// <summary>Coins this member can still donate today (the coin allowance resets every day, orbes are unlimited).</summary>
+        public long CoinsLeftToday(GuildMember member)
+        {
+            if (member == null)
+            {
+                return 0;
+            }
+            long used = member.CoinDonationDay == TimeUtil.DayIndex(_clock.UtcNow) ? member.CoinsDonatedToday : 0;
+            return Math.Max(0, _balance.Guild.DailyCoinDonationCap - used);
+        }
+
+        /// <summary>Orbe donation (kept for older callers).</summary>
+        public OperationResult<GuildDonationResult> Donate(Guild guild, string playerId, IWallet wallet, long amount) =>
+            Donate(guild, playerId, wallet, Currency.Orbes, amount);
+
+        /// <summary>
+        /// Contributes toward the guild levels. Coins (a daily allowance per member) and orbes (unlimited) both turn into
+        /// guild points: <see cref="GuildBalance.CoinsPerPoint"/> coins or one orbe per point. A big donation climbs as many
+        /// levels as it pays for; only what is needed is taken (nothing is taken past the max level).
+        /// </summary>
+        public OperationResult<GuildDonationResult> Donate(Guild guild, string playerId, IWallet wallet, Currency currency, long amount)
         {
             GuildMember member = guild?.Find(playerId);
             if (member == null)
@@ -375,7 +415,7 @@ namespace CrushRoyale.Core.Social
             {
                 throw new ArgumentNullException(nameof(wallet));
             }
-            if (amount <= 0)
+            if (amount <= 0 || (currency != Currency.Coins && currency != Currency.Orbes))
             {
                 return OperationResult<GuildDonationResult>.Fail(ErrorCode.InvalidArgument);
             }
@@ -384,17 +424,67 @@ namespace CrushRoyale.Core.Social
                 return OperationResult<GuildDonationResult>.Fail(ErrorCode.LimitReached);
             }
 
-            KeyValuePair<Currency, long> cost = GetNextLevelCost(guild);
-            long pay = Math.Min(amount, cost.Value - guild.DonationProgress);
-            OperationResult debit = wallet.Debit(cost.Key, pay, TransactionReason.GuildDonation, guild.Id);
-            if (!debit.Success)
+            int today = TimeUtil.DayIndex(_clock.UtcNow);
+            long unit = currency == Currency.Coins ? Math.Max(1, _balance.Guild.CoinsPerPoint) : 1;
+            if (currency == Currency.Coins)
             {
-                return OperationResult<GuildDonationResult>.Fail(debit.Error);
+                long left = CoinsLeftToday(member);
+                if (left < unit)
+                {
+                    return OperationResult<GuildDonationResult>.Fail(ErrorCode.LimitReached, "Daily coin donation allowance used.");
+                }
+                amount = Math.Min(amount, left);
+            }
+            long points = amount / unit;
+            if (points <= 0)
+            {
+                return OperationResult<GuildDonationResult>.Fail(ErrorCode.InvalidArgument, "Donation too small.");
             }
 
-            guild.DonationProgress += pay;
-            if (cost.Key == Currency.Coins)
+            int level = guild.Level;
+            long progress = Math.Max(0, guild.DonationProgress);
+            long used = 0;
+            int gained = 0;
+            while (level < _balance.Guild.MaxLevel)
             {
+                long cost = PointsForLevel(level + 1);
+                if (progress >= cost)
+                {
+                    progress -= cost;
+                    level++;
+                    gained++;
+                    continue;
+                }
+                if (used >= points)
+                {
+                    break;
+                }
+                long part = Math.Min(points - used, cost - progress);
+                used += part;
+                progress += part;
+            }
+            if (level >= _balance.Guild.MaxLevel)
+            {
+                progress = 0;
+            }
+
+            long pay = used * unit;
+            if (pay > 0)
+            {
+                OperationResult debit = wallet.Debit(currency, pay, TransactionReason.GuildDonation, guild.Id);
+                if (!debit.Success)
+                {
+                    return OperationResult<GuildDonationResult>.Fail(debit.Error);
+                }
+            }
+            if (currency == Currency.Coins)
+            {
+                if (member.CoinDonationDay != today)
+                {
+                    member.CoinDonationDay = today;
+                    member.CoinsDonatedToday = 0;
+                }
+                member.CoinsDonatedToday += pay;
                 member.DonatedCoins += pay;
             }
             else
@@ -402,20 +492,23 @@ namespace CrushRoyale.Core.Social
                 member.DonatedOrbes += pay;
             }
 
-            var result = new GuildDonationResult { Paid = pay, Currency = cost.Key };
-            if (guild.DonationProgress >= cost.Value)
+            guild.Level = level;
+            guild.DonationProgress = progress;
+            guild.TechPointsAvailable += gained * _balance.Guild.TechPointsPerLevel;
+            return OperationResult<GuildDonationResult>.Ok(new GuildDonationResult
             {
-                guild.Level++;
-                guild.DonationProgress = 0;
-                guild.TechPointsAvailable += _balance.Guild.TechPointsPerLevel;
-                result.LeveledUp = true;
-            }
-            result.NewLevel = guild.Level;
-            return OperationResult<GuildDonationResult>.Ok(result);
+                Paid = pay,
+                Currency = currency,
+                Points = used,
+                LeveledUp = gained > 0,
+                LevelsGained = gained,
+                NewLevel = level,
+                CoinsLeftToday = CoinsLeftToday(member)
+            });
         }
 
         /// <summary>Prompt API name: donate toward the next level/tech point.</summary>
-        public OperationResult<GuildDonationResult> DonateTechPoints(Guild guild, string playerId, IWallet wallet, int amount) => Donate(guild, playerId, wallet, amount);
+        public OperationResult<GuildDonationResult> DonateTechPoints(Guild guild, string playerId, IWallet wallet, int amount) => Donate(guild, playerId, wallet, Currency.Orbes, amount);
 
         public OperationResult SpendTechPoint(Guild guild, string actorId, GuildTech tech)
         {
@@ -476,7 +569,8 @@ namespace CrushRoyale.Core.Social
         }
 
         /// <summary>Records one attack (a guild-boss match score, already validated by replay). 3 attacks per member per week.</summary>
-        public OperationResult<BossAttackResult> SubmitBossDamage(Guild guild, string playerId, long score, int week)
+        /// <summary>Applies an attack. <c>attackStartedAtUnixMs</c> (0 = unknown): an attack started before the boss fell is never lost.</summary>
+        public OperationResult<BossAttackResult> SubmitBossDamage(Guild guild, string playerId, long score, int week, long attackStartedAtUnixMs = 0)
         {
             GuildMember member = guild?.Find(playerId);
             if (member == null)
@@ -497,7 +591,18 @@ namespace CrushRoyale.Core.Social
             }
             if (boss.Defeated)
             {
-                return OperationResult<BossAttackResult>.Fail(ErrorCode.SessionOver, "Boss already defeated this week.");
+                if (attackStartedAtUnixMs <= 0 || attackStartedAtUnixMs > boss.DefeatedAtUnixMs)
+                {
+                    return OperationResult<BossAttackResult>.Fail(ErrorCode.SessionOver, "Boss already defeated this week.");
+                }
+                long late = score * (1000 + GetTechValue(guild, GuildTech.BossDamage)) / 1000;
+                member.BossDamageThisWeek += late;
+                return OperationResult<BossAttackResult>.Ok(new BossAttackResult
+                {
+                    DamageApplied = late,
+                    AttacksLeft = _balance.Guild.BossAttacksPerMemberPerWeek - member.BossAttacksThisWeek,
+                    DefeatedDuringAttack = true
+                });
             }
             if (member.BossAttacksThisWeek >= _balance.Guild.BossAttacksPerMemberPerWeek)
             {

@@ -30,7 +30,7 @@ namespace CrushRoyale.Game.UI
         /// <summary>Gem colors indexed by PieceColor (Red, Blue, Green, Yellow, Purple, Orange).</summary>
         public static readonly Color[] Gems =
         {
-            Hex("FF4B5C"), Hex("3D8BFF"), Hex("3DDC84"), Hex("FFD23F"), Hex("B061FF"), Hex("FF8C2B")
+            Hex("FF4B5C"), Hex("3D8BFF"), Hex("3DDC84"), Hex("FFF03A"), Hex("B061FF"), Hex("FF6A1A")
         };
 
         /// <summary>Color-blind palette (Okabe-Ito based) used when the accessibility option is on.</summary>

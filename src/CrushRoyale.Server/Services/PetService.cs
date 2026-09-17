@@ -75,6 +75,20 @@ public sealed class PetService
             return new PetActionResponse { Pets = Mappers.Pets(ws), Wallet = Mappers.Wallet(ws) };
         }, ct);
 
+    public Task<PetActionResponse> ConvertAsync(Guid userId, PetConvertRequest request, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            PetType from = Mappers.ParseEnum<PetType>(request?.From, "from");
+            PetType to = Mappers.ParseEnum<PetType>(request?.To, "to");
+            ErrorCode error = ws.Pets.ConvertFragments(from, to, request?.Count ?? 0);
+            if (error != ErrorCode.None)
+            {
+                throw new ApiException(error, error == ErrorCode.NotEnoughItems ? "Not enough fragments." : "Fragments cannot be converted.");
+            }
+            return new PetActionResponse { Pets = Mappers.Pets(ws), Wallet = Mappers.Wallet(ws) };
+        }, ct);
+
     public Task<PetActionResponse> AwakenAsync(Guid userId, PetRequest request, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx =>
         {

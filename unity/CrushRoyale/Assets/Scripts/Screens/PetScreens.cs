@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CrushRoyale.Contracts;
 using CrushRoyale.Game.Audio;
@@ -242,11 +243,22 @@ namespace CrushRoyale.Game.Screens
                 }
                 return;
             }
+            // Surplus fragments of an owned pet can be traded for fragments of a pet still locked.
+            bool canConvert = pet.Fragments >= ConvertRatio && pets.Pets.Exists(p => !p.Owned);
+            float convertMax = pet.CanAwaken ? 0.54f : 0.64f;
             if (pet.CanAwaken)
             {
                 Button awaken = UIFactory.Button(card, Loc.T("pets.awaken", pet.AwakenFragments, pet.AwakenCoins), () => _ = AwakenAsync(pet.Type),
-                    pet.Fragments >= pet.AwakenFragments ? Theme.Orbe : Theme.PanelLight, Theme.SmallSize - 6);
-                UIFactory.Anchor(awaken.GetComponent<RectTransform>(), 0.33f, 0.05f, 0.64f, 0.3f);
+                    pet.Fragments >= pet.AwakenFragments ? Theme.Orbe : Theme.PanelLight, Theme.SmallSize - 8);
+                UIFactory.Anchor(awaken.GetComponent<RectTransform>(), canConvert ? 0.555f : 0.33f, 0.05f, canConvert ? 0.765f : 0.64f, 0.3f);
+            }
+            if (canConvert)
+            {
+                PetDto source = pet;
+                Button convert = UIFactory.Button(card, Loc.T("pets.convert"), () => ShowConvert(source, pets), Theme.Crystal, Theme.SmallSize - 6);
+                UIFactory.Anchor(convert.GetComponent<RectTransform>(), 0.33f, 0.05f, convertMax, 0.3f);
+                Pulse pulse = convert.gameObject.AddComponent<Pulse>();
+                pulse.Scale = true;
             }
             Button equip = UIFactory.Button(card, Loc.T(equipped ? "pets.equipped" : "pets.equip"), () =>
             {
@@ -255,7 +267,144 @@ namespace CrushRoyale.Game.Screens
                     _ = EquipAsync(pet.Type);
                 }
             }, equipped ? Theme.Success : Theme.Gold, Theme.SmallSize);
-            UIFactory.Anchor(equip.GetComponent<RectTransform>(), 0.67f, 0.05f, 0.97f, 0.3f);
+            UIFactory.Anchor(equip.GetComponent<RectTransform>(), pet.CanAwaken && canConvert ? 0.78f : 0.67f, 0.05f, 0.97f, 0.3f);
+        }
+
+        private int ConvertRatio => Math.Max(1, Game.Backend.Balance?.Pets?.ConvertRatio ?? 3);
+
+        /// <summary>Trade popup: pick a locked pet and how many of its fragments to receive (ConvertRatio surplus fragments each).</summary>
+        private void ShowConvert(PetDto source, PetsDto pets)
+        {
+            List<PetDto> locked = pets.Pets.FindAll(p => !p.Owned);
+            if (locked.Count == 0)
+            {
+                return;
+            }
+            int ratio = ConvertRatio;
+            int max = source.Fragments / ratio;
+            PetDto target = locked.OrderByDescending(p => p.Fragments).First();
+            int count = 1;
+
+            RectTransform box = UI.Popup(0.14f, 0.86f);
+            void Close()
+            {
+                if (box != null)
+                {
+                    Destroy(box.parent.gameObject);
+                }
+            }
+
+            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", box), -0.03f, 0.9f, 1.03f, 1.03f);
+            UiKit.Ribbon(ribbon);
+            Text title = UIFactory.Label(ribbon, Loc.T("pets.convertTitle"), Theme.HeaderSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.2f, 0.34f, 0.8f, 0.92f);
+            Widgets.TitleOutline(title);
+
+            // From -> to strip.
+            Image fromArt = UIFactory.Icon(box, PetArt(source.Type), Color.white, 0);
+            UIFactory.Anchor(fromArt.rectTransform, 0.06f, 0.7f, 0.3f, 0.88f);
+            fromArt.gameObject.AddComponent<Breathe>().Amount = 0.03f;
+            Text fromText = UIFactory.Label(box, Loc.T("pets.fragments", source.Fragments), Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(fromText.rectTransform, 0.02f, 0.655f, 0.34f, 0.705f);
+            Widgets.TitleOutline(fromText);
+            Text arrow = UIFactory.Label(box, Loc.T("pets.convertRate", ratio), Theme.BodySize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(arrow.rectTransform, 0.32f, 0.72f, 0.68f, 0.86f);
+            Widgets.TitleOutline(arrow);
+            arrow.gameObject.AddComponent<Pulse>();
+            Image toArt = UIFactory.Icon(box, PetArt(target.Type), new Color(0.2f, 0.18f, 0.32f, 1f), 0);
+            UIFactory.Anchor(toArt.rectTransform, 0.7f, 0.7f, 0.94f, 0.88f);
+            Text toText = UIFactory.Label(box, string.Empty, Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(toText.rectTransform, 0.66f, 0.655f, 0.98f, 0.705f);
+            Widgets.TitleOutline(toText);
+
+            // Locked pets to choose from.
+            Text pick = UIFactory.Label(box, Loc.T("pets.convertPick"), Theme.SmallSize, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(pick.rectTransform, 0.07f, 0.6f, 0.93f, 0.65f);
+            RectTransform choices = UIFactory.Anchor(UIFactory.Rect("Choices", box), 0.06f, 0.4f, 0.94f, 0.595f);
+            HorizontalLayoutGroup row = choices.gameObject.AddComponent<HorizontalLayoutGroup>();
+            row.spacing = 14;
+            row.childControlWidth = row.childControlHeight = true;
+            row.childForceExpandWidth = row.childForceExpandHeight = true;
+            var tiles = new List<(PetDto Pet, Image Tile)>();
+
+            Text amount = UIFactory.Label(box, string.Empty, Theme.BodySize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(amount.rectTransform, 0.28f, 0.25f, 0.72f, 0.36f);
+            Widgets.TitleOutline(amount);
+            Button go = null;
+
+            void Refresh()
+            {
+                count = Mathf.Clamp(count, 1, Math.Max(1, max));
+                int after = target.Fragments + count;
+                toArt.sprite = PetArt(target.Type);
+                toText.text = PetName(Loc, target.Type) + "  " + Loc.T("pets.fragmentProgress", Math.Min(after, pets.UnlockFragments), pets.UnlockFragments);
+                amount.text = Loc.T("pets.convertAmount", count * ratio, count);
+                foreach ((PetDto p, Image tile) in tiles)
+                {
+                    tile.color = p == target ? Theme.Crystal : Theme.PanelLight;
+                }
+                if (go != null)
+                {
+                    go.interactable = max >= 1;
+                }
+            }
+
+            foreach (PetDto candidate in locked)
+            {
+                PetDto choice = candidate;
+                Image tile = UIFactory.Panel("Tile", choices, Theme.PanelLight);
+                UiKit.CardFrame(tile);
+                Button tap = tile.gameObject.AddComponent<Button>();
+                tap.targetGraphic = tile;
+                tap.onClick.AddListener(() =>
+                {
+                    Game.Audio.PlaySFX(SoundIds.Click);
+                    target = choice;
+                    Refresh();
+                });
+                Image art = UIFactory.Icon(tile.transform, PetArt(choice.Type), new Color(0.35f, 0.32f, 0.5f, 1f), 0);
+                UIFactory.Anchor(art.rectTransform, 0.1f, 0.3f, 0.9f, 0.95f);
+                art.raycastTarget = false;
+                Text frag = UIFactory.Label(tile.transform, choice.Fragments + "/" + pets.UnlockFragments, Theme.SmallSize - 8, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(frag.rectTransform, 0f, 0.02f, 1f, 0.3f);
+                Widgets.TitleOutline(frag);
+                tiles.Add((choice, tile));
+            }
+
+            // Amount: - / + / max.
+            Button minus = UIFactory.Button(box, "-", () => { count--; Refresh(); }, Theme.PanelLight, Theme.HeaderSize);
+            UIFactory.Anchor(minus.GetComponent<RectTransform>(), 0.07f, 0.25f, 0.26f, 0.36f);
+            Button plus = UIFactory.Button(box, "+", () => { count++; Refresh(); }, Theme.PanelLight, Theme.HeaderSize);
+            UIFactory.Anchor(plus.GetComponent<RectTransform>(), 0.74f, 0.25f, 0.93f, 0.36f);
+            Button all = UIFactory.Button(box, Loc.T("pets.convertMax", max), () => { count = max; Refresh(); }, Theme.Orbe, Theme.SmallSize - 4);
+            UIFactory.Anchor(all.GetComponent<RectTransform>(), 0.3f, 0.155f, 0.7f, 0.235f);
+
+            Button cancel = UIFactory.Button(box, Loc.T("common.cancel"), Close, Theme.PanelLight, Theme.BodySize);
+            UIFactory.Anchor(cancel.GetComponent<RectTransform>(), 0.06f, 0.03f, 0.46f, 0.13f);
+            go = UIFactory.Button(box, Loc.T("pets.convertGo"), () =>
+            {
+                string to = target.Type;
+                int n = count;
+                Close();
+                _ = ConvertAsync(source.Type, to, n);
+            }, Theme.Success, Theme.BodySize);
+            UIFactory.Anchor(go.GetComponent<RectTransform>(), 0.54f, 0.03f, 0.94f, 0.13f);
+            go.gameObject.AddComponent<Breathe>().Amount = 0.03f;
+            Refresh();
+        }
+
+        private async Task ConvertAsync(string from, string to, int count)
+        {
+            PetActionResponse response = await Api(api => api.ConvertPetFragmentsAsync(from, to, count));
+            if (response == null || this == null)
+            {
+                return;
+            }
+            Game.Audio.PlaySFX(SoundIds.Sparkle);
+            Apply(response.Pets, response.Wallet);
+            Game.Telemetry.Track("pet_convert", ("from", from), ("to", to), ("count", count));
+            UI.Toast(Loc.T("pets.converted", count, PetName(Loc, to)), 2.5f);
+            Rebuild();
         }
 
         private async Task SummonAsync(int count)

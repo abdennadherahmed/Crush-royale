@@ -512,6 +512,9 @@ namespace CrushRoyale.Contracts
 
         public long BossDamage { get; set; }
 
+        /// <summary>Coins donated today (the coin allowance resets daily).</summary>
+        public long CoinsDonatedToday { get; set; }
+
         public long JoinedAtUnixMs { get; set; }
     }
 
@@ -545,6 +548,12 @@ namespace CrushRoyale.Contracts
         public string NextLevelCurrency { get; set; }
 
         public long NextLevelCost { get; set; }
+
+        /// <summary>Coins per guild point (one orbe = one point).</summary>
+        public int CoinsPerPoint { get; set; }
+
+        /// <summary>Daily coin donation allowance per member.</summary>
+        public long DailyCoinCap { get; set; }
 
         public int TechPoints { get; set; }
 
@@ -596,6 +605,9 @@ namespace CrushRoyale.Contracts
     public sealed class DonateRequest
     {
         public long Amount { get; set; }
+
+        /// <summary>"Coins" (daily allowance) or "Orbes" (unlimited). Empty means orbes.</summary>
+        public string Currency { get; set; }
     }
 
     public sealed class DonateResponse
@@ -605,6 +617,11 @@ namespace CrushRoyale.Contracts
         public string Currency { get; set; }
 
         public bool LeveledUp { get; set; }
+
+        /// <summary>Levels gained by this donation: a big gift fills several levels at once.</summary>
+        public int LevelsGained { get; set; }
+
+        public long Points { get; set; }
 
         public GuildDto Guild { get; set; }
 
@@ -629,6 +646,9 @@ namespace CrushRoyale.Contracts
         public int AttacksLeft { get; set; }
 
         public bool DefeatedNow { get; set; }
+
+        /// <summary>Other members defeated the boss while this attack was played: damage counted, attack kept, reward shared.</summary>
+        public bool DefeatedDuringAttack { get; set; }
 
         public RewardDto Reward { get; set; }
 

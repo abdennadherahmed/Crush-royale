@@ -192,10 +192,16 @@ namespace CrushRoyale.Core.Config
 
         public int MaxOfficers { get; set; } = 4;
 
-        /// <summary>Level 1 -> 2 is paid in coins.</summary>
-        public int Level2CostCoins { get; set; } = 500;
+        /// <summary>Guild points for level 1 -> 2 (levels cost guild points; donations turn into points).</summary>
+        public int Level2CostPoints { get; set; } = 5;
 
-        /// <summary>Level 2 -> 3 costs this many orbes, then +25% per level.</summary>
+        /// <summary>Coins per guild point (one orbe is one point).</summary>
+        public int CoinsPerPoint { get; set; } = 100;
+
+        /// <summary>Coins each member may donate per day (resets daily); orbe donations are unlimited.</summary>
+        public int DailyCoinDonationCap { get; set; } = 5000;
+
+        /// <summary>Level 2 -> 3 costs this many points, then +25% per level.</summary>
         public int OrbeLevelBaseCost { get; set; } = 100;
 
         public int OrbeLevelEscalationPermille { get; set; } = 1250;
@@ -229,6 +235,7 @@ namespace CrushRoyale.Core.Config
             GameBalance.Require(MaxMembers >= 2 && MaxMembers <= 100, "Guild.MaxMembers");
             GameBalance.Require(MaxLevel >= 2, "Guild.MaxLevel");
             GameBalance.Require(OrbeLevelEscalationPermille >= 1000, "Guild.OrbeLevelEscalationPermille");
+            GameBalance.Require(CoinsPerPoint >= 1 && DailyCoinDonationCap >= CoinsPerPoint && Level2CostPoints >= 1, "Guild donation settings");
             GameBalance.Require(RankingPoolOrbes.Length == 5 && RankingPoolCoins.Length == 5, "Guild ranking pools need 5 values");
         }
     }

@@ -371,6 +371,39 @@ namespace CrushRoyale.Game.Screens
             string storyLabel = Loc.T("menu.story") + (stage > 0 ? "\n" + Loc.T("menu.stageShort", stage) : string.Empty);
             PlayButton(safe, storyLabel, "map", typeof(WorldMapScreen), "Story", Theme.GoldDark, 0.14f, 0.255f);
             PlayButton(safe, Loc.T("menu.pvp"), "pvp", typeof(PvpScreen), "Pvp", Theme.Hex("B3263E"), 0.025f, 0.13f);
+
+            if (!Game.Backend.IsOnline)
+            {
+                OfflineBanner(safe);
+            }
+        }
+
+        /// <summary>
+        /// Offline is practice only (story up to stage 50 and PvP against a bot, nothing saved): everything that touches the
+        /// shared online world (shop, guild, pets, friends...) waits for the connection so nothing can conflict with it.
+        /// </summary>
+        private void OfflineBanner(RectTransform safe)
+        {
+            Image pill = UIFactory.Panel("Offline", safe, new Color(0.35f, 0.06f, 0.12f, 0.92f));
+            UIFactory.Anchor(pill.rectTransform, 0.2f, 0.835f, 0.8f, 0.885f);
+            Outline border = pill.gameObject.AddComponent<Outline>();
+            border.effectColor = new Color(1f, 0.4f, 0.45f, 0.9f);
+            border.effectDistance = new Vector2(3, -3);
+            Image dot = UIFactory.Icon(pill.transform, ProceduralSprites.Circle(), Theme.Danger, 0);
+            dot.preserveAspect = true;
+            UIFactory.Anchor(dot.rectTransform, 0.03f, 0.25f, 0.09f, 0.75f);
+            dot.gameObject.AddComponent<Pulse>().Scale = true;
+            Text text = UIFactory.Label(pill.transform, Loc.T("menu.offlineBanner"), Theme.SmallSize - 6, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(text.rectTransform, 0.1f, 0.05f, 0.98f, 0.95f);
+            Widgets.TitleOutline(text);
+            Button retry = pill.gameObject.AddComponent<Button>();
+            retry.targetGraphic = pill;
+            retry.onClick.AddListener(() =>
+            {
+                Game.Audio.PlaySFX(SoundIds.Click);
+                Game.Backend.TryReconnect();
+                UI.Toast(Loc.T("menu.offlineRetry"));
+            });
         }
 
         private void BuildHero(RectTransform safe, ProfileDto profile, PlayerSettings settings, string gender)
@@ -633,6 +666,12 @@ namespace CrushRoyale.Game.Screens
             if (unlocked)
             {
                 UI.Show(screen);
+            }
+            else if (!Game.Backend.IsOnline)
+            {
+                // Online-only feature: explain why (no conflicts with the online world) and try to reconnect.
+                UI.Toast(Loc.T("menu.offlineLocked"), 3f);
+                Game.Backend.TryReconnect();
             }
             else
             {

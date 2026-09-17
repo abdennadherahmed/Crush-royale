@@ -118,7 +118,7 @@ namespace CrushRoyale.Game
         /// <summary>The server answered after the splash moved on: switch the menu to online mode (matches in progress finish offline).</summary>
         private void OnCameOnline()
         {
-            UI.Toast(Loc.T("splash.online"), 2.5f);
+            UI.Toast(Loc.T("splash.onlineNow"), 4f);
             if (UI.Current is MainMenuScreen || UI.Current is PvpScreen || UI.Current is WorldMapScreen)
             {
                 _ = SplashScreen.EnterOnlineAsync(this, UI, Loc);

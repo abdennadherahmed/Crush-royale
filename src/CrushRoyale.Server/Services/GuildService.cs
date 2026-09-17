@@ -183,7 +183,8 @@ public sealed class GuildService
         {
             PlayerWorkspace ws = ctx.Player;
             GuildRecord record = await LockMyGuildAsync(ctx).ConfigureAwait(false);
-            GuildDonationResult result = new GuildManager(ws.Balance, ws.Clock).Donate(record.Guild, ws.IdString, ws.Wallet, request?.Amount ?? 0).ValueOrThrow();
+            GuildDonationResult result = new GuildManager(ws.Balance, ws.Clock).Donate(record.Guild, ws.IdString, ws.Wallet,
+                string.Equals(request?.Currency, "Coins", StringComparison.OrdinalIgnoreCase) ? Currency.Coins : Currency.Orbes, request?.Amount ?? 0).ValueOrThrow();
             ws.Achievements.IncrementStat(StatKey.GuildDonations, 1);
             await ctx.Tx.UpdateGuildAsync(record).ConfigureAwait(false);
             return new DonateResponse
@@ -191,6 +192,8 @@ public sealed class GuildService
                 Paid = result.Paid,
                 Currency = result.Currency.ToString(),
                 LeveledUp = result.LeveledUp,
+                LevelsGained = result.LevelsGained,
+                Points = result.Points,
                 Guild = await ToDtoAsync(record, ws, ct).ConfigureAwait(false),
                 Wallet = Mappers.Wallet(ws)
             };
@@ -292,7 +295,7 @@ public sealed class GuildService
             }
 
             var manager = new GuildManager(ws.Balance, ws.Clock);
-            BossAttackResult attack = manager.SubmitBossDamage(record.Guild, ws.IdString, result.FinalScore, match.Config.GuildWeek).ValueOrThrow();
+            BossAttackResult attack = manager.SubmitBossDamage(record.Guild, ws.IdString, result.FinalScore, match.Config.GuildWeek, TimeUtil.ToUnixMs(match.StartedAt)).ValueOrThrow();
 
             RewardData? reward = null;
             if (attack.DefeatedNow)
@@ -306,6 +309,13 @@ public sealed class GuildService
                 {
                     record.PendingRewards.Add(new PendingGuildReward { Id = rewardId, Reward = reward, PlayerIds = others });
                 }
+            }
+            else if (attack.DefeatedDuringAttack)
+            {
+                // Hand over the shared defeat reward right away so the result screen can show it.
+                PendingGuildReward? mine = record.PendingRewards.FirstOrDefault(p => p.PlayerIds.Contains(ws.IdString));
+                reward = mine?.Reward;
+                ClaimPendingRewards(ws, record);
             }
 
             ws.Achievements.IncrementStat(StatKey.GuildBossAttacks, 1);
@@ -341,6 +351,7 @@ public sealed class GuildService
                 Damage = attack.DamageApplied,
                 AttacksLeft = attack.AttacksLeft,
                 DefeatedNow = attack.DefeatedNow,
+                DefeatedDuringAttack = attack.DefeatedDuringAttack,
                 Reward = reward == null ? null : Mappers.Reward(reward),
                 Boss = BossDto(record.Guild.Boss),
                 AchievementsUnlocked = ws.UnlockedAchievements.ToList()
@@ -453,7 +464,8 @@ public sealed class GuildService
     {
         Guild g = record.Guild;
         var manager = new GuildManager(ws.Balance, ws.Clock);
-        KeyValuePair<Currency, long> cost = manager.GetNextLevelCost(g);
+        long cost = manager.GetNextLevelPoints(g);
+        int today = TimeUtil.DayIndex(ws.Clock.UtcNow);
         int week = Week;
         int attacks = ws.Balance.Guild.BossAttacksPerMemberPerWeek;
         IReadOnlyList<GuildRankingRow> top = await _ops.Store.TopGuildsAsync(100, ct).ConfigureAwait(false);
@@ -465,8 +477,10 @@ public sealed class GuildService
             Description = g.Description,
             Level = g.Level,
             DonationProgress = g.DonationProgress,
-            NextLevelCurrency = g.Level >= ws.Balance.Guild.MaxLevel ? null : cost.Key.ToString(),
-            NextLevelCost = g.Level >= ws.Balance.Guild.MaxLevel ? 0 : cost.Value,
+            NextLevelCurrency = g.Level >= ws.Balance.Guild.MaxLevel ? null : "Points",
+            NextLevelCost = g.Level >= ws.Balance.Guild.MaxLevel ? 0 : cost,
+            CoinsPerPoint = ws.Balance.Guild.CoinsPerPoint,
+            DailyCoinCap = ws.Balance.Guild.DailyCoinDonationCap,
             TechPoints = g.TechPointsAvailable,
             Tech = g.TechRanks.ToDictionary(kv => kv.Key.ToString(), kv => kv.Value),
             Members = g.Members
@@ -482,6 +496,7 @@ public sealed class GuildService
                     DonatedOrbes = m.DonatedOrbes,
                     BossAttacksLeft = m.BossWeek == week ? attacks - m.BossAttacksThisWeek : attacks,
                     BossDamage = m.BossWeek == week ? m.BossDamageThisWeek : 0,
+                    CoinsDonatedToday = m.CoinDonationDay == today ? m.CoinsDonatedToday : 0,
                     JoinedAtUnixMs = m.JoinedAtUnixMs
                 }).ToList(),
             IsOpen = g.IsOpen,

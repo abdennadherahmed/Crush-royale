@@ -217,6 +217,9 @@ namespace CrushRoyale.Client
 
         public Task<PetActionResponse> UnlockPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetUnlock, new PetRequest { Pet = pet }, ct);
 
+        public Task<PetActionResponse> ConvertPetFragmentsAsync(string from, string to, int count, CancellationToken ct = default) =>
+            Transport.PostAsync<PetActionResponse>(ApiRoutes.PetConvert, new PetConvertRequest { From = from, To = to, Count = count }, ct);
+
         public Task<PetActionResponse> AwakenPetAsync(string pet, CancellationToken ct = default) => Transport.PostAsync<PetActionResponse>(ApiRoutes.PetAwaken, new PetRequest { Pet = pet }, ct);
 
         public Task<ShopResponse> GetShopAsync(CancellationToken ct = default) => Transport.GetAsync<ShopResponse>(ApiRoutes.Shop, ct);
@@ -257,7 +260,8 @@ namespace CrushRoyale.Client
         public Task<GuildDto> SetRoleAsync(string playerId, string role, CancellationToken ct = default) => Transport.PostAsync<GuildDto>(ApiRoutes.GuildRole, new GuildMemberActionRequest { PlayerId = playerId, Role = role }, ct);
         public Task<GuildDto> InviteAsync(string playerId, CancellationToken ct = default) => Transport.PostAsync<GuildDto>(ApiRoutes.GuildInvite, new GuildMemberActionRequest { PlayerId = playerId }, ct);
         public Task<GuildDto> UpdateGuildSettingsAsync(GuildSettingsRequest request, CancellationToken ct = default) => Transport.PutAsync<GuildDto>(ApiRoutes.GuildSettings, request, ct);
-        public Task<DonateResponse> DonateAsync(long amount, CancellationToken ct = default) => Transport.PostAsync<DonateResponse>(ApiRoutes.GuildDonate, new DonateRequest { Amount = amount }, ct);
+        public Task<DonateResponse> DonateAsync(long amount, string currency = "Orbes", CancellationToken ct = default) =>
+            Transport.PostAsync<DonateResponse>(ApiRoutes.GuildDonate, new DonateRequest { Amount = amount, Currency = currency }, ct);
         public Task<GuildDto> SpendTechAsync(string tech, CancellationToken ct = default) => Transport.PostAsync<GuildDto>(ApiRoutes.GuildTech, new TechRequest { Tech = tech }, ct);
         public Task<MatchStartResponse> StartGuildBossAsync(StartStageRequest request, CancellationToken ct = default) => Transport.PostAsync<MatchStartResponse>(ApiRoutes.GuildBossStart, request, ct);
         public Task<GuildBossAttackResponse> SubmitGuildBossAsync(SubmitReplayRequest request, CancellationToken ct = default) => Transport.PostAsync<GuildBossAttackResponse>(ApiRoutes.GuildBossDamage, request, ct);

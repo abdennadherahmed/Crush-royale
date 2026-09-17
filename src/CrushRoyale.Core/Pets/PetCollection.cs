@@ -117,6 +117,39 @@ namespace CrushRoyale.Core.Pets
             return pulls;
         }
 
+        /// <summary>
+        /// Trades surplus fragments of a pet you already own for fragments of a pet you do not own yet,
+        /// <see cref="PetBalance.ConvertRatio"/> for one. <paramref name="count"/> is the number of fragments received.
+        /// </summary>
+        public ErrorCode ConvertFragments(PetType from, PetType to, int count)
+        {
+            if (from == PetType.None || to == PetType.None || from == to || _balance.Get(from) == null || _balance.Get(to) == null)
+            {
+                return ErrorCode.NotFound;
+            }
+            if (count <= 0 || count > 10000)
+            {
+                return ErrorCode.InvalidArgument;
+            }
+            if (!Owns(from))
+            {
+                return ErrorCode.PermissionDenied;
+            }
+            if (Owns(to))
+            {
+                return ErrorCode.AlreadyClaimed;
+            }
+            PetState source = Get(from);
+            long cost = (long)count * Math.Max(1, _balance.ConvertRatio);
+            if (source.Fragments < cost)
+            {
+                return ErrorCode.NotEnoughItems;
+            }
+            source.Fragments -= (int)cost;
+            Get(to).Fragments += count;
+            return ErrorCode.None;
+        }
+
         /// <summary>Unlocks a pet not owned yet by spending <see cref="PetBalance.UnlockFragments"/> of its fragments.</summary>
         public ErrorCode Unlock(PetType type)
         {
