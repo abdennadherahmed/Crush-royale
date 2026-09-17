@@ -48,6 +48,9 @@ namespace CrushRoyale.Contracts
 
         public int AssistExtraMoves { get; set; }
 
+        /// <summary>Win-streak starting bonuses already on the board (0-3).</summary>
+        public int StartBoosters { get; set; }
+
         /// <summary>Equipped pet and the level it plays at in this match (capped in PvP).</summary>
         public string Pet { get; set; }
 
@@ -144,6 +147,11 @@ namespace CrushRoyale.Contracts
 
         /// <summary>Chest granted by this stage (welcome chest, chapter bosses), null otherwise.</summary>
         public string ChestEarned { get; set; }
+
+        /// <summary>Win streak after this stage, and the streak a loss just ended (0 if none).</summary>
+        public int WinStreak { get; set; }
+
+        public int StreakLost { get; set; }
 
         public WalletDto Wallet { get; set; }
 

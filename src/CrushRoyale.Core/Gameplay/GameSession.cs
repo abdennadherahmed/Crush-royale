@@ -218,6 +218,7 @@ namespace CrushRoyale.Core.Gameplay
 
             _boardManager = new BoardManager(config.Seed, balance, config.Board.ColorCount);
             _boardManager.GenerateNewBoard(config.Board);
+            PlaceStartBoosters(config.StartBoosters);
             _cascade = new CascadeCalculator(balance);
             _powerUps = new PowerUpManager(balance, config);
             _objectives = new ObjectiveTracker(config.Objectives, _boardManager.Board, config.BossHp);
@@ -233,6 +234,39 @@ namespace CrushRoyale.Core.Gameplay
             _nextCheckpointMs = balance.Timing.CheckpointIntervalMs;
             InitialBoardHash = _boardManager.Board.ComputeHash();
             State = SessionState.Running;
+        }
+
+        /// <summary>
+        /// Win-streak bonuses: turns plain gems into a line, a bomb and a line (same colour, so no match appears).
+        /// Own random stream: identical on client and server, and board refills are untouched.
+        /// </summary>
+        private void PlaceStartBoosters(int count)
+        {
+            count = Math.Min(count, SessionConfig.MaxStartBoosters);
+            if (count <= 0)
+            {
+                return;
+            }
+            GameBoard board = _boardManager.Board;
+            var candidates = new List<Pos>();
+            foreach (Pos p in board.AllPositions())
+            {
+                Piece piece = board[p];
+                if (!piece.IsEmpty && piece.Type == PieceType.Normal && board.IceAt(p) == 0)
+                {
+                    candidates.Add(p);
+                }
+            }
+            var rng = new DeterministicRandom(Config.Seed, 0x57EA4B0057UL);
+            PieceType[] types = { PieceType.LineHorizontal, PieceType.AreaBomb, PieceType.LineVertical };
+            for (int i = 0; i < count && candidates.Count > 0; i++)
+            {
+                int k = rng.NextInt(candidates.Count);
+                Pos p = candidates[k];
+                candidates.RemoveAt(k);
+                Piece old = board[p];
+                board[p] = new Piece(old.Id, old.Color, types[i], old.Hp);
+            }
         }
 
         // ------------------------------------------------------------------ events (UI integration)
@@ -286,7 +320,11 @@ namespace CrushRoyale.Core.Gameplay
 
         public int ContinuesUsed { get; private set; }
 
-        public int TimeLimitMs => Config.TimeLimitMs + _powerUps.ExtraTimeMs + _continueExtraTimeMs;
+        public int TimeLimitMs => Config.TimeLimitMs + _powerUps.ExtraTimeMs + _continueExtraTimeMs
+            + (Config.HasMoveLimit ? 0 : Config.AssistExtraMoves * AssistMsPerMove);
+
+        /// <summary>On timed stages the difficulty assist gives time instead of moves.</summary>
+        public const int AssistMsPerMove = 2500;
 
         public int LastKnownTimeMs { get; private set; }
 
@@ -481,7 +519,8 @@ namespace CrushRoyale.Core.Gameplay
             }
 
             int remaining = TimeLimitMs - nowMs;
-            if (!_timeWarningSent && remaining > 0 && remaining <= _balance.Timing.TimeWarningMs)
+            // Moves stages have no visible clock: no "hurry up" warning there.
+            if (!_timeWarningSent && !Config.HasMoveLimit && remaining > 0 && remaining <= _balance.Timing.TimeWarningMs)
             {
                 _timeWarningSent = true;
                 OnTimeWarning?.Invoke(remaining);
@@ -754,8 +793,12 @@ namespace CrushRoyale.Core.Gameplay
                 {
                     bonus += (long)MovesLeft * _balance.Scoring.RemainingMoveBonus;
                 }
-                int secondsLeft = Math.Max(0, TimeLimitMs - endTimeMs) / 1000;
-                bonus += (long)secondsLeft * _balance.Scoring.RemainingSecondBonus;
+                if (!Config.HasMoveLimit)
+                {
+                    // Only timed stages pay for the time left (moves stages pay for the moves left).
+                    int secondsLeft = Math.Max(0, TimeLimitMs - endTimeMs) / 1000;
+                    bonus += (long)secondsLeft * _balance.Scoring.RemainingSecondBonus;
+                }
                 _bonusPoints += bonus;
                 Score += bonus;
                 if (bonus > 0)

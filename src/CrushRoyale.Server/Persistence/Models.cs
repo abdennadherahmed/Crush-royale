@@ -71,6 +71,9 @@ public sealed class PlayerState
     /// <summary>UTC day index of the last daily VIP gift claimed (VIP 6+).</summary>
     public int VipGiftDay { get; set; } = -1;
 
+    /// <summary>UTC day of the last daily wheel spin.</summary>
+    public int WheelDay { get; set; } = -1;
+
     public long? GuildId { get; set; }
 
     public HashSet<StoryEnding> EndingsReached { get; set; } = new();
@@ -125,6 +128,9 @@ public sealed class MatchConfigSnapshot
     public League HighestLeague { get; set; }
 
     public int AssistExtraMoves { get; set; }
+
+    /// <summary>Win-streak starting bonuses placed on the board.</summary>
+    public int StartBoosters { get; set; }
 
     public int ContinuesAuthorized { get; set; }
 

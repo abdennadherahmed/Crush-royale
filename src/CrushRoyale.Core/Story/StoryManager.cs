@@ -69,6 +69,11 @@ namespace CrushRoyale.Core.Story
 
         /// <summary>Chapter star chests already opened ("chapter:tier").</summary>
         public HashSet<string> ClaimedChapterChests { get; set; } = new HashSet<string>();
+
+        /// <summary>First wins in a row on new stages; a loss on a stage not won yet resets it.</summary>
+        public int WinStreak { get; set; }
+
+        public int BestWinStreak { get; set; }
     }
 
     public sealed class StageCompletion
@@ -87,6 +92,9 @@ namespace CrushRoyale.Core.Story
         public int Orbes { get; internal set; }
 
         public int NextStage { get; internal set; }
+
+        /// <summary>Win streak that this loss ended (0 when there was none).</summary>
+        public int StreakLost { get; internal set; }
 
         public List<StoryEvent> Events { get; } = new List<StoryEvent>();
 
@@ -146,6 +154,25 @@ namespace CrushRoyale.Core.Story
             return Progress.Stages.TryGetValue(stageId, out StageProgress p) ? p.LastStatus : StageStatus.Unlocked;
         }
 
+        /// <summary>Starting bonuses earned by the win streak (0-3), only on stages not won yet.</summary>
+        public int GetStreakBoosters(int stageId)
+        {
+            if (Progress.Stages.TryGetValue(stageId, out StageProgress p) && p.EverWon)
+            {
+                return 0;
+            }
+            int[] wins = _balance.Story.StreakBoosterWins;
+            int count = 0;
+            for (int i = 0; i < wins.Length; i++)
+            {
+                if (Progress.WinStreak >= wins[i])
+                {
+                    count = i + 1;
+                }
+            }
+            return count;
+        }
+
         public int GetAssistExtraMoves(int stageId)
         {
             if (!Progress.Stages.TryGetValue(stageId, out StageProgress p) || p.EverWon)
@@ -188,6 +215,11 @@ namespace CrushRoyale.Core.Story
             if (status != StageStatus.Won)
             {
                 p.ConsecutiveFailures++;
+                if (!p.EverWon)
+                {
+                    completion.StreakLost = Progress.WinStreak;
+                    Progress.WinStreak = 0;
+                }
                 return completion;
             }
 
@@ -204,6 +236,8 @@ namespace CrushRoyale.Core.Story
 
             if (completion.FirstWin)
             {
+                Progress.WinStreak++;
+                Progress.BestWinStreak = Math.Max(Progress.BestWinStreak, Progress.WinStreak);
                 p.EverWon = true;
                 p.FirstWonAtUnixMs = TimeUtil.ToUnixMs(_clock.UtcNow);
                 completion.BaseCoins = stage.RewardCoins;

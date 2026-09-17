@@ -27,6 +27,8 @@ namespace CrushRoyale.Contracts
         public const string LivesBuy = Prefix + "/stamina/buy";
         public const string LivesVipClaim = Prefix + "/stamina/vip-life";
         public const string VipGift = Prefix + "/vip/gift";
+
+        public const string WheelSpin = Prefix + "/wheel/spin";
         public const string Shop = Prefix + "/shop";
         public const string ShopRefresh = Prefix + "/shop/refresh";
         public const string ShopPurchase = Prefix + "/shop/purchase";

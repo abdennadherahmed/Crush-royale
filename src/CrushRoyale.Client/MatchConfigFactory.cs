@@ -41,7 +41,8 @@ namespace CrushRoyale.Client
                     {
                         throw new ArgumentNullException(nameof(catalog));
                     }
-                    config = SessionConfig.ForStage(catalog.Get(start.StageId), balance, loadout, league, start.AssistExtraMoves);
+                    config = SessionConfig.ForStage(catalog.Get(start.StageId), balance, loadout, league, start.AssistExtraMoves)
+                        .WithStartBoosters(start.StartBoosters);
                     break;
                 case GameMode.GuildBoss:
                     config = SessionConfig.ForGuildBoss(seed, start.StageId, balance, loadout, league);

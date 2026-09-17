@@ -192,6 +192,8 @@ namespace CrushRoyale.Client
         public Task<ChoiceResponse> MakeChoiceAsync(string choiceId, string optionId, CancellationToken ct = default) => Transport.PostAsync<ChoiceResponse>(ApiRoutes.StoryChoice, new ChoiceRequest { ChoiceId = choiceId, OptionId = optionId }, ct);
         public Task<VipGiftResponse> ClaimVipGiftAsync(CancellationToken ct = default) => Transport.PostAsync<VipGiftResponse>(ApiRoutes.VipGift, null, ct);
 
+        public Task<WheelSpinResponse> SpinWheelAsync(CancellationToken ct = default) => Transport.PostAsync<WheelSpinResponse>(ApiRoutes.WheelSpin, null, ct);
+
         public Task<ChapterChestResponse> ClaimChapterChestAsync(int chapter, int tier, CancellationToken ct = default) =>
             Transport.PostAsync<ChapterChestResponse>(ApiRoutes.ChapterChest, new ChapterChestRequest { Chapter = chapter, Tier = tier }, ct);
 

@@ -120,6 +120,31 @@ namespace CrushRoyale.Contracts
 
         /// <summary>Chapter star chests already opened ("chapter:tier", tier 0-2 for 30/45/60 stars).</summary>
         public List<string> ClaimedChapterChests { get; set; } = new List<string>();
+
+        /// <summary>First wins in a row on new stages (3, 5 and 7 give starting bonuses).</summary>
+        public int WinStreak { get; set; }
+
+        public int BestWinStreak { get; set; }
+    }
+
+    /// <summary>Daily wheel result: the slice index (see Core DailyWheel.Slices) and what it granted.</summary>
+    public sealed class WheelSpinResponse
+    {
+        public int SliceIndex { get; set; }
+
+        public RewardDto Reward { get; set; }
+
+        public int PetFragments { get; set; }
+
+        public string FragmentsPet { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public InventoryDto Inventory { get; set; }
+
+        public PetsDto Pets { get; set; }
+
+        public LivesDto Lives { get; set; }
     }
 
     public sealed class VipGiftResponse
@@ -409,6 +434,9 @@ namespace CrushRoyale.Contracts
 
         /// <summary>VIP 6+: today's VIP gift has not been claimed yet.</summary>
         public bool VipGiftAvailable { get; set; }
+
+        /// <summary>The free daily wheel can be spun.</summary>
+        public bool WheelAvailable { get; set; }
 
         public int LoginCalendarSlot { get; set; }
 

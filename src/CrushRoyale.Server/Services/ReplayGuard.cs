@@ -26,7 +26,8 @@ public static class ReplayGuard
         {
             return ErrorCode.ReplayMismatch;
         }
-        if (replay.HighestLeague != match.Config.HighestLeague || replay.AssistExtraMoves != match.Config.AssistExtraMoves)
+        if (replay.HighestLeague != match.Config.HighestLeague || replay.AssistExtraMoves != match.Config.AssistExtraMoves
+            || replay.StartBoosters != match.Config.StartBoosters)
         {
             return ErrorCode.ReplayMismatch;
         }

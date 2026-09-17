@@ -86,7 +86,9 @@ public static class Mappers
             Party = ws.Story.GetParty().Select(c => c.Id).ToList(),
             UnlockedFeatures = Enum.GetValues<Feature>().Where(ws.Story.IsFeatureUnlocked).Select(f => f.ToString()).ToList(),
             SeenEvents = p.SeenEvents.OrderBy(e => e, StringComparer.Ordinal).ToList(),
-            ClaimedChapterChests = (p.ClaimedChapterChests ?? new HashSet<string>()).OrderBy(c => c, StringComparer.Ordinal).ToList()
+            ClaimedChapterChests = (p.ClaimedChapterChests ?? new HashSet<string>()).OrderBy(c => c, StringComparer.Ordinal).ToList(),
+            WinStreak = p.WinStreak,
+            BestWinStreak = p.BestWinStreak
         };
     }
 
@@ -128,6 +130,7 @@ public static class Mappers
             GuildId = s.GuildId,
             LoginBonusAvailable = LoginCalendar.CanClaim(s.Login, ws.Now),
             VipGiftAvailable = VipGifts.CanClaim((int)s.Vip.Tier, s.VipGiftDay, TimeUtil.DayIndex(ws.Now)),
+            WheelAvailable = DailyWheel.CanSpin(s.WheelDay, TimeUtil.DayIndex(ws.Now)),
             LoginCalendarSlot = s.Login.NextSlot,
             CollectionPagesCompleted = s.Achievements.PagesCompleted.Count,
             UnclaimedAchievements = ws.Achievements.GetUnclaimed().Count,
@@ -265,6 +268,7 @@ public static class Mappers
         Loadout = Loadout(match.Config.Loadout),
         HighestLeague = match.Config.HighestLeague.ToString(),
         AssistExtraMoves = match.Config.AssistExtraMoves,
+        StartBoosters = match.Config.StartBoosters,
         Pet = match.Config.Pet == PetType.None ? null : match.Config.Pet.ToString(),
         PetLevel = match.Config.PetLevel,
         StartedAtUnixMs = TimeUtil.ToUnixMs(match.StartedAt),

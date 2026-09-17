@@ -76,6 +76,9 @@ namespace CrushRoyale.Core.Replay
 
         public List<LoadoutEntry> Loadout { get; set; } = new List<LoadoutEntry>();
 
+        /// <summary>Win-streak starting bonuses on the board (format v3+).</summary>
+        public int StartBoosters { get; set; }
+
         /// <summary>Pet equipped for the match and the level it played at (format v2+).</summary>
         public PetType Pet { get; set; }
 
@@ -175,7 +178,8 @@ namespace CrushRoyale.Core.Replay
                 HighestLeague = config.HighestLeague,
                 AssistExtraMoves = config.AssistExtraMoves,
                 Pet = config.Pet,
-                PetLevel = config.PetLevel
+                PetLevel = config.PetLevel,
+                StartBoosters = config.StartBoosters
             };
             foreach (LoadoutEntry e in config.Loadout)
             {

@@ -36,7 +36,8 @@ namespace CrushRoyale.Core.Economy
         PetSummon = 25,
         PetAwaken = 26,
         ChapterChest = 27,
-        VipGift = 28
+        VipGift = 28,
+        DailyWheel = 29
     }
 
     /// <summary>One immutable line of the currency ledger.</summary>

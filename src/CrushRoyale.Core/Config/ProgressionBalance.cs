@@ -27,6 +27,24 @@ namespace CrushRoyale.Core.Config
 
         public int BossExtraTimeMs { get; set; } = 15000;
 
+        /// <summary>Timed stages (unlimited moves): clock from easy to hard.</summary>
+        public int TimedEasyTimeLimitMs { get; set; } = 100000;
+
+        public int TimedHardTimeLimitMs { get; set; } = 75000;
+
+        /// <summary>Moves stages show no clock; this cap only ends abandoned sessions.</summary>
+        public int MovesStageTimeCapMs { get; set; } = 900000;
+
+        /// <summary>Coin reward multipliers of the Hard / Super hard stages, and the Super hard orbe bonus.</summary>
+        public int HardCoinMultiplierPermille { get; set; } = 1500;
+
+        public int SuperHardCoinMultiplierPermille { get; set; } = 2000;
+
+        public int SuperHardOrbes { get; set; } = 5;
+
+        /// <summary>Win streak (first wins in a row on new stages) needed for 1, 2 and 3 starting bonuses on the board.</summary>
+        public int[] StreakBoosterWins { get; set; } = { 3, 5, 7 };
+
         /// <summary>Expected points per move used to derive target scores (validated by the balancing bot tests).</summary>
         public int ExpectedPointsPerMove { get; set; } = 420;
 
@@ -78,6 +96,9 @@ namespace CrushRoyale.Core.Config
             GameBalance.Require(FinalBossIndex == StagesPerChapter, "Story.FinalBossIndex must be the last stage of a chapter");
             GameBalance.Require(HardMoveLimit >= 5 && EasyMoveLimit >= HardMoveLimit, "Story move limits");
             GameBalance.Require(HardTimeLimitMs >= 20000 && EasyTimeLimitMs >= HardTimeLimitMs, "Story time limits");
+            GameBalance.Require(TimedHardTimeLimitMs >= 30000 && TimedEasyTimeLimitMs >= TimedHardTimeLimitMs && MovesStageTimeCapMs >= 120000, "Story timed stages");
+            GameBalance.Require(StreakBoosterWins != null && StreakBoosterWins.Length == 3 && StreakBoosterWins[0] >= 1
+                && StreakBoosterWins[1] > StreakBoosterWins[0] && StreakBoosterWins[2] > StreakBoosterWins[1], "Story streak boosters");
         }
     }
 

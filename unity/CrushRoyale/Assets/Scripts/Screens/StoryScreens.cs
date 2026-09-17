@@ -612,6 +612,34 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Anchor(tag.rectTransform, -0.2f, 0.88f, 1.2f, 1.12f);
                 Widgets.TitleOutline(tag);
             }
+            // Sawtooth labels (red Hard, purple Super hard) and a clock on timed stages.
+            if (!stage.IsBoss && stage.Tier != StageTier.Normal)
+            {
+                bool super = stage.Tier == StageTier.SuperHard;
+                Color tierColor = super ? Theme.Hex("B05CFF") : Theme.Hex("FF4B5C");
+                Image ring = UIFactory.Icon(node, ProceduralSprites.Glow(128), new Color(tierColor.r, tierColor.g, tierColor.b, 0.85f), 0);
+                UIFactory.Stretch(ring.rectTransform, -34, -34, -34, -34);
+                ring.transform.SetAsFirstSibling();
+                ring.raycastTarget = false;
+                if (unlocked)
+                {
+                    ring.gameObject.AddComponent<Pulse>();
+                }
+                Text tierTag = UIFactory.Label(node, Loc.T(super ? "map.superHard" : "map.hard"), Theme.SmallSize - 6, tierColor, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Anchor(tierTag.rectTransform, -0.4f, 0.9f, 1.4f, 1.18f);
+                Widgets.TitleOutline(tierTag);
+            }
+            if (stage.Timed)
+            {
+                Sprite hourglass = UiKit.Art("item_hourglass");
+                if (hourglass != null)
+                {
+                    Image clock = UIFactory.Icon(node, hourglass, unlocked ? Color.white : new Color(0.5f, 0.5f, 0.6f, 1f), 0);
+                    clock.preserveAspect = true;
+                    clock.raycastTarget = false;
+                    UIFactory.Anchor(clock.rectTransform, 0.66f, 0.62f, 1.02f, 1.02f);
+                }
+            }
             Text number = UIFactory.Label(node, unlocked || stage.IsBoss ? stageId.ToString() : string.Empty, stage.IsBoss ? Theme.SmallSize : Theme.BodySize + 2, Theme.Text, stage.IsBoss ? TextAnchor.LowerCenter : TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Stretch(number.rectTransform, 0, 0, 0, stage.IsBoss ? 6 : 0);
             Widgets.TitleOutline(number);
@@ -709,6 +737,34 @@ namespace CrushRoyale.Game.Screens
                 }
             }
 
+            // Difficulty tier and win-streak bonus.
+            if (stage.Tier != StageTier.Normal)
+            {
+                bool super = stage.Tier == StageTier.SuperHard;
+                Image tier = UIFactory.Panel("Tier", list, super ? Theme.Hex("7A1FA2") : Theme.Hex("B3263E"));
+                UIFactory.Height(tier, 120);
+                Text tierText = UIFactory.Label(tier.transform, Loc.T(super ? "stage.tierSuperHard" : "stage.tierHard") + "\n" + Loc.T("stage.tierReward"), Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(tierText.rectTransform, 12, 12, 4, 4);
+                Widgets.TitleOutline(tierText);
+                tier.gameObject.AddComponent<Breathe>().Amount = 0.01f;
+            }
+            int streak = Game.Backend.Profile?.Story?.WinStreak ?? 0;
+            bool alreadyWon = earned > 0;
+            if (Game.Backend.IsOnline && streak > 0 && !alreadyWon)
+            {
+                int boosters = 0;
+                foreach (int step in Game.Backend.Balance.Story.StreakBoosterWins)
+                {
+                    boosters += streak >= step ? 1 : 0;
+                }
+                Image flame = UIFactory.Panel("Streak", list, Theme.GoldDark);
+                UIFactory.Height(flame, 100);
+                string streakText = boosters > 0 ? Loc.T("streak.boosters", streak, boosters) : Loc.T("streak.now", streak);
+                Text flameText = UIFactory.Label(flame.transform, streakText, Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(flameText.rectTransform, 12, 12, 4, 4);
+                Widgets.TitleOutline(flameText);
+            }
+
             // Objectives as big illustrated chips.
             Image goals = UIFactory.Panel("Goals", list, Theme.Panel);
             UIFactory.Height(goals, 300);
@@ -726,7 +782,8 @@ namespace CrushRoyale.Game.Screens
             {
                 GoalChip(chips, stage, objective);
             }
-            string limits = Loc.T("stage.limits", stage.MoveLimit, stage.TimeLimitMs / 1000) + "   ·   " + Loc.T("stage.difficulty", Mathf.RoundToInt(stage.DifficultyPercent));
+            string limits = (stage.Timed ? Loc.T("stage.limitsTimed", stage.TimeLimitMs / 1000) : Loc.T("stage.limitsMoves", stage.MoveLimit))
+                + "   ·   " + Loc.T("stage.difficulty", Mathf.RoundToInt(stage.DifficultyPercent));
             Text limitText = UIFactory.Label(goals.transform, limits, Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(limitText.rectTransform, 0.06f, 0.07f, 0.94f, 0.26f);
 

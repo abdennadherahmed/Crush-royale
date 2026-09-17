@@ -22,6 +22,14 @@ namespace CrushRoyale.Core.Story
         DefeatBoss = 4
     }
 
+    /// <summary>Difficulty label shown on the map: a sawtooth of easy stages, a hard one, now and then a super hard one.</summary>
+    public enum StageTier : byte
+    {
+        Normal = 0,
+        Hard = 1,
+        SuperHard = 2
+    }
+
     public enum BossKind : byte
     {
         None = 0,
@@ -69,8 +77,17 @@ namespace CrushRoyale.Core.Story
 
         public string BossId { get; set; }
 
+        /// <summary>
+        /// Timed stage: unlimited moves, beat the goal before the clock runs out. Otherwise a moves stage: limited moves and
+        /// no visible clock (<see cref="TimeLimitMs"/> is then only a generous safety cap).
+        /// </summary>
+        public bool Timed { get; set; }
+
+        public StageTier Tier { get; set; }
+
         public int TimeLimitMs { get; set; }
 
+        /// <summary>0 on timed stages (unlimited moves).</summary>
         public int MoveLimit { get; set; }
 
         public int TargetScore { get; set; }

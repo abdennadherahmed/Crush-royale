@@ -322,7 +322,7 @@ public class GameSessionTests
     [Fact]
     public void Tick_FiresWarningOnce_ThenEndsOnTime()
     {
-        var session = Fixtures.StorySession(Fixtures.Stage(timeMs: 30000));
+        var session = Fixtures.StorySession(Fixtures.Stage(moves: 0, timeMs: 30000));
         int warnings = 0;
         session.OnTimeWarning += _ => warnings++;
         session.Tick(15000);

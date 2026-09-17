@@ -63,7 +63,8 @@ public sealed class StoryService
                 {
                     Loadout = loadout,
                     HighestLeague = ws.State.Pvp.HighestLeague,
-                    AssistExtraMoves = ws.Story.GetAssistExtraMoves(stageId)
+                    AssistExtraMoves = ws.Story.GetAssistExtraMoves(stageId),
+                    StartBoosters = ws.Story.GetStreakBoosters(stageId)
                 }
             };
             ws.SnapshotPet(match.Config, GameMode.Story);
@@ -116,7 +117,8 @@ public sealed class StoryService
 
             StageData stage = ws.Catalog.Get(match.StageId);
             SessionConfig config = SessionConfig.ForStage(stage, ws.Balance, match.Config.Loadout, match.Config.HighestLeague, match.Config.AssistExtraMoves)
-                .WithPet(match.Config.Pet, match.Config.PetLevel, ws.Balance);
+                .WithPet(match.Config.Pet, match.Config.PetLevel, ws.Balance)
+                .WithStartBoosters(match.Config.StartBoosters);
 
             bool timingOk = ws.AntiCheat.ValidateTimestamps(ws.State.Integrity, replay, TimeUtil.ToUnixMs(match.StartedAt), ws.NowMs, match.Id);
             ReplayVerification verification = ws.AntiCheat.ValidateReplay(ws.State.Integrity, replay, config, match.Id);
@@ -211,6 +213,8 @@ public sealed class StoryService
                 AchievementsUnlocked = ws.UnlockedAchievements.ToList(),
                 ShowInterstitial = showAd,
                 ChestEarned = chest,
+                WinStreak = ws.State.Story.WinStreak,
+                StreakLost = completion.StreakLost,
                 Wallet = Mappers.Wallet(ws),
                 Lives = Mappers.Lives(ws)
             };

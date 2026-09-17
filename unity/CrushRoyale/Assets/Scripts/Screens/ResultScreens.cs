@@ -132,6 +132,7 @@ namespace CrushRoyale.Game.Screens
                     Game.Audio.PlaySFX(SoundIds.Coins);
                 }
                 ChestLine(list, s.ChestEarned);
+                StreakLine(list, s);
                 foreach (string feature in s.FeaturesUnlocked)
                 {
                     UIFactory.Height(UIFactory.Label(list, Loc.T("result.unlocked", Loc.T("feature." + feature)), Theme.BodySize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold), 70);
@@ -159,6 +160,44 @@ namespace CrushRoyale.Game.Screens
                 int next = _args.Server?.NextStage ?? _args.StageId + 1;
                 UIFactory.Button(buttons, Loc.T("result.next"), () => UI.Show<StagePreviewScreen>(next, addToHistory: false));
             }
+        }
+
+        /// <summary>Win streak: the flame grows on new wins (with the next bonus to reach), and a loss says what was lost.</summary>
+        private void StreakLine(Transform list, StageCompleteResponse s)
+        {
+            ProfileDto profile = Game.Backend.Profile;
+            if (profile?.Story != null)
+            {
+                profile.Story.WinStreak = s.WinStreak;
+            }
+            if (s.StreakLost > 0)
+            {
+                Text lost = UIFactory.Label(list, Loc.T("streak.lost", s.StreakLost), Theme.BodySize, Theme.Danger, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Height(lost, 80);
+                Widgets.TitleOutline(lost);
+                return;
+            }
+            if (!s.FirstWin || s.WinStreak <= 0)
+            {
+                return;
+            }
+            int[] steps = Game.Backend.Balance.Story.StreakBoosterWins;
+            int next = 0;
+            foreach (int step in steps)
+            {
+                if (s.WinStreak < step)
+                {
+                    next = step;
+                    break;
+                }
+            }
+            string text = Loc.T("streak.now", s.WinStreak) + "  " + (next > 0 ? Loc.T("streak.next", next - s.WinStreak) : Loc.T("streak.max"));
+            Image pill = UIFactory.Panel("Streak", list, Theme.GoldDark);
+            UIFactory.Height(pill, 90);
+            Text label = UIFactory.Label(pill.transform, text, Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(label.rectTransform, 16, 16, 0, 0);
+            Widgets.TitleOutline(label);
+            pill.gameObject.AddComponent<PopIn>().Delay = 0.4f;
         }
 
         public override async Task OnShownAsync()

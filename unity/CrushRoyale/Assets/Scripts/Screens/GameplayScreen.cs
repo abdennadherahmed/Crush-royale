@@ -36,6 +36,8 @@ namespace CrushRoyale.Game.Screens
         private RectTransform _petIcon;
         private RectTransform _goalRow;
         private RectTransform _movesMedal;
+        private Text _movesCaption;
+        private Image _clockIcon;
         private StageLife _life;
         private Text _bossLabel;
         private readonly List<(Text Count, GameObject Check)> _goalChips = new List<(Text, GameObject)>();
@@ -72,6 +74,7 @@ namespace CrushRoyale.Game.Screens
             Text movesCaption = UIFactory.Label(medal, Loc.T("hud.movesLabel"), Theme.SmallSize - 6, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(movesCaption.rectTransform, 0.1f, 0.1f, 0.9f, 0.34f);
             Widgets.TitleOutline(movesCaption);
+            _movesCaption = movesCaption;
 
             Text scoreCaption = UIFactory.Label(hud.transform, Loc.T("hud.scoreLabel"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(scoreCaption.rectTransform, 0.36f, 0.62f, 0.68f, 0.88f);
@@ -84,6 +87,7 @@ namespace CrushRoyale.Game.Screens
             {
                 Image clock = UIFactory.Icon(hud.transform, hourglass, Color.white, 0);
                 UIFactory.Anchor(clock.rectTransform, 0.71f, 0.18f, 0.79f, 0.82f);
+                _clockIcon = clock;
             }
             _time = UIFactory.Label(hud.transform, string.Empty, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(_time.rectTransform, 0.79f, 0.1f, 0.97f, 0.9f);
@@ -368,11 +372,28 @@ namespace CrushRoyale.Game.Screens
             int now = _controller.Clock.NowMs;
 
             _score.text = Loc.Number(s.Score);
-            _moves.text = s.Config.HasMoveLimit ? Loc.Number(s.MovesLeft) : "∞";
-            _moves.color = s.Config.HasMoveLimit && s.MovesLeft <= 5 ? Theme.Danger : Theme.Text;
             int seconds = Mathf.CeilToInt(s.RemainingTimeMs(now) / 1000f);
-            _time.text = (seconds / 60) + ":" + (seconds % 60).ToString("00");
-            _time.color = seconds <= 10 ? Theme.Danger : Theme.Text;
+            string clock = (seconds / 60) + ":" + (seconds % 60).ToString("00");
+            if (s.Config.Mode == GameMode.Story)
+            {
+                // Story stages are either timed (the clock takes the medallion) or limited in moves (no clock at all).
+                bool timed = !s.Config.HasMoveLimit;
+                _moves.text = timed ? clock : Loc.Number(s.MovesLeft);
+                _moves.color = timed ? (seconds <= 10 ? Theme.Danger : Theme.Text) : (s.MovesLeft <= 5 ? Theme.Danger : Theme.Text);
+                _movesCaption.text = Loc.T(timed ? "hud.timeLabel" : "hud.movesLabel");
+                _time.enabled = false;
+                if (_clockIcon != null)
+                {
+                    _clockIcon.enabled = false;
+                }
+            }
+            else
+            {
+                _moves.text = s.Config.HasMoveLimit ? Loc.Number(s.MovesLeft) : "∞";
+                _moves.color = s.Config.HasMoveLimit && s.MovesLeft <= 5 ? Theme.Danger : Theme.Text;
+                _time.text = clock;
+                _time.color = seconds <= 10 ? Theme.Danger : Theme.Text;
+            }
 
             UIFactory.SetProgress(_meterFill, s.ComboMeterPermille / 1000f);
             _surge.enabled = s.IsRedSurgeActive(now);
@@ -507,6 +528,31 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Anchor(sub.rectTransform, 0.06f, 0.08f, 0.94f, 0.3f);
             Widgets.TitleOutline(sub);
 
+            // Difficulty tag above the window, win-streak bonuses below it.
+            StageData tierStage = _launch.Mode == GameMode.Story && _launch.StageId > 0 ? Game.Backend.Catalog.Get(_launch.StageId) : null;
+            if (tierStage != null && tierStage.Tier != StageTier.Normal)
+            {
+                bool super = tierStage.Tier == StageTier.SuperHard;
+                Image tag = UIFactory.Panel("Tier", shade.transform, super ? Theme.Hex("7A1FA2") : Theme.Hex("B3263E"));
+                UIFactory.Anchor(tag.rectTransform, 0.14f, 0.665f, 0.86f, 0.72f);
+                Text tagText = UIFactory.Label(tag.transform, Loc.T(super ? "stage.tierSuperHard" : "stage.tierHard"), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(tagText.rectTransform);
+                Widgets.TitleOutline(tagText);
+                tag.gameObject.AddComponent<Pulse>().Scale = true;
+                Game.Audio.PlaySFX(SoundIds.BossRoar);
+            }
+            if (s.Config.StartBoosters > 0)
+            {
+                Image streak = UIFactory.Panel("Streak", shade.transform, Theme.GoldDark);
+                UIFactory.Anchor(streak.rectTransform, 0.1f, 0.32f, 0.9f, 0.385f);
+                int wins = Game.Backend.Profile?.Story?.WinStreak ?? 0;
+                Text streakText = UIFactory.Label(streak.transform, Loc.T("streak.boosters", wins, s.Config.StartBoosters), Theme.BodySize - 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(streakText.rectTransform, 12, 12, 0, 0);
+                Widgets.TitleOutline(streakText);
+                streak.gameObject.AddComponent<PopIn>().Delay = 0.3f;
+                Game.Audio.PlaySFX(SoundIds.Sparkle);
+            }
+
             Game.Audio.PlaySFX(SoundIds.Click);
             await Task.WhenAny(done.Task, Task.Delay(2600));
             if (shade != null)
@@ -633,7 +679,15 @@ namespace CrushRoyale.Game.Screens
 
         private async Task QuitAsync()
         {
-            bool confirm = await UI.Confirm(Loc.T("pause.quit"), Loc.T(_launch.Mode == GameMode.Story ? "pause.quitStory" : "pause.quitPvp"));
+            string warning = Loc.T(_launch.Mode == GameMode.Story ? "pause.quitStory" : "pause.quitPvp");
+            int streakAtRisk = Game.Backend.Profile?.Story?.WinStreak ?? 0;
+            string starsWon = Game.Backend.Profile?.Story?.StarsByStage ?? string.Empty;
+            bool newStage = _launch.StageId - 1 >= starsWon.Length || starsWon[_launch.StageId - 1] == '0';
+            if (_launch.Mode == GameMode.Story && !_launch.Offline && streakAtRisk > 0 && newStage)
+            {
+                warning += "\n" + Loc.T("pause.quitStreak", streakAtRisk);
+            }
+            bool confirm = await UI.Confirm(Loc.T("pause.quit"), warning);
             if (!confirm)
             {
                 return;

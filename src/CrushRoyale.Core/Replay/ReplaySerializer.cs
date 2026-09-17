@@ -18,7 +18,7 @@ namespace CrushRoyale.Core.Replay
     /// Compact binary replay format (little-endian, LEB128 varints, CRC-32 footer).
     ///
     ///   "CRRP" | u8 formatVersion | var rulesVersion | u64 balanceHash | u8 mode | u64 seed | zigzag stageId
-    ///   | string playerId | u8 highestLeague | var assistMoves | [v2: u8 pet | u8 petLevel]
+    ///   | string playerId | u8 highestLeague | var assistMoves | [v2: u8 pet | u8 petLevel] | [v3: u8 startBoosters]
     ///   | var loadoutCount { u8 type, var qty }
     ///   | var actionCount { u8 type, var deltaMs, payload, var scoreDelta }
     ///       swap payload:    u8 from(x&lt;&lt;4|y), u8 to
@@ -29,7 +29,7 @@ namespace CrushRoyale.Core.Replay
     /// </summary>
     public static class ReplaySerializer
     {
-        public const byte FormatVersion = 2;
+        public const byte FormatVersion = 3;
         public const int MaxActions = 20000;
         public const int MaxCheckpoints = 2000;
         public const int MaxPlayerIdLength = 128;
@@ -60,6 +60,7 @@ namespace CrushRoyale.Core.Replay
             w.WriteVarUInt((ulong)data.AssistExtraMoves);
             w.WriteByte((byte)data.Pet);
             w.WriteByte((byte)Math.Max(0, Math.Min(255, data.PetLevel)));
+            w.WriteByte((byte)Math.Max(0, Math.Min(SessionConfig.MaxStartBoosters, data.StartBoosters)));
 
             w.WriteVarUInt((ulong)data.Loadout.Count);
             foreach (LoadoutEntry e in data.Loadout)
@@ -177,6 +178,14 @@ namespace CrushRoyale.Core.Replay
             {
                 data.Pet = ReadEnum<PetType>(r.ReadByte());
                 data.PetLevel = r.ReadByte();
+            }
+            if (version >= 3)
+            {
+                data.StartBoosters = r.ReadByte();
+                if (data.StartBoosters > SessionConfig.MaxStartBoosters)
+                {
+                    throw new ReplayFormatException("Invalid start boosters.");
+                }
             }
 
             int loadoutCount = ReadCount(r, 9);

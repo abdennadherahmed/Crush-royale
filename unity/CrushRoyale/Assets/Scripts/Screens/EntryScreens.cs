@@ -362,6 +362,7 @@ namespace CrushRoyale.Game.Screens
             SideButton(safe, "friends", "menu.friends", typeof(FriendsScreen), "Friends", 0.815f, 0.815f, 0);
             SideButton(safe, "map", "menu.map", typeof(WorldMapScreen), "Story", 0.815f, 0.707f, 0);
             SideButton(safe, "pets", "menu.pets", typeof(PetsScreen), null, 0.815f, 0.599f, 0);
+            WheelButton(safe, profile);
 
             // Bottom: shop (left), play buttons (center), guild (right).
             CornerButton(safe, "shop", "menu.shop", typeof(ShopScreen), "Shop", 0.01f);
@@ -501,6 +502,7 @@ namespace CrushRoyale.Game.Screens
             if (profile != null)
             {
                 VipBadge(safe, profile.Vip?.Tier ?? 0);
+                StreakBadge(safe, profile.Story?.WinStreak ?? 0);
             }
 
             CurrencyBar bar = CurrencyBar.Create(safe);
@@ -508,6 +510,63 @@ namespace CrushRoyale.Game.Screens
 
             Button gear = IconButton(safe, "settings", () => UI.Show<SettingsScreen>());
             UIFactory.Anchor(gear.GetComponent<RectTransform>(), 0.875f, 0.915f, 0.985f, 0.99f);
+        }
+
+        /// <summary>Daily wheel under the pets: glows with a "!" while today's free spin is waiting.</summary>
+        private void WheelButton(RectTransform safe, ProfileDto profile)
+        {
+            bool available = Game.Backend.IsOnline && (profile?.WheelAvailable ?? false);
+            Button button = IconButton(safe, "wheel", () =>
+            {
+                Game.Audio.PlaySFX(SoundIds.Click);
+                if (!Game.Backend.IsOnline)
+                {
+                    UI.Toast(Loc.T("menu.offlineLocked"), 3f);
+                    return;
+                }
+                DailyWheelPopup.Show();
+            });
+            RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.815f, 0.391f, 0.985f, 0.491f);
+            Transform wheelIcon = rect.childCount > 0 ? rect.GetChild(0) : null;
+            Caption(rect, Loc.T("menu.wheel"), Game.Backend.IsOnline);
+            if (available)
+            {
+                Image glow = UIFactory.Icon(rect, ProceduralSprites.Glow(128), new Color(1f, 0.85f, 0.35f, 0.8f), 0);
+                UIFactory.Stretch(glow.rectTransform, -20, -20, -20, -20);
+                glow.raycastTarget = false;
+                glow.transform.SetAsFirstSibling();
+                glow.gameObject.AddComponent<Pulse>();
+                if (wheelIcon != null)
+                {
+                    wheelIcon.gameObject.AddComponent<Spin>().DegreesPerSecond = 25f;
+                }
+                CountBadge(rect, 1);
+            }
+        }
+
+        /// <summary>Flame next to the VIP plate while a win streak runs (3, 5, 7 wins give starting bonuses).</summary>
+        private void StreakBadge(RectTransform safe, int streak)
+        {
+            if (streak <= 0)
+            {
+                return;
+            }
+            Button plate = UIFactory.Button(safe, string.Empty, () => UI.Toast(Loc.T("streak.explain"), 4f), Theme.Hex("B3263E"));
+            RectTransform rect = UIFactory.Anchor(plate.GetComponent<RectTransform>(), 0.26f, 0.872f, 0.42f, 0.914f);
+            Sprite bolt = UiKit.Art("item_bolt");
+            if (bolt != null)
+            {
+                Image icon = UIFactory.Icon(rect, bolt, Color.white, 0);
+                icon.preserveAspect = true;
+                UIFactory.Anchor(icon.rectTransform, -0.04f, 0.02f, 0.36f, 1.2f);
+            }
+            Text label = UIFactory.Label(rect, "x" + streak, Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(label.rectTransform, 0.34f, 0.05f, 0.98f, 0.95f);
+            Widgets.TitleOutline(label);
+            if (streak >= 3)
+            {
+                plate.gameObject.AddComponent<Breathe>().Amount = 0.03f;
+            }
         }
 
         /// <summary>Gold "VIP n" plate with a crown under the profile chip; opens the VIP benefits page.</summary>

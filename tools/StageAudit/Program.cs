@@ -117,6 +117,8 @@ namespace CrushRoyale.Tools.StageAudit
             var stones = new int[total + 1];
             var collect = new int[total + 1];
             Profile expert = Profiles[2];
+            // Timed stages are measured at a human pace: an expert still needs time to spot moves against the clock.
+            var timedExpert = new Profile { Name = "timed-expert", BestMovePermille = 1000, ThinkMinMs = 1500, ThinkMaxMs = 2000 };
             const int runs = 4;
             Parallel.For(1, total + 1, id =>
             {
@@ -129,7 +131,7 @@ namespace CrushRoyale.Tools.StageAudit
                     config.Objectives = new List<StageObjective> { new StageObjective { Type = ObjectiveType.ReachScore, Target = int.MaxValue } };
                     var session = new GameSession(config, balance, "bake");
                     int iceBefore = session.Board.TotalIceLayers;
-                    StageResult result = HeadlessRunner.Run(session, new ObjectiveBot((ulong)(id * 31 + r * 977), expert, stage));
+                    StageResult result = HeadlessRunner.Run(session, new ObjectiveBot((ulong)(id * 31 + r * 977), stage.Timed ? timedExpert : expert, stage));
                     s += result.FinalScore;
                     i += iceBefore - session.Board.TotalIceLayers;
                     st += result.StonesDestroyed;
@@ -303,6 +305,32 @@ namespace CrushRoyale.Tools.StageAudit
                     sb.Append($"| {Pct(band.Average(r => r.WinRate[p]))}% | {Pct(band.Average(r => r.WinRateWithAssist[p]))}% ");
                 }
                 sb.AppendLine("|");
+            }
+
+            // Sawtooth check: win rates by stage kind (stages 14+ where the tiers apply).
+            sb.AppendLine();
+            sb.AppendLine("## By stage kind (stages 14-1000, no assist)");
+            sb.AppendLine();
+            sb.AppendLine("| Kind | Stages | Casual | Average | Expert |");
+            sb.AppendLine("|---|---|---|---|---|");
+            IEnumerable<StageReport> late = reports.Skip(14).Take(total - 13);
+            var kinds = new List<(string Name, Func<StageReport, bool> Match)>
+            {
+                ("Moves, normal", r => !r.Stage.IsBoss && !r.Stage.Timed && r.Stage.Tier == StageTier.Normal),
+                ("Timed, normal", r => r.Stage.Timed && r.Stage.Tier == StageTier.Normal),
+                ("Breather (after hard)", r => !r.Stage.IsBoss && r.Stage.Tier == StageTier.Normal && (r.Stage.IndexInChapter == 8 || r.Stage.IndexInChapter == 15 || r.Stage.IndexInChapter == 18)),
+                ("Hard", r => r.Stage.Tier == StageTier.Hard),
+                ("Super hard", r => r.Stage.Tier == StageTier.SuperHard),
+                ("Boss", r => r.Stage.IsBoss)
+            };
+            foreach ((string name, Func<StageReport, bool> match) in kinds)
+            {
+                List<StageReport> group = late.Where(match).ToList();
+                if (group.Count == 0)
+                {
+                    continue;
+                }
+                sb.AppendLine($"| {name} | {group.Count} | {Pct(group.Average(r => r.WinRate[0]))}% | {Pct(group.Average(r => r.WinRate[1]))}% | {Pct(group.Average(r => r.WinRate[2]))}% |");
             }
 
             List<StageReport> impossible = reports.Skip(1).Where(r => r.WinRateWithAssist[2] == 0).ToList();

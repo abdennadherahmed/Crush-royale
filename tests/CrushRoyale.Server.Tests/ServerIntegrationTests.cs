@@ -95,7 +95,7 @@ public sealed class CrushApp : WebApplicationFactory<Program>
 
         SessionConfig config = mode switch
         {
-            GameMode.Story => SessionConfig.ForStage(Catalog.Get(start.StageId), Balance, loadout, league, start.AssistExtraMoves),
+            GameMode.Story => SessionConfig.ForStage(Catalog.Get(start.StageId), Balance, loadout, league, start.AssistExtraMoves).WithStartBoosters(start.StartBoosters),
             GameMode.GuildBoss => SessionConfig.ForGuildBoss(seed, start.StageId, Balance, loadout, league),
             _ => SessionConfig.ForPvp(seed, Balance, mode, loadout, league)
         };
@@ -306,6 +306,21 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         PetActionResponse converted = await http.PostOk<PetActionResponse>(ApiRoutes.PetConvert, new PetConvertRequest { From = "FrostFox", To = "ForestOwl", Count = 3 });
         Assert.Equal(0, converted.Pets.Pets.Single(p => p.Type == "FrostFox").Fragments);
         Assert.Equal(3, converted.Pets.Pets.Single(p => p.Type == "ForestOwl").Fragments);
+    }
+
+    [Fact]
+    public async Task WinStreak_GivesStartBoosters_AndWheelSpinsOncePerDay()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync(unlockStage: 40);
+        await _app.MutateAsync(id, s => s.Story.WinStreak = 5);
+        MatchStartResponse start = await http.PostOk<MatchStartResponse>(ApiRoutes.Fill(ApiRoutes.StageStart, "stageId", 40), new StartStageRequest());
+        Assert.Equal(2, start.StartBoosters);
+        StageCompleteResponse done = await http.PostOk<StageCompleteResponse>(ApiRoutes.Fill(ApiRoutes.StageComplete, "matchId", start.MatchId), _app.Play(id, start));
+        Assert.True(done.Accepted);
+
+        WheelSpinResponse spin = await http.PostOk<WheelSpinResponse>(ApiRoutes.WheelSpin, null);
+        Assert.InRange(spin.SliceIndex, 0, 7);
+        await http.PostError(ApiRoutes.WheelSpin, null, HttpStatusCode.Conflict);
     }
 
     [Fact]

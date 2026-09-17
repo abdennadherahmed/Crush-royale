@@ -73,6 +73,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Extra moves granted after repeated failures on the same stage (see Story.DifficultyAssist).</summary>
         public int AssistExtraMoves { get; set; }
 
+        /// <summary>Win-streak reward: special gems (line, bomb, line) already on the board when the stage starts.</summary>
+        public int StartBoosters { get; set; }
+
         /// <summary>Equipped companion pet (None when absent).</summary>
         public PetType Pet { get; set; }
 
@@ -82,6 +85,8 @@ namespace CrushRoyale.Core.Gameplay
         public bool IsPvp => Mode == GameMode.PvpRanked || Mode == GameMode.FriendlyChallenge;
 
         public bool HasMoveLimit => MoveLimit > 0;
+
+        public const int MaxStartBoosters = 3;
 
         /// <summary>Adds the equipped pet, capping its level in PvP. Returns this config for chaining.</summary>
         public SessionConfig WithPet(PetType pet, int level, GameBalance balance)
@@ -142,6 +147,13 @@ namespace CrushRoyale.Core.Gameplay
                 HighestLeague = highestLeague,
                 AssistExtraMoves = Math.Max(0, assistExtraMoves)
             };
+        }
+
+        /// <summary>Win-streak starting bonuses (0-3). Returns this config for chaining.</summary>
+        public SessionConfig WithStartBoosters(int count)
+        {
+            StartBoosters = Math.Max(0, Math.Min(MaxStartBoosters, count));
+            return this;
         }
 
         public static SessionConfig ForPvp(ulong seed, GameBalance balance, GameMode mode, IEnumerable<LoadoutEntry> loadout, League highestLeague)

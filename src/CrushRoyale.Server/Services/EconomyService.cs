@@ -79,6 +79,39 @@ public sealed class EconomyService
             };
         }, ct);
 
+    public Task<WheelSpinResponse> SpinWheelAsync(Guid userId, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            int today = TimeUtil.DayIndex(ws.Now);
+            if (!DailyWheel.CanSpin(ws.State.WheelDay, today))
+            {
+                throw new ApiException(ErrorCode.AlreadyClaimed, "The wheel was already spun today.");
+            }
+            WheelSpin spin = DailyWheel.Spin(ws.IdString, today);
+            ws.State.WheelDay = today;
+            string key = "wheel:" + today;
+            if (!spin.Reward.IsEmpty)
+            {
+                ws.GrantReward(spin.Reward, TransactionReason.DailyWheel, key, key);
+            }
+            if (spin.PetFragments > 0)
+            {
+                ws.Pets.Get(spin.FragmentsPet).Fragments += spin.PetFragments;
+            }
+            return new WheelSpinResponse
+            {
+                SliceIndex = spin.SliceIndex,
+                Reward = Mappers.Reward(spin.Reward),
+                PetFragments = spin.PetFragments,
+                FragmentsPet = spin.PetFragments > 0 ? spin.FragmentsPet.ToString() : null,
+                Wallet = Mappers.Wallet(ws),
+                Inventory = Mappers.Inventory(ws),
+                Pets = Mappers.Pets(ws),
+                Lives = Mappers.Lives(ws)
+            };
+        }, ct);
+
     public Task<ShopResponse> GetShopAsync(Guid userId, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx => BuildShop(ctx.Player, CreateShop(ctx.Player)), ct);
 

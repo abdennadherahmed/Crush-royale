@@ -13,7 +13,7 @@ namespace CrushRoyale.Core.Config
     public sealed class GameBalance
     {
         /// <summary>Bump when a gameplay rule changes in code (not just numbers).</summary>
-        public const int RulesVersion = 2;
+        public const int RulesVersion = 3;
 
         public BoardBalance Board { get; set; } = new BoardBalance();
 
