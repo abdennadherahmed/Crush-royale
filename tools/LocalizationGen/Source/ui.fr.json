@@ -819,5 +819,8 @@
   "profile.bpFrame": "Cadre saison {0}",
   "profile.bpBoard": "Plateau saison {0}",
   "profile.bpPieces": "Gemmes saison {0}",
-  "profile.pageFrame": "Cadre du collectionneur {0}"
+  "profile.pageFrame": "Cadre du collectionneur {0}",
+  "hud.voice.bossDefeated": "Boss vaincu !",
+  "hud.guildBossHp": "Boss de guilde : {0} / {1} PV",
+  "settings.reduceMotion": "Réduire les animations"
 }

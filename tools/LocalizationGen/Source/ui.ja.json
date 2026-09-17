@@ -819,5 +819,8 @@
   "profile.bpFrame": "シーズン{0}フレーム",
   "profile.bpBoard": "シーズン{0}盤面",
   "profile.bpPieces": "シーズン{0}宝石",
-  "profile.pageFrame": "コレクターフレーム{0}"
+  "profile.pageFrame": "コレクターフレーム{0}",
+  "hud.voice.bossDefeated": "ボス撃破！",
+  "hud.guildBossHp": "ギルドボス：HP {0} / {1}",
+  "settings.reduceMotion": "動きを減らす"
 }

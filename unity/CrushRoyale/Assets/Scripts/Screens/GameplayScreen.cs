@@ -37,6 +37,7 @@ namespace CrushRoyale.Game.Screens
         private RectTransform _goalRow;
         private RectTransform _movesMedal;
         private StageLife _life;
+        private Text _bossLabel;
         private readonly List<(Text Count, GameObject Check)> _goalChips = new List<(Text, GameObject)>();
 
         public override System.Type BackTarget => null;
@@ -44,6 +45,7 @@ namespace CrushRoyale.Game.Screens
         protected override void Build()
         {
             _launch = (MatchLaunch)Args;
+            ArtLibrary.GemSkin = ArtLibrary.GemSkinFolder(Game.Backend.Profile?.Inventory?.EquippedPieceSkin);
             AddBackdrop();
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
             safe.gameObject.AddComponent<SafeArea>();
@@ -167,7 +169,13 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Label(bar, Loc.T("hud.noPowerUps"), Theme.SmallSize, Theme.TextMuted);
             }
 
-            bossBar.gameObject.SetActive(config.BossHp > 0);
+            bossBar.gameObject.SetActive(config.BossHp > 0 || (_launch.Mode == GameMode.GuildBoss && (_launch.Ticket?.BossMaxHp ?? 0) > 0));
+            if (_launch.Mode == GameMode.GuildBoss && (_launch.Ticket?.BossMaxHp ?? 0) > 0)
+            {
+                _bossLabel = UIFactory.Label(bossBar, string.Empty, Theme.SmallSize - 6, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(_bossLabel.rectTransform);
+                Widgets.TitleOutline(_bossLabel);
+            }
             _goalRow.gameObject.SetActive(session.Objectives.Progress.Count > 0);
 
             _controller = gameObject.AddComponent<MatchController>();
@@ -382,9 +390,18 @@ namespace CrushRoyale.Game.Screens
                 _goalChips[i].Check.SetActive(p.IsComplete);
             }
 
-            if (s.Config.BossHp > 0)
+            if (_life != null)
             {
-                UIFactory.SetProgress(_bossFill, 1f - Mathf.Clamp01(s.Score / (float)s.Config.BossHp));
+                float share = _life.BossHpShare(s.Score);
+                if (share >= 0f)
+                {
+                    UIFactory.SetProgress(_bossFill, share);
+                }
+                if (_bossLabel != null && _launch.Ticket != null)
+                {
+                    long left = System.Math.Max(0, _launch.Ticket.BossRemainingHp - s.Score);
+                    _bossLabel.text = Loc.T("hud.guildBossHp", Loc.Number(left), Loc.Number(_launch.Ticket.BossMaxHp));
+                }
             }
             if (_opponentScore != null && _controller.Ghost != null)
             {

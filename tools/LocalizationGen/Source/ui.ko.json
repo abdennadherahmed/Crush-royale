@@ -819,5 +819,8 @@
   "profile.bpFrame": "시즌 {0} 프레임",
   "profile.bpBoard": "시즌 {0} 보드",
   "profile.bpPieces": "시즌 {0} 보석",
-  "profile.pageFrame": "수집가 프레임 {0}"
+  "profile.pageFrame": "수집가 프레임 {0}",
+  "hud.voice.bossDefeated": "보스 격파!",
+  "hud.guildBossHp": "길드 보스: HP {0} / {1}",
+  "settings.reduceMotion": "움직임 줄이기"
 }

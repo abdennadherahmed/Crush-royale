@@ -1012,22 +1012,57 @@ namespace CrushRoyale.Game.Screens
             await Api(api => api.CancelMatchmakingAsync(), loading: false);
         }
 
+        /// <summary>One player of the versus popup: framed avatar, name, title plaque, league line.</summary>
+        private void Side(RectTransform box, string name, string title, string frame, Sprite portrait, string line, Color lineColor, bool top)
+        {
+            float y0 = top ? 0.6f : 0.04f;
+            float y1 = top ? 0.96f : 0.4f;
+            RectTransform area = UIFactory.Anchor(UIFactory.Rect(top ? "Me" : "Opponent", box), 0.04f, y0, 0.96f, y1);
+            RectTransform avatar = CosmeticLook.Avatar(area, portrait, frame, 190);
+            avatar.anchorMin = avatar.anchorMax = new Vector2(0.17f, 0.52f);
+            avatar.gameObject.AddComponent<PopIn>().Delay = top ? 0f : 0.25f;
+            Text nameText = UIFactory.Label(area, name, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(nameText.rectTransform, 0.36f, 0.66f, 1f, 0.98f);
+            Widgets.TitleOutline(nameText);
+            if (!string.IsNullOrEmpty(title))
+            {
+                RectTransform plate = CosmeticLook.TitlePlate(area, Loc, title, Theme.SmallSize - 2);
+                UIFactory.Anchor(plate, 0.34f, 0.4f, 0.96f, 0.68f);
+            }
+            Text lineText = UIFactory.Label(area, line, Theme.SmallSize, lineColor, TextAnchor.UpperLeft, FontStyle.Bold);
+            UIFactory.Anchor(lineText.rectTransform, 0.36f, 0.02f, 1f, 0.4f);
+            Widgets.TitleOutline(lineText);
+        }
+
         private async Task ShowVersusAsync(MatchStartResponse match)
         {
-            RectTransform box = UI.Popup(0.3f, 0.7f);
+            RectTransform box = UI.Popup(0.22f, 0.78f);
             ProfileDto me = Game.Backend.Profile;
             GhostDto ghost = match.Ghost;
+            string myGender = me.Hero?.Gender ?? Game.Save.Settings.HeroGender ?? "female";
 
-            Text versus = UIFactory.Label(box, "VS", 140, Theme.RedSurge, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(versus.rectTransform, 0.3f, 0.35f, 0.7f, 0.65f);
-            Text left = UIFactory.Label(box, me.DisplayName + "\n" + Loc.T("league." + me.Pvp.League) + " " + me.Pvp.Trophies, Theme.BodySize, Theme.League(me.Pvp.League));
-            UIFactory.Anchor(left.rectTransform, 0.02f, 0.66f, 0.98f, 0.95f);
+            Side(box, me.DisplayName, me.Inventory?.EquippedTitle, me.Inventory?.EquippedFrame, ArtLibrary.Character(myGender == "male" ? "hero" : "heroine"),
+                Loc.T("league." + me.Pvp.League) + "  " + Loc.Number(me.Pvp.Trophies), Theme.League(me.Pvp.League), top: true);
 
-            string opponent = ghost != null
-                ? ghost.OpponentName + "\n" + Loc.T("league." + ghost.OpponentLeague) + " " + ghost.OpponentTrophies + "\n" + string.Join(", ", ghost.OpponentLoadout.Select(l => Loc.T("powerup." + l.Type)))
-                : Loc.T("pvp.liveOpponent");
-            Text right = UIFactory.Label(box, opponent, Theme.BodySize, Theme.Crystal);
-            UIFactory.Anchor(right.rectTransform, 0.02f, 0.05f, 0.98f, 0.34f);
+            Text versus = UIFactory.Label(box, "VS", 150, Theme.RedSurge, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(versus.rectTransform, 0.3f, 0.42f, 0.7f, 0.58f);
+            Widgets.TitleOutline(versus);
+            versus.gameObject.AddComponent<Pulse>().Scale = true;
+
+            if (ghost != null)
+            {
+                string[] portraits = { "kael", "mira", "thorin", "zara", "elian", "mark", "soren" };
+                Sprite face = ArtLibrary.Character(portraits[Mathf.Abs((ghost.OpponentName ?? string.Empty).GetHashCode()) % portraits.Length]);
+                string loadout = string.Join(", ", ghost.OpponentLoadout.Select(l => Loc.T("powerup." + l.Type)));
+                Side(box, ghost.OpponentName, ghost.OpponentTitle, ghost.OpponentFrame, face,
+                    Loc.T("league." + ghost.OpponentLeague) + "  " + Loc.Number(ghost.OpponentTrophies) + (loadout.Length > 0 ? "\n" + loadout : string.Empty),
+                    Theme.League(ghost.OpponentLeague), top: false);
+            }
+            else
+            {
+                Text right = UIFactory.Label(box, Loc.T("pvp.liveOpponent"), Theme.BodySize, Theme.Crystal);
+                UIFactory.Anchor(right.rectTransform, 0.05f, 0.05f, 0.95f, 0.4f);
+            }
 
             Game.Audio.PlaySFX(SoundIds.RedSurge);
             await Task.Delay(2500);

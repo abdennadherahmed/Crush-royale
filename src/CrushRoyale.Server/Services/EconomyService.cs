@@ -18,8 +18,11 @@ public sealed class EconomyService
     private readonly IReceiptValidator _receipts;
     private readonly ILogger<EconomyService> _logger;
 
-    public EconomyService(PlayerOperations ops, IReceiptValidator receipts, ILogger<EconomyService> logger)
+    private readonly GameServerOptions _options;
+
+    public EconomyService(PlayerOperations ops, IReceiptValidator receipts, GameServerOptions options, ILogger<EconomyService> logger)
     {
+        _options = options;
         _ops = ops;
         _receipts = receipts;
         _logger = logger;
@@ -215,6 +218,10 @@ public sealed class EconomyService
         _ops.RunAsync(userId, ctx =>
         {
             PlayerWorkspace ws = ctx.Player;
+            if (!_options.RewardedAdsEnabled)
+            {
+                throw new ApiException(ErrorCode.FeatureLocked, "Rewarded ads are not available yet.");
+            }
             string placement = (request?.Placement ?? string.Empty).Trim().ToLowerInvariant();
             if (placement is not ("life" or "coins"))
             {

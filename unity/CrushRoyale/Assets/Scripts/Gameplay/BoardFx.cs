@@ -374,6 +374,10 @@ namespace CrushRoyale.Game.Gameplay
 
         public void Shake(float seconds, float strength)
         {
+            if (GameRoot.Instance != null && GameRoot.Instance.Save.Settings.ReduceMotion)
+            {
+                return;
+            }
             bool active = _shakeTime > 0f;
             if (!active)
             {

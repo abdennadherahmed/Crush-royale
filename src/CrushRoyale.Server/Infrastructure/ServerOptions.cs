@@ -57,4 +57,10 @@ public sealed class GameServerOptions
     public int RateLimitPerMinute { get; set; } = 120;
 
     public bool EnableBackgroundJobs { get; set; } = true;
+
+    /// <summary>
+    /// Rewarded ad grants. Off until the ad network's server-side verification callback is wired: otherwise a modified
+    /// client could claim ad rewards without watching anything (audit S-01 / rewarded ads).
+    /// </summary>
+    public bool RewardedAdsEnabled { get; set; }
 }

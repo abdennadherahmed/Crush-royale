@@ -819,5 +819,8 @@
   "profile.bpFrame": "Moldura temporada {0}",
   "profile.bpBoard": "Tabuleiro temporada {0}",
   "profile.bpPieces": "Gemas temporada {0}",
-  "profile.pageFrame": "Moldura do colecionador {0}"
+  "profile.pageFrame": "Moldura do colecionador {0}",
+  "hud.voice.bossDefeated": "Chefe derrotado!",
+  "hud.guildBossHp": "Chefe da guilda: {0} / {1} PV",
+  "settings.reduceMotion": "Reduzir animações"
 }

@@ -819,5 +819,8 @@
   "profile.bpFrame": "إطار الموسم {0}",
   "profile.bpBoard": "لوحة الموسم {0}",
   "profile.bpPieces": "جواهر الموسم {0}",
-  "profile.pageFrame": "إطار الجامع {0}"
+  "profile.pageFrame": "إطار الجامع {0}",
+  "hud.voice.bossDefeated": "تم هزيمة الزعيم!",
+  "hud.guildBossHp": "زعيم النقابة: {0} / {1} نقطة حياة",
+  "settings.reduceMotion": "تقليل الحركة"
 }

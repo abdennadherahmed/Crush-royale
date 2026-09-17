@@ -819,5 +819,8 @@
   "profile.bpFrame": "Marco temporada {0}",
   "profile.bpBoard": "Tablero temporada {0}",
   "profile.bpPieces": "Gemas temporada {0}",
-  "profile.pageFrame": "Marco de coleccionista {0}"
+  "profile.pageFrame": "Marco de coleccionista {0}",
+  "hud.voice.bossDefeated": "¡Jefe derrotado!",
+  "hud.guildBossHp": "Jefe del gremio: {0} / {1} PV",
+  "settings.reduceMotion": "Reducir animaciones"
 }

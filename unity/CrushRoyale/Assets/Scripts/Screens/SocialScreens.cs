@@ -98,8 +98,14 @@ namespace CrushRoyale.Game.Screens
 
         private RectTransform PlayerCard(Transform parent, PublicProfileDto player)
         {
-            RectTransform card = Widgets.Card(parent, 230);
-            UIFactory.Label(card, player.DisplayName + (string.IsNullOrEmpty(player.Title) ? string.Empty : "  - " + Loc.T("cosmetic." + player.Title)), Theme.BodySize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+            RectTransform card = Widgets.Card(parent, string.IsNullOrEmpty(player.Title) ? 230 : 300);
+            UIFactory.Label(card, player.DisplayName, Theme.BodySize, CosmeticLook.Frame(player.Frame).Main, TextAnchor.MiddleLeft, FontStyle.Bold);
+            if (!string.IsNullOrEmpty(player.Title))
+            {
+                RectTransform plateRow = UIFactory.Rect("TitleRow", card);
+                RectTransform plate = CosmeticLook.TitlePlate(plateRow, Loc, player.Title, Theme.SmallSize - 4);
+                UIFactory.Anchor(plate, 0f, 0f, 0.6f, 1f);
+            }
             UIFactory.Label(card, Loc.T("friends.line", Loc.T("league." + player.League), player.Trophies, player.HighestStage), Theme.SmallSize, Theme.League(player.League), TextAnchor.MiddleLeft);
             return card;
         }

@@ -63,6 +63,21 @@ namespace CrushRoyale.Game.UI
             return (Rarity(id), Color.white);
         }
 
+        /// <summary>Full-body hero art wearing an outfit (Art/Characters/{hero}_full_{outfit}), the base art otherwise.</summary>
+        public static Sprite HeroFull(string gender, string outfitId)
+        {
+            string id = gender == "male" ? "hero" : "heroine";
+            if (!string.IsNullOrEmpty(outfitId) && outfitId.StartsWith("outfit.", System.StringComparison.Ordinal))
+            {
+                Sprite dressed = ArtLibrary.Character(id + "_full_" + outfitId.Substring("outfit.".Length));
+                if (dressed != null)
+                {
+                    return dressed;
+                }
+            }
+            return ArtLibrary.Character(id + "_full") ?? ArtLibrary.Character(id);
+        }
+
         /// <summary>Glow behind the hero for an outfit (transparent without one).</summary>
         public static Color OutfitAura(string id)
         {
@@ -97,6 +112,64 @@ namespace CrushRoyale.Game.UI
             }
         }
 
+        /// <summary>Illustrated plaque with the title name, colored by rarity (Art/Kit/title_{rarity}, ribbon as fallback).</summary>
+        public static RectTransform TitlePlate(Transform parent, Localization loc, string titleId, int fontSize)
+        {
+            RectTransform root = UIFactory.Rect("TitlePlate", parent);
+            if (string.IsNullOrEmpty(titleId))
+            {
+                return root;
+            }
+            CosmeticDefinition def = CosmeticCatalog.Get(titleId);
+            CosmeticRarity rarity = def?.Rarity ?? CosmeticRarity.Common;
+            Sprite plate = UiKit.Art("title_" + rarity.ToString().ToLowerInvariant());
+            if (plate != null)
+            {
+                Image image = UIFactory.Icon(root, plate, Color.white, 0);
+                image.preserveAspect = false;
+                UIFactory.Stretch(image.rectTransform);
+            }
+            else
+            {
+                UiKit.Ribbon(root);
+            }
+            // On the illustrated plaque the plaque itself carries the rarity color: white text reads best on all four.
+            Text text = UIFactory.Label(root, Name(loc, titleId), fontSize, plate != null ? Theme.Text : Rarity(rarity), TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(text.rectTransform, 0.14f, 0.18f, 0.86f, 0.86f);
+            Widgets.TitleOutline(text);
+            return root;
+        }
+
+        /// <summary>Illustrated frame art for a frame id (Art/Frames), null when the art is missing.</summary>
+        public static Sprite FrameArt(string frameId)
+        {
+            if (string.IsNullOrEmpty(frameId))
+            {
+                return null;
+            }
+            string file = frameId.StartsWith("frame.page", System.StringComparison.Ordinal) ? "collector"
+                : frameId.StartsWith(CosmeticCatalog.BattlePassPrefix, System.StringComparison.Ordinal) ? "season"
+                : frameId.Substring(frameId.IndexOf('.') + 1);
+            return ArtLibrary.Load("Art/Frames/" + file);
+        }
+
+        /// <summary>Fits frame art around a round portrait (the crown frame's ring sits low under its crown and wings).</summary>
+        public static void PlaceFrame(RectTransform frame, string frameId)
+        {
+            if (frameId == "frame.crown")
+            {
+                UIFactory.Anchor(frame, -0.42f, -0.2f, 1.42f, 1.62f);
+            }
+            else if (frameId == "frame.crystal")
+            {
+                UIFactory.Anchor(frame, -0.2f, -0.2f, 1.2f, 1.28f);
+            }
+            else
+            {
+                UIFactory.Anchor(frame, -0.13f, -0.13f, 1.13f, 1.13f);
+            }
+        }
+
         /// <summary>Round avatar: portrait inside the equipped frame (colored rings, a crown on the crown frame).</summary>
         public static RectTransform Avatar(Transform parent, Sprite portrait, string frameId, float size)
         {
@@ -120,6 +193,15 @@ namespace CrushRoyale.Game.UI
             {
                 Image face = UIFactory.Icon(backRect, portrait, Color.white, 0);
                 UIFactory.Stretch(face.rectTransform, -size * 0.04f, -size * 0.04f, 0f, -size * 0.12f);
+            }
+            Sprite art = FrameArt(frameId);
+            if (art != null)
+            {
+                outer.enabled = false;
+                inner.enabled = false;
+                Image frameImage = UIFactory.Icon(root, art, Color.white, 0);
+                PlaceFrame(frameImage.rectTransform, frameId);
+                return root;
             }
             if (frameId == "frame.crown" || frameId == "frame.royal")
             {

@@ -130,7 +130,8 @@ namespace CrushRoyale.Game.Networking
             {
                 return;
             }
-            string message = (condition ?? string.Empty).Length > 2000 ? condition.Substring(0, 2000) : condition ?? string.Empty;
+            string message = Scrub((condition ?? string.Empty).Length > 2000 ? condition.Substring(0, 2000) : condition ?? string.Empty);
+            stackTrace = Scrub(stackTrace);
             string key = message.Length > 160 ? message.Substring(0, 160) : message;
             lock (_lock)
             {
@@ -144,6 +145,13 @@ namespace CrushRoyale.Game.Networking
                 }
             }
         }
+
+        private static readonly System.Text.RegularExpressions.Regex Secrets = new System.Text.RegularExpressions.Regex(
+            @"eyJ[\w-]+\.[\w-]+\.[\w-]+|Bearer\s+\S+|sb_(publishable|secret)_\w+|[\w.+-]+@[\w-]+\.[\w.]+|(purchaseToken|refresh_token|access_token|apikey)[=:""\s]+[^\s&""]+",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        /// <summary>Security audit S-07: tokens, keys and e-mails never leave the device in error reports.</summary>
+        private static string Scrub(string text) => string.IsNullOrEmpty(text) ? text ?? string.Empty : Secrets.Replace(text, "[redacted]");
 
         private void Load()
         {

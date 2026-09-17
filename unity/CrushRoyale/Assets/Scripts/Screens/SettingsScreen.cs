@@ -35,6 +35,11 @@ namespace CrushRoyale.Game.Screens
                 s.ColorBlindMode = v;
                 Game.Save.SaveSettings();
             });
+            Widgets.Toggle(list, Loc.T("settings.reduceMotion"), s.ReduceMotion, v =>
+            {
+                s.ReduceMotion = v;
+                Game.Save.SaveSettings();
+            });
             Widgets.Toggle(list, Loc.T("settings.notifications"), s.NotificationsEnabled, v =>
             {
                 s.NotificationsEnabled = v;

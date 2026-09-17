@@ -14,7 +14,36 @@ namespace CrushRoyale.Game.UI
     {
         private static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>();
 
-        public static Sprite Gem(PieceColor color) => Load("Art/Gems/" + color.ToString().ToLowerInvariant());
+        /// <summary>Equipped gem skin folder used by the board ("runes", "jewels", "season"), null for the classic gems.</summary>
+        public static string GemSkin { get; set; }
+
+        public static Sprite Gem(PieceColor color) => Gem(color, GemSkin);
+
+        /// <summary>Gem art of a skin folder, falling back to the classic gem when that skin has no art.</summary>
+        public static Sprite Gem(PieceColor color, string skinFolder)
+        {
+            string file = color.ToString().ToLowerInvariant();
+            Sprite skinned = string.IsNullOrEmpty(skinFolder) ? null : Load("Art/Gems/" + skinFolder + "/" + file);
+            return skinned ?? Load("Art/Gems/" + file);
+        }
+
+        /// <summary>Art folder of a piece skin cosmetic id.</summary>
+        public static string GemSkinFolder(string pieceSkinId)
+        {
+            if (string.IsNullOrEmpty(pieceSkinId))
+            {
+                return null;
+            }
+            if (pieceSkinId == "pieces.runes")
+            {
+                return "runes";
+            }
+            if (pieceSkinId == "pieces.gems")
+            {
+                return "jewels";
+            }
+            return pieceSkinId.StartsWith("bp.s", System.StringComparison.Ordinal) ? "season" : null;
+        }
 
         public static Sprite Stone() => Load("Art/Gems/stone");
 

@@ -376,7 +376,7 @@ namespace CrushRoyale.Game.Screens
         private void BuildHero(RectTransform safe, ProfileDto profile, PlayerSettings settings, string gender)
         {
             string id = gender == "male" ? "hero" : "heroine";
-            Sprite full = ArtLibrary.Character(id + "_full");
+            Sprite full = CosmeticLook.HeroFull(gender, profile?.Inventory?.EquippedOutfit);
             Sprite art = full ?? ArtLibrary.Character(id);
 
             Image halo = UIFactory.Icon(safe, ProceduralSprites.Glow(128), new Color(Theme.Crystal.r, Theme.Crystal.g, Theme.Crystal.b, 0.38f), 0);
@@ -443,11 +443,27 @@ namespace CrushRoyale.Game.Screens
             string name = profile?.DisplayName ?? settings.HeroPseudo ?? Loc.T("menu.practiceTitle");
             Text title = UIFactory.Label(chipRect, name, Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
             UIFactory.Anchor(title.rectTransform, 0.32f, 0.5f, 0.98f, 0.95f);
-            string detail = profile == null
-                ? Loc.T("common.offline")
-                : Loc.T("league." + profile.Pvp.League) + "  " + Loc.Number(profile.Pvp.Trophies);
-            Text sub = UIFactory.Label(chipRect, detail, Theme.SmallSize - 4, profile == null ? Theme.Warning : Theme.League(profile.Pvp.League), TextAnchor.MiddleLeft);
-            UIFactory.Anchor(sub.rectTransform, 0.32f, 0.06f, 0.98f, 0.5f);
+            string equippedTitle = profile?.Inventory?.EquippedTitle;
+            if (!string.IsNullOrEmpty(equippedTitle))
+            {
+                RectTransform plate = CosmeticLook.TitlePlate(chipRect, Loc, equippedTitle, Theme.SmallSize - 6);
+                UIFactory.Anchor(plate, 0.28f, 0.02f, 1.0f, 0.52f);
+            }
+            else
+            {
+                string detail = profile == null
+                    ? Loc.T("common.offline")
+                    : Loc.T("league." + profile.Pvp.League) + "  " + Loc.Number(profile.Pvp.Trophies);
+                Text sub = UIFactory.Label(chipRect, detail, Theme.SmallSize - 4, profile == null ? Theme.Warning : Theme.League(profile.Pvp.League), TextAnchor.MiddleLeft);
+                UIFactory.Anchor(sub.rectTransform, 0.32f, 0.06f, 0.98f, 0.5f);
+            }
+            Sprite frameArt = CosmeticLook.FrameArt(profile?.Inventory?.EquippedFrame);
+            if (frameArt != null)
+            {
+                Image frameImage = UIFactory.Icon(ring.transform, frameArt, Color.white, 0);
+                frameImage.preserveAspect = false;
+                CosmeticLook.PlaceFrame(frameImage.rectTransform, profile.Inventory.EquippedFrame);
+            }
 
             if (profile != null)
             {

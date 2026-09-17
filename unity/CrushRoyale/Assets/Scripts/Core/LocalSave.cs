@@ -17,6 +17,9 @@ namespace CrushRoyale.Game
         public bool HapticsEnabled = true;
         public bool NotificationsEnabled = true;
         public bool ColorBlindMode;
+
+        /// <summary>Accessibility: no screen shake, slow motion, zoom or weather particles.</summary>
+        public bool ReduceMotion;
         public string Language;
         public bool TutorialDone;
         public bool PrivacyAccepted;

@@ -24,6 +24,8 @@ namespace CrushRoyale.Contracts
 
         public string OpponentFrame { get; set; }
 
+        public string OpponentTitle { get; set; }
+
         public List<LoadoutEntryDto> OpponentLoadout { get; set; } = new List<LoadoutEntryDto>();
     }
 
@@ -59,6 +61,11 @@ namespace CrushRoyale.Contracts
 
         /// <summary>Opponent ghost (PvP) when already available.</summary>
         public GhostDto Ghost { get; set; }
+
+        /// <summary>Guild boss attacks: the boss HP when the attack starts (0 otherwise).</summary>
+        public long BossMaxHp { get; set; }
+
+        public long BossRemainingHp { get; set; }
     }
 
     public sealed class ContinueRequest

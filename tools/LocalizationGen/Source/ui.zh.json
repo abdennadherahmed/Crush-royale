@@ -819,5 +819,8 @@
   "profile.bpFrame": "第{0}赛季头像框",
   "profile.bpBoard": "第{0}赛季棋盘",
   "profile.bpPieces": "第{0}赛季宝石",
-  "profile.pageFrame": "收藏家头像框{0}"
+  "profile.pageFrame": "收藏家头像框{0}",
+  "hud.voice.bossDefeated": "首领已被击败！",
+  "hud.guildBossHp": "公会首领：{0} / {1} 生命",
+  "settings.reduceMotion": "减少动画"
 }

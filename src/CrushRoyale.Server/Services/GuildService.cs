@@ -245,7 +245,10 @@ public sealed class GuildService
             ws.SnapshotPet(match.Config, GameMode.GuildBoss);
             await ctx.Tx.InsertMatchAsync(match).ConfigureAwait(false);
             await ctx.Tx.UpdateGuildAsync(record).ConfigureAwait(false);
-            return Mappers.MatchStart(match, ws, _ops.Balance.HashHex);
+            MatchStartResponse start = Mappers.MatchStart(match, ws, _ops.Balance.HashHex);
+            start.BossMaxHp = boss.MaxHp;
+            start.BossRemainingHp = boss.RemainingHp;
+            return start;
         }, ct);
 
     public Task<GuildBossAttackResponse> SubmitBossDamageAsync(Guid userId, SubmitReplayRequest request, CancellationToken ct) =>

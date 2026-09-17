@@ -47,6 +47,22 @@ namespace CrushRoyale.Game.Gameplay
         private float _nextChatter;
         private bool _finished;
         private bool _leading;
+        private long _guildBossMax;
+        private long _guildBossRemaining;
+
+        /// <summary>Remaining boss HP share for a score: story bosses from the stage HP, guild bosses from the weekly HP.</summary>
+        public float BossHpShare(long score)
+        {
+            if (_config.BossHp > 0)
+            {
+                return 1f - Mathf.Clamp01(score / (float)_config.BossHp);
+            }
+            if (_guildBossMax > 0)
+            {
+                return Mathf.Clamp01((_guildBossRemaining - score) / (float)_guildBossMax);
+            }
+            return -1f;
+        }
 
         private Localization Loc => _game.Loc;
 
@@ -69,7 +85,10 @@ namespace CrushRoyale.Game.Gameplay
             Kingdom kingdom = _launch.Mode == GameMode.Story && _launch.StageId > 0
                 ? _game.Backend.Catalog.Get(_launch.StageId).Kingdom
                 : Kingdom.Central;
-            Weather.Create(_root, kingdom);
+            if (!_game.Save.Settings.ReduceMotion)
+            {
+                Weather.Create(_root, kingdom);
+            }
 
             // Aura behind the board, brighter as the combo meter fills.
             _aura = UIFactory.Icon(_board.Rect.parent, ProceduralSprites.Glow(128), new Color(0.5f, 0.3f, 1f, 0.2f), 0);
@@ -89,12 +108,14 @@ namespace CrushRoyale.Game.Gameplay
             }
 
             bool bossFight = _config.BossHp > 0 || _launch.Mode == GameMode.GuildBoss;
+            _guildBossMax = _launch.Mode == GameMode.GuildBoss ? _launch.Ticket?.BossMaxHp ?? 0 : 0;
+            _guildBossRemaining = _launch.Mode == GameMode.GuildBoss ? _launch.Ticket?.BossRemainingHp ?? 0 : 0;
             if (bossFight)
             {
                 StageData stage = _launch.Mode == GameMode.Story && _launch.StageId > 0 ? _game.Backend.Catalog.Get(_launch.StageId) : null;
                 Sprite art = stage != null ? ArtLibrary.Boss(stage) : ArtLibrary.GuildBoss();
                 string name = stage != null && !string.IsNullOrEmpty(stage.BossId) ? Loc.T(stage.BossId + ".name") : Loc.T("boss.guildName");
-                _boss = BossView.Create(_safe, art ?? ArtLibrary.GuildBoss(), name, _config.BossHp, _board);
+                _boss = BossView.Create(_safe, art ?? ArtLibrary.GuildBoss(), name, _config.BossHp > 0 ? _config.BossHp : _guildBossRemaining, _board, showDamage: _launch.Mode == GameMode.GuildBoss);
             }
 
             if (_launch.Mode == GameMode.Story || _launch.Mode == GameMode.GuildBoss)
@@ -103,8 +124,9 @@ namespace CrushRoyale.Game.Gameplay
             }
             else if (_controller.Ghost != null)
             {
-                string name = _launch.Ticket?.Ghost?.OpponentName ?? Loc.T("hud.botName");
-                _opponent = OpponentView.Create(_safe, name);
+                GhostDto ghostInfo = _launch.Ticket?.Ghost;
+                string name = ghostInfo?.OpponentName ?? Loc.T("hud.botName");
+                _opponent = OpponentView.Create(_safe, name, ghostInfo?.OpponentFrame, ghostInfo?.OpponentTitle, Loc);
             }
 
             _controller.StepPlayed += OnStep;
@@ -147,7 +169,7 @@ namespace CrushRoyale.Game.Gameplay
                 await CoroutineTask.Run(this, _boss.Entrance());
                 _board.Fx?.Shake(0.5f, 24f);
             }
-            _game.Audio.PlaySFX(SoundIds.VoiceFight);
+            Voice(SoundIds.VoiceFight);
             if (_board.Fx != null)
             {
                 Announce(Loc.T("hud.fight"), Theme.Gold, 1.1f, true);
@@ -191,14 +213,14 @@ namespace CrushRoyale.Game.Gameplay
             GameSession s = _controller.Session;
             if (outcome.RedSurgeActivated)
             {
-                _game.Audio.PlaySFX(SoundIds.VoiceRedSurge);
+                Voice(SoundIds.VoiceRedSurge);
             }
 
             long gained = s.Score - _lastScore;
             _lastScore = s.Score;
             if (gained > 0 && _boss != null)
             {
-                _boss.TakeHit(gained, s.Config.BossHp > 0 ? 1f - Mathf.Clamp01(s.Score / (float)s.Config.BossHp) : -1f);
+                _boss.TakeHit(gained, BossHpShare(s.Score));
             }
 
             int cascades = outcome.Resolution?.CascadeCount ?? 0;
@@ -332,9 +354,9 @@ namespace CrushRoyale.Game.Gameplay
             _lastHype = Time.unscaledTime;
             int tier = Mathf.Clamp(level - 2, 0, 3);
             int variant = Random.Range(0, 2);
-            _game.Audio.PlaySFX(HypeVoices[tier][variant]);
+            Voice(HypeVoices[tier][variant]);
             Announce(Loc.T(HypeKeys[tier][variant]), HypeColors[Random.Range(0, HypeColors.Length)], 1f + tier * 0.18f, tier >= 2);
-            if (tier >= 2)
+            if (tier >= 2 && !_game.Save.Settings.ReduceMotion)
             {
                 StartCoroutine(SlowMotion(tier >= 3 ? 0.3f : 0.5f, tier >= 3 ? 0.45f : 0.3f));
                 StartCoroutine(Zoom(tier >= 3 ? 1.08f : 1.05f));
@@ -465,7 +487,7 @@ namespace CrushRoyale.Game.Gameplay
             if (_boss != null && (result.Won || _launch.Mode == GameMode.GuildBoss))
             {
                 await CoroutineTask.Run(this, _boss.Death(_board));
-                _game.Audio.PlaySFX(SoundIds.VoiceBossDefeated);
+                Voice(SoundIds.VoiceBossDefeated);
             }
             else if (_boss != null)
             {
@@ -494,7 +516,7 @@ namespace CrushRoyale.Game.Gameplay
             if (won)
             {
                 _board.Fx?.Confetti(120);
-                _game.Audio.PlaySFX(_launch.Mode == GameMode.Story ? SoundIds.VoiceLevelComplete : SoundIds.VoiceVictory);
+                Voice(_launch.Mode == GameMode.Story ? SoundIds.VoiceLevelComplete : SoundIds.VoiceVictory);
                 await Task.Delay(1200);
             }
             else
@@ -510,7 +532,7 @@ namespace CrushRoyale.Game.Gameplay
             {
                 yield break;
             }
-            _game.Audio.PlaySFX(SoundIds.VoiceFinalBonus);
+            Voice(SoundIds.VoiceFinalBonus);
             Announce(Loc.T("hud.finalBonus"), Theme.Gold, 1.2f, true);
             yield return new WaitForSeconds(0.6f);
 
@@ -541,6 +563,29 @@ namespace CrushRoyale.Game.Gameplay
         }
 
         private string Pick(params string[] keys) => Loc.T(keys[Random.Range(0, keys.Length)]);
+
+        private static readonly Dictionary<string, bool> VoiceExists = new Dictionary<string, bool>();
+
+        /// <summary>Announcer line in the game language (Resources/Audio/voice/{lang}/), English otherwise.</summary>
+        private void Voice(string id)
+        {
+            string lang = Loc.Language ?? "en";
+            if (lang != "en")
+            {
+                string localized = "voice/" + lang + "/" + id;
+                if (!VoiceExists.TryGetValue(localized, out bool exists))
+                {
+                    exists = Resources.Load<AudioClip>("Audio/" + localized) != null;
+                    VoiceExists[localized] = exists;
+                }
+                if (exists)
+                {
+                    _game.Audio.PlaySFX(localized);
+                    return;
+                }
+            }
+            _game.Audio.PlaySFX(id);
+        }
     }
 
     // ====================================================================== pet
@@ -873,7 +918,7 @@ namespace CrushRoyale.Game.Gameplay
 
         private static GameRoot Game => GameRoot.Instance;
 
-        public static BossView Create(RectTransform safe, Sprite art, string name, long hp, BoardView board)
+        public static BossView Create(RectTransform safe, Sprite art, string name, long hp, BoardView board, bool showDamage = false)
         {
             RectTransform rect = UIFactory.Anchor(UIFactory.Rect("Boss", safe), 0.6f, 0.68f, 1.02f, 0.87f);
             BossView boss = rect.gameObject.AddComponent<BossView>();
@@ -891,7 +936,7 @@ namespace CrushRoyale.Game.Gameplay
             boss._name = UIFactory.Label(rect, name, Theme.SmallSize, Theme.Danger, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(boss._name.rectTransform, -0.1f, -0.1f, 1.0f, 0.08f);
             Widgets.TitleOutline(boss._name);
-            if (hp <= 0)
+            if (hp <= 0 || showDamage)
             {
                 boss._damageTotal = UIFactory.Label(rect, string.Empty, Theme.SmallSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Anchor(boss._damageTotal.rectTransform, -0.1f, 0.84f, 1.0f, 1.02f);
@@ -1112,24 +1157,21 @@ namespace CrushRoyale.Game.Gameplay
 
         private static GameRoot Game => GameRoot.Instance;
 
-        public static OpponentView Create(RectTransform safe, string name)
+        public static OpponentView Create(RectTransform safe, string name, string frameId, string titleId, Localization loc)
         {
             RectTransform rect = UIFactory.Anchor(UIFactory.Rect("Opponent", safe), 0.56f, 0.77f, 0.72f, 0.86f);
             OpponentView view = rect.gameObject.AddComponent<OpponentView>();
-            view._frame = UIFactory.Rect("Frame", rect);
-            view._frame.anchorMin = view._frame.anchorMax = new Vector2(0.5f, 0.55f);
-            view._frame.sizeDelta = new Vector2(120, 120);
-            UiKit.RoundBadge(view._frame, crystal: true);
             string id = Portraits[Mathf.Abs((name ?? string.Empty).GetHashCode()) % Portraits.Length];
-            Sprite art = ArtLibrary.Character(id);
-            if (art != null)
-            {
-                Image face = UIFactory.Icon(view._frame, art, Color.white, 0);
-                UIFactory.Stretch(face.rectTransform, 14, 14, 14, 14);
-            }
-            Text label = UIFactory.Label(rect, name, Theme.SmallSize - 8, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(label.rectTransform, -0.3f, -0.15f, 1.3f, 0.12f);
+            view._frame = CosmeticLook.Avatar(rect, ArtLibrary.Character(id), frameId, 110);
+            view._frame.anchorMin = view._frame.anchorMax = new Vector2(0.5f, 0.58f);
+            Text label = UIFactory.Label(rect, name, Theme.SmallSize - 8, CosmeticLook.Frame(frameId).Main, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(label.rectTransform, -0.3f, -0.12f, 1.3f, 0.14f);
             Widgets.TitleOutline(label);
+            if (!string.IsNullOrEmpty(titleId))
+            {
+                RectTransform plate = CosmeticLook.TitlePlate(rect, loc, titleId, Theme.SmallSize - 12);
+                UIFactory.Anchor(plate, -0.35f, -0.36f, 1.35f, -0.1f);
+            }
 
             Image bubble = UIFactory.Panel("Taunt", safe, Theme.Panel);
             view._bubble = UIFactory.Anchor(bubble.rectTransform, 0.03f, 0.78f, 0.55f, 0.85f);

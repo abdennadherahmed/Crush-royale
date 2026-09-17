@@ -819,5 +819,8 @@
   "profile.bpFrame": "Rahmen Saison {0}",
   "profile.bpBoard": "Spielbrett Saison {0}",
   "profile.bpPieces": "Edelsteine Saison {0}",
-  "profile.pageFrame": "Sammlerrahmen {0}"
+  "profile.pageFrame": "Sammlerrahmen {0}",
+  "hud.voice.bossDefeated": "Boss besiegt!",
+  "hud.guildBossHp": "Gildenboss: {0} / {1} LP",
+  "settings.reduceMotion": "Animationen reduzieren"
 }

@@ -79,7 +79,7 @@ namespace CrushRoyale.Game.Screens
             Image aura = UIFactory.Icon(scene, ProceduralSprites.Glow(128), CosmeticLook.OutfitAura(_stats.Outfit), 0);
             UIFactory.Anchor(aura.rectTransform, 0.1f, 0.05f, 0.9f, 0.85f);
             aura.gameObject.AddComponent<Pulse>();
-            Sprite full = ArtLibrary.Character(id + "_full") ?? ArtLibrary.Character(id);
+            Sprite full = CosmeticLook.HeroFull(gender, _stats.Outfit);
             if (full != null)
             {
                 Image hero = UIFactory.Icon(scene, full, Color.white, 0);
@@ -111,11 +111,8 @@ namespace CrushRoyale.Game.Screens
             Widgets.TitleOutline(name);
             if (!string.IsNullOrEmpty(_stats.Profile.Title))
             {
-                RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Title", scene), 0.24f, 0.8f, 0.78f, 0.885f);
-                UiKit.Ribbon(ribbon);
-                Text title = UIFactory.Label(ribbon, CosmeticLook.Name(Loc, _stats.Profile.Title), Theme.SmallSize, CosmeticLook.Rarity(_stats.Profile.Title), TextAnchor.MiddleCenter, FontStyle.Bold);
-                UIFactory.Anchor(title.rectTransform, 0.18f, 0.3f, 0.82f, 0.95f);
-                Widgets.TitleOutline(title);
+                RectTransform plate = CosmeticLook.TitlePlate(scene, Loc, _stats.Profile.Title, Theme.SmallSize);
+                UIFactory.Anchor(plate, 0.26f, 0.8f, 0.8f, 0.885f);
             }
             string league = Loc.T("league." + _stats.Profile.League) + "  ·  " + Loc.Number(_stats.Profile.Trophies);
             Text leagueText = UIFactory.Label(scene, league, Theme.SmallSize + 2, Theme.League(_stats.Profile.League), TextAnchor.MiddleLeft, FontStyle.Bold);
@@ -271,6 +268,13 @@ namespace CrushRoyale.Game.Screens
             {
                 case CosmeticKind.AvatarFrame:
                 {
+                    Sprite frameArt = CosmeticLook.FrameArt(id);
+                    if (frameArt != null)
+                    {
+                        Image art = UIFactory.Icon(box, frameArt, Color.white, 0);
+                        UIFactory.Stretch(art.rectTransform);
+                        break;
+                    }
                     (Color main, Color accent) = CosmeticLook.Frame(id);
                     Image ring = UIFactory.Icon(box, ProceduralSprites.Circle(), main, 0);
                     UIFactory.Stretch(ring.rectTransform);
@@ -282,21 +286,24 @@ namespace CrushRoyale.Game.Screens
                 }
                 case CosmeticKind.Title:
                 {
-                    UiKit.Ribbon(box);
-                    Text t = UIFactory.Label(box, "Aa", Theme.SmallSize, string.IsNullOrEmpty(id) ? Theme.TextMuted : CosmeticLook.Rarity(id), TextAnchor.MiddleCenter, FontStyle.Bold);
-                    UIFactory.Anchor(t.rectTransform, 0.2f, 0.3f, 0.8f, 0.9f);
+                    if (string.IsNullOrEmpty(id))
+                    {
+                        UiKit.Ribbon(box);
+                        break;
+                    }
+                    RectTransform plate = CosmeticLook.TitlePlate(box, Loc, id, Theme.SmallSize - 8);
+                    UIFactory.Anchor(plate, -0.2f, 0.25f, 1.2f, 0.75f);
                     break;
                 }
                 case CosmeticKind.HeroOutfit:
                 {
                     Image aura = UIFactory.Icon(box, ProceduralSprites.Glow(128), CosmeticLook.OutfitAura(id), 0);
                     UIFactory.Stretch(aura.rectTransform, -10, -10, -10, -10);
-                    string gender = _stats.HeroGender == "male" ? "hero" : "heroine";
-                    Sprite portrait = ArtLibrary.Character(gender);
-                    if (portrait != null)
+                    Sprite dressed = CosmeticLook.HeroFull(_stats.HeroGender ?? "female", id);
+                    if (dressed != null)
                     {
-                        Image face = UIFactory.Icon(box, portrait, Color.white, 0);
-                        UIFactory.Stretch(face.rectTransform);
+                        Image body = UIFactory.Icon(box, dressed, Color.white, 0);
+                        UIFactory.Stretch(body.rectTransform);
                     }
                     break;
                 }
@@ -316,11 +323,18 @@ namespace CrushRoyale.Game.Screens
                 }
                 case CosmeticKind.PieceSkin:
                 {
-                    Sprite gem = ArtLibrary.Gem(id == "pieces.runes" ? CrushRoyale.Core.Board.PieceColor.Purple : id == "pieces.gems" ? CrushRoyale.Core.Board.PieceColor.Blue : CrushRoyale.Core.Board.PieceColor.Red);
-                    if (gem != null)
+                    // Three gems of the skin in a small cluster.
+                    string folder = ArtLibrary.GemSkinFolder(id);
+                    var colors = new[] { CrushRoyale.Core.Board.PieceColor.Red, CrushRoyale.Core.Board.PieceColor.Blue, CrushRoyale.Core.Board.PieceColor.Yellow };
+                    Vector2[] spots = { new Vector2(0.05f, 0.35f), new Vector2(0.5f, 0.35f), new Vector2(0.27f, 0f) };
+                    for (int g = 0; g < 3; g++)
                     {
-                        Image g = UIFactory.Icon(box, gem, Color.white, 0);
-                        UIFactory.Stretch(g.rectTransform, 10, 10, 10, 10);
+                        Sprite gem = ArtLibrary.Gem(colors[g], folder);
+                        if (gem != null)
+                        {
+                            Image gemImage = UIFactory.Icon(box, gem, Color.white, 0);
+                            UIFactory.Anchor(gemImage.rectTransform, spots[g].x, spots[g].y, spots[g].x + 0.48f, spots[g].y + 0.62f);
+                        }
                     }
                     break;
                 }

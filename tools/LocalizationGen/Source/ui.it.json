@@ -819,5 +819,8 @@
   "profile.bpFrame": "Cornice stagione {0}",
   "profile.bpBoard": "Tabellone stagione {0}",
   "profile.bpPieces": "Gemme stagione {0}",
-  "profile.pageFrame": "Cornice del collezionista {0}"
+  "profile.pageFrame": "Cornice del collezionista {0}",
+  "hud.voice.bossDefeated": "Boss sconfitto!",
+  "hud.guildBossHp": "Boss di gilda: {0} / {1} PV",
+  "settings.reduceMotion": "Riduci animazioni"
 }

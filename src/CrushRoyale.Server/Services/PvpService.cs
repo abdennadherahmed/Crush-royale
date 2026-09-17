@@ -347,6 +347,7 @@ public sealed class PvpService
             OpponentTrophies = row.Trophies,
             OpponentLeague = LeagueTable.GetLeague(row.Trophies, balance.Trophies).ToString(),
             OpponentFrame = owner?.Frame,
+            OpponentTitle = owner?.Title,
             OpponentLoadout = Mappers.Loadout(replay.Loadout)
         };
     }

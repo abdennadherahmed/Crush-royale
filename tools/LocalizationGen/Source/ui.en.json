@@ -819,5 +819,8 @@
   "profile.bpFrame": "Season {0} frame",
   "profile.bpBoard": "Season {0} board",
   "profile.bpPieces": "Season {0} gems",
-  "profile.pageFrame": "Collector frame {0}"
+  "profile.pageFrame": "Collector frame {0}",
+  "hud.voice.bossDefeated": "Boss defeated!",
+  "hud.guildBossHp": "Guild boss: {0} / {1} HP",
+  "settings.reduceMotion": "Reduce motion"
 }
