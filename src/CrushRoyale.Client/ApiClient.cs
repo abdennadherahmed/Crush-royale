@@ -190,6 +190,11 @@ namespace CrushRoyale.Client
         public Task<ContinueResponse> ContinueStageAsync(string matchId, bool useFree, CancellationToken ct = default) => Transport.PostAsync<ContinueResponse>(ApiRoutes.Fill(ApiRoutes.StageContinue, "matchId", matchId), new ContinueRequest { UseFreeContinue = useFree }, ct);
         public Task<StageCompleteResponse> CompleteStageAsync(SubmitReplayRequest request, CancellationToken ct = default) => Transport.PostAsync<StageCompleteResponse>(ApiRoutes.Fill(ApiRoutes.StageComplete, "matchId", request.MatchId), request, ct);
         public Task<ChoiceResponse> MakeChoiceAsync(string choiceId, string optionId, CancellationToken ct = default) => Transport.PostAsync<ChoiceResponse>(ApiRoutes.StoryChoice, new ChoiceRequest { ChoiceId = choiceId, OptionId = optionId }, ct);
+        public Task<VipGiftResponse> ClaimVipGiftAsync(CancellationToken ct = default) => Transport.PostAsync<VipGiftResponse>(ApiRoutes.VipGift, null, ct);
+
+        public Task<ChapterChestResponse> ClaimChapterChestAsync(int chapter, int tier, CancellationToken ct = default) =>
+            Transport.PostAsync<ChapterChestResponse>(ApiRoutes.ChapterChest, new ChapterChestRequest { Chapter = chapter, Tier = tier }, ct);
+
         public Task<bool> MarkEventSeenAsync(string eventId, CancellationToken ct = default) => Transport.PostAsync<bool>(ApiRoutes.Fill(ApiRoutes.StoryEventSeen, "eventId", eventId), null, ct);
 
         // Economy

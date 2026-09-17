@@ -50,6 +50,31 @@ namespace CrushRoyale.Game.Gameplay
             public bool Twinkle;
         }
 
+        /// <summary>False when a richer announcer (StageLife) shows the combo texts instead.</summary>
+        public bool ComboTexts { get; set; } = true;
+
+        public float CellSize => _cell;
+
+        /// <summary>Public access to the pooled particles for other living elements (confetti, rockets, magic).</summary>
+        public void Spawn(Vector2 position, Vector2 velocity, float life, float startSize, float endSize, Color color, Sprite sprite,
+            float drag = 0f, float gravity = 0f, float spin = 0f, bool stretch = false, bool twinkle = false) =>
+            Emit(position, velocity, life, startSize, endSize, color, sprite, drag, gravity, spin, stretch, twinkle);
+
+        /// <summary>Colored paper rain from above the board.</summary>
+        public void Confetti(int count)
+        {
+            Color[] colors = { Theme.Gold, Theme.Crystal, Theme.Orbe, Theme.Danger, Theme.Success, Color.white };
+            float half = _cell * 5f;
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 at = new Vector2(Random.Range(-half, half), half + Random.Range(0f, _cell * 3f));
+                Vector2 velocity = new Vector2(Random.Range(-1f, 1f) * _cell * 2f, Random.Range(-2f, 1f) * _cell);
+                float size = _cell * Random.Range(0.16f, 0.3f);
+                Emit(at, velocity, Random.Range(1.8f, 2.8f), size, size, colors[Random.Range(0, colors.Length)], ProceduralSprites.RoundedRect(4),
+                    drag: 1.2f, gravity: _cell * 3.5f, spin: Random.Range(-400f, 400f), aspect: 0.55f);
+            }
+        }
+
         public static BoardFx Create(RectTransform layer, RectTransform board, float cell)
         {
             BoardFx fx = layer.gameObject.AddComponent<BoardFx>();
@@ -308,7 +333,7 @@ namespace CrushRoyale.Game.Gameplay
         /// <summary>Cascade praise from the second chain on: Super, Great, Amazing, Divine.</summary>
         public void Combo(int cascadeLevel)
         {
-            if (cascadeLevel < 2)
+            if (cascadeLevel < 2 || !ComboTexts)
             {
                 return;
             }

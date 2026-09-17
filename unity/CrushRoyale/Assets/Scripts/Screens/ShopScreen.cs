@@ -375,6 +375,8 @@ namespace CrushRoyale.Game.Screens
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = columns;
             grid.childAlignment = TextAnchor.UpperCenter;
+            grid.padding = new RectOffset(8, 8, 0, 0);
+            GridFit.On(grid);
             foreach (ShopItemDto item in items)
             {
                 RectTransform cell = UIFactory.Rect("Cell", gridRect);

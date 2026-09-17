@@ -118,7 +118,8 @@ public sealed class PlayerWorkspace
         Vip = State.Vip.Tier,
         CollectionPagesCompleted = State.Achievements.PagesCompleted.Count,
         GuildCoinBonusPermille = GuildTech(Core.Social.GuildTech.CoinBonus),
-        RarePerk = State.Inventory.RarePerkUnlocked
+        RarePerk = State.Inventory.RarePerkUnlocked,
+        CosmeticCoinBonusPermille = CosmeticBonuses.Total(State.Inventory.Cosmetics).Coins
     };
 
     public PlayerContext ShopContext => new()
@@ -218,6 +219,8 @@ public sealed class PlayerWorkspace
     public void AddBattlePassXp(int xp)
     {
         BattlePass.EnsureSeason(State.BattlePass, Now, Balance.LiveOps);
+        int cosmeticBonus = CosmeticBonuses.Total(State.Inventory.Cosmetics).PassXp;
+        xp = (int)((long)xp * (1000 + cosmeticBonus) / 1000);
         BattlePass.AddXp(State.BattlePass, xp, GuildTech(Core.Social.GuildTech.BattlePassXp));
         Achievements.SetStatMax(StatKey.BattlePassTiers, BattlePass.TierForXp(State.BattlePass.Xp, Balance.LiveOps));
     }

@@ -117,6 +117,51 @@ namespace CrushRoyale.Contracts
         public List<string> UnlockedFeatures { get; set; } = new List<string>();
 
         public List<string> SeenEvents { get; set; } = new List<string>();
+
+        /// <summary>Chapter star chests already opened ("chapter:tier", tier 0-2 for 30/45/60 stars).</summary>
+        public List<string> ClaimedChapterChests { get; set; } = new List<string>();
+    }
+
+    public sealed class VipGiftResponse
+    {
+        public RewardDto Reward { get; set; }
+
+        public int PetFragments { get; set; }
+
+        public string FragmentsPet { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public InventoryDto Inventory { get; set; }
+
+        public PetsDto Pets { get; set; }
+
+        public LivesDto Lives { get; set; }
+    }
+
+    public sealed class ChapterChestRequest
+    {
+        public int Chapter { get; set; }
+
+        /// <summary>0, 1 or 2 (half, three quarters, all of the chapter stars).</summary>
+        public int Tier { get; set; }
+    }
+
+    public sealed class ChapterChestResponse
+    {
+        public RewardDto Reward { get; set; }
+
+        public int PetFragments { get; set; }
+
+        public string FragmentsPet { get; set; }
+
+        public WalletDto Wallet { get; set; }
+
+        public InventoryDto Inventory { get; set; }
+
+        public PetsDto Pets { get; set; }
+
+        public StoryDto Story { get; set; }
     }
 
     /// <summary>One pet of the collection, with what the UI needs to show progress and the awakening button.</summary>
@@ -351,6 +396,9 @@ namespace CrushRoyale.Contracts
 
         public bool LoginBonusAvailable { get; set; }
 
+        /// <summary>VIP 6+: today's VIP gift has not been claimed yet.</summary>
+        public bool VipGiftAvailable { get; set; }
+
         public int LoginCalendarSlot { get; set; }
 
         public int CollectionPagesCompleted { get; set; }
@@ -402,6 +450,34 @@ namespace CrushRoyale.Contracts
         public int AchievementsUnlocked { get; set; }
 
         public int? WeeklyRank { get; set; }
+
+        /// <summary>"male" or "female".</summary>
+        public string HeroGender { get; set; }
+
+        public int VipTier { get; set; }
+
+        public string Outfit { get; set; }
+
+        public string BoardSkin { get; set; }
+
+        public string PieceSkin { get; set; }
+
+        /// <summary>Owned cosmetics (friends can browse the collection).</summary>
+        public List<string> Cosmetics { get; set; } = new List<string>();
+
+        public int CosmeticsCounted { get; set; }
+
+        public int CosmeticCoinBonusPermille { get; set; }
+
+        public int CosmeticPassXpBonusPermille { get; set; }
+
+        public string Pet { get; set; }
+
+        public int PetLevel { get; set; }
+
+        public int PetsOwned { get; set; }
+
+        public int CollectionPages { get; set; }
     }
 
     public sealed class SearchPlayersResponse

@@ -66,6 +66,9 @@ namespace CrushRoyale.Core.Story
         public bool NewGamePlusUnlocked { get; set; }
 
         public int TotalStars { get; set; }
+
+        /// <summary>Chapter star chests already opened ("chapter:tier").</summary>
+        public HashSet<string> ClaimedChapterChests { get; set; } = new HashSet<string>();
     }
 
     public sealed class StageCompletion

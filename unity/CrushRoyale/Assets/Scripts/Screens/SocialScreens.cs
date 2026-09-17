@@ -71,6 +71,7 @@ namespace CrushRoyale.Game.Screens
                 long cooldown = _friends.ChallengeCooldownMs.TryGetValue(id, out long ms) ? ms : 0;
                 Button challenge = UIFactory.Button(actions.transform, cooldown > 0 ? Loc.T("friends.cooldown", Mathf.CeilToInt(cooldown / 60000f)) : Loc.T("friends.challenge"), () => _ = ChallengeAsync(id), Theme.Gold, Theme.SmallSize);
                 challenge.interactable = cooldown <= 0;
+                UIFactory.Button(actions.transform, Loc.T("profile.view"), () => UI.Show<ProfileScreen>(id), Theme.Hex("5BA8FF"), Theme.SmallSize);
                 UIFactory.Button(actions.transform, Loc.T("friends.remove"), () => _ = RemoveAsync(id), Theme.PanelLight, Theme.SmallSize, Theme.Text);
             }
 
@@ -177,6 +178,7 @@ namespace CrushRoyale.Game.Screens
             grid.spacing = new Vector2(10, 10);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 4;
+            GridFit.On(grid);
             for (int i = 0; i < Leagues.Length; i++)
             {
                 int index = i;
@@ -204,6 +206,7 @@ namespace CrushRoyale.Game.Screens
                 resetAt = _guilds.ResetAtUnixMs;
                 mine = Loc.T("leaderboard.myGuildRank", _guilds.MyGuildRank?.ToString() ?? "-");
                 rows.AddRange(_guilds.Entries.Select(g => (g.Rank, g.Name, (long)g.TotalTrophies, Theme.Text, false)));
+                _ids.Clear();
             }
             else
             {
@@ -214,6 +217,7 @@ namespace CrushRoyale.Game.Screens
                 resetAt = _players.ResetAtUnixMs;
                 mine = Loc.T("leaderboard.myRank", _players.MyRank?.ToString() ?? "-");
                 rows.AddRange(_players.Entries.Select(e => (e.Rank, e.DisplayName, (long)e.Trophies, Theme.League(e.League), e.PlayerId == Game.Backend.PlayerId)));
+                _ids = _players.Entries.GroupBy(e => e.Rank).ToDictionary(g => g.Key, g => g.First().PlayerId);
             }
 
             TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(resetAt) - DateTimeOffset.UtcNow;
@@ -235,7 +239,14 @@ namespace CrushRoyale.Game.Screens
             Podium(list, rows.Where(r => r.Rank <= 3).ToList());
             foreach (var row in rows.Where(r => r.Rank > 3))
             {
-                Line(list, row.Rank, row.Name, Loc.Number(row.Value), row.Color, row.Me);
+                RectTransform line = Line(list, row.Rank, row.Name, Loc.Number(row.Value), row.Color, row.Me);
+                if (_ids.TryGetValue(row.Rank, out string playerId))
+                {
+                    Button open = line.gameObject.AddComponent<Button>();
+                    open.targetGraphic = line.GetComponent<Image>();
+                    open.onClick.AddListener(() => UI.Show<ProfileScreen>(playerId));
+                    line.gameObject.AddComponent<ButtonFeedback>();
+                }
             }
             if (rows.Count == 0)
             {
@@ -313,7 +324,9 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
-        private static void Line(Transform list, int rank, string name, string value, Color color, bool me)
+        private Dictionary<int, string> _ids = new Dictionary<int, string>();
+
+        private static RectTransform Line(Transform list, int rank, string name, string value, Color color, bool me)
         {
             Image row = UIFactory.Panel("Row", list, Theme.Panel);
             UIFactory.Height(row, 110);
@@ -336,6 +349,7 @@ namespace CrushRoyale.Game.Screens
             }
             Text valueText = UIFactory.Label(row.transform, value, Theme.BodySize, Theme.Text, TextAnchor.MiddleRight, FontStyle.Bold);
             UIFactory.Anchor(valueText.rectTransform, 0.78f, 0.1f, 0.96f, 0.9f);
+            return row.rectTransform;
         }
     }
 
@@ -876,6 +890,7 @@ namespace CrushRoyale.Game.Screens
             grid.spacing = new Vector2(14, 14);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 4;
+            GridFit.On(grid);
             grid.childAlignment = TextAnchor.UpperCenter;
             int slot = profile?.LoginCalendarSlot ?? -1;
             for (int i = 0; i < calendar.Length; i++)

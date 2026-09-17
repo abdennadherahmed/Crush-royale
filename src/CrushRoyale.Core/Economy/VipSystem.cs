@@ -237,6 +237,9 @@ namespace CrushRoyale.Core.Economy
         public bool RarePerk { get; set; }
 
         public bool EventActive { get; set; }
+
+        /// <summary>Stacked cosmetic collection bonus (see <see cref="CosmeticBonuses"/>).</summary>
+        public int CosmeticCoinBonusPermille { get; set; }
     }
 
     /// <summary>Applies additive coin bonuses (VIP + collection book + guild + crown), capped by the economy balance.</summary>
@@ -259,7 +262,8 @@ namespace CrushRoyale.Core.Economy
             long total = vip.CoinBonusPermille
                 + (long)Math.Max(0, context.CollectionPagesCompleted) * CollectionPageBonusPermille
                 + Math.Max(0, context.GuildCoinBonusPermille)
-                + (context.RarePerk ? balance.Economy.RarePerkCoinBonusPermille : 0);
+                + (context.RarePerk ? balance.Economy.RarePerkCoinBonusPermille : 0)
+                + Math.Max(0, Math.Min(CosmeticBonuses.MaxCoinPermille, context.CosmeticCoinBonusPermille));
             return (int)Math.Min(balance.Economy.MaxTotalCoinBonusPermille, total);
         }
 

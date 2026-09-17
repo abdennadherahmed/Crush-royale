@@ -22,6 +22,9 @@ namespace CrushRoyale.Game
         public bool PrivacyAccepted;
         public int LastSeenStage;
 
+        /// <summary>Stage the hero stood on at the last map visit (the hero walks from there to the new one).</summary>
+        public int LastMapStage;
+
         /// <summary>Hero chosen on this device (possibly offline, synced to the server at the next login).</summary>
         public bool HeroCreated;
         public string HeroGender;

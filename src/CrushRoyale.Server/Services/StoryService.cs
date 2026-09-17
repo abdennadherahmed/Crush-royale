@@ -216,6 +216,31 @@ public sealed class StoryService
             };
         }, ct);
 
+    public Task<ChapterChestResponse> ClaimChapterChestAsync(Guid userId, ChapterChestRequest request, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            int chapter = request?.Chapter ?? 0;
+            int tier = request?.Tier ?? -1;
+            ChapterChestReward chest = ChapterChests.Claim(ws.State.Story, ws.Balance.Story, chapter, tier).ValueOrThrow();
+            string key = "chapter-chest:" + ChapterChests.Key(chapter, tier);
+            ws.GrantReward(chest.Reward, TransactionReason.ChapterChest, key, key);
+            if (chest.PetFragments > 0)
+            {
+                ws.Pets.Get(chest.FragmentsPet).Fragments += chest.PetFragments;
+            }
+            return new ChapterChestResponse
+            {
+                Reward = Mappers.Reward(chest.Reward),
+                PetFragments = chest.PetFragments,
+                FragmentsPet = chest.PetFragments > 0 ? chest.FragmentsPet.ToString() : null,
+                Wallet = Mappers.Wallet(ws),
+                Inventory = Mappers.Inventory(ws),
+                Pets = Mappers.Pets(ws),
+                Story = Mappers.Story(ws)
+            };
+        }, ct);
+
     public Task<ChoiceResponse> MakeChoiceAsync(Guid userId, ChoiceRequest request, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx =>
         {

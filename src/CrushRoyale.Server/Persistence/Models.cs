@@ -68,6 +68,9 @@ public sealed class PlayerState
 
     public VipStatus Vip { get; set; } = new();
 
+    /// <summary>UTC day index of the last daily VIP gift claimed (VIP 6+).</summary>
+    public int VipGiftDay { get; set; } = -1;
+
     public long? GuildId { get; set; }
 
     public HashSet<StoryEnding> EndingsReached { get; set; } = new();

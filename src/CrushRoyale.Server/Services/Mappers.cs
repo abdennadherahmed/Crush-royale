@@ -85,7 +85,8 @@ public static class Mappers
             NewGamePlusUnlocked = p.NewGamePlusUnlocked,
             Party = ws.Story.GetParty().Select(c => c.Id).ToList(),
             UnlockedFeatures = Enum.GetValues<Feature>().Where(ws.Story.IsFeatureUnlocked).Select(f => f.ToString()).ToList(),
-            SeenEvents = p.SeenEvents.OrderBy(e => e, StringComparer.Ordinal).ToList()
+            SeenEvents = p.SeenEvents.OrderBy(e => e, StringComparer.Ordinal).ToList(),
+            ClaimedChapterChests = (p.ClaimedChapterChests ?? new HashSet<string>()).OrderBy(c => c, StringComparer.Ordinal).ToList()
         };
     }
 
@@ -126,6 +127,7 @@ public static class Mappers
             Inventory = Inventory(ws),
             GuildId = s.GuildId,
             LoginBonusAvailable = LoginCalendar.CanClaim(s.Login, ws.Now),
+            VipGiftAvailable = VipGifts.CanClaim((int)s.Vip.Tier, s.VipGiftDay, TimeUtil.DayIndex(ws.Now)),
             LoginCalendarSlot = s.Login.NextSlot,
             CollectionPagesCompleted = s.Achievements.PagesCompleted.Count,
             UnclaimedAchievements = ws.Achievements.GetUnclaimed().Count,

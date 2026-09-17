@@ -232,6 +232,28 @@ namespace CrushRoyale.Game.Audio
     public static class SoundIds
     {
         public const string Match3 = "match3";
+        public const string PetHop = "pet_hop";
+        public const string PetLand = "pet_land";
+        public const string BossHit = "boss_hit";
+        public const string BossRoar = "boss_roar";
+        public const string BossDeath = "boss_death";
+        public const string Whoosh = "whoosh";
+        public const string Sparkle = "sparkle";
+        public const string Firework = "firework";
+        public const string VoiceSweet = "voice_sweet";
+        public const string VoiceGreat = "voice_great";
+        public const string VoiceAwesome = "voice_awesome";
+        public const string VoiceAmazing = "voice_amazing";
+        public const string VoiceIncredible = "voice_incredible";
+        public const string VoiceUnstoppable = "voice_unstoppable";
+        public const string VoiceDivine = "voice_divine";
+        public const string VoiceLegendary = "voice_legendary";
+        public const string VoiceFight = "voice_fight";
+        public const string VoiceFinalBonus = "voice_final_bonus";
+        public const string VoiceLevelComplete = "voice_level_complete";
+        public const string VoiceBossDefeated = "voice_boss_defeated";
+        public const string VoiceVictory = "voice_victory";
+        public const string VoiceRedSurge = "voice_red_surge";
         public const string Match4 = "match4";
         public const string Match5 = "match5";
         public const string Cascade = "cascade";

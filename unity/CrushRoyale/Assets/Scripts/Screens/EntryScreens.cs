@@ -418,9 +418,20 @@ namespace CrushRoyale.Game.Screens
 
         private void BuildTopBar(RectTransform safe, ProfileDto profile, PlayerSettings settings, string gender)
         {
-            Button chip = UIFactory.Button(safe, string.Empty, () => UI.Show<SettingsScreen>(), new Color(0.1f, 0.07f, 0.22f, 0.9f));
+            // Profile chip (the gear on the right opens the settings).
+            Button chip = UIFactory.Button(safe, string.Empty, () =>
+            {
+                if (Game.Backend.IsOnline)
+                {
+                    UI.Show<ProfileScreen>();
+                }
+                else
+                {
+                    UI.Toast(Loc.T("error.offline"));
+                }
+            }, new Color(0.1f, 0.07f, 0.22f, 0.9f));
             RectTransform chipRect = UIFactory.Anchor(chip.GetComponent<RectTransform>(), 0.015f, 0.915f, 0.43f, 0.99f);
-            Image ring = UIFactory.Icon(chipRect, ProceduralSprites.Circle(), Theme.GoldDark, 0);
+            Image ring = UIFactory.Icon(chipRect, ProceduralSprites.Circle(), CosmeticLook.Frame(profile?.Inventory?.EquippedFrame).Main, 0);
             UIFactory.Anchor(ring.rectTransform, 0.02f, 0.06f, 0.29f, 0.94f).GetComponent<Image>().preserveAspect = true;
             Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
             if (portrait != null)

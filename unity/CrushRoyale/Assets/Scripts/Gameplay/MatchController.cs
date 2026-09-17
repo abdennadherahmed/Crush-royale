@@ -49,6 +49,12 @@ namespace CrushRoyale.Game.Gameplay
 
         public event Action<ActionOutcome> ActionPresented;
 
+        /// <summary>Raised when a resolution step starts animating (combo texts, pet and hero reactions).</summary>
+        public event Action<ResolutionStep> StepPlayed;
+
+        /// <summary>Raised when an accepted action starts animating (before the board moves).</summary>
+        public event Action<ActionOutcome> ActionStarted;
+
         public void Begin(GameSession session, BoardView board, BoardInput input, GhostPlayer ghost, BoardView ghostBoard)
         {
             _game = GameRoot.Instance;
@@ -199,6 +205,7 @@ namespace CrushRoyale.Game.Gameplay
                 _game.Haptics.Medium();
             }
 
+            ActionStarted?.Invoke(outcome);
             yield return Board.PlayOutcome(outcome, Session.Board, OnStep);
 
             if (outcome.RedSurgeActivated)
@@ -226,6 +233,7 @@ namespace CrushRoyale.Game.Gameplay
 
         private void OnStep(ResolutionStep step)
         {
+            StepPlayed?.Invoke(step);
             if (step.CascadeLevel >= 1)
             {
                 _game.Audio.PlaySFX(SoundIds.Cascade, 1f + Mathf.Min(step.CascadeLevel, 6) * 0.08f);

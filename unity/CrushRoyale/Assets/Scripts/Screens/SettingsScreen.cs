@@ -57,6 +57,7 @@ namespace CrushRoyale.Game.Screens
             grid.spacing = new Vector2(12, 12);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 3;
+            GridFit.On(grid);
             foreach (string code in Localization.Supported)
             {
                 string language = code;

@@ -35,6 +35,8 @@ namespace CrushRoyale.Game.Screens
         private bool _submitting;
         private RectTransform _petIcon;
         private RectTransform _goalRow;
+        private RectTransform _movesMedal;
+        private StageLife _life;
         private readonly List<(Text Count, GameObject Check)> _goalChips = new List<(Text, GameObject)>();
 
         public override System.Type BackTarget => null;
@@ -57,6 +59,7 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Anchor(pause.GetComponent<RectTransform>(), 0.03f, 0.2f, 0.13f, 0.8f);
 
             RectTransform medal = UIFactory.Anchor(UIFactory.Rect("Moves", hud.transform), 0.15f, -0.08f, 0.33f, 1.08f);
+            _movesMedal = medal;
             if (UiKit.RoundBadge(medal, crystal: false) != null)
             {
                 medal.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
@@ -105,8 +108,9 @@ namespace CrushRoyale.Game.Screens
             _surge.enabled = false;
 
             // Board
-            BoardView board = BoardView.Create(safe, 1000f, ghost: false);
-            board.Rect.anchorMin = board.Rect.anchorMax = new Vector2(0.5f, 0.43f);
+            // Slightly smaller board: room below it for the pet and the hero, and it fits narrow (tall) phones.
+            BoardView board = BoardView.Create(safe, 940f, ghost: false);
+            board.Rect.anchorMin = board.Rect.anchorMax = new Vector2(0.5f, 0.445f);
             board.Rect.anchoredPosition = Vector2.zero;
             BoardInput input = board.gameObject.AddComponent<BoardInput>();
 
@@ -162,7 +166,6 @@ namespace CrushRoyale.Game.Screens
             {
                 UIFactory.Label(bar, Loc.T("hud.noPowerUps"), Theme.SmallSize, Theme.TextMuted);
             }
-            AddPetBadge(safe, config);
 
             bossBar.gameObject.SetActive(config.BossHp > 0);
             _goalRow.gameObject.SetActive(session.Objectives.Progress.Count > 0);
@@ -171,6 +174,8 @@ namespace CrushRoyale.Game.Screens
             _controller.Changed += RefreshHud;
             _controller.Finished += result => _ = OnFinishedAsync(result);
             _controller.Begin(session, board, input, ghost, ghostBoard);
+            _life = StageLife.Attach(Root, safe, board, _controller, _launch, config);
+            board.ApplySkin(Game.Backend.Profile?.Inventory?.EquippedBoardSkin);
             _controller.ActionPresented += outcome =>
             {
                 if (outcome.PetMove.HasValue && _petIcon != null)
@@ -218,6 +223,13 @@ namespace CrushRoyale.Game.Screens
                 {
                     return;
                 }
+                _controller.Pause();
+                await _life.PlayIntroAsync();
+                if (this == null)
+                {
+                    return;
+                }
+                _controller.Resume();
 
                 if (stage.Id == 1 && !Game.Save.Settings.TutorialDone)
                 {
@@ -227,6 +239,7 @@ namespace CrushRoyale.Game.Screens
             else
             {
                 Game.Audio.PlayMusic(SoundIds.PvpMusic);
+                await _life.PlayIntroAsync();
             }
         }
 
@@ -631,6 +644,14 @@ namespace CrushRoyale.Game.Screens
             }
 
             _submitting = true;
+            if (_life != null)
+            {
+                await _life.PlayFinaleAsync(result, _movesMedal, left => _moves.text = Loc.Number(left));
+                if (this == null)
+                {
+                    return;
+                }
+            }
             Game.Audio.PlaySFX(result.State == SessionState.Won || result.State == SessionState.Completed ? SoundIds.WinFanfare : SoundIds.LoseJingle);
 
             switch (_launch.Mode)

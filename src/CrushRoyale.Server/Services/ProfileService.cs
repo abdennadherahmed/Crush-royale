@@ -188,6 +188,7 @@ public sealed class ProfileService
                 return null;
             }
             PlayerState s = record.State;
+            (int Coins, int PassXp, int Counted) bonus = CosmeticBonuses.Total(s.Inventory.Cosmetics);
             return new PlayerStatsDto
             {
                 Profile = new PublicProfileDto
@@ -206,7 +207,20 @@ public sealed class ProfileService
                 BestWinStreak = s.Pvp.BestWinStreak,
                 HighestLeague = s.Pvp.HighestLeague.ToString(),
                 TotalStars = s.Story.TotalStars,
-                AchievementsUnlocked = s.Achievements.UnlockedAt.Count
+                AchievementsUnlocked = s.Achievements.UnlockedAt.Count,
+                HeroGender = s.Hero?.Gender,
+                VipTier = (int)s.Vip.Tier,
+                Outfit = s.Inventory.EquippedOutfit,
+                BoardSkin = s.Inventory.EquippedBoardSkin,
+                PieceSkin = s.Inventory.EquippedPieceSkin,
+                Cosmetics = s.Inventory.Cosmetics.OrderBy(c => c, StringComparer.Ordinal).ToList(),
+                CosmeticsCounted = bonus.Counted,
+                CosmeticCoinBonusPermille = bonus.Coins,
+                CosmeticPassXpBonusPermille = bonus.PassXp,
+                Pet = s.Pets == null || s.Pets.Equipped == Core.Config.PetType.None ? null : s.Pets.Equipped.ToString(),
+                PetLevel = s.Pets != null && s.Pets.Pets.TryGetValue(s.Pets.Equipped, out Core.Pets.PetState pet) ? pet.Level : 0,
+                PetsOwned = s.Pets == null ? 0 : s.Pets.Pets.Values.Count(p => p.Owned),
+                CollectionPages = s.Achievements.PagesCompleted.Count
             };
         }, ct).ConfigureAwait(false);
 

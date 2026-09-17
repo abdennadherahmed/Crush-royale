@@ -33,6 +33,8 @@ namespace CrushRoyale.Game.Screens
         private int _act = -1;
         private int _chapter = -1;
         private Dictionary<int, List<string>> _friendsByStage = new Dictionary<int, List<string>>();
+        private readonly Dictionary<int, Vector2> _nodePositions = new Dictionary<int, Vector2>();
+        private RectTransform _heroMarker;
 
         public override System.Type BackTarget => typeof(MainMenuScreen);
 
@@ -102,6 +104,7 @@ namespace CrushRoyale.Game.Screens
             {
                 Widgets.Backdrop(inner, Kingdom.Central, 0.8f);
             }
+            MapAnimator.Create(pins);
 
             int stagesPerAct = story.ChaptersPerAct * story.StagesPerChapter;
             for (int act = 1; act <= story.Acts && act <= KingdomSpots.Length; act++)
@@ -205,8 +208,28 @@ namespace CrushRoyale.Game.Screens
             {
                 earned += Mathf.Max(0, stars[id - 1] - '0');
             }
-            Text starText = UIFactory.Label(bar.transform, "★ " + earned + " / " + story.StagesPerChapter * 3, Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(starText.rectTransform, 0.16f, 0.06f, 0.84f, 0.45f);
+            int max = story.StagesPerChapter * 3;
+            UIFactory.ProgressBar(bar.transform, earned / (float)Mathf.Max(1, max), Theme.Gold, out RectTransform progress);
+            UIFactory.Anchor(progress, 0.2f, 0.1f, 0.74f, 0.42f);
+            Text starText = UIFactory.Label(progress, "★ " + earned + " / " + max, Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(starText.rectTransform);
+            Widgets.TitleOutline(starText);
+            for (int tier = 0; tier < ChapterChests.Tiers; tier++)
+            {
+                float x = ChapterChests.StarsNeeded(story, tier) / (float)max;
+                bool claimed = IsChestClaimed(_chapter, tier);
+                Image mark = UIFactory.Icon(progress, ChestArtFor(tier, open: claimed), earned >= ChapterChests.StarsNeeded(story, tier) || claimed ? Color.white : new Color(0.45f, 0.45f, 0.55f, 1f), 0);
+                UIFactory.Anchor(mark.rectTransform, x - 0.07f, 0.1f, x + 0.07f, 1.6f);
+            }
+        }
+
+        private bool IsChestClaimed(int chapter, int tier) =>
+            Game.Backend.Profile?.Story?.ClaimedChapterChests?.Contains(ChapterChests.Key(chapter, tier)) ?? false;
+
+        private static Sprite ChestArtFor(int tier, bool open)
+        {
+            string[] types = { "silver", "gold", "crystal" };
+            return (open ? UiKit.Art("chest_open_" + types[tier]) : null) ?? ChestBar.ChestArt(types[tier]);
         }
 
         private void BuildPath(RectTransform body, StoryBalance story, int highest)
@@ -261,6 +284,8 @@ namespace CrushRoyale.Game.Screens
             int firstStage = (_chapter - 1) * story.StagesPerChapter + 1;
             Vector2 previous = Vector2.zero;
             RectTransform currentNode = null;
+            _nodePositions.Clear();
+            _heroMarker = null;
             for (int i = 0; i < count; i++)
             {
                 int stageId = firstStage + i;
@@ -269,6 +294,7 @@ namespace CrushRoyale.Game.Screens
                 {
                     Dots(content, previous, position, stageId <= highest);
                 }
+                _nodePositions[stageId] = position;
                 RectTransform node = StageNode(content, stageId, position, highest, stars);
                 if (stageId == highest)
                 {
@@ -277,9 +303,190 @@ namespace CrushRoyale.Game.Screens
                 previous = position;
             }
 
+            // Star chests beside stages 10, 15 and 20 of the chapter, on the other side of the path.
+            int earned = 0;
+            for (int id = firstStage; id < firstStage + story.StagesPerChapter && id - 1 < stars.Length; id++)
+            {
+                earned += Mathf.Max(0, stars[id - 1] - '0');
+            }
+            int[] besides = { story.StagesPerChapter / 2, story.StagesPerChapter * 3 / 4, story.StagesPerChapter };
+            for (int tier = 0; tier < ChapterChests.Tiers; tier++)
+            {
+                int stageId = firstStage + besides[tier] - 1;
+                if (_nodePositions.TryGetValue(stageId, out Vector2 at))
+                {
+                    ChestNode(content, tier, new Vector2(at.x > 0 ? at.x - 330f : at.x + 330f, at.y + 40f), earned, story);
+                }
+            }
+
+            // The hero walks from the stage of the last visit to the new current stage.
+            if (currentNode != null && _nodePositions.TryGetValue(highest, out Vector2 heroAt))
+            {
+                int from = Game.Save.Settings.LastMapStage;
+                _heroMarker = HeroMarker(content, heroAt);
+                if (from > 0 && from < highest && _nodePositions.ContainsKey(from))
+                {
+                    _heroMarker.anchoredPosition = _nodePositions[from] + new Vector2(0, 120f);
+                    StartCoroutine(WalkHero(from, highest));
+                }
+                if (Game.Save.Settings.LastMapStage != highest)
+                {
+                    Game.Save.Settings.LastMapStage = highest;
+                    Game.Save.SaveSettings();
+                }
+            }
+
             // Start scrolled so the current stage (or the chapter start) is visible.
             float target = currentNode != null ? currentNode.anchoredPosition.y : 0f;
             StartCoroutine(ScrollTo(scroll, target, height));
+        }
+
+        private RectTransform HeroMarker(RectTransform content, Vector2 at)
+        {
+            ProfileDto profile = Game.Backend.Profile;
+            string gender = profile?.Hero?.Gender ?? Game.Save.Settings.HeroGender ?? "female";
+            RectTransform marker = UIFactory.Rect("Hero", content);
+            marker.anchorMin = marker.anchorMax = new Vector2(0.5f, 0f);
+            marker.sizeDelta = new Vector2(130, 130);
+            marker.anchoredPosition = at + new Vector2(0, 120f);
+            Image shadow = UIFactory.Icon(marker, ProceduralSprites.Glow(64), new Color(0, 0, 0, 0.5f), 0);
+            UIFactory.Anchor(shadow.rectTransform, 0.1f, -0.25f, 0.9f, 0.05f);
+            Image ring = UIFactory.Icon(marker, ProceduralSprites.Circle(), Theme.Gold, 0);
+            UIFactory.Stretch(ring.rectTransform);
+            Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
+            if (portrait != null)
+            {
+                Image face = UIFactory.Icon(marker, portrait, Color.white, 0);
+                UIFactory.Stretch(face.rectTransform, 8, 8, 8, 8);
+            }
+            string pet = profile?.Pets?.Equipped;
+            Sprite petArt = string.IsNullOrEmpty(pet) ? null : PetsScreen.PetArt(pet);
+            if (petArt != null)
+            {
+                Image petImage = UIFactory.Icon(marker, petArt, Color.white, 0);
+                UIFactory.Anchor(petImage.rectTransform, 0.72f, -0.2f, 1.3f, 0.45f);
+                Breathe hop = petImage.gameObject.AddComponent<Breathe>();
+                hop.Amount = 0.08f;
+                hop.Speed = 4f;
+            }
+            marker.gameObject.AddComponent<Breathe>().Amount = 0.06f;
+            return marker;
+        }
+
+        /// <summary>Hops from node to node along the path, then celebrates on the new stage.</summary>
+        private System.Collections.IEnumerator WalkHero(int from, int to)
+        {
+            yield return new WaitForSeconds(0.5f);
+            for (int stage = from + 1; stage <= to && _heroMarker != null; stage++)
+            {
+                if (!_nodePositions.TryGetValue(stage, out Vector2 next))
+                {
+                    continue;
+                }
+                Vector2 start = _heroMarker.anchoredPosition;
+                Vector2 end = next + new Vector2(0, 120f);
+                Game.Audio.PlaySFX(SoundIds.PetHop, UnityEngine.Random.Range(0.95f, 1.1f));
+                for (float t = 0; t < 0.45f && _heroMarker != null; t += Time.deltaTime)
+                {
+                    float k = t / 0.45f;
+                    _heroMarker.anchoredPosition = Vector2.Lerp(start, end, k) + new Vector2(0, Mathf.Sin(k * Mathf.PI) * 70f);
+                    yield return null;
+                }
+                if (_heroMarker != null)
+                {
+                    _heroMarker.anchoredPosition = end;
+                }
+            }
+            if (_heroMarker != null)
+            {
+                Game.Audio.PlaySFX(SoundIds.Sparkle);
+                _heroMarker.gameObject.AddComponent<PopIn>();
+            }
+        }
+
+        private void ChestNode(RectTransform content, int tier, Vector2 at, int earned, StoryBalance story)
+        {
+            int need = ChapterChests.StarsNeeded(story, tier);
+            bool claimed = IsChestClaimed(_chapter, tier);
+            bool ready = !claimed && earned >= need;
+            int chapter = _chapter;
+
+            RectTransform node = UIFactory.Rect("StarChest" + tier, content);
+            node.anchorMin = node.anchorMax = new Vector2(0.5f, 0f);
+            node.sizeDelta = new Vector2(170, 170);
+            node.anchoredPosition = at;
+            Image hit = node.gameObject.AddComponent<Image>();
+            hit.color = new Color(0, 0, 0, 0);
+            Button button = node.gameObject.AddComponent<Button>();
+            button.targetGraphic = hit;
+            node.gameObject.AddComponent<ButtonFeedback>();
+
+            if (ready)
+            {
+                Image glow = UIFactory.Icon(node, ProceduralSprites.Glow(128), new Color(1f, 0.85f, 0.35f, 0.95f), 0);
+                UIFactory.Stretch(glow.rectTransform, -50, -50, -50, -50);
+                glow.gameObject.AddComponent<Pulse>();
+            }
+            Image art = UIFactory.Icon(node, ChestArtFor(tier, open: claimed), ready || claimed ? Color.white : new Color(0.5f, 0.5f, 0.6f, 1f), 0);
+            UIFactory.Stretch(art.rectTransform);
+            if (ready)
+            {
+                Breathe breathe = art.gameObject.AddComponent<Breathe>();
+                breathe.Amount = 0.06f;
+                breathe.Speed = 5f;
+            }
+
+            Image plate = UIFactory.Panel("Need", node, claimed ? Theme.Success : ready ? Theme.GoldDark : Theme.Panel);
+            UIFactory.Anchor(plate.rectTransform, 0.05f, -0.22f, 0.95f, 0.04f);
+            string label = claimed ? "✔" : ready ? Loc.T("map.chestOpen") : Mathf.Min(earned, need) + "/" + need + " ★";
+            Text text = UIFactory.Label(plate.transform, label, Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(text.rectTransform, 4, 4, 2, 2);
+            Widgets.TitleOutline(text);
+
+            button.onClick.AddListener(() =>
+            {
+                if (claimed)
+                {
+                    UI.Toast(Loc.T("map.chestClaimed"));
+                }
+                else if (!ready)
+                {
+                    UI.Toast(Loc.T("map.chestNeed", need - earned, need));
+                }
+                else
+                {
+                    _ = ClaimChestAsync(chapter, tier);
+                }
+            });
+        }
+
+        private async Task ClaimChestAsync(int chapter, int tier)
+        {
+            ChapterChestResponse response = await Api(api => api.ClaimChapterChestAsync(chapter, tier));
+            if (response == null || this == null)
+            {
+                return;
+            }
+            ProfileDto profile = Game.Backend.Profile;
+            if (profile != null)
+            {
+                profile.Story = response.Story ?? profile.Story;
+                profile.Pets = response.Pets ?? profile.Pets;
+            }
+            Game.Backend.ApplyWallet(response.Wallet);
+            Game.Backend.ApplyInventory(response.Inventory);
+            Game.Telemetry.Track("chapter_chest", ("chapter", chapter), ("tier", tier));
+
+            List<RevealItem> items = RevealOverlay.FromReward(response.Reward);
+            if (response.PetFragments > 0 && !string.IsNullOrEmpty(response.FragmentsPet))
+            {
+                items.Add(new RevealItem { Art = PetsScreen.PetArt(response.FragmentsPet), Caption = Loc.T("pets.fragmentsGain", response.PetFragments), Rare = true });
+            }
+            await RevealOverlay.PlayChestAsync(items, ChestArtFor(tier, open: false), ChestArtFor(tier, open: true), Loc.T("map.chestTitle", ChapterChests.StarsNeeded(Game.Backend.Balance.Story, tier)));
+            if (this != null)
+            {
+                Rebuild();
+            }
         }
 
         /// <summary>Waits one frame for the viewport size, then centers the path on <paramref name="y"/>.</summary>
@@ -391,29 +598,27 @@ namespace CrushRoyale.Game.Screens
                 }
             }
 
-            // The hero stands on the current stage.
-            if (current)
-            {
-                ProfileDto profile = Game.Backend.Profile;
-                string gender = profile?.Hero?.Gender ?? Game.Save.Settings.HeroGender ?? "female";
-                Sprite portrait = ArtLibrary.Character(gender == "male" ? "hero" : "heroine");
-                if (portrait != null)
-                {
-                    RectTransform marker = UIFactory.Anchor(UIFactory.Rect("Hero", node), 0.1f, 0.95f, 0.9f, 1.75f);
-                    Image ring = UIFactory.Icon(marker, ProceduralSprites.Circle(), Theme.Gold, 0);
-                    UIFactory.Stretch(ring.rectTransform);
-                    Image face = UIFactory.Icon(marker, portrait, Color.white, 0);
-                    UIFactory.Stretch(face.rectTransform, 8, 8, 8, 8);
-                    marker.gameObject.AddComponent<Breathe>().Amount = 0.06f;
-                }
-            }
-
             if (_friendsByStage.TryGetValue(stageId, out List<string> friends) && friends.Count > 0)
             {
-                Image chip = UIFactory.Panel("Friends", node, Theme.Crystal);
-                UIFactory.Anchor(chip.rectTransform, 0.72f, 0.7f, 1.35f, 1.0f);
-                Text initials = UIFactory.Label(chip.transform, string.Join("", friends.Take(3).Select(f => f.Substring(0, 1))), Theme.SmallSize - 4, Theme.Background, TextAnchor.MiddleCenter, FontStyle.Bold);
-                UIFactory.Stretch(initials.rectTransform);
+                // Up to 3 friend avatars fanned out on the left of the stage, with their names.
+                string[] portraits = { "kael", "mira", "thorin", "zara", "elian", "mark", "soren", "lyra" };
+                for (int f = 0; f < friends.Count && f < 3; f++)
+                {
+                    string friend = friends[f] ?? string.Empty;
+                    RectTransform avatar = UIFactory.Rect("Friend", node);
+                    avatar.anchorMin = avatar.anchorMax = new Vector2(-0.25f - f * 0.35f, 0.75f - f * 0.1f);
+                    avatar.sizeDelta = new Vector2(80, 80);
+                    UiKit.RoundBadge(avatar, crystal: true);
+                    Sprite face = ArtLibrary.Character(portraits[Mathf.Abs(friend.GetHashCode()) % portraits.Length]);
+                    if (face != null)
+                    {
+                        Image faceImage = UIFactory.Icon(avatar, face, Color.white, 0);
+                        UIFactory.Stretch(faceImage.rectTransform, 9, 9, 9, 9);
+                    }
+                    Text friendName = UIFactory.Label(avatar, friend.Length > 10 ? friend.Substring(0, 10) : friend, Theme.SmallSize - 10, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold);
+                    UIFactory.Anchor(friendName.rectTransform, -0.6f, -0.45f, 1.6f, 0f);
+                    Widgets.TitleOutline(friendName);
+                }
             }
             return node;
         }

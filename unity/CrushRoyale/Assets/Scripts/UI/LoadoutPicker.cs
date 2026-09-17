@@ -93,6 +93,9 @@ namespace CrushRoyale.Game.UI
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 3;
             grid.childAlignment = TextAnchor.UpperCenter;
+            grid.padding = new RectOffset(8, 8, 8, 8);
+            UIFactory.Height(gridRect, rows * 330 + (rows - 1) * 18 + 16);
+            GridFit.On(grid);
 
             foreach (PowerUpDefinition def in defs)
             {

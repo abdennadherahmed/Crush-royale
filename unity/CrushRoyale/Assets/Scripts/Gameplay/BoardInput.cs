@@ -27,6 +27,10 @@ namespace CrushRoyale.Game.Gameplay
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (Board != null && ToLocal(eventData, out Vector2 look))
+            {
+                Board.LookAt(look);
+            }
             if (!Interactable || Board == null || !ToLocal(eventData, out Vector2 local) || !Board.TryGetCell(local, out Pos cell))
             {
                 _pressed = null;
@@ -39,6 +43,10 @@ namespace CrushRoyale.Game.Gameplay
 
         public void OnDrag(PointerEventData eventData)
         {
+            if (Board != null && ToLocal(eventData, out Vector2 look))
+            {
+                Board.LookAt(look);
+            }
             if (!Interactable || TargetingMode || _pressed == null || _swiped || !ToLocal(eventData, out Vector2 local))
             {
                 return;

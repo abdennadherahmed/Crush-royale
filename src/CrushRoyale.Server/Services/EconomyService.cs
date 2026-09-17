@@ -45,6 +45,37 @@ public sealed class EconomyService
             return new PurchaseResponse { Granted = new RewardDto { Lives = 1 }, Wallet = Mappers.Wallet(ws), Lives = Mappers.Lives(ws) };
         }, ct);
 
+    public Task<VipGiftResponse> ClaimVipGiftAsync(Guid userId, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            int tier = (int)ws.State.Vip.Tier;
+            int today = TimeUtil.DayIndex(ws.Now);
+            if (!VipGifts.HasGift(tier))
+            {
+                throw new ApiException(ErrorCode.PermissionDenied, "VIP gifts start at VIP " + VipGifts.FromTier + ".");
+            }
+            if (!VipGifts.CanClaim(tier, ws.State.VipGiftDay, today))
+            {
+                throw new ApiException(ErrorCode.AlreadyClaimed, "Today's VIP gift was already claimed.");
+            }
+            VipGift gift = VipGifts.For(tier, today);
+            ws.State.VipGiftDay = today;
+            string key = "vip-gift:" + today;
+            ws.GrantReward(gift.Reward, TransactionReason.VipGift, key, key);
+            ws.Pets.Get(gift.FragmentsPet).Fragments += gift.PetFragments;
+            return new VipGiftResponse
+            {
+                Reward = Mappers.Reward(gift.Reward),
+                PetFragments = gift.PetFragments,
+                FragmentsPet = gift.FragmentsPet.ToString(),
+                Wallet = Mappers.Wallet(ws),
+                Inventory = Mappers.Inventory(ws),
+                Pets = Mappers.Pets(ws),
+                Lives = Mappers.Lives(ws)
+            };
+        }, ct);
+
     public Task<ShopResponse> GetShopAsync(Guid userId, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx => BuildShop(ctx.Player, CreateShop(ctx.Player)), ct);
 

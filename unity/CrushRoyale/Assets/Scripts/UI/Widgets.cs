@@ -221,6 +221,47 @@ namespace CrushRoyale.Game.UI
         }
     }
 
+    /// <summary>
+    /// Keeps a fixed column count inside the real width: the canvas is narrower than 1080 units on tall phones, so
+    /// fixed cell widths overflowed on the right. Cell width follows the rect; height keeps its value.
+    /// </summary>
+    [RequireComponent(typeof(GridLayoutGroup))]
+    public sealed class GridFit : MonoBehaviour
+    {
+        private GridLayoutGroup _grid;
+
+        public static GridFit On(GridLayoutGroup grid)
+        {
+            GridFit fit = grid.GetComponent<GridFit>() ?? grid.gameObject.AddComponent<GridFit>();
+            fit._grid = grid;
+            fit.Refresh();
+            return fit;
+        }
+
+        private void OnEnable() => Refresh();
+
+        private void OnRectTransformDimensionsChange() => Refresh();
+
+        private void Refresh()
+        {
+            if (_grid == null)
+            {
+                _grid = GetComponent<GridLayoutGroup>();
+            }
+            float width = ((RectTransform)transform).rect.width;
+            int columns = Mathf.Max(1, _grid.constraintCount);
+            if (width <= 1f || _grid.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
+            {
+                return;
+            }
+            float cell = (width - _grid.padding.left - _grid.padding.right - _grid.spacing.x * (columns - 1)) / columns;
+            if (Mathf.Abs(cell - _grid.cellSize.x) > 0.5f)
+            {
+                _grid.cellSize = new Vector2(Mathf.Max(10f, cell), _grid.cellSize.y);
+            }
+        }
+    }
+
     /// <summary>Springy scale-in when a popup, card or reward appears.</summary>
     public sealed class PopIn : MonoBehaviour
     {

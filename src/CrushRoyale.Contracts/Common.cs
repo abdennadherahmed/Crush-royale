@@ -21,10 +21,12 @@ namespace CrushRoyale.Contracts
         public const string StageContinue = Prefix + "/story/matches/{matchId}/continue";
         public const string StageComplete = Prefix + "/story/matches/{matchId}/complete";
         public const string StoryChoice = Prefix + "/story/choices";
+        public const string ChapterChest = Prefix + "/story/chapter-chest";
         public const string StoryEventSeen = Prefix + "/story/events/{eventId}/seen";
 
         public const string LivesBuy = Prefix + "/stamina/buy";
         public const string LivesVipClaim = Prefix + "/stamina/vip-life";
+        public const string VipGift = Prefix + "/vip/gift";
         public const string Shop = Prefix + "/shop";
         public const string ShopRefresh = Prefix + "/shop/refresh";
         public const string ShopPurchase = Prefix + "/shop/purchase";

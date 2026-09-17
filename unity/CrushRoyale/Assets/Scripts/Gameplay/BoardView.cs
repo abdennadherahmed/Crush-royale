@@ -31,8 +31,21 @@ namespace CrushRoyale.Game.Gameplay
         private Image _hintB;
         private TimingBalance _timing;
         private BoardFx _fx;
+        private Image _frame;
 
         public RectTransform Rect { get; private set; }
+
+        public BoardFx Fx => _fx;
+
+        /// <summary>The pet starts its free move (board-local positions of the two swapped gems).</summary>
+        public event Action<Vector2, Vector2> PetMoveStarted;
+
+        /// <summary>Last finger position on the board (gems look at it for a moment).</summary>
+        public void LookAt(Vector2 local)
+        {
+            PieceView.LookTarget = local;
+            PieceView.LookUntil = Time.unscaledTime + 2.5f;
+        }
 
         public int Width { get; private set; }
 
@@ -54,6 +67,7 @@ namespace CrushRoyale.Game.Gameplay
             view.IsGhost = ghost;
 
             Image frame = rect.gameObject.AddComponent<Image>();
+            view._frame = frame;
             frame.sprite = ProceduralSprites.RoundedRect(28);
             frame.type = Image.Type.Sliced;
             frame.color = ghost ? new Color(0.1f, 0.08f, 0.2f, 0.75f) : new Color(0.08f, 0.06f, 0.16f, 0.92f);
@@ -150,7 +164,7 @@ namespace CrushRoyale.Game.Gameplay
                 alive.Add(piece.Id);
                 if (!_pieces.TryGetValue(piece.Id, out PieceView view))
                 {
-                    view = PieceView.Create(_piecesLayer, piece, Cell, ColorBlind);
+                    view = PieceView.Create(_piecesLayer, piece, Cell, ColorBlind, eyes: !IsGhost);
                     _pieces[piece.Id] = view;
                 }
                 else if (!view.Piece.Equals(piece))
@@ -183,6 +197,26 @@ namespace CrushRoyale.Game.Gameplay
                 {
                     _iceLayers[y * Width + x] = board.IceAt(new Pos(x, y));
                     RefreshIce(x, y);
+                }
+            }
+        }
+
+        /// <summary>Colors the frame and the checkerboard cells with the equipped board skin.</summary>
+        public void ApplySkin(string boardSkin)
+        {
+            (Color frame, Color cellA, Color cellB) = CosmeticLook.Board(boardSkin);
+            if (_frame != null && !IsGhost)
+            {
+                _frame.color = frame;
+            }
+            for (int i = 0; i < _cellsLayer.childCount; i++)
+            {
+                Image cell = _cellsLayer.GetChild(i).GetComponent<Image>();
+                if (cell != null && Width > 0)
+                {
+                    int x = i % Width;
+                    int y = i / Width;
+                    cell.color = (x + y) % 2 == 0 ? cellA : cellB;
                 }
             }
         }
@@ -260,6 +294,8 @@ namespace CrushRoyale.Game.Gameplay
                 PieceView pb = FindAt(action.To);
                 if (pa != null && pb != null)
                 {
+                    pa.Surprise();
+                    pb.Surprise();
                     Vector2 a = CellPosition(action.From);
                     Vector2 b = CellPosition(action.To);
                     yield return CoroutineTask.Tween(_timing.SwapAnimationMs / 1000f / speed, k =>
@@ -314,6 +350,7 @@ namespace CrushRoyale.Game.Gameplay
             {
                 Move petMove = outcome.PetMove.Value;
                 _fx?.PetAssist(CellPosition(petMove.From), CellPosition(petMove.To));
+                PetMoveStarted?.Invoke(CellPosition(petMove.From), CellPosition(petMove.To));
                 PieceView pa = FindAt(petMove.From);
                 PieceView pb = FindAt(petMove.To);
                 if (pa != null && pb != null)
@@ -395,6 +432,10 @@ namespace CrushRoyale.Game.Gameplay
                 RefreshIce(ice.X, ice.Y);
             }
 
+            foreach (PieceView v in vanishing)
+            {
+                v?.Panic();
+            }
             yield return CoroutineTask.Tween(clearTime, k =>
             {
                 float s = 1f - Ease.InQuad(k);
