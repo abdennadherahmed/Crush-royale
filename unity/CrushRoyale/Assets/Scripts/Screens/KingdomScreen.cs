@@ -25,10 +25,10 @@ namespace CrushRoyale.Game.Screens
         private static readonly Rect[][] Regions =
         {
             new[] { new Rect(0.4f, 0.2f, 0.28f, 0.47f), new Rect(0f, 0.22f, 0.42f, 0.43f), new Rect(0.08f, 0.68f, 0.34f, 0.32f), new Rect(0.12f, 0f, 0.74f, 0.24f), new Rect(0.68f, 0.4f, 0.19f, 0.6f), new Rect(0.85f, 0.03f, 0.15f, 0.69f) },
-            new[] { new Rect(0.05f, 0f, 0.25f, 0.6f), new Rect(0.2f, 0.3f, 0.6f, 0.25f), new Rect(0.2f, 0.5f, 0.6f, 0.12f), new Rect(0.7f, 0.25f, 0.28f, 0.6f), new Rect(0.35f, 0.55f, 0.3f, 0.4f), new Rect(0f, 0.6f, 0.3f, 0.4f) },
-            new[] { new Rect(0f, 0f, 1f, 0.22f), new Rect(0f, 0.18f, 0.35f, 0.35f), new Rect(0.38f, 0.3f, 0.24f, 0.55f), new Rect(0.35f, 0f, 0.3f, 0.3f), new Rect(0.65f, 0.25f, 0.35f, 0.7f), new Rect(0f, 0.5f, 0.35f, 0.5f) },
-            new[] { new Rect(0.3f, 0f, 0.4f, 0.25f), new Rect(0.05f, 0.1f, 0.3f, 0.5f), new Rect(0.65f, 0.1f, 0.3f, 0.5f), new Rect(0.6f, 0.55f, 0.4f, 0.45f), new Rect(0.4f, 0.3f, 0.2f, 0.3f), new Rect(0.35f, 0.55f, 0.3f, 0.45f) },
-            new[] { new Rect(0f, 0.1f, 0.25f, 0.8f), new Rect(0.25f, 0.55f, 0.5f, 0.45f), new Rect(0.3f, 0f, 0.4f, 0.3f), new Rect(0.35f, 0.75f, 0.3f, 0.25f), new Rect(0.38f, 0.2f, 0.24f, 0.45f), new Rect(0.75f, 0.1f, 0.25f, 0.8f) }
+            new[] { new Rect(0.33f, 0.03f, 0.47f, 0.47f), new Rect(0.05f, 0.3f, 0.5f, 0.3f), new Rect(0.55f, 0.45f, 0.45f, 0.3f), new Rect(0.84f, 0.58f, 0.16f, 0.42f), new Rect(0.48f, 0.45f, 0.16f, 0.46f), new Rect(0f, 0.2f, 0.28f, 0.48f) },
+            new[] { new Rect(0.15f, 0f, 0.7f, 0.28f), new Rect(0f, 0.12f, 0.37f, 0.46f), new Rect(0.41f, 0.44f, 0.17f, 0.38f), new Rect(0.55f, 0.14f, 0.31f, 0.31f), new Rect(0.72f, 0.35f, 0.28f, 0.65f), new Rect(0.02f, 0.56f, 0.27f, 0.37f) },
+            new[] { new Rect(0.41f, 0.1f, 0.21f, 0.25f), new Rect(0.34f, 0.05f, 0.12f, 0.6f), new Rect(0.54f, 0.33f, 0.12f, 0.24f), new Rect(0.55f, 0.59f, 0.1f, 0.19f), new Rect(0.45f, 0.43f, 0.1f, 0.19f), new Rect(0.44f, 0.7f, 0.12f, 0.3f) },
+            new[] { new Rect(0f, 0.12f, 0.32f, 0.88f), new Rect(0.68f, 0.12f, 0.32f, 0.88f), new Rect(0.22f, 0f, 0.56f, 0.32f), new Rect(0.4f, 0.8f, 0.2f, 0.2f), new Rect(0.3f, 0.25f, 0.4f, 0.28f), new Rect(0.44f, 0.52f, 0.12f, 0.16f) }
         };
 
         private static readonly string[] TaskIcons = { "item_gift", "item_pouch", "item_hourglass", "item_stars", "item_medal", "item_crown" };
@@ -145,11 +145,17 @@ namespace CrushRoyale.Game.Screens
             Sprite baseSprite = ruined ?? fallback;
             fitter.aspectRatio = baseSprite != null ? baseSprite.rect.width / baseSprite.rect.height : 16f / 9f;
 
+            bool zoneDone = zone.Tasks.TrueForAll(t => built.Contains(t.Id));
+            if (zoneDone && restored != null)
+            {
+                // Finished zone: the whole painting comes back to life (sky, background, light).
+                baseSprite = restored;
+            }
             Image baseImage = art.gameObject.AddComponent<Image>();
             baseImage.sprite = baseSprite;
             baseImage.raycastTarget = false;
             // Without the ruined painting, the restored one (or the kingdom) is shown dark and grey.
-            baseImage.color = ruined != null ? Color.white : new Color(0.32f, 0.28f, 0.36f, 1f);
+            baseImage.color = ruined != null || zoneDone ? Color.white : new Color(0.32f, 0.28f, 0.36f, 1f);
             Sprite reveal = restored ?? fallback;
 
             for (int i = 0; i < zone.Tasks.Count; i++)
@@ -161,7 +167,8 @@ namespace CrushRoyale.Game.Screens
                 }
                 Rect r = Regions[zone.Number - 1][i];
                 RectTransform window = UIFactory.Anchor(UIFactory.Rect("Built" + i, art), r.xMin, r.yMin, r.xMax, r.yMax);
-                window.gameObject.AddComponent<RectMask2D>();
+                // Feather about a fifth of the smaller side (the scene is roughly 1000 x 560 units).
+                Feather(window.gameObject.AddComponent<RectMask2D>(), Mathf.RoundToInt(Mathf.Min(48f, Mathf.Min(r.width * 1000f, r.height * 560f) * 0.2f)));
                 RectTransform piece = UIFactory.Rect("Restored", window);
                 piece.anchorMin = new Vector2(-r.xMin / r.width, -r.yMin / r.height);
                 piece.anchorMax = new Vector2((1f - r.xMin) / r.width, (1f - r.yMin) / r.height);
@@ -182,6 +189,19 @@ namespace CrushRoyale.Game.Screens
                 mote.rectTransform.anchorMin = mote.rectTransform.anchorMax = new Vector2(UnityEngine.Random.value, UnityEngine.Random.value);
                 mote.gameObject.AddComponent<Pulse>().Speed = 1f + UnityEngine.Random.value * 2f;
                 mote.raycastTarget = false;
+            }
+        }
+
+        /// <summary>
+        /// Soft mask edges so a repaired part blends into the ruins instead of showing a hard rectangle.
+        /// RectMask2D.softness exists since Unity 2020; set by reflection so older API stubs still compile.
+        /// </summary>
+        private static void Feather(RectMask2D mask, int pixels)
+        {
+            System.Reflection.PropertyInfo softness = typeof(RectMask2D).GetProperty("softness");
+            if (softness != null && softness.CanWrite)
+            {
+                softness.SetValue(mask, new Vector2Int(pixels, pixels));
             }
         }
 
