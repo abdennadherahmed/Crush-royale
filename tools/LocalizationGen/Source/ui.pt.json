@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} PV",
   "guild.bossReset": "Novo chefe em {0} d {1} h",
   "guild.bossDefeated": "Chefe derrotado! Ótimo trabalho em equipe.",
-  "guild.attack": "Atacar (restam {0})",
+  "guild.attack": "Atacar ({0} hoje)",
   "guild.damageBoard": "Ranking de dano",
   "guild.chatPlaceholder": "Mensagem…",
   "guild.send": "Enviar",
@@ -947,5 +947,17 @@
   "update.failedRequired": "Não foi possível instalar a atualização. Verifique sua conexão e tente de novo.",
   "hud.fusion": "FUSÃO!",
   "friends.invite": "Convidar um amigo",
-  "leaderboard.playNow": "Jogar PvP agora"
+  "leaderboard.playNow": "Jogar PvP agora",
+  "guild.bossDaily": "3 ataques por dia · o chefe mantém os PV a semana toda",
+  "mechanic.new": "NOVO!",
+  "mechanic.ok": "Entendi!",
+  "mechanic.bomb.title": "Bombas-relógio",
+  "mechanic.bomb.body": "O número são os movimentos restantes. Combine a gema-bomba antes de 0 ou você perde a fase!",
+  "mechanic.blight.title": "Cristal corrompido",
+  "mechanic.blight.body": "Ele se espalha para uma gema vizinha a cada jogada em que você não quebra nenhum. Combine ao lado para destruí-lo!",
+  "mechanic.egg.title": "Ovos de dragão",
+  "mechanic.egg.body": "Faça duas combinações ao lado de um ovo: ele choca e deixa uma gema bônus no lugar!",
+  "hud.defused": "DESARMADA!",
+  "hud.hatched": "CHOCOU!",
+  "hud.boom": "BUM!"
 }

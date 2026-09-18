@@ -9,6 +9,7 @@ Outputs (transparent PNGs):
   line_h.png, line_v.png      double-arrow energy rods laid over a line bonus
   bomb.png                    spiked gold ring laid around an area bomb
   chest_<type>.png, chest_open_<type>.png   wood, silver, gold, crystal
+  blight.png, egg.png, egg_cracked.png, bomb_badge.png   stage mechanics of stages 201, 301 and 101
 """
 import math
 import os
@@ -431,6 +432,119 @@ def render_chests():
             render(name)
 
 
+# ----------------------------------------------------------------------------- stage mechanics (101 / 201 / 301)
+
+def crystal_spike(name, length, radius, location, tilt, spin, material):
+    """Hexagonal crystal: prism with a pointed tip, tilted outward from the cluster centre."""
+    bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=radius, radius2=radius * 0.85, depth=length, location=(0, 0, 0))
+    body = bpy.context.active_object
+    bpy.ops.mesh.primitive_cone_add(vertices=6, radius1=radius * 0.85, radius2=0, depth=length * 0.35, location=(0, 0, length / 2 + length * 0.175))
+    tip = bpy.context.active_object
+    body.select_set(True)
+    tip.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.join()
+    body.name = name
+    body.data.materials.append(material)
+    body.rotation_euler = (tilt, 0, spin)
+    body.location = location
+    return body
+
+
+def render_mechanics():
+    studio(256, 2.4)
+    # Blight: dark corrupted crystal cluster with magenta glow on a rocky base.
+    clear_meshes()
+    shard = principled("blight", (0.16, 0.0, 0.22), metallic=0.3, roughness=0.12, coat=1.0, emission=(0.7, 0.0, 0.85), strength=0.9)
+    base = noisy("blightbase", (0.01, 0.0, 0.02), (0.09, 0.03, 0.12), scale=6.0, roughness=0.85, bump=1.0)
+    # Dark rock the crystals grow from (flattened, displaced so it reads as stone, not glass).
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=4, radius=0.75, location=(0, 0, -0.55))
+    rock_obj = bpy.context.active_object
+    rock_obj.scale = (1.1, 0.95, 0.4)
+    rock_tex = bpy.data.textures.new("blightrock", "CLOUDS")
+    rock_tex.noise_scale = 0.3
+    rock_disp = rock_obj.modifiers.new("disp", "DISPLACE")
+    rock_disp.texture = rock_tex
+    rock_disp.strength = 0.18
+    rock_obj.data.materials.append(principled("blightrock", (0.035, 0.02, 0.05), roughness=0.9))
+    bpy.ops.object.shade_smooth()
+    spikes = [(1.1, 0.2, (0, 0, -0.1), 0.0, 0.0), (0.8, 0.16, (-0.35, 0.1, -0.2), 0.45, 1.2), (0.85, 0.16, (0.38, -0.05, -0.2), 0.5, -1.9),
+              (0.6, 0.13, (0.1, 0.38, -0.25), 0.55, 3.0), (0.55, 0.12, (-0.1, -0.4, -0.25), 0.6, 0.2), (0.45, 0.1, (0.55, 0.3, -0.3), 0.8, -2.6),
+              (0.45, 0.1, (-0.6, -0.25, -0.3), 0.8, 0.9)]
+    for i, (length, radius, loc, tilt, spin) in enumerate(spikes):
+        crystal_spike("spike%d" % i, length, radius, (loc[0], loc[1], loc[2] + length / 2), tilt, spin, shard)
+    glow = bpy.data.lights.new("glowlight_blight", "POINT")
+    glow.energy = 40
+    glow.color = (0.9, 0.2, 1.0)
+    gobj = bpy.data.objects.new("glowlight_blight", glow)
+    gobj.location = (0, -0.6, 0.6)
+    bpy.context.scene.collection.objects.link(gobj)
+    render("blight")
+
+    # Dragon egg: scaled shell with voronoi scales, gold speckles; cracked version glows from inside.
+    for cracked in (False, True):
+        clear_meshes()
+        mat = bpy.data.materials.new("eggshell")
+        mat.use_nodes = True
+        nt = mat.node_tree
+        b = bsdf_of(mat)
+        vor = nt.nodes.new("ShaderNodeTexVoronoi")
+        vor.inputs["Scale"].default_value = 9.0
+        ramp = nt.nodes.new("ShaderNodeValToRGB")
+        ramp.color_ramp.elements[0].color = (0.02, 0.35, 0.3, 1)
+        ramp.color_ramp.elements[1].color = (0.35, 0.9, 0.7, 1)
+        nt.links.new(vor.outputs["Distance"], ramp.inputs["Fac"])
+        nt.links.new(ramp.outputs["Color"], b.inputs["Base Color"])
+        bump = nt.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = 0.6
+        nt.links.new(vor.outputs["Distance"], bump.inputs["Height"])
+        nt.links.new(bump.outputs["Normal"], b.inputs["Normal"])
+        set_in(b, "Roughness", 0.3)
+        set_in(b, "Coat Weight", 0.6)
+        bpy.ops.mesh.primitive_uv_sphere_add(segments=64, ring_count=32, radius=0.72, location=(0, 0, 0))
+        egg = bpy.context.active_object
+        egg.scale = (0.86, 0.86, 1.15)
+        for v in egg.data.vertices:
+            if v.co.z > 0:
+                v.co.x *= 1 - 0.18 * v.co.z / 0.72
+                v.co.y *= 1 - 0.18 * v.co.z / 0.72
+        egg.data.materials.append(mat)
+        bpy.ops.object.shade_smooth()
+        # Lay the egg's long axis along the picture's vertical (the camera looks down).
+        pivot = bpy.data.objects.new("eggpivot", None)
+        bpy.context.scene.collection.objects.link(pivot)
+        egg.parent = pivot
+        gold = principled("eggband", (1.0, 0.72, 0.28), metallic=1.0, roughness=0.22)
+        bpy.ops.mesh.primitive_torus_add(major_radius=0.64, minor_radius=0.04, location=(0, 0, -0.05))
+        band = bpy.context.active_object
+        band.data.materials.append(gold)
+        band.parent = pivot
+        bpy.ops.object.shade_smooth()
+        if cracked:
+            lava = principled("crack", (1.0, 0.6, 0.1), emission=(1.0, 0.55, 0.1), strength=8.0)
+            # Glowing cracks on the side facing the camera (the egg's -Y side before the pivot tilt).
+            for size, loc, rot in [((0.6, 0.05, 0.04), (-0.05, -0.6, 0.25), 20), ((0.4, 0.05, 0.04), (0.2, -0.58, 0.0), -40),
+                                   ((0.35, 0.05, 0.04), (-0.22, -0.55, 0.5), 70), ((0.3, 0.05, 0.04), (0.08, -0.6, -0.25), -15)]:
+                crack = box("crack", size, loc, lava, bevel=0.0, rotation=(0, math.radians(rot), 0))
+                crack.parent = pivot
+        pivot.rotation_euler = (math.radians(-72), 0, math.radians(12))
+        render("egg_cracked" if cracked else "egg")
+
+    # Countdown bomb badge: black iron bomb, gold ring, lit fuse.
+    clear_meshes()
+    iron = principled("bombiron", (0.03, 0.03, 0.05), metallic=0.6, roughness=0.25, coat=1.0)
+    gold = principled("bombgold", (1.0, 0.72, 0.28), metallic=1.0, roughness=0.2)
+    spark = principled("spark", (1.0, 0.8, 0.3), emission=(1.0, 0.6, 0.1), strength=18.0)
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.75, location=(0, 0, -0.1))
+    bpy.context.active_object.data.materials.append(iron)
+    bpy.ops.object.shade_smooth()
+    cylinder("cap", 0.2, 0.22, (0.35, 0.35, 0.55), gold, rotation=(math.radians(-30), math.radians(30), 0))
+    cylinder("fuse", 0.045, 0.45, (0.5, 0.5, 0.8), principled("rope", (0.55, 0.4, 0.2), roughness=0.9), rotation=(math.radians(-40), math.radians(40), 0))
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=0.12, location=(0.64, 0.64, 1.0))
+    bpy.context.active_object.data.materials.append(spark)
+    render("bomb_badge")
+
+
 bpy.ops.wm.read_factory_settings(use_empty=True)
 if wanted("stone"):
     render_stones()
@@ -440,3 +554,5 @@ if wanted("line") or wanted("bomb"):
     render_bonuses()
 if wanted("chest"):
     render_chests()
+if wanted("blight") or wanted("egg") or wanted("bomb_badge"):
+    render_mechanics()

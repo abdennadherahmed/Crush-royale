@@ -613,7 +613,7 @@
   "guild.bossHp": "生命值 {0} / {1}",
   "guild.bossReset": "{0} 天 {1} 小时后刷新首领",
   "guild.bossDefeated": "首领已击败！团队配合出色。",
-  "guild.attack": "攻击（剩余 {0} 次）",
+  "guild.attack": "攻击（今日剩余 {0} 次）",
   "guild.damageBoard": "伤害排行",
   "guild.chatPlaceholder": "输入消息…",
   "guild.send": "发送",
@@ -947,5 +947,17 @@
   "update.failedRequired": "无法安装更新。请检查网络后重试。",
   "hud.fusion": "融合！",
   "friends.invite": "邀请好友",
-  "leaderboard.playNow": "立即 PvP"
+  "leaderboard.playNow": "立即 PvP",
+  "guild.bossDaily": "每天可攻击 3 次 · 首领生命值整周保留",
+  "mechanic.new": "新机制！",
+  "mechanic.ok": "明白了！",
+  "mechanic.bomb.title": "定时炸弹",
+  "mechanic.bomb.body": "数字是剩余步数。在归零前消除炸弹宝石，否则关卡失败！",
+  "mechanic.blight.title": "腐化水晶",
+  "mechanic.blight.body": "每回合若没有摧毁它，就会感染相邻宝石。在旁边消除来摧毁它！",
+  "mechanic.egg.title": "龙蛋",
+  "mechanic.egg.body": "在龙蛋旁消除两次：它会孵化并在原地留下奖励宝石！",
+  "hud.defused": "已拆除！",
+  "hud.hatched": "孵化！",
+  "hud.boom": "轰！"
 }

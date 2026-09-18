@@ -218,7 +218,8 @@ namespace CrushRoyale.Core.Config
 
         public int BossHpGrowthPermille { get; set; } = 1350;
 
-        public int BossAttacksPerMemberPerWeek { get; set; } = 3;
+        /// <summary>Boss attacks per member and per UTC day (the boss keeps its HP all week).</summary>
+        public int BossAttacksPerMemberPerDay { get; set; } = 3;
 
         public int BossBaseRewardCoins { get; set; } = 500;
 

@@ -198,6 +198,15 @@ namespace CrushRoyale.Game.Gameplay
 
         private void OnStep(ResolutionStep step)
         {
+            if (step.BombsDefused > 0)
+            {
+                Announce(Loc.T("hud.defused"), Theme.Success, 1.1f, true);
+            }
+            if (step.EggsHatched > 0)
+            {
+                Announce(Loc.T("hud.hatched"), Theme.Gold, 1.1f, true);
+                _game.Haptics.Medium();
+            }
             if (step.CombosTriggered > 0)
             {
                 // Two bonuses fused: the biggest single moment of a match.
@@ -222,6 +231,18 @@ namespace CrushRoyale.Game.Gameplay
         private void OnActionPresented(ActionOutcome outcome)
         {
             GameSession s = _controller.Session;
+            if (outcome.BombExploded.HasValue)
+            {
+                Announce(Loc.T("hud.boom"), new Color(1f, 0.35f, 0.2f), 1.5f, true);
+                _board.Fx?.Shake(0.8f, 44f);
+                _game.Audio.PlaySFX(SoundIds.Explosion);
+                _game.Haptics.Heavy();
+            }
+            else if (outcome.BlightSpread.HasValue)
+            {
+                _board.Fx?.Shake(0.15f, 8f);
+                _game.Haptics.Light();
+            }
             if (outcome.RedSurgeActivated)
             {
                 Voice(SoundIds.VoiceRedSurge);

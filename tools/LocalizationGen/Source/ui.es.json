@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} PS",
   "guild.bossReset": "Nuevo jefe en {0} d {1} h",
   "guild.bossDefeated": "¡Jefe derrotado! Gran trabajo en equipo.",
-  "guild.attack": "Atacar (quedan {0})",
+  "guild.attack": "Atacar ({0} hoy)",
   "guild.damageBoard": "Clasificación de daño",
   "guild.chatPlaceholder": "Mensaje…",
   "guild.send": "Enviar",
@@ -947,5 +947,17 @@
   "update.failedRequired": "No se pudo instalar la actualización. Revisa tu conexión e inténtalo de nuevo.",
   "hud.fusion": "¡FUSIÓN!",
   "friends.invite": "Invitar a un amigo",
-  "leaderboard.playNow": "Jugar PvP ahora"
+  "leaderboard.playNow": "Jugar PvP ahora",
+  "guild.bossDaily": "3 ataques al día · el jefe conserva sus PV toda la semana",
+  "mechanic.new": "¡NUEVO!",
+  "mechanic.ok": "¡Entendido!",
+  "mechanic.bomb.title": "Bombas de relojería",
+  "mechanic.bomb.body": "El número son los movimientos restantes. ¡Combina la gema de la bomba antes de 0 o perderás el nivel!",
+  "mechanic.blight.title": "Cristal corrupto",
+  "mechanic.blight.body": "Se extiende a una gema vecina en cada movimiento en que no rompas ninguno. ¡Combina a su lado para destruirlo!",
+  "mechanic.egg.title": "Huevos de dragón",
+  "mechanic.egg.body": "Haz dos combinaciones junto a un huevo: ¡eclosiona y deja una gema bonus en su lugar!",
+  "hud.defused": "¡DESACTIVADA!",
+  "hud.hatched": "¡ECLOSIÓN!",
+  "hud.boom": "¡BUM!"
 }

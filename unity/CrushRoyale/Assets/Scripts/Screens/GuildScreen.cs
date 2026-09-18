@@ -722,6 +722,8 @@ namespace CrushRoyale.Game.Screens
             {
                 Button attack = UIFactory.Button(scene, Loc.T("guild.attack", attacks), () => _ = AttackAsync(), attacks > 0 ? Theme.Danger : Theme.PanelLight, Theme.BodySize);
                 UIFactory.Anchor(attack.GetComponent<RectTransform>(), 0.15f, 0.02f, 0.85f, 0.135f);
+                Text daily = Outlined(scene, Loc.T("guild.bossDaily"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleCenter);
+                UIFactory.Anchor(daily.rectTransform, 0.04f, 0.14f, 0.96f, 0.19f);
                 attack.interactable = attacks > 0;
                 if (attacks > 0)
                 {

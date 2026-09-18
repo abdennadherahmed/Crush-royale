@@ -82,6 +82,11 @@ namespace CrushRoyale.Core.Social
 
         public int BossAttacksThisWeek { get; set; }
 
+        /// <summary>UTC day of <see cref="BossAttacksToday"/>: attacks come back every day, the boss HP does not.</summary>
+        public int BossDay { get; set; } = -1;
+
+        public int BossAttacksToday { get; set; }
+
         public long BossDamageThisWeek { get; set; }
     }
 
@@ -577,7 +582,13 @@ namespace CrushRoyale.Core.Social
             return guild.Boss;
         }
 
-        /// <summary>Records one attack (a guild-boss match score, already validated by replay). 3 attacks per member per week.</summary>
+        /// <summary>Attacks a member can still make today (3 per UTC day).</summary>
+        public int BossAttacksLeftToday(GuildMember member) =>
+            member == null ? 0 : _balance.Guild.BossAttacksPerMemberPerDay - (member.BossDay == Today ? member.BossAttacksToday : 0);
+
+        private int Today => TimeUtil.DayIndex(_clock.UtcNow);
+
+        /// <summary>Records one attack (a guild-boss match score, already validated by replay). 3 attacks per member per day.</summary>
         /// <summary>Applies an attack. <c>attackStartedAtUnixMs</c> (0 = unknown): an attack started before the boss fell is never lost.</summary>
         public OperationResult<BossAttackResult> SubmitBossDamage(Guild guild, string playerId, long score, int week, long attackStartedAtUnixMs = 0)
         {
@@ -598,6 +609,11 @@ namespace CrushRoyale.Core.Social
                 member.BossAttacksThisWeek = 0;
                 member.BossDamageThisWeek = 0;
             }
+            if (member.BossDay != Today)
+            {
+                member.BossDay = Today;
+                member.BossAttacksToday = 0;
+            }
             if (boss.Defeated)
             {
                 if (attackStartedAtUnixMs <= 0 || attackStartedAtUnixMs > boss.DefeatedAtUnixMs)
@@ -609,11 +625,11 @@ namespace CrushRoyale.Core.Social
                 return OperationResult<BossAttackResult>.Ok(new BossAttackResult
                 {
                     DamageApplied = late,
-                    AttacksLeft = _balance.Guild.BossAttacksPerMemberPerWeek - member.BossAttacksThisWeek,
+                    AttacksLeft = BossAttacksLeftToday(member),
                     DefeatedDuringAttack = true
                 });
             }
-            if (member.BossAttacksThisWeek >= _balance.Guild.BossAttacksPerMemberPerWeek)
+            if (member.BossAttacksToday >= _balance.Guild.BossAttacksPerMemberPerDay)
             {
                 return OperationResult<BossAttackResult>.Fail(ErrorCode.LimitReached);
             }
@@ -621,12 +637,13 @@ namespace CrushRoyale.Core.Social
             long damage = score * (1000 + GetTechValue(guild, GuildTech.BossDamage)) / 1000;
             boss.Damage += damage;
             member.BossAttacksThisWeek++;
+            member.BossAttacksToday++;
             member.BossDamageThisWeek += damage;
 
             var result = new BossAttackResult
             {
                 DamageApplied = damage,
-                AttacksLeft = _balance.Guild.BossAttacksPerMemberPerWeek - member.BossAttacksThisWeek
+                AttacksLeft = BossAttacksLeftToday(member)
             };
             if (boss.Damage >= boss.MaxHp)
             {

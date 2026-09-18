@@ -613,7 +613,7 @@
   "guild.bossHp": "HP {0} / {1}",
   "guild.bossReset": "새 보스까지 {0}일 {1}시간",
   "guild.bossDefeated": "보스 격파! 멋진 팀워크입니다.",
-  "guild.attack": "공격 ({0}회 남음)",
+  "guild.attack": "공격 (오늘 {0}회 남음)",
   "guild.damageBoard": "피해량 랭킹",
   "guild.chatPlaceholder": "메시지…",
   "guild.send": "보내기",
@@ -947,5 +947,17 @@
   "update.failedRequired": "업데이트를 설치하지 못했습니다. 연결을 확인한 뒤 다시 시도하세요.",
   "hud.fusion": "퓨전!",
   "friends.invite": "친구 초대",
-  "leaderboard.playNow": "지금 PvP 하기"
+  "leaderboard.playNow": "지금 PvP 하기",
+  "guild.bossDaily": "하루 3회 공격 · 보스 HP는 일주일 동안 유지",
+  "mechanic.new": "NEW!",
+  "mechanic.ok": "알겠어요!",
+  "mechanic.bomb.title": "시한폭탄",
+  "mechanic.bomb.body": "숫자는 남은 이동 횟수예요. 0이 되기 전에 폭탄 보석을 맞추지 않으면 스테이지 실패!",
+  "mechanic.blight.title": "타락한 수정",
+  "mechanic.blight.body": "하나도 부수지 못한 턴마다 옆 보석으로 번져요. 바로 옆에서 맞춰 파괴하세요!",
+  "mechanic.egg.title": "용의 알",
+  "mechanic.egg.body": "알 옆에서 두 번 맞추면 부화해서 그 자리에 보너스 보석이 생겨요!",
+  "hud.defused": "해체!",
+  "hud.hatched": "부화!",
+  "hud.boom": "쾅!"
 }

@@ -230,6 +230,15 @@ namespace CrushRoyale.Game.Screens
                     _controller.Resume();
                 }
 
+                // First stage with a new mechanic (101 bombs, 201 blight, 301 eggs): a one-screen tutorial.
+                _controller.Pause();
+                await MechanicTutorial.ShowNewAsync(Game, stage);
+                if (this == null)
+                {
+                    return;
+                }
+                _controller.Resume();
+
                 await ShowGoalBannerAsync();
                 if (this == null)
                 {

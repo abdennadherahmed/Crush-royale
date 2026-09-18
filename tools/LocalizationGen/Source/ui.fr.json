@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} PV",
   "guild.bossReset": "Nouveau boss dans {0} j {1} h",
   "guild.bossDefeated": "Boss vaincu ! Beau travail d'équipe.",
-  "guild.attack": "Attaquer ({0} restantes)",
+  "guild.attack": "Attaquer ({0} restantes aujourd'hui)",
   "guild.damageBoard": "Classement des dégâts",
   "guild.chatPlaceholder": "Message…",
   "guild.send": "Envoyer",
@@ -947,5 +947,17 @@
   "update.failedRequired": "La mise à jour n'a pas pu être installée. Vérifie ta connexion puis réessaie.",
   "hud.fusion": "FUSION !",
   "friends.invite": "Inviter un ami",
-  "leaderboard.playNow": "Jouer en PvP"
+  "leaderboard.playNow": "Jouer en PvP",
+  "guild.bossDaily": "3 attaques par jour · le boss garde ses PV toute la semaine",
+  "mechanic.new": "NOUVEAU !",
+  "mechanic.ok": "Compris !",
+  "mechanic.bomb.title": "Bombes à retardement",
+  "mechanic.bomb.body": "Le chiffre, c'est le nombre de coups restants. Fais un match avec la gemme piégée avant 0, sinon le niveau est perdu !",
+  "mechanic.blight.title": "Cristal corrompu",
+  "mechanic.blight.body": "Il contamine une gemme voisine à chaque coup où tu n'en casses aucun. Fais des matchs juste à côté pour le détruire !",
+  "mechanic.egg.title": "Œufs de dragon",
+  "mechanic.egg.body": "Fais deux matchs à côté d'un œuf : il éclot et laisse une gemme bonus à sa place !",
+  "hud.defused": "DÉSAMORCÉE !",
+  "hud.hatched": "ÉCLOSION !",
+  "hud.boom": "BOUM !"
 }

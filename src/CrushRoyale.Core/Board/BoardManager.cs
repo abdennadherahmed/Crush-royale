@@ -153,7 +153,7 @@ namespace CrushRoyale.Core.Board
             foreach (Pos p in Board.AllPositions())
             {
                 Piece piece = Board[p];
-                if (piece.CanSwap && !piece.IsSpecial)
+                if (piece.IsPlainGem)
                 {
                     candidates.Add(p);
                 }
@@ -175,6 +175,110 @@ namespace CrushRoyale.Core.Board
 
             BoardShuffler.EnsurePlayable(Board, _shuffleRng, _colorCount);
             return converted;
+        }
+
+        // ------------------------------------------------------------------ hazards (stages 101+)
+
+        public int Count(PieceType type)
+        {
+            int n = 0;
+            foreach (Pos p in Board.AllPositions())
+            {
+                if (!Board[p].IsEmpty && Board[p].Type == type)
+                {
+                    n++;
+                }
+            }
+            return n;
+        }
+
+        /// <summary>Turns a random plain gem (no ice) into a countdown bomb of the same color. Returns its cell.</summary>
+        public Pos? SpawnTimeBomb(DeterministicRandom rng, int moves)
+        {
+            var candidates = new List<Pos>();
+            foreach (Pos p in Board.AllPositions())
+            {
+                if (Board[p].IsPlainGem && Board.IceAt(p) == 0)
+                {
+                    candidates.Add(p);
+                }
+            }
+            if (candidates.Count == 0)
+            {
+                return null;
+            }
+            Pos target = candidates[rng.NextInt(candidates.Count)];
+            Piece old = Board[target];
+            Board[target] = new Piece(old.Id, old.Color, PieceType.TimeBomb, (byte)moves);
+            return target;
+        }
+
+        /// <summary>One move passed: every countdown bomb loses a move. Returns the bombs that reached zero.</summary>
+        public List<Pos> TickTimeBombs()
+        {
+            var exploded = new List<Pos>();
+            foreach (Pos p in Board.AllPositions())
+            {
+                Piece piece = Board[p];
+                if (!piece.IsTimeBomb)
+                {
+                    continue;
+                }
+                if (piece.Hp <= 1)
+                {
+                    exploded.Add(p);
+                }
+                else
+                {
+                    Board[p] = piece.WithHp((byte)(piece.Hp - 1));
+                }
+            }
+            return exploded;
+        }
+
+        /// <summary>Continue after an explosion: every bomb gets at least <paramref name="moves"/> moves again.</summary>
+        public void RewindTimeBombs(int moves)
+        {
+            foreach (Pos p in Board.AllPositions())
+            {
+                Piece piece = Board[p];
+                if (piece.IsTimeBomb && piece.Hp < moves)
+                {
+                    Board[p] = piece.WithHp((byte)moves);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Corruption grows: a random plain gem next to a blight crystal becomes blight. The board is then kept playable.
+        /// Returns the converted cell, or null when nothing can spread.
+        /// </summary>
+        public Pos? SpreadBlight(DeterministicRandom rng)
+        {
+            var targets = new List<Pos>();
+            var seen = new HashSet<Pos>();
+            foreach (Pos p in Board.AllPositions())
+            {
+                if (!Board[p].IsBlight)
+                {
+                    continue;
+                }
+                foreach (Pos n in new[] { p.Offset(1, 0), p.Offset(-1, 0), p.Offset(0, 1), p.Offset(0, -1) })
+                {
+                    if (Board.InBounds(n) && Board[n].IsPlainGem && seen.Add(n))
+                    {
+                        targets.Add(n);
+                    }
+                }
+            }
+            if (targets.Count == 0)
+            {
+                return null;
+            }
+            Pos target = targets[rng.NextInt(targets.Count)];
+            Board[target] = Board.CreatePiece(PieceColor.None, PieceType.Blight, 1);
+            BoardShuffler.EnsurePlayable(Board, _shuffleRng, _colorCount);
+            return target;
         }
 
         public Move? GetHint()
@@ -205,6 +309,14 @@ namespace CrushRoyale.Core.Board
                 foreach (MatchGroup g in MatchFinder.FindMatches(board))
                 {
                     score += g.Cells.Count + (int)g.Shape * 3;
+                    foreach (Pos c in g.Cells)
+                    {
+                        // Defusing the most urgent bomb matters more than a bigger match.
+                        if (board[c].IsTimeBomb)
+                        {
+                            score += 40 - Math.Min(30, (int)board[c].Hp * 3);
+                        }
+                    }
                 }
                 board.Swap(move.From, move.To);
 

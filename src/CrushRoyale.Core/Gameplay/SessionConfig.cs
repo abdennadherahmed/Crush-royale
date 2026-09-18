@@ -61,6 +61,11 @@ namespace CrushRoyale.Core.Gameplay
 
         public int BossStonesPerPhase { get; set; }
 
+        /// <summary>Countdown bombs kept on the board (story, from stage 101).</summary>
+        public int TimeBombCount { get; set; }
+
+        public int TimeBombMoves { get; set; }
+
         public int TwoStarScore { get; set; }
 
         public int ThreeStarScore { get; set; }
@@ -134,6 +139,8 @@ namespace CrushRoyale.Core.Gameplay
                     StoneHp = stage.StoneHp,
                     IceCells = stage.IceCells,
                     IceLayers = stage.IceLayers,
+                    BlightCount = stage.BlightCount,
+                    EggCount = stage.EggCount,
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },
@@ -141,6 +148,8 @@ namespace CrushRoyale.Core.Gameplay
                 BossHp = stage.BossHp,
                 BossPhases = stage.BossPhases,
                 BossStonesPerPhase = stage.BossStonesPerPhase,
+                TimeBombCount = stage.TimeBombCount,
+                TimeBombMoves = stage.TimeBombMoves,
                 TwoStarScore = stage.TwoStarScore,
                 ThreeStarScore = stage.ThreeStarScore,
                 Loadout = CopyLoadout(loadout),
@@ -241,6 +250,10 @@ namespace CrushRoyale.Core.Gameplay
                 return ErrorCode.InvalidArgument;
             }
             if (BossPhases < 0 || BossStonesPerPhase < 0 || BossHp < 0)
+            {
+                return ErrorCode.InvalidArgument;
+            }
+            if (TimeBombCount < 0 || TimeBombCount > 6 || (TimeBombCount > 0 && (TimeBombMoves < 3 || TimeBombMoves > 60)))
             {
                 return ErrorCode.InvalidArgument;
             }

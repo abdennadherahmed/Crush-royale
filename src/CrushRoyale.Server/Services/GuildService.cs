@@ -221,10 +221,9 @@ public sealed class GuildService
                 throw new ApiException(ErrorCode.SessionOver, "This week's boss is already defeated.");
             }
             GuildMember member = record.Guild.Find(ws.IdString)!;
-            int attacksUsed = member.BossWeek == week ? member.BossAttacksThisWeek : 0;
-            if (attacksUsed >= ws.Balance.Guild.BossAttacksPerMemberPerWeek)
+            if (new GuildManager(ws.Balance, ws.Clock).BossAttacksLeftToday(member) <= 0)
             {
-                throw new ApiException(ErrorCode.LimitReached, "No boss attacks left this week.");
+                throw new ApiException(ErrorCode.LimitReached, "No boss attacks left today.");
             }
 
             List<LoadoutEntry> loadout = ws.Inventory.BuildLoadout(Mappers.ParseLoadout(request?.Loadout, ws.Balance), ws.Balance, ws.State.Pvp.HighestLeague).ValueOrThrow();
@@ -233,7 +232,7 @@ public sealed class GuildService
                 Id = Mappers.NewId("gb"),
                 PlayerId = userId,
                 Mode = GameMode.GuildBoss,
-                Seed = StableHash.Mix((ulong)record.Id, (ulong)week, StableHash.Fnv1a(ws.IdString + ":" + attacksUsed + ":" + ws.NowMs)),
+                Seed = StableHash.Mix((ulong)record.Id, (ulong)week, StableHash.Fnv1a(ws.IdString + ":" + member.BossAttacksThisWeek + ":" + ws.NowMs)),
                 StageId = boss.BossIndex,
                 Status = MatchStatus.Started,
                 StartedAt = ws.Now,
@@ -467,7 +466,7 @@ public sealed class GuildService
         long cost = manager.GetNextLevelPoints(g);
         int today = TimeUtil.DayIndex(ws.Clock.UtcNow);
         int week = Week;
-        int attacks = ws.Balance.Guild.BossAttacksPerMemberPerWeek;
+
         IReadOnlyList<GuildRankingRow> top = await _ops.Store.TopGuildsAsync(100, ct).ConfigureAwait(false);
 
         return new GuildDto
@@ -494,7 +493,7 @@ public sealed class GuildService
                     Trophies = m.Trophies,
                     DonatedCoins = m.DonatedCoins,
                     DonatedOrbes = m.DonatedOrbes,
-                    BossAttacksLeft = m.BossWeek == week ? attacks - m.BossAttacksThisWeek : attacks,
+                    BossAttacksLeft = manager.BossAttacksLeftToday(m),
                     BossDamage = m.BossWeek == week ? m.BossDamageThisWeek : 0,
                     CoinsDonatedToday = m.CoinDonationDay == today ? m.CoinsDonatedToday : 0,
                     JoinedAtUnixMs = m.JoinedAtUnixMs

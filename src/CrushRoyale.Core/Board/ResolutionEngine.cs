@@ -58,17 +58,20 @@ namespace CrushRoyale.Core.Board
         }
     }
 
+    /// <summary>A block (stone, blight or egg) taking a hit.</summary>
     public readonly struct StoneHit
     {
         public readonly Pos Position;
         public readonly int PieceId;
         public readonly int RemainingHp;
+        public readonly PieceType Type;
 
-        public StoneHit(Pos position, int pieceId, int remainingHp)
+        public StoneHit(Pos position, int pieceId, int remainingHp, PieceType type = PieceType.Stone)
         {
             Position = position;
             PieceId = pieceId;
             RemainingHp = remainingHp;
+            Type = type;
         }
 
         public bool Destroyed => RemainingHp <= 0;
@@ -104,20 +107,26 @@ namespace CrushRoyale.Core.Board
         /// <summary>Cleared gems per color, indexed by (int)PieceColor.</summary>
         public int[] ClearedByColor { get; } = new int[6];
 
-        public int StonesDestroyed
+        public int StonesDestroyed => CountDestroyed(PieceType.Stone);
+
+        public int BlightCleared => CountDestroyed(PieceType.Blight);
+
+        public int EggsHatched => CountDestroyed(PieceType.Egg);
+
+        /// <summary>Countdown bombs matched or blasted in this wave.</summary>
+        public int BombsDefused { get; internal set; }
+
+        private int CountDestroyed(PieceType type)
         {
-            get
+            int n = 0;
+            foreach (StoneHit hit in StoneHits)
             {
-                int n = 0;
-                foreach (StoneHit hit in StoneHits)
+                if (hit.Destroyed && hit.Type == type)
                 {
-                    if (hit.Destroyed)
-                    {
-                        n++;
-                    }
+                    n++;
                 }
-                return n;
             }
+            return n;
         }
     }
 
@@ -459,14 +468,14 @@ namespace CrushRoyale.Core.Board
             var stoneSet = new HashSet<Pos>();
             foreach (Pos p in order)
             {
-                if (board[p].IsStone && stoneSet.Add(p))
+                if (board[p].IsBlock && stoneSet.Add(p))
                 {
                     stoneOrder.Add(p);
                 }
             }
             foreach (Pos p in order)
             {
-                if (causes[p] != ClearCause.Match || board[p].IsStone)
+                if (causes[p] != ClearCause.Match || board[p].IsBlock)
                 {
                     continue;
                 }
@@ -480,9 +489,14 @@ namespace CrushRoyale.Core.Board
             foreach (Pos p in order)
             {
                 Piece piece = board[p];
-                if (piece.IsStone)
+                if (piece.IsBlock)
                 {
                     continue;
+                }
+                if (piece.IsTimeBomb)
+                {
+                    step.BombsDefused++;
+                    points += _scoring.SpecialActivationBonus;
                 }
 
                 ClearCause cause = causes[p];
@@ -500,15 +514,20 @@ namespace CrushRoyale.Core.Board
                 board[p] = Piece.Empty;
             }
 
+            var hatched = new List<(Pos Position, int EggId)>();
             foreach (Pos p in stoneOrder)
             {
                 Piece stone = board[p];
                 int hp = stone.Hp - 1;
-                step.StoneHits.Add(new StoneHit(p, stone.Id, hp));
+                step.StoneHits.Add(new StoneHit(p, stone.Id, hp, stone.Type));
                 if (hp <= 0)
                 {
                     board[p] = Piece.Empty;
                     points += _scoring.StonePoints;
+                    if (stone.IsEgg)
+                    {
+                        hatched.Add((p, stone.Id));
+                    }
                 }
                 else
                 {
@@ -526,6 +545,19 @@ namespace CrushRoyale.Core.Board
                 Piece created = board.CreatePiece(template.Piece.Color, template.Piece.Type);
                 board[template.Position] = created;
                 step.SpecialsCreated.Add(new PieceSpawn(created, template.Position, template.Position.Y));
+            }
+
+            // 6b) Hatched dragon eggs leave a bonus gem; its kind and color derive from the egg id (deterministic, no RNG).
+            PieceType[] hatchTypes = { PieceType.LineHorizontal, PieceType.AreaBomb, PieceType.LineVertical };
+            foreach ((Pos position, int eggId) in hatched)
+            {
+                if (!board[position].IsEmpty)
+                {
+                    continue;
+                }
+                Piece hatchling = board.CreatePiece((PieceColor)(eggId % _colorCount), hatchTypes[eggId % hatchTypes.Length]);
+                board[position] = hatchling;
+                step.SpecialsCreated.Add(new PieceSpawn(hatchling, position, position.Y));
             }
 
             // 7) Gravity + refill, column by column.
@@ -567,7 +599,7 @@ namespace CrushRoyale.Core.Board
 
         private static void AddAdjacentStone(GameBoard board, Pos p, List<Pos> order, HashSet<Pos> set)
         {
-            if (board.InBounds(p) && board[p].IsStone && set.Add(p))
+            if (board.InBounds(p) && board[p].IsBlock && set.Add(p))
             {
                 order.Add(p);
             }

@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} ОЗ",
   "guild.bossReset": "Новый босс через {0} д {1} ч",
   "guild.bossDefeated": "Босс повержен! Отличная командная работа.",
-  "guild.attack": "Атаковать (осталось {0})",
+  "guild.attack": "Атаковать ({0} сегодня)",
   "guild.damageBoard": "Рейтинг урона",
   "guild.chatPlaceholder": "Сообщение…",
   "guild.send": "Отправить",
@@ -947,5 +947,17 @@
   "update.failedRequired": "Не удалось установить обновление. Проверьте подключение и повторите попытку.",
   "hud.fusion": "СЛИЯНИЕ!",
   "friends.invite": "Пригласить друга",
-  "leaderboard.playNow": "Играть в PvP"
+  "leaderboard.playNow": "Играть в PvP",
+  "guild.bossDaily": "3 атаки в день · босс сохраняет ОЗ всю неделю",
+  "mechanic.new": "НОВИНКА!",
+  "mechanic.ok": "Понятно!",
+  "mechanic.bomb.title": "Бомбы с таймером",
+  "mechanic.bomb.body": "Число — это оставшиеся ходы. Соберите камень с бомбой до нуля, иначе уровень проигран!",
+  "mechanic.blight.title": "Порченый кристалл",
+  "mechanic.blight.body": "Он заражает соседний камень после каждого хода без разрушения. Собирайте ряды рядом, чтобы уничтожить его!",
+  "mechanic.egg.title": "Драконьи яйца",
+  "mechanic.egg.body": "Соберите два ряда рядом с яйцом: оно вылупится и оставит бонусный камень!",
+  "hud.defused": "ОБЕЗВРЕЖЕНА!",
+  "hud.hatched": "ВЫЛУПИЛСЯ!",
+  "hud.boom": "БУМ!"
 }

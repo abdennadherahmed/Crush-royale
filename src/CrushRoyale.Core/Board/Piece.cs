@@ -30,7 +30,22 @@ namespace CrushRoyale.Core.Board
         AreaBomb = 3,
 
         /// <summary>Obstacle: cannot be swapped or matched, falls with gravity, broken by adjacent matches/blasts.</summary>
-        Stone = 4
+        Stone = 4,
+
+        /// <summary>
+        /// Corrupted crystal (from stage 201): a colorless block broken like a stone, which spreads to a neighbouring
+        /// gem after every move that destroyed none of it.
+        /// </summary>
+        Blight = 5,
+
+        /// <summary>Dragon egg (from stage 301): a colorless 2-hit block that hatches into a bonus gem.</summary>
+        Egg = 6,
+
+        /// <summary>
+        /// Countdown bomb (from stage 101): a normal colored gem whose Hp is the number of moves left; the stage is lost
+        /// when it reaches 0. Matching or blasting it defuses it.
+        /// </summary>
+        TimeBomb = 7
     }
 
     /// <summary>
@@ -54,11 +69,12 @@ namespace CrushRoyale.Core.Board
             {
                 throw new ArgumentOutOfRangeException(nameof(id), "Piece ids start at 1.");
             }
-            if (type == PieceType.Stone && color != PieceColor.None)
+            bool block = IsBlockType(type);
+            if (block && color != PieceColor.None)
             {
-                throw new ArgumentException("Stones have no color.", nameof(color));
+                throw new ArgumentException("Stones, blight and eggs have no color.", nameof(color));
             }
-            if (type != PieceType.Stone && color == PieceColor.None)
+            if (!block && color == PieceColor.None)
             {
                 throw new ArgumentException("Gems need a color.", nameof(color));
             }
@@ -66,18 +82,33 @@ namespace CrushRoyale.Core.Board
             Id = id;
             Color = color;
             Type = type;
-            Hp = type == PieceType.Stone ? (byte)Math.Max(1, (int)hp) : (byte)0;
+            Hp = block || type == PieceType.TimeBomb ? (byte)Math.Max(1, (int)hp) : (byte)0;
         }
+
+        /// <summary>Colorless obstacles hit by neighbouring matches: stones, blight, eggs.</summary>
+        public static bool IsBlockType(PieceType type) => type == PieceType.Stone || type == PieceType.Blight || type == PieceType.Egg;
 
         public bool IsEmpty => Id == 0;
 
         public bool IsStone => !IsEmpty && Type == PieceType.Stone;
 
+        /// <summary>Stone, blight or egg: not swappable nor matchable, falls with gravity, hit by neighbouring matches.</summary>
+        public bool IsBlock => !IsEmpty && IsBlockType(Type);
+
+        public bool IsBlight => !IsEmpty && Type == PieceType.Blight;
+
+        public bool IsEgg => !IsEmpty && Type == PieceType.Egg;
+
+        public bool IsTimeBomb => !IsEmpty && Type == PieceType.TimeBomb;
+
+        /// <summary>Plain gem (no bonus, no bomb): the only kind hazards may convert.</summary>
+        public bool IsPlainGem => !IsEmpty && Type == PieceType.Normal;
+
         /// <summary>Line or area bomb.</summary>
         public bool IsSpecial => !IsEmpty && (Type == PieceType.LineHorizontal || Type == PieceType.LineVertical || Type == PieceType.AreaBomb);
 
         /// <summary>Can take part in a color match.</summary>
-        public bool IsMatchable => !IsEmpty && Type != PieceType.Stone;
+        public bool IsMatchable => !IsEmpty && !IsBlockType(Type);
 
         /// <summary>Can be moved by the player.</summary>
         public bool CanSwap => IsMatchable;

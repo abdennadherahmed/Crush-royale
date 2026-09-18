@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} نقطة حياة",
   "guild.bossReset": "زعيم جديد بعد {0} ي {1} س",
   "guild.bossDefeated": "هُزم الزعيم! عمل جماعي رائع.",
-  "guild.attack": "هجوم (متبقٍ {0})",
+  "guild.attack": "هاجم ({0} متبقية اليوم)",
   "guild.damageBoard": "ترتيب الضرر",
   "guild.chatPlaceholder": "رسالة…",
   "guild.send": "إرسال",
@@ -947,5 +947,17 @@
   "update.failedRequired": "تعذّر تثبيت التحديث. تحقّق من اتصالك ثم حاول مجددًا.",
   "hud.fusion": "اندماج!",
   "friends.invite": "ادعُ صديقًا",
-  "leaderboard.playNow": "العب PvP الآن"
+  "leaderboard.playNow": "العب PvP الآن",
+  "guild.bossDaily": "3 هجمات يوميًا · يحتفظ الزعيم بنقاط حياته طوال الأسبوع",
+  "mechanic.new": "جديد!",
+  "mechanic.ok": "فهمت!",
+  "mechanic.bomb.title": "قنابل موقوتة",
+  "mechanic.bomb.body": "الرقم هو عدد الحركات المتبقية. طابق جوهرة القنبلة قبل أن تصل إلى 0 وإلا تخسر المرحلة!",
+  "mechanic.blight.title": "بلورة فاسدة",
+  "mechanic.blight.body": "ينتشر إلى جوهرة مجاورة بعد كل حركة لا تكسر فيها أيًا منه. طابق بجانبه لتدميره!",
+  "mechanic.egg.title": "بيض التنين",
+  "mechanic.egg.body": "طابق مرتين بجانب البيضة: تفقس وتترك جوهرة مكافأة مكانها!",
+  "hud.defused": "تم التعطيل!",
+  "hud.hatched": "فقست!",
+  "hud.boom": "بووم!"
 }

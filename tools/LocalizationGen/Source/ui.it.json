@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} PS",
   "guild.bossReset": "Nuovo boss tra {0} g {1} h",
   "guild.bossDefeated": "Boss sconfitto! Ottimo lavoro di squadra.",
-  "guild.attack": "Attacca ({0} rimasti)",
+  "guild.attack": "Attacca ({0} oggi)",
   "guild.damageBoard": "Classifica dei danni",
   "guild.chatPlaceholder": "Messaggio…",
   "guild.send": "Invia",
@@ -947,5 +947,17 @@
   "update.failedRequired": "Impossibile installare l'aggiornamento. Controlla la connessione e riprova.",
   "hud.fusion": "FUSIONE!",
   "friends.invite": "Invita un amico",
-  "leaderboard.playNow": "Gioca in PvP"
+  "leaderboard.playNow": "Gioca in PvP",
+  "guild.bossDaily": "3 attacchi al giorno · il boss mantiene i PV tutta la settimana",
+  "mechanic.new": "NOVITÀ!",
+  "mechanic.ok": "Capito!",
+  "mechanic.bomb.title": "Bombe a tempo",
+  "mechanic.bomb.body": "Il numero indica le mosse rimaste. Abbina la gemma bomba prima dello 0, o perdi il livello!",
+  "mechanic.blight.title": "Cristallo corrotto",
+  "mechanic.blight.body": "Si diffonde a una gemma vicina a ogni mossa in cui non ne rompi nessuno. Abbina accanto per distruggerlo!",
+  "mechanic.egg.title": "Uova di drago",
+  "mechanic.egg.body": "Fai due abbinamenti accanto a un uovo: si schiude e lascia una gemma bonus al suo posto!",
+  "hud.defused": "DISINNESCATA!",
+  "hud.hatched": "SCHIUSO!",
+  "hud.boom": "BUM!"
 }

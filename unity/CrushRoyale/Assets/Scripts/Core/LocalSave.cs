@@ -22,6 +22,9 @@ namespace CrushRoyale.Game
         public bool ReduceMotion;
         public string Language;
         public bool TutorialDone;
+
+        /// <summary>Board mechanics already explained by their one-screen tutorial (bomb, blight, egg).</summary>
+        public System.Collections.Generic.List<string> SeenMechanics = new System.Collections.Generic.List<string>();
         public bool PrivacyAccepted;
         public int LastSeenStage;
 

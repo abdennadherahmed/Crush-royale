@@ -267,6 +267,18 @@ namespace CrushRoyale.Core.Board
             {
                 return "#" + p.Hp;
             }
+            if (p.IsBlight)
+            {
+                return "%" + p.Hp;
+            }
+            if (p.IsEgg)
+            {
+                return "@" + p.Hp;
+            }
+            if (p.IsTimeBomb)
+            {
+                return ColorChar(p.Color) + "t";
+            }
 
             char c = ColorChar(p.Color);
             switch (p.Type)
@@ -292,6 +304,14 @@ namespace CrushRoyale.Core.Board
             {
                 return board.CreatePiece(PieceColor.None, PieceType.Stone, (byte)(token[1] - '0'));
             }
+            if (token[0] == '%')
+            {
+                return board.CreatePiece(PieceColor.None, PieceType.Blight, (byte)(token[1] - '0'));
+            }
+            if (token[0] == '@')
+            {
+                return board.CreatePiece(PieceColor.None, PieceType.Egg, (byte)(token[1] - '0'));
+            }
 
             PieceColor color = ParseColor(token[0]);
             switch (token[1])
@@ -300,6 +320,7 @@ namespace CrushRoyale.Core.Board
                 case 'h': return board.CreatePiece(color, PieceType.LineHorizontal);
                 case 'v': return board.CreatePiece(color, PieceType.LineVertical);
                 case 'a': return board.CreatePiece(color, PieceType.AreaBomb);
+                case 't': return board.CreatePiece(color, PieceType.TimeBomb, 5);
                 default: throw new FormatException("Invalid piece type in token '" + token + "'.");
             }
         }

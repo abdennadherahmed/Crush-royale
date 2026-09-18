@@ -111,6 +111,18 @@ namespace CrushRoyale.Core.Story
 
         public int IceLayers { get; set; } = 1;
 
+        /// <summary>Countdown bombs kept on the board (from stage 101).</summary>
+        public int TimeBombCount { get; set; }
+
+        /// <summary>Moves each countdown bomb starts with.</summary>
+        public int TimeBombMoves { get; set; }
+
+        /// <summary>Corrupted crystals at the start (from stage 201); they spread.</summary>
+        public int BlightCount { get; set; }
+
+        /// <summary>Dragon eggs (from stage 301).</summary>
+        public int EggCount { get; set; }
+
         public List<StageObjective> Objectives { get; set; } = new List<StageObjective>();
 
         public int BossHp { get; set; }

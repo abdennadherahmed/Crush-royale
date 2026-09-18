@@ -158,6 +158,12 @@ public class GuildTests
         }
         Assert.Equal(ErrorCode.LimitReached, m.SubmitBossDamage(guild, "m1", 1000, week).Error);
 
+        // Attacks come back the next day; the boss keeps the damage it took.
+        _clock.Advance(TimeSpan.FromDays(1));
+        week = TimeUtil.WeekIndex(_clock.UtcNow);
+        Assert.Equal(3, m.BossAttacksLeftToday(guild.Find("m1")));
+        Assert.True(m.SubmitBossDamage(guild, "m1", 1000, week).Success);
+
         m.SubmitBossDamage(guild, "leader", 30000, week);
         var killing = m.SubmitBossDamage(guild, "leader", 30000, week).Value;
         Assert.True(killing.DefeatedNow);
@@ -176,6 +182,7 @@ public class GuildTests
         Assert.Equal(before + late.DamageApplied, m1.BossDamageThisWeek);
 
         Assert.Equal(2, m.EnsureBossWeek(guild, week + 1).BossIndex);
+        _clock.Advance(TimeSpan.FromDays(1));
         Assert.True(m.SubmitBossDamage(guild, "m1", 10, week + 1).Success);
         Assert.Equal(2, m.EnsureBossWeek(guild, week + 2).BossIndex);
     }

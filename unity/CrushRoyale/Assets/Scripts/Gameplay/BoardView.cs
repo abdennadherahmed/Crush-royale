@@ -497,6 +497,11 @@ namespace CrushRoyale.Game.Gameplay
                 if (hit.Destroyed)
                 {
                     vanishing.Add(stone);
+                    if (!IsGhost && hit.Type != PieceType.Stone)
+                    {
+                        // Corrupted crystal shatters in magenta, a dragon egg in gold.
+                        StartCoroutine(Burst(CellPosition(hit.Position), hit.Type == PieceType.Blight ? new Color(0.85f, 0.2f, 1f) : new Color(1f, 0.8f, 0.3f)));
+                    }
                 }
                 else
                 {

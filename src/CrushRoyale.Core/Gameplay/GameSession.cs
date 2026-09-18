@@ -123,6 +123,15 @@ namespace CrushRoyale.Core.Gameplay
 
         public List<Pos> BossStones { get; } = new List<Pos>();
 
+        /// <summary>A countdown bomb reached zero after this action (the stage is lost unless it was won by it).</summary>
+        public Pos? BombExploded { get; internal set; }
+
+        /// <summary>New countdown bomb placed after this action.</summary>
+        public Pos? BombSpawned { get; internal set; }
+
+        /// <summary>Gem turned into blight after this action.</summary>
+        public Pos? BlightSpread { get; internal set; }
+
         public SessionState StateAfter { get; internal set; }
     }
 
@@ -169,6 +178,9 @@ namespace CrushRoyale.Core.Gameplay
 
         public int ContinuesUsed { get; internal set; }
 
+        /// <summary>The stage was lost because a countdown bomb exploded.</summary>
+        public bool LostToBomb { get; internal set; }
+
         public Dictionary<PowerUpType, int> PowerUpsUsed { get; internal set; } = new Dictionary<PowerUpType, int>();
 
         public ReplayData Replay { get; internal set; }
@@ -204,6 +216,13 @@ namespace CrushRoyale.Core.Gameplay
         private int _specialsActivated;
         private int _line5Matches;
         private readonly DeterministicRandom _petRng;
+        private readonly DeterministicRandom _hazardRng;
+        private bool _bombExploded;
+
+        /// <summary>Moves between two countdown bomb spawns, and moves given back to bombs by a continue.</summary>
+        public const int BombRespawnMoves = 4;
+
+        public const int ContinueBombMoves = 5;
 
         public GameSession(SessionConfig config, GameBalance balance, string playerId = null)
         {
@@ -219,6 +238,15 @@ namespace CrushRoyale.Core.Gameplay
             _boardManager = new BoardManager(config.Seed, balance, config.Board.ColorCount);
             _boardManager.GenerateNewBoard(config.Board);
             PlaceStartBoosters(config.StartBoosters);
+            // Own stream for hazards (bombs, blight): refills and shuffles never shift, replays re-simulate them exactly.
+            _hazardRng = new DeterministicRandom(config.Seed, 0xB0B5B11E7UL);
+            if (config.Mode == GameMode.Story)
+            {
+                for (int i = 0; i < config.TimeBombCount; i++)
+                {
+                    _boardManager.SpawnTimeBomb(_hazardRng, config.TimeBombMoves + i * 2);
+                }
+            }
             _cascade = new CascadeCalculator(balance);
             _powerUps = new PowerUpManager(balance, config);
             _objectives = new ObjectiveTracker(config.Objectives, _boardManager.Board, config.BossHp);
@@ -458,6 +486,10 @@ namespace CrushRoyale.Core.Gameplay
             {
                 TryPetMove(t, outcome);
             }
+            if (Config.Mode == GameMode.Story)
+            {
+                ApplyHazards(outcome);
+            }
 
             int duration = baseDuration;
             if (resolution != null)
@@ -494,6 +526,10 @@ namespace CrushRoyale.Core.Gameplay
                 if (_objectives.AllComplete)
                 {
                     End(SessionState.Won, t);
+                }
+                else if (_bombExploded)
+                {
+                    End(SessionState.Lost, t);
                 }
                 else if (Config.HasMoveLimit && MovesLeft <= 0)
                 {
@@ -583,6 +619,7 @@ namespace CrushRoyale.Core.Gameplay
                 StonesDestroyed = _stonesDestroyed,
                 IceBroken = _iceBroken,
                 ContinuesUsed = ContinuesUsed,
+                LostToBomb = _bombExploded && State == SessionState.Lost,
                 PowerUpsUsed = used,
                 Replay = _recorder.Data
             };
@@ -711,6 +748,49 @@ namespace CrushRoyale.Core.Gameplay
             OnScoreChanged?.Invoke(Score, gained);
         }
 
+        /// <summary>After each player move: blight spreads when none was destroyed, bombs count down, new bombs arrive.</summary>
+        private void ApplyHazards(ActionOutcome outcome)
+        {
+            if (Config.Board.BlightCount > 0)
+            {
+                int cleared = BlightClearedIn(outcome.Resolution) + BlightClearedIn(outcome.PetResolution);
+                if (cleared == 0)
+                {
+                    outcome.BlightSpread = _boardManager.SpreadBlight(_hazardRng);
+                }
+            }
+
+            if (Config.TimeBombCount <= 0)
+            {
+                return;
+            }
+            List<Pos> exploded = _boardManager.TickTimeBombs();
+            if (exploded.Count > 0)
+            {
+                outcome.BombExploded = exploded[0];
+                _bombExploded = true;
+                return;
+            }
+            if (MovesUsed % BombRespawnMoves == 0 && _boardManager.Count(PieceType.TimeBomb) < Config.TimeBombCount)
+            {
+                outcome.BombSpawned = _boardManager.SpawnTimeBomb(_hazardRng, Config.TimeBombMoves);
+            }
+        }
+
+        private static int BlightClearedIn(ResolutionResult resolution)
+        {
+            if (resolution == null)
+            {
+                return 0;
+            }
+            int n = 0;
+            foreach (ResolutionStep step in resolution.Steps)
+            {
+                n += step.BlightCleared;
+            }
+            return n;
+        }
+
         private void CheckBossPhase(ActionOutcome outcome)
         {
             if (Config.BossPhases <= 1 || Config.BossHp <= 0)
@@ -753,6 +833,11 @@ namespace CrushRoyale.Core.Gameplay
             if (Config.HasMoveLimit)
             {
                 MovesLeft += _balance.Stamina.ContinueExtraMoves;
+            }
+            if (_bombExploded)
+            {
+                _bombExploded = false;
+                _boardManager.RewindTimeBombs(ContinueBombMoves);
             }
 
             ContinuesUsed++;

@@ -24,6 +24,12 @@ namespace CrushRoyale.Core.Board
 
         public int IceLayers { get; set; } = 1;
 
+        /// <summary>Corrupted crystals placed at the start (they spread during the stage).</summary>
+        public int BlightCount { get; set; }
+
+        /// <summary>Dragon eggs (2 hits, hatch into a bonus gem).</summary>
+        public int EggCount { get; set; }
+
         public int MaxAttempts { get; set; } = 400;
 
         public int LowDifficultyBiasPermille { get; set; } = 350;
@@ -50,6 +56,10 @@ namespace CrushRoyale.Core.Board
             if (StoneHp < 1 || StoneHp > 3)
             {
                 throw new ArgumentException("StoneHp must be 1-3.");
+            }
+            if (BlightCount < 0 || EggCount < 0 || StoneCount + BlightCount + EggCount > cells / 4)
+            {
+                throw new ArgumentException("Too many blocks (stones, blight, eggs).");
             }
             if (IceCells < 0 || IceCells + StoneCount > cells)
             {
@@ -141,6 +151,9 @@ namespace CrushRoyale.Core.Board
             {
                 board[p] = board.CreatePiece(PieceColor.None, PieceType.Stone, (byte)o.StoneHp);
             }
+            // Blight and eggs sit in the upper half: they fall onto the board as the player clears below.
+            PlaceBlocks(board, o, rng, stoneSet, o.BlightCount, PieceType.Blight, 1);
+            PlaceBlocks(board, o, rng, stoneSet, o.EggCount, PieceType.Egg, 2);
 
             int biasPermille = o.LowDifficultyBiasPermille * (1000 - Clamp(o.DifficultyPermille)) / 1000;
             var candidates = new List<PieceColor>(o.ColorCount);
@@ -195,6 +208,27 @@ namespace CrushRoyale.Core.Board
             }
 
             return board;
+        }
+
+        private static void PlaceBlocks(GameBoard board, BoardGenerationOptions o, DeterministicRandom rng, HashSet<Pos> taken, int count, PieceType type, int hp)
+        {
+            if (count <= 0)
+            {
+                return;
+            }
+            var excluded = new HashSet<Pos>(taken);
+            for (int y = 0; y < o.Height / 2; y++)
+            {
+                for (int x = 0; x < o.Width; x++)
+                {
+                    excluded.Add(new Pos(x, y));
+                }
+            }
+            foreach (Pos p in PickDistinctCells(o.Width, o.Height, count, rng, excluded))
+            {
+                board[p] = board.CreatePiece(PieceColor.None, type, (byte)hp);
+                taken.Add(p);
+            }
         }
 
         /// <summary>True if placing <paramref name="color"/> at (x,y) completes a run of 3 with already-filled cells to the left or below.</summary>

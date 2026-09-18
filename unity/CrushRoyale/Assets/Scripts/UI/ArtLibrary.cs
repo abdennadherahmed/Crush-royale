@@ -49,6 +49,15 @@ namespace CrushRoyale.Game.UI
 
         public static Sprite Ice() => Load("Art/Gems/ice");
 
+        /// <summary>Corrupted crystal (stage 201+).</summary>
+        public static Sprite Blight() => Load("Art/Gems/blight");
+
+        /// <summary>Dragon egg; cracked and glowing when one hit is left (stage 301+).</summary>
+        public static Sprite Egg(int hp) => Load(hp <= 1 ? "Art/Gems/egg_cracked" : "Art/Gems/egg");
+
+        /// <summary>Iron bomb laid on a countdown gem (stage 101+).</summary>
+        public static Sprite BombBadge() => Load("Art/Gems/bomb_badge");
+
         /// <summary>Iron bands laid over a stone that still needs two hits.</summary>
         public static Sprite StoneBands() => Load("Art/Gems/stone_bands");
 

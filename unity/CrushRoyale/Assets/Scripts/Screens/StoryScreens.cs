@@ -799,6 +799,23 @@ namespace CrushRoyale.Game.Screens
                 Text score = UIFactory.Label(thresholds.transform, Loc.Number(scores[i]), Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Anchor(score.rectTransform, x + 0.02f, 0.08f, x + 0.31f, 0.5f);
             }
+            var mechanics = new List<string>();
+            if (stage.TimeBombCount > 0)
+            {
+                mechanics.Add(Loc.T("mechanic.bomb.title"));
+            }
+            if (stage.BlightCount > 0)
+            {
+                mechanics.Add(Loc.T("mechanic.blight.title"));
+            }
+            if (stage.EggCount > 0)
+            {
+                mechanics.Add(Loc.T("mechanic.egg.title"));
+            }
+            if (mechanics.Count > 0)
+            {
+                UIFactory.Height(UIFactory.Label(list, string.Join("  ·  ", mechanics), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold), 60);
+            }
             if (stage.StoneCount > 0 || stage.IceCells > 0)
             {
                 UIFactory.Height(UIFactory.Label(list, Loc.T("stage.obstacles", stage.StoneCount, stage.IceCells), Theme.SmallSize, Theme.TextMuted), 60);

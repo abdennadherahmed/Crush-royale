@@ -273,6 +273,7 @@ namespace CrushRoyale.Core.Story
             stage.StoneHp = d >= 700 ? 2 : 1;
             stage.IceCells = Math.Min(iceCells, 24);
             stage.IceLayers = iceLayers;
+            AddMechanics(stage, campaignId, index, d);
 
             int starBase = Math.Max(stage.TargetScore, 200);
             stage.TwoStarScore = RoundTo((int)((long)starBase * s.TwoStarPermille / 1000), 50);
@@ -321,6 +322,48 @@ namespace CrushRoyale.Core.Story
                 }
             }
             return stage;
+        }
+
+        /// <summary>Stage where each new board mechanic appears for the first time (with its short tutorial).</summary>
+        public const int TimeBombIntroStage = 101;
+
+        public const int BlightIntroStage = 201;
+
+        public const int EggIntroStage = 301;
+
+        /// <summary>
+        /// A new mechanic every 100 stages: countdown bombs (101), spreading blight (201), dragon eggs (301). Each one
+        /// then returns on about one stage in five, and they mix as the campaign goes on. Never on boss stages.
+        /// </summary>
+        private static void AddMechanics(StageData stage, int campaignId, int index, int d)
+        {
+            if (stage.IsBoss)
+            {
+                return;
+            }
+            if (campaignId == TimeBombIntroStage || (campaignId > TimeBombIntroStage && index % 5 == 1))
+            {
+                stage.TimeBombCount = campaignId == TimeBombIntroStage ? 1 : 1 + (d >= 650 ? 1 : 0);
+                stage.TimeBombMoves = campaignId == TimeBombIntroStage ? 12 : 10 - d * 3 / 1000;
+            }
+            if (campaignId == BlightIntroStage || (campaignId > BlightIntroStage && index % 5 == 3))
+            {
+                stage.BlightCount = campaignId == BlightIntroStage ? 2 : 2 + d * 2 / 1000;
+            }
+            if (campaignId == EggIntroStage || (campaignId > EggIntroStage && index % 5 == 2))
+            {
+                stage.EggCount = campaignId == EggIntroStage ? 3 : 2 + d * 2 / 1000;
+            }
+            // At most a quarter of the board is blocks.
+            int spare = 16 - stage.BlightCount - stage.EggCount;
+            stage.StoneCount = Math.Max(0, Math.Min(stage.StoneCount, spare));
+            foreach (StageObjective objective in stage.Objectives)
+            {
+                if (objective.Type == ObjectiveType.BreakStones)
+                {
+                    objective.Target = Math.Max(1, Math.Min(objective.Target, stage.StoneCount * GoalObstaclePermille / 1000));
+                }
+            }
         }
 
         private BossKind BossKindFor(int id, int act, int chapter, int index, bool endless)

@@ -73,7 +73,7 @@ namespace CrushRoyale.Core.Board
 
                 foreach (PieceColor color in colors)
                 {
-                    board[p] = new Piece(piece.Id, color, piece.Type);
+                    board[p] = new Piece(piece.Id, color, piece.Type, piece.Hp);
                     if (!MatchFinder.HasMatchAt(board, p) && !NeighbourMatches(board, p))
                     {
                         break;
@@ -151,7 +151,7 @@ namespace CrushRoyale.Core.Board
         private static bool IsPlain(GameBoard board, Pos p)
         {
             Piece piece = board[p];
-            return piece.CanSwap && !piece.IsSpecial;
+            return piece.IsPlainGem;
         }
     }
 }

@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} HP",
   "guild.bossReset": "New boss in {0}d {1}h",
   "guild.bossDefeated": "Boss defeated! Great teamwork.",
-  "guild.attack": "Attack ({0} left)",
+  "guild.attack": "Attack ({0} left today)",
   "guild.damageBoard": "Damage ranking",
   "guild.chatPlaceholder": "Message…",
   "guild.send": "Send",
@@ -947,5 +947,17 @@
   "update.failedRequired": "The update could not be installed. Check your connection, then try again.",
   "hud.fusion": "FUSION!",
   "friends.invite": "Invite a friend",
-  "leaderboard.playNow": "Play PvP now"
+  "leaderboard.playNow": "Play PvP now",
+  "guild.bossDaily": "3 attacks per day · the boss keeps its HP all week",
+  "mechanic.new": "NEW!",
+  "mechanic.ok": "Got it!",
+  "mechanic.bomb.title": "Countdown bombs",
+  "mechanic.bomb.body": "The number is the moves left. Match the bomb's gem before it reaches 0, or the stage is lost!",
+  "mechanic.blight.title": "Corrupted crystal",
+  "mechanic.blight.body": "It spreads to a neighbour gem after every move where you break none. Make matches next to it to destroy it!",
+  "mechanic.egg.title": "Dragon eggs",
+  "mechanic.egg.body": "Make two matches next to an egg: it hatches into a bonus gem right where it stood!",
+  "hud.defused": "DEFUSED!",
+  "hud.hatched": "HATCHED!",
+  "hud.boom": "BOOM!"
 }

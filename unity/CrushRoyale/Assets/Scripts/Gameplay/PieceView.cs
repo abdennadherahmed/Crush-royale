@@ -11,6 +11,10 @@ namespace CrushRoyale.Game.Gameplay
     {
         private Image _body;
         private Image _overlay;
+
+        // Countdown bomb: iron bomb badge in the corner and the moves left.
+        private Image _bombBadge;
+        private Text _countdown;
         private CanvasGroup _group;
 
         // Mascot eyes: they blink, follow the finger, widen when swapped and tremble before exploding.
@@ -149,7 +153,16 @@ namespace CrushRoyale.Game.Gameplay
 
             if (_eyes != null)
             {
-                _eyes.gameObject.SetActive(!piece.IsStone);
+                _eyes.gameObject.SetActive(!piece.IsBlock);
+            }
+            ShowCountdown(piece);
+            if (piece.IsBlight || piece.IsEgg)
+            {
+                Sprite block = piece.IsBlight ? ArtLibrary.Blight() : ArtLibrary.Egg(piece.Hp);
+                _body.sprite = block ?? ArtLibrary.Stone() ?? ProceduralSprites.Stone();
+                _body.color = block != null ? Color.white : (piece.IsBlight ? new Color(0.7f, 0.2f, 0.9f) : new Color(0.3f, 0.9f, 0.7f));
+                _overlay.enabled = false;
+                return;
             }
             if (piece.IsStone)
             {
@@ -264,7 +277,7 @@ namespace CrushRoyale.Game.Gameplay
             float now = Time.unscaledTime;
             if (_glintTime < 0f)
             {
-                if (now < _nextGlint || Piece.IsStone)
+                if (now < _nextGlint || Piece.IsBlock)
                 {
                     return;
                 }
@@ -280,6 +293,41 @@ namespace CrushRoyale.Game.Gameplay
                 _glint.localScale = Vector3.zero;
                 _glintTime = -1f;
                 _nextGlint = now + Random.Range(4f, 14f);
+            }
+        }
+
+        private void ShowCountdown(Piece piece)
+        {
+            if (!piece.IsTimeBomb)
+            {
+                if (_bombBadge != null)
+                {
+                    _bombBadge.gameObject.SetActive(false);
+                    _countdown.gameObject.SetActive(false);
+                }
+                return;
+            }
+            if (_bombBadge == null)
+            {
+                _bombBadge = UIFactory.Icon(Rect, ArtLibrary.BombBadge() ?? ProceduralSprites.Circle(), Color.white, 0);
+                _bombBadge.raycastTarget = false;
+                _bombBadge.preserveAspect = true;
+                UIFactory.Anchor(_bombBadge.rectTransform, 0.38f, 0.38f, 1.02f, 1.02f);
+                _countdown = UIFactory.Label(_bombBadge.transform, string.Empty, Mathf.RoundToInt(Rect.sizeDelta.y * 0.34f), Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+                _countdown.raycastTarget = false;
+                UIFactory.Anchor(_countdown.rectTransform, 0f, -0.05f, 0.86f, 0.8f);
+                Outline outline = _countdown.gameObject.AddComponent<Outline>();
+                outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
+                outline.effectDistance = new Vector2(2f, -2f);
+            }
+            _bombBadge.gameObject.SetActive(true);
+            _countdown.gameObject.SetActive(true);
+            _countdown.text = piece.Hp.ToString();
+            // Red and trembling in the last three moves.
+            _countdown.color = piece.Hp <= 3 ? new Color(1f, 0.3f, 0.25f) : Color.white;
+            if (piece.Hp <= 3)
+            {
+                Panic();
             }
         }
 

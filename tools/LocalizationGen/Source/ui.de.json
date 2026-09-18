@@ -613,7 +613,7 @@
   "guild.bossHp": "{0} / {1} LP",
   "guild.bossReset": "Neuer Boss in {0} T {1} Std.",
   "guild.bossDefeated": "Boss besiegt! Tolle Teamarbeit.",
-  "guild.attack": "Angreifen ({0} übrig)",
+  "guild.attack": "Angreifen ({0} heute übrig)",
   "guild.damageBoard": "Schadensrangliste",
   "guild.chatPlaceholder": "Nachricht…",
   "guild.send": "Senden",
@@ -947,5 +947,17 @@
   "update.failedRequired": "Das Update konnte nicht installiert werden. Prüfe deine Verbindung und versuche es erneut.",
   "hud.fusion": "FUSION!",
   "friends.invite": "Freund einladen",
-  "leaderboard.playNow": "Jetzt PvP spielen"
+  "leaderboard.playNow": "Jetzt PvP spielen",
+  "guild.bossDaily": "3 Angriffe pro Tag · der Boss behält seine LP die ganze Woche",
+  "mechanic.new": "NEU!",
+  "mechanic.ok": "Verstanden!",
+  "mechanic.bomb.title": "Zeitbomben",
+  "mechanic.bomb.body": "Die Zahl zeigt die übrigen Züge. Kombiniere den Bomben-Edelstein vor 0, sonst ist das Level verloren!",
+  "mechanic.blight.title": "Verderbter Kristall",
+  "mechanic.blight.body": "Er befällt nach jedem Zug ohne Treffer einen Nachbarstein. Kombiniere direkt daneben, um ihn zu zerstören!",
+  "mechanic.egg.title": "Dracheneier",
+  "mechanic.egg.body": "Zwei Kombinationen neben einem Ei: Es schlüpft und hinterlässt einen Bonus-Edelstein!",
+  "hud.defused": "ENTSCHÄRFT!",
+  "hud.hatched": "GESCHLÜPFT!",
+  "hud.boom": "BUMM!"
 }

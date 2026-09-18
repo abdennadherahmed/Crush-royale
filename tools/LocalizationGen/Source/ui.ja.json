@@ -613,7 +613,7 @@
   "guild.bossHp": "HP {0} / {1}",
   "guild.bossReset": "新しいボスまで {0}日{1}時間",
   "guild.bossDefeated": "ボス撃破！見事なチームワーク。",
-  "guild.attack": "攻撃（残り{0}回）",
+  "guild.attack": "攻撃（今日あと{0}回）",
   "guild.damageBoard": "ダメージランキング",
   "guild.chatPlaceholder": "メッセージ…",
   "guild.send": "送信",
@@ -947,5 +947,17 @@
   "update.failedRequired": "アップデートをインストールできませんでした。接続を確認して再試行してください。",
   "hud.fusion": "フュージョン！",
   "friends.invite": "友達を招待",
-  "leaderboard.playNow": "PvPで遊ぶ"
+  "leaderboard.playNow": "PvPで遊ぶ",
+  "guild.bossDaily": "1日3回攻撃 · ボスのHPは1週間持ち越し",
+  "mechanic.new": "NEW!",
+  "mechanic.ok": "わかった！",
+  "mechanic.bomb.title": "時限爆弾",
+  "mechanic.bomb.body": "数字は残り手数。0になる前に爆弾の宝石をそろえよう。さもないとステージ失敗！",
+  "mechanic.blight.title": "腐敗クリスタル",
+  "mechanic.blight.body": "壊さなかった手のたびに隣の宝石へ広がる。すぐ隣でそろえて破壊しよう！",
+  "mechanic.egg.title": "ドラゴンの卵",
+  "mechanic.egg.body": "卵の隣で2回そろえると孵化して、その場にボーナス宝石が生まれる！",
+  "hud.defused": "解除！",
+  "hud.hatched": "孵化！",
+  "hud.boom": "ドカーン！"
 }

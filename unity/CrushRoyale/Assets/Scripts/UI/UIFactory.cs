@@ -109,10 +109,14 @@ namespace CrushRoyale.Game.UI
             return image;
         }
 
+        public const int MinFontSize = 24;
+
         public static Text Label(Transform parent, string text, int size = Theme.BodySize, Color? color = null, TextAnchor align = TextAnchor.MiddleCenter, FontStyle style = FontStyle.Normal)
         {
             RectTransform rect = Rect("Label", parent);
             Text label = rect.gameObject.AddComponent<Text>();
+            // Legibility floor on phones (1080-wide canvas): nothing smaller than 24 px.
+            size = Mathf.Max(size, MinFontSize);
             bool title = UsesTitleFont(text, size, style);
             label.font = title ? TitleFont : Font;
             label.text = text;
