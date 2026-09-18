@@ -70,24 +70,52 @@ namespace CrushRoyale.Core.Progression
                 throw new ArgumentOutOfRangeException(nameof(tier));
             }
 
-            var free = RewardData.FromCurrency(100 + tier * 10);
-            if (tier % 5 == 0)
+            // Every tier gives something different from its neighbours (coins, lives, bonuses, orbes) so the track reads
+            // as a varied path rather than a column of coin piles.
+            long coins = 100 + tier * 10;
+            RewardData free;
+            switch (tier % 5)
             {
-                free.AddPowerUp((PowerUpType)(tier / 5 % 3), 1);
+                case 1:
+                    free = RewardData.FromCurrency(coins);
+                    break;
+                case 2:
+                    free = new RewardData { Coins = coins / 2, Lives = 1 };
+                    break;
+                case 3:
+                    free = RewardData.FromCurrency(coins / 2).AddPowerUp((PowerUpType)(tier / 5 % 3), 1);
+                    break;
+                case 4:
+                    free = RewardData.FromCurrency(coins, 3);
+                    break;
+                default:
+                    free = RewardData.FromCurrency(coins).AddPowerUp((PowerUpType)(tier / 5 % 3), 1);
+                    break;
             }
             if (tier % 10 == 0)
             {
                 free.Orbes += 10;
             }
 
-            var premium = RewardData.FromCurrency((100 + tier * 10) * 2, tier % 2 == 0 ? 5 : 0);
+            RewardData premium;
+            switch (tier % 4)
+            {
+                case 1:
+                    premium = RewardData.FromCurrency(coins * 2);
+                    break;
+                case 2:
+                    premium = RewardData.FromCurrency(coins, 10);
+                    break;
+                case 3:
+                    premium = RewardData.FromCurrency(coins).AddPowerUp((PowerUpType)(3 + tier / 4 % 3), 1);
+                    break;
+                default:
+                    premium = new RewardData { Coins = coins, Lives = 2 };
+                    break;
+            }
             if (tier % 10 == 0)
             {
                 premium.AddPowerUp((PowerUpType)(6 + tier / 10 % 3), 1);
-            }
-            if (tier % 5 == 0 && tier % 10 != 0)
-            {
-                premium.AddPowerUp((PowerUpType)(3 + tier / 5 % 3), 1);
             }
             if (tier == 25)
             {

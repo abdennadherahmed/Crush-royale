@@ -18,7 +18,8 @@ namespace CrushRoyale.Game.Gameplay
     /// </summary>
     public sealed class MatchController : MonoBehaviour
     {
-        private const int HintDelayMs = 6000;
+        /// <summary>Idle time (after the board has settled) before the best move is suggested.</summary>
+        private const int HintDelayMs = 5000;
 
         private readonly Queue<Func<int, PlayerAction>> _inputs = new Queue<Func<int, PlayerAction>>();
         private GameRoot _game;
@@ -263,7 +264,13 @@ namespace CrushRoyale.Game.Gameplay
 
         private void UpdateHint(int now)
         {
-            if (_hintShown || _animating || Clock.IsPaused || now - _lastActivityMs < HintDelayMs || !Session.IsRunning)
+            if (_animating || Clock.IsPaused)
+            {
+                // The idle countdown starts once cascades have finished.
+                _lastActivityMs = now;
+                return;
+            }
+            if (_hintShown || now - _lastActivityMs < HintDelayMs || !Session.IsRunning)
             {
                 return;
             }

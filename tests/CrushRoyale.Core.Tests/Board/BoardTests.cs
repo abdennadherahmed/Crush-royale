@@ -476,4 +476,54 @@ public class ResolutionEngineTests
         Assert.NotNull(hint);
         Assert.True(MoveFinder.IsValidSwap(manager.Board, hint.Value.From, hint.Value.To));
     }
+
+    [Fact]
+    public void TwoLineBonuses_Swapped_ClearRowAndColumn()
+    {
+        var board = GameBoard.FromDebugString(@"
+            B. G. Y. P. O.
+            G. Y. P. O. B.
+            Y. P. Rh Gv G.
+            R. O. B. R. Y.
+            P. O. G. B. P.");
+        Assert.Equal(ErrorCode.None, MoveFinder.CheckSwap(board, new Pos(2, 2), new Pos(3, 2)));
+        Assert.Contains(MoveFinder.FindValidMoves(board), m => m.Equals(new Move(new Pos(2, 2), new Pos(3, 2))));
+
+        var step = Engine(board).ResolveSwap(board, new Pos(2, 2), new Pos(3, 2)).Value.Steps[0];
+
+        Assert.Equal(1, step.CombosTriggered);
+        Assert.Equal(2, step.SpecialsActivated);
+        Assert.Equal(9, step.Cleared.Count);
+        Assert.All(step.Cleared, c => Assert.True(c.Position.Y == 2 || c.Position.X == 3));
+    }
+
+    [Fact]
+    public void TwoAreaBombs_Swapped_Clear5x5()
+    {
+        var board = GameBoard.FromDebugString(@"
+            B. G. Y. P. O.
+            G. Y. Ba O. B.
+            Y. P. Ra G. G.
+            R. O. B. R. Y.
+            P. O. G. B. P.");
+        var step = Engine(board).ResolveSwap(board, new Pos(2, 3), new Pos(2, 2)).Value.Steps[0];
+
+        Assert.Equal(1, step.CombosTriggered);
+        Assert.Equal(25, step.Cleared.Count);
+    }
+
+    [Fact]
+    public void LineAndBomb_Swapped_ClearThreeRowsAndColumns()
+    {
+        var board = GameBoard.FromDebugString(@"
+            B. G. Y. P. O.
+            G. Y. P. O. B.
+            Y. P. Ra Gv G.
+            R. O. B. R. Y.
+            P. O. G. B. P.");
+        var step = Engine(board).ResolveSwap(board, new Pos(2, 2), new Pos(3, 2)).Value.Steps[0];
+
+        // Rows 1-3 and columns 2-4 on a 5x5 board: everything but the two 2x2 corners on the left.
+        Assert.Equal(25 - 4, step.Cleared.Count);
+    }
 }

@@ -190,6 +190,16 @@ namespace CrushRoyale.Core.Board
             foreach (Move move in moves)
             {
                 GameBoard board = Board;
+                if (MoveFinder.IsSpecialCombo(board, move.From, move.To))
+                {
+                    // Fusing two bonuses beats any plain match.
+                    if (100 > bestScore)
+                    {
+                        bestScore = 100;
+                        best = move;
+                    }
+                    continue;
+                }
                 board.Swap(move.From, move.To);
                 int score = 0;
                 foreach (MatchGroup g in MatchFinder.FindMatches(board))

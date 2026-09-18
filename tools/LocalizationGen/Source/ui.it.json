@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Forzieri express",
   "guild.tech.ChestSpeed.desc": "I forzieri si aprono il 5% più in fretta per grado.",
   "guild.tech.PetXp": "Canile reale",
-  "guild.tech.PetXp.desc": "+10% XP famiglio per grado."
+  "guild.tech.PetXp.desc": "+10% XP famiglio per grado.",
+  "update.checking": "Ricerca aggiornamenti…",
+  "update.downloading": "Download della nuova versione",
+  "update.installing": "Installazione dell'aggiornamento…",
+  "update.title": "Nuova versione",
+  "update.readyBody": "La nuova versione è scaricata. Installarla ora?",
+  "update.requiredBody": "Questa versione non è più supportata online. Installa l'aggiornamento per continuare a giocare.",
+  "update.permissionTitle": "Consenti aggiornamenti",
+  "update.permissionBody": "Solo una volta: nella schermata successiva attiva «Consenti da questa fonte», poi torna. Crush Royale si aggiornerà da solo.",
+  "update.allow": "Consenti",
+  "update.install": "Installa",
+  "update.later": "Più tardi",
+  "update.failed": "Impossibile scaricare l'aggiornamento. Nuovo tentativo al prossimo avvio.",
+  "update.failedRequired": "Impossibile installare l'aggiornamento. Controlla la connessione e riprova.",
+  "hud.fusion": "FUSIONE!",
+  "friends.invite": "Invita un amico",
+  "leaderboard.playNow": "Gioca in PvP"
 }

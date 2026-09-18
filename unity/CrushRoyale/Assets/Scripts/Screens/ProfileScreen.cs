@@ -114,7 +114,7 @@ namespace CrushRoyale.Game.Screens
                 RectTransform plate = CosmeticLook.TitlePlate(scene, Loc, _stats.Profile.Title, Theme.SmallSize);
                 UIFactory.Anchor(plate, 0.26f, 0.8f, 0.8f, 0.885f);
             }
-            string league = Loc.T("league." + _stats.Profile.League) + "  ·  " + Loc.Number(_stats.Profile.Trophies);
+            string league = Loc.T("league." + _stats.Profile.League) + "  ·  " + Loc.T("profile.trophies") + " " + Loc.Number(_stats.Profile.Trophies);
             Text leagueText = UIFactory.Label(scene, league, Theme.SmallSize + 2, Theme.League(_stats.Profile.League), TextAnchor.MiddleLeft, FontStyle.Bold);
             UIFactory.Anchor(leagueText.rectTransform, 0.27f, 0.73f, 0.8f, 0.8f);
             Widgets.TitleOutline(leagueText);
@@ -259,8 +259,11 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
+        private void SlotIcon(Transform parent, CosmeticKind kind, string id, float minX, float minY, float maxX, float maxY) =>
+            CosmeticPreview(parent, Loc, _stats.HeroGender, kind, id, minX, minY, maxX, maxY);
+
         /// <summary>Small visual preview of a cosmetic: frame ring, title ribbon, outfit aura, board tiles, gems, emote.</summary>
-        private void SlotIcon(Transform parent, CosmeticKind kind, string id, float minX, float minY, float maxX, float maxY)
+        public static void CosmeticPreview(Transform parent, Localization Loc, string heroGender, CosmeticKind kind, string id, float minX, float minY, float maxX, float maxY)
         {
             RectTransform box = UIFactory.Anchor(UIFactory.Rect("Preview", parent), minX, minY, maxX, maxY);
             box.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.FitInParent;
@@ -299,7 +302,7 @@ namespace CrushRoyale.Game.Screens
                 {
                     Image aura = UIFactory.Icon(box, ProceduralSprites.Glow(128), CosmeticLook.OutfitAura(id), 0);
                     UIFactory.Stretch(aura.rectTransform, -10, -10, -10, -10);
-                    Sprite dressed = CosmeticLook.HeroFull(_stats.HeroGender ?? "female", id);
+                    Sprite dressed = CosmeticLook.HeroFull(heroGender ?? "female", id);
                     if (dressed != null)
                     {
                         Image body = UIFactory.Icon(box, dressed, Color.white, 0);

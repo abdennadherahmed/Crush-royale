@@ -18,6 +18,8 @@ namespace CrushRoyale.Game.Screens
         private Text _status;
         private Button _offlineButton;
         private bool _connecting;
+        private RectTransform _updateBar;
+        private Image _updateFill;
 
         protected override void Build()
         {
@@ -42,6 +44,77 @@ namespace CrushRoyale.Game.Screens
 
             _status = UIFactory.Label(Root, string.Empty, Theme.SmallSize, Theme.TextMuted);
             UIFactory.Anchor(_status.rectTransform, 0.1f, 0.26f, 0.9f, 0.32f);
+
+            _updateFill = UiKit.Bar(Root, 0f, Theme.Crystal, out _updateBar);
+            UIFactory.Anchor(_updateBar, 0.12f, 0.215f, 0.88f, 0.25f);
+            _updateBar.gameObject.SetActive(false);
+        }
+
+        /// <summary>
+        /// Self-update (directly-installed APKs): download the newer build with a progress bar and open the installer.
+        /// Returns true when the game must stop here (installer opened, or a required update that failed).
+        /// </summary>
+        private async Task<bool> RunUpdaterAsync(bool mustUpdate)
+        {
+            var updater = new AppUpdater(Game.Config);
+            if (!updater.Supported)
+            {
+                return false;
+            }
+            _status.text = Loc.T("update.checking");
+            if (!await updater.CheckAsync() || this == null)
+            {
+                return mustUpdate;
+            }
+            bool required = mustUpdate || updater.Required;
+            Game.Telemetry.Track("update_found", ("to", (int)updater.Available.VersionCode), ("required", required));
+            _updateBar.gameObject.SetActive(true);
+            while (this != null)
+            {
+                AppUpdater.Outcome outcome = await updater.DownloadAndInstallAsync(
+                    progress =>
+                    {
+                        if (this == null)
+                        {
+                            return;
+                        }
+                        _updateFill.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(progress), 1f);
+                        _status.text = Loc.T("update.downloading") + "  " + Mathf.RoundToInt(progress * 100) + "%";
+                    },
+                    () => UI.Dialog(Loc.T("update.permissionTitle"), Loc.T("update.permissionBody"), Loc.T("update.allow"), required ? null : Loc.T("update.later")));
+                if (this == null)
+                {
+                    return true;
+                }
+                if (outcome == AppUpdater.Outcome.InstallerOpened)
+                {
+                    // Installing restarts the game. Back here means the player closed the installer.
+                    _status.text = Loc.T("update.installing");
+                    await Task.Delay(1500);
+                    if (this == null)
+                    {
+                        return true;
+                    }
+                    bool retry = await UI.Dialog(Loc.T("update.title"), Loc.T(required ? "update.requiredBody" : "update.readyBody"), Loc.T("update.install"), required ? null : Loc.T("update.later"));
+                    if (retry || required)
+                    {
+                        continue;
+                    }
+                    break;
+                }
+                Game.Telemetry.Track("update_failed", ("required", required));
+                if (!required)
+                {
+                    UI.Toast(Loc.T("update.failed"), 3f);
+                    break;
+                }
+                await UI.Alert(Loc.T("update.title"), Loc.T("update.failedRequired"));
+            }
+            if (this != null)
+            {
+                _updateBar.gameObject.SetActive(false);
+            }
+            return false;
         }
 
         public override async Task OnShownAsync()
@@ -60,6 +133,11 @@ namespace CrushRoyale.Game.Screens
                 {
                     Application.OpenURL(Game.Config.PrivacyPolicyUrl);
                 }
+            }
+
+            if (await RunUpdaterAsync(false))
+            {
+                return;
             }
 
             _status.text = Loc.T("splash.connecting");
@@ -85,6 +163,17 @@ namespace CrushRoyale.Game.Screens
                 CrushApiException error = Game.Backend.LastError;
                 if (error != null && error.Code == "VersionMismatch")
                 {
+                    // The server runs newer rules: update in place (APK) or through the store (Google Play install).
+                    if (new AppUpdater(Game.Config).Supported)
+                    {
+                        await RunUpdaterAsync(true);
+                        if (this != null)
+                        {
+                            // No newer build published yet: the player can only wait for it.
+                            _status.text = Loc.T("error.VersionMismatch");
+                        }
+                        return;
+                    }
                     await UI.Alert(Loc.T("error.title"), Loc.T("error.VersionMismatch"));
                     Application.OpenURL("market://details?id=" + Application.identifier);
                     return;

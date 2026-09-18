@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Baús expressos",
   "guild.tech.ChestSpeed.desc": "Baús abrem 5% mais rápido por nível.",
   "guild.tech.PetXp": "Canil real",
-  "guild.tech.PetXp.desc": "+10% de XP de mascote por nível."
+  "guild.tech.PetXp.desc": "+10% de XP de mascote por nível.",
+  "update.checking": "Procurando atualizações…",
+  "update.downloading": "Baixando a nova versão",
+  "update.installing": "Instalando a atualização…",
+  "update.title": "Nova versão",
+  "update.readyBody": "A nova versão foi baixada. Instalar agora?",
+  "update.requiredBody": "Esta versão não é mais aceita online. Instale a atualização para continuar jogando.",
+  "update.permissionTitle": "Permitir atualizações",
+  "update.permissionBody": "Só uma vez: na próxima tela ative \"Permitir desta fonte\" e volte. O Crush Royale vai se atualizar sozinho.",
+  "update.allow": "Permitir",
+  "update.install": "Instalar",
+  "update.later": "Mais tarde",
+  "update.failed": "Não foi possível baixar a atualização. Nova tentativa no próximo início.",
+  "update.failedRequired": "Não foi possível instalar a atualização. Verifique sua conexão e tente de novo.",
+  "hud.fusion": "FUSÃO!",
+  "friends.invite": "Convidar um amigo",
+  "leaderboard.playNow": "Jogar PvP agora"
 }

@@ -154,9 +154,19 @@ namespace CrushRoyale.Game.Gameplay
             if (piece.IsStone)
             {
                 _body.sprite = ArtLibrary.Stone() ?? ProceduralSprites.Stone();
-                float shade = piece.Hp >= 2 ? 0.7f : 1f;
-                _body.color = new Color(shade, shade, shade, 1f);
-                _overlay.enabled = false;
+                _body.color = Color.white;
+                // Two-hit stones are bound with iron bands (3D overlay), which drop off after the first hit.
+                Sprite bands = piece.Hp >= 2 ? ArtLibrary.StoneBands() : null;
+                _overlay.enabled = bands != null;
+                if (bands != null)
+                {
+                    _overlay.sprite = bands;
+                    _overlay.color = Color.white;
+                }
+                else if (piece.Hp >= 2)
+                {
+                    _body.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                }
                 return;
             }
 
@@ -177,18 +187,19 @@ namespace CrushRoyale.Game.Gameplay
             {
                 case PieceType.LineHorizontal:
                     _overlay.enabled = true;
-                    _overlay.sprite = ProceduralSprites.Stripes(true);
-                    _overlay.color = new Color(1, 1, 1, 0.9f);
+                    _overlay.sprite = ArtLibrary.Special(piece.Type) ?? ProceduralSprites.Stripes(true);
+                    _overlay.color = Color.white;
                     break;
                 case PieceType.LineVertical:
                     _overlay.enabled = true;
-                    _overlay.sprite = ProceduralSprites.Stripes(false);
-                    _overlay.color = new Color(1, 1, 1, 0.9f);
+                    _overlay.sprite = ArtLibrary.Special(piece.Type) ?? ProceduralSprites.Stripes(false);
+                    _overlay.color = Color.white;
                     break;
                 case PieceType.AreaBomb:
                     _overlay.enabled = true;
-                    _overlay.sprite = ProceduralSprites.Ring();
-                    _overlay.color = new Color(1f, 0.95f, 0.6f, 1f);
+                    Sprite bomb = ArtLibrary.Special(piece.Type);
+                    _overlay.sprite = bomb ?? ProceduralSprites.Ring();
+                    _overlay.color = bomb != null ? Color.white : new Color(1f, 0.95f, 0.6f, 1f);
                     break;
                 default:
                     _overlay.enabled = false;

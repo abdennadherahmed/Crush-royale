@@ -198,6 +198,15 @@ namespace CrushRoyale.Game.Gameplay
 
         private void OnStep(ResolutionStep step)
         {
+            if (step.CombosTriggered > 0)
+            {
+                // Two bonuses fused: the biggest single moment of a match.
+                Announce(Loc.T("hud.fusion"), Theme.Crystal, 1.25f, true);
+                _board.Fx?.Shake(0.45f, 30f);
+                _game.Haptics.Heavy();
+                _game.Audio.PlaySFX(SoundIds.Explosion);
+                Voice(SoundIds.VoiceIncredible);
+            }
             int level = step.CascadeLevel + 1;
             bool bigShape = false;
             foreach (MatchGroup group in step.Groups)

@@ -82,6 +82,16 @@ public sealed class CrushApp : WebApplicationFactory<Program>
             return true;
         }, CancellationToken.None);
 
+    public Task SetGuildLevelAsync(Guid member, int level) =>
+        Store.TransactAsync(async tx =>
+        {
+            long guildId = (await tx.GetPlayerAsync(member, false))!.State.GuildId!.Value;
+            GuildRecord guild = (await tx.GetGuildAsync(guildId))!;
+            guild.Guild.Level = level;
+            await tx.UpdateGuildAsync(guild);
+            return true;
+        }, CancellationToken.None);
+
     public Task<PlayerState> StateAsync(Guid id) =>
         Store.TransactAsync(async tx => (await tx.GetPlayerAsync(id, false))!.State, CancellationToken.None);
 
@@ -321,6 +331,19 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         WheelSpinResponse spin = await http.PostOk<WheelSpinResponse>(ApiRoutes.WheelSpin, null);
         Assert.InRange(spin.SliceIndex, 0, 7);
         await http.PostError(ApiRoutes.WheelSpin, null, HttpStatusCode.Conflict);
+    }
+
+    [Fact]
+    public async Task Guild_DonateOrbes_OnAHighLevelGuild()
+    {
+        var (leader, http, _) = await _app.NewPlayerAsync(unlockStage: 400);
+        await http.PostOk<GuildDto>(ApiRoutes.GuildCreate, new CreateGuildRequest { Name = "Winners", Description = "Chill play", IsOpen = true });
+        await _app.MutateAsync(leader, s => s.Wallet.Orbes = 64_950);
+        await _app.SetGuildLevelAsync(leader, 20);
+
+        GuildDto mine = await http.GetOk<GuildDto>(ApiRoutes.GuildMine);
+        DonateResponse donation = await http.PostOk<DonateResponse>(ApiRoutes.GuildDonate, new DonateRequest { Amount = mine.NextLevelCost, Currency = "Orbes" });
+        Assert.Equal(21, donation.Guild.Level);
     }
 
     [Fact]

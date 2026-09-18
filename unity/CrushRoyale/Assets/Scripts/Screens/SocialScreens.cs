@@ -41,7 +41,7 @@ namespace CrushRoyale.Game.Screens
 
             if (_friends == null)
             {
-                UIFactory.Height(UIFactory.Label(list, Loc.T("common.loading"), Theme.BodySize, Theme.TextMuted), 100);
+                Widgets.Loading(list, Loc, 100);
                 return;
             }
 
@@ -61,7 +61,7 @@ namespace CrushRoyale.Game.Screens
             Widgets.SectionTitle(list, Loc.T("friends.list", _friends.Friends.Count));
             if (_friends.Friends.Count == 0)
             {
-                UIFactory.Height(UIFactory.Label(list, Loc.T("friends.empty"), Theme.BodySize, Theme.TextMuted), 120);
+                Widgets.EmptyState(list, "item_heart", Loc.T("friends.empty"), Loc.T("friends.invite"), () => _ = ChallengeFlow.ShareAsync(UI, Game));
             }
             foreach (PublicProfileDto friend in _friends.Friends)
             {
@@ -256,7 +256,7 @@ namespace CrushRoyale.Game.Screens
             }
             if (rows.Count == 0)
             {
-                UIFactory.Height(UIFactory.Label(list, Loc.T("leaderboard.empty"), Theme.BodySize, Theme.TextMuted), 160);
+                Widgets.EmptyState(list, "item_trophy", Loc.T("leaderboard.empty"), Loc.T("leaderboard.playNow"), () => UI.Show<PvpScreen>());
             }
         }
 
@@ -372,7 +372,7 @@ namespace CrushRoyale.Game.Screens
             RectTransform body = Frame("achievements.title");
             if (_data == null)
             {
-                UIFactory.Label(body, Loc.T("common.loading"), Theme.BodySize, Theme.TextMuted);
+                Widgets.Loading(body, Loc);
                 return;
             }
 
@@ -532,7 +532,7 @@ namespace CrushRoyale.Game.Screens
             RectTransform body = Frame("battlepass.title");
             if (_pass == null)
             {
-                UIFactory.Label(body, Loc.T("common.loading"), Theme.BodySize, Theme.TextMuted);
+                Widgets.Loading(body, Loc);
                 return;
             }
 
@@ -700,10 +700,18 @@ namespace CrushRoyale.Game.Screens
             }
 
             List<RevealItem> items = RevealOverlay.FromReward(reward);
-            RevealItem first = items.Count > 0 ? items[0] : null;
+            // Headline icon: the most special item of the tier (items are listed coins first, cosmetics last).
+            RevealItem first = items.LastOrDefault(i => i.Art != null);
             if (first?.Art != null)
             {
+                if (first.Rare && !claimed)
+                {
+                    Image glow = UIFactory.Icon(cell.transform, ProceduralSprites.Glow(), new Color(1f, 0.85f, 0.3f, 0.55f), 0);
+                    UIFactory.Anchor(glow.rectTransform, 0f, 0.15f, 0.5f, 1f);
+                    glow.gameObject.AddComponent<Pulse>();
+                }
                 Image icon = UIFactory.Icon(cell.transform, first.Art, claimed ? new Color(1f, 1f, 1f, 0.5f) : Color.white, 0);
+                icon.preserveAspect = true;
                 UIFactory.Anchor(icon.rectTransform, 0.05f, 0.25f, 0.45f, 0.95f);
             }
             string caption = string.Join("\n", items.Select(i => i.Caption));
@@ -800,7 +808,7 @@ namespace CrushRoyale.Game.Screens
             RectTransform list = UIFactory.ScrollList(body, 16, 28);
             if (_quests == null)
             {
-                UIFactory.Height(UIFactory.Label(list, Loc.T("common.loading"), Theme.BodySize, Theme.TextMuted), 100);
+                Widgets.Loading(list, Loc, 100);
                 return;
             }
 

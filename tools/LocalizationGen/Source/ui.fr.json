@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Coffres express",
   "guild.tech.ChestSpeed.desc": "Les coffres s'ouvrent 5 % plus vite par rang.",
   "guild.tech.PetXp": "Chenil royal",
-  "guild.tech.PetXp.desc": "+10 % d'XP de familier par rang."
+  "guild.tech.PetXp.desc": "+10 % d'XP de familier par rang.",
+  "update.checking": "Recherche de mise à jour…",
+  "update.downloading": "Téléchargement de la nouvelle version",
+  "update.installing": "Installation de la mise à jour…",
+  "update.title": "Nouvelle version",
+  "update.readyBody": "La nouvelle version est téléchargée. L'installer maintenant ?",
+  "update.requiredBody": "Cette version n'est plus acceptée en ligne. Installe la mise à jour pour continuer à jouer.",
+  "update.permissionTitle": "Autoriser les mises à jour",
+  "update.permissionBody": "Une seule fois : sur l'écran suivant, active « Autoriser cette source », puis reviens. Crush Royale se mettra ensuite à jour tout seul.",
+  "update.allow": "Autoriser",
+  "update.install": "Installer",
+  "update.later": "Plus tard",
+  "update.failed": "La mise à jour n'a pas pu être téléchargée. Nouvel essai au prochain lancement.",
+  "update.failedRequired": "La mise à jour n'a pas pu être installée. Vérifie ta connexion puis réessaie.",
+  "hud.fusion": "FUSION !",
+  "friends.invite": "Inviter un ami",
+  "leaderboard.playNow": "Jouer en PvP"
 }

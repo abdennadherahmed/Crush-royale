@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Cofres exprés",
   "guild.tech.ChestSpeed.desc": "Los cofres se abren un 5% más rápido por rango.",
   "guild.tech.PetXp": "Perrera real",
-  "guild.tech.PetXp.desc": "+10% de XP de mascota por rango."
+  "guild.tech.PetXp.desc": "+10% de XP de mascota por rango.",
+  "update.checking": "Buscando actualizaciones…",
+  "update.downloading": "Descargando la nueva versión",
+  "update.installing": "Instalando la actualización…",
+  "update.title": "Nueva versión",
+  "update.readyBody": "La nueva versión está descargada. ¿Instalarla ahora?",
+  "update.requiredBody": "Esta versión ya no es compatible en línea. Instala la actualización para seguir jugando.",
+  "update.permissionTitle": "Permitir actualizaciones",
+  "update.permissionBody": "Solo una vez: en la siguiente pantalla activa «Permitir de esta fuente» y vuelve. Crush Royale se actualizará solo.",
+  "update.allow": "Permitir",
+  "update.install": "Instalar",
+  "update.later": "Más tarde",
+  "update.failed": "No se pudo descargar la actualización. Se reintentará en el próximo inicio.",
+  "update.failedRequired": "No se pudo instalar la actualización. Revisa tu conexión e inténtalo de nuevo.",
+  "hud.fusion": "¡FUSIÓN!",
+  "friends.invite": "Invitar a un amigo",
+  "leaderboard.playNow": "Jugar PvP ahora"
 }

@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Express-Truhen",
   "guild.tech.ChestSpeed.desc": "Truhen öffnen sich pro Rang 5 % schneller.",
   "guild.tech.PetXp": "Königlicher Zwinger",
-  "guild.tech.PetXp.desc": "+10 % Begleiter-EP pro Rang."
+  "guild.tech.PetXp.desc": "+10 % Begleiter-EP pro Rang.",
+  "update.checking": "Suche nach Updates…",
+  "update.downloading": "Neue Version wird geladen",
+  "update.installing": "Update wird installiert…",
+  "update.title": "Neue Version",
+  "update.readyBody": "Die neue Version ist geladen. Jetzt installieren?",
+  "update.requiredBody": "Diese Version wird online nicht mehr unterstützt. Installiere das Update, um weiterzuspielen.",
+  "update.permissionTitle": "Updates erlauben",
+  "update.permissionBody": "Nur einmal: Aktiviere auf dem nächsten Bildschirm „Dieser Quelle vertrauen“ und kehre zurück. Danach aktualisiert sich Crush Royale selbst.",
+  "update.allow": "Erlauben",
+  "update.install": "Installieren",
+  "update.later": "Später",
+  "update.failed": "Das Update konnte nicht geladen werden. Neuer Versuch beim nächsten Start.",
+  "update.failedRequired": "Das Update konnte nicht installiert werden. Prüfe deine Verbindung und versuche es erneut.",
+  "hud.fusion": "FUSION!",
+  "friends.invite": "Freund einladen",
+  "leaderboard.playNow": "Jetzt PvP spielen"
 }

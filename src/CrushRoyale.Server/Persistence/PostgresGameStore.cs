@@ -99,7 +99,7 @@ public sealed class PostgresGameStore : IGameStore
     public async Task<IReadOnlyList<GuildRankingRow>> TopGuildsAsync(int limit, CancellationToken cancellationToken)
     {
         const string sql = @"
-            select id, name, total_trophies, member_count, level
+            select id, name, total_trophies, member_count, coalesce((state->'guild'->>'level')::int, level)
             from public.guilds
             where member_count > 0
             order by total_trophies desc, id
@@ -167,7 +167,7 @@ public sealed class PostgresGameStore : IGameStore
     public async Task<IReadOnlyList<GuildSummary>> SearchGuildsAsync(string namePrefix, int limit, CancellationToken cancellationToken)
     {
         const string sql = @"
-            select id, name, level, member_count, total_trophies, is_open, min_trophies
+            select id, name, coalesce((state->'guild'->>'level')::int, level), member_count, total_trophies, is_open, min_trophies
             from public.guilds
             where lower(name) like @prefix escape '\'
             order by total_trophies desc, id
@@ -887,10 +887,14 @@ public sealed class PostgresGameStore : IGameStore
             cmd.Parameters.Add(new NpgsqlParameter("state", NpgsqlDbType.Jsonb) { Value = Json.Serialize(s) });
         }
 
+        private const int LegacyGuildLevelColumnMax = 20;
+
         private static void AddGuildColumns(NpgsqlCommand cmd, GuildRecord guild)
         {
             cmd.Parameters.AddWithValue("name", guild.Guild.Name);
-            cmd.Parameters.AddWithValue("level", guild.Guild.Level);
+            // The column only mirrors the level for indexing: databases created before 50-level guilds still carry a
+            // "level between 1 and 20" check (migration 20260918090000 widens it), and the real level lives in the state.
+            cmd.Parameters.AddWithValue("level", Math.Min(guild.Guild.Level, LegacyGuildLevelColumnMax));
             cmd.Parameters.AddWithValue("members", guild.Guild.Members.Count);
             cmd.Parameters.AddWithValue("trophies", guild.Guild.TotalTrophies);
             cmd.Parameters.AddWithValue("open", guild.Guild.IsOpen);

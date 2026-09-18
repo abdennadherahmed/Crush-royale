@@ -49,6 +49,21 @@ namespace CrushRoyale.Game.UI
 
         public static Sprite Ice() => Load("Art/Gems/ice");
 
+        /// <summary>Iron bands laid over a stone that still needs two hits.</summary>
+        public static Sprite StoneBands() => Load("Art/Gems/stone_bands");
+
+        /// <summary>3D overlay of a bonus gem: double-arrow rod (lines) or spiked gold ring (area bomb).</summary>
+        public static Sprite Special(PieceType type)
+        {
+            switch (type)
+            {
+                case PieceType.LineHorizontal: return Load("Art/Gems/special_line_h");
+                case PieceType.LineVertical: return Load("Art/Gems/special_line_v");
+                case PieceType.AreaBomb: return Load("Art/Gems/special_bomb");
+                default: return null;
+            }
+        }
+
         // Same order as PowerUpType.
         private static readonly string[] PowerUpFiles =
         {

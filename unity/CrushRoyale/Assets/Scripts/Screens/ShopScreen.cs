@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CrushRoyale.Client;
 using CrushRoyale.Contracts;
+using CrushRoyale.Core.Economy;
 using CrushRoyale.Game.Audio;
 using CrushRoyale.Game.UI;
 using UnityEngine;
@@ -77,7 +78,7 @@ namespace CrushRoyale.Game.Screens
         {
             if (_shop == null)
             {
-                UIFactory.Height(UIFactory.Label(_list, Loc.T("common.loading"), Theme.BodySize, Theme.TextMuted), 120);
+                Widgets.Loading(_list, Loc, 120);
                 return;
             }
 
@@ -321,7 +322,7 @@ namespace CrushRoyale.Game.Screens
             Grid(_list, cosmetics, 2, 330, (cell, item) =>
             {
                 Image card = CardIn(cell);
-                Icon(card.transform, "item_gift", 0.3f, 0.5f, 0.7f, 0.92f);
+                CosmeticPreviewOrGift(card.transform, item.CosmeticId, 0.25f, 0.5f, 0.75f, 0.94f);
                 Text name = UIFactory.Label(card.transform, Loc.T("cosmetic." + item.CosmeticId), Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Anchor(name.rectTransform, 0.05f, 0.3f, 0.95f, 0.5f);
                 Widgets.TitleOutline(name);
@@ -346,10 +347,11 @@ namespace CrushRoyale.Game.Screens
                 bool equipped = cosmetic == profile.Inventory.EquippedFrame || cosmetic == profile.Inventory.EquippedBoardSkin
                     || cosmetic == profile.Inventory.EquippedPieceSkin || cosmetic == profile.Inventory.EquippedTitle || cosmetic == profile.Inventory.EquippedOutfit;
                 Image row = UIFactory.Panel("Owned", _list, Theme.Panel);
-                UIFactory.Height(row, 120);
+                UIFactory.Height(row, 170);
                 UiKit.CardFrame(row);
+                CosmeticPreviewOrGift(row.transform, cosmetic, 0.03f, 0.1f, 0.19f, 0.9f);
                 Text label = UIFactory.Label(row.transform, (equipped ? "✔ " : string.Empty) + Loc.T("cosmetic." + cosmetic), Theme.BodySize - 4, equipped ? Theme.Gold : Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
-                UIFactory.Anchor(label.rectTransform, 0.05f, 0.1f, 0.68f, 0.9f);
+                UIFactory.Anchor(label.rectTransform, 0.22f, 0.1f, 0.68f, 0.9f);
                 if (!equipped && !cosmetic.StartsWith("emote.", StringComparison.Ordinal))
                 {
                     string id = cosmetic;
@@ -357,6 +359,19 @@ namespace CrushRoyale.Game.Screens
                     UIFactory.Anchor(equip.GetComponent<RectTransform>(), 0.7f, 0.15f, 0.96f, 0.85f);
                 }
             }
+        }
+
+        /// <summary>Real look of the cosmetic (frame, board, gems, outfit, title) instead of a generic gift box.</summary>
+        private void CosmeticPreviewOrGift(Transform parent, string cosmeticId, float minX, float minY, float maxX, float maxY)
+        {
+            CosmeticDefinition definition = string.IsNullOrEmpty(cosmeticId) ? null : CosmeticCatalog.Get(cosmeticId);
+            if (definition == null)
+            {
+                Icon(parent, "item_gift", minX, minY, maxX, maxY);
+                return;
+            }
+            string gender = Game.Backend.Profile?.Hero?.Gender ?? Game.Save.Settings.HeroGender;
+            ProfileScreen.CosmeticPreview(parent, Loc, gender, definition.Kind, cosmeticId, minX, minY, maxX, maxY);
         }
 
         private static void Grid(Transform list, List<ShopItemDto> items, int columns, float cellHeight, Action<RectTransform, ShopItemDto> fill)

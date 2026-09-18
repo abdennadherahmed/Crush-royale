@@ -106,8 +106,9 @@ namespace CrushRoyale.Game.UI
             overlay._caption = UIFactory.Label(shade.transform, string.Empty, Theme.TitleSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(overlay._caption.rectTransform, 0.05f, 0.19f, 0.95f, 0.3f);
             Widgets.TitleOutline(overlay._caption);
-            overlay._counter = UIFactory.Label(shade.transform, string.Empty, Theme.BodySize, Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(overlay._counter.rectTransform, 0.3f, 0.78f, 0.7f, 0.84f);
+            overlay._counter = UIFactory.Label(shade.transform, string.Empty, Theme.HeaderSize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(overlay._counter.rectTransform, 0.25f, 0.77f, 0.75f, 0.85f);
+            Widgets.TitleOutline(overlay._counter);
             return overlay;
         }
 
@@ -311,7 +312,10 @@ namespace CrushRoyale.Game.UI
                     Image icon = UIFactory.Icon(card.transform, item.Art, Color.white, 0);
                     UIFactory.Anchor(icon.rectTransform, 0.08f, 0.32f, 0.92f, 0.95f);
                 }
-                Text label = UIFactory.Label(card.transform, item.Caption, Theme.SmallSize - 8, item.Rare ? Theme.Gold : Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                Text label = UIFactory.Label(card.transform, item.Caption, Theme.SmallSize, item.Rare ? Theme.Gold : Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                label.resizeTextForBestFit = true;
+                label.resizeTextMinSize = Theme.SmallSize - 12;
+                label.resizeTextMaxSize = Theme.SmallSize + 2;
                 UIFactory.Anchor(label.rectTransform, 0.03f, 0.02f, 0.97f, 0.32f);
                 Widgets.TitleOutline(label);
                 card.gameObject.AddComponent<PopIn>().Delay = i * 0.05f;

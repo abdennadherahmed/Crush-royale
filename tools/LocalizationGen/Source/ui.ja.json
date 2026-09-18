@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "急速宝箱",
   "guild.tech.ChestSpeed.desc": "ランクごとに宝箱の開封が5%速くなる。",
   "guild.tech.PetXp": "王家の飼育小屋",
-  "guild.tech.PetXp.desc": "ランクごとにペットXP+10%。"
+  "guild.tech.PetXp.desc": "ランクごとにペットXP+10%。",
+  "update.checking": "アップデートを確認中…",
+  "update.downloading": "新しいバージョンをダウンロード中",
+  "update.installing": "アップデートをインストール中…",
+  "update.title": "新しいバージョン",
+  "update.readyBody": "新しいバージョンのダウンロードが完了しました。今すぐインストールしますか？",
+  "update.requiredBody": "このバージョンはオンラインで利用できなくなりました。プレイを続けるにはアップデートをインストールしてください。",
+  "update.permissionTitle": "アップデートを許可",
+  "update.permissionBody": "初回のみ：次の画面で「この提供元のアプリを許可」をオンにして戻ってください。以後 Crush Royale は自動で更新されます。",
+  "update.allow": "許可",
+  "update.install": "インストール",
+  "update.later": "あとで",
+  "update.failed": "アップデートをダウンロードできませんでした。次回起動時に再試行します。",
+  "update.failedRequired": "アップデートをインストールできませんでした。接続を確認して再試行してください。",
+  "hud.fusion": "フュージョン！",
+  "friends.invite": "友達を招待",
+  "leaderboard.playNow": "PvPで遊ぶ"
 }

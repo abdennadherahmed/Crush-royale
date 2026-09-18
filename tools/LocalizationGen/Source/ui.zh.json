@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "极速宝箱",
   "guild.tech.ChestSpeed.desc": "每级宝箱开启速度提升5%。",
   "guild.tech.PetXp": "皇家兽舍",
-  "guild.tech.PetXp.desc": "每级宠物经验+10%。"
+  "guild.tech.PetXp.desc": "每级宠物经验+10%。",
+  "update.checking": "正在检查更新…",
+  "update.downloading": "正在下载新版本",
+  "update.installing": "正在安装更新…",
+  "update.title": "新版本",
+  "update.readyBody": "新版本已下载。现在安装吗？",
+  "update.requiredBody": "此版本已无法在线使用。请安装更新以继续游戏。",
+  "update.permissionTitle": "允许更新",
+  "update.permissionBody": "仅需一次：在下一个页面开启“允许来自此来源”，然后返回。之后 Crush Royale 会自动更新。",
+  "update.allow": "允许",
+  "update.install": "安装",
+  "update.later": "稍后",
+  "update.failed": "更新下载失败，将在下次启动时重试。",
+  "update.failedRequired": "无法安装更新。请检查网络后重试。",
+  "hud.fusion": "融合！",
+  "friends.invite": "邀请好友",
+  "leaderboard.playNow": "立即 PvP"
 }

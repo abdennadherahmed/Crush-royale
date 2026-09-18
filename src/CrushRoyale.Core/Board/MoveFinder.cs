@@ -43,10 +43,17 @@ namespace CrushRoyale.Core.Board
             {
                 return ErrorCode.NotSwappable;
             }
+            if (IsSpecialCombo(board, a, b))
+            {
+                return ErrorCode.None;
+            }
             return CreatesMatch(board, a, b) ? ErrorCode.None : ErrorCode.NoMatch;
         }
 
         public static bool IsValidSwap(GameBoard board, Pos a, Pos b) => CheckSwap(board, a, b) == ErrorCode.None;
+
+        /// <summary>Two adjacent bonuses (any kinds, any colors) can always be swapped: their effects combine.</summary>
+        public static bool IsSpecialCombo(GameBoard board, Pos a, Pos b) => board[a].IsSpecial && board[b].IsSpecial;
 
         /// <summary>All valid swaps. Each unordered pair appears once (From is left/below To).</summary>
         public static List<Move> FindValidMoves(GameBoard board)
@@ -100,7 +107,16 @@ namespace CrushRoyale.Core.Board
         private static bool TryPair(GameBoard board, Pos a, Pos b, List<Move> output)
         {
             Piece pb = board[b];
-            if (!pb.CanSwap || pb.Color == board[a].Color)
+            if (!pb.CanSwap)
+            {
+                return false;
+            }
+            if (IsSpecialCombo(board, a, b))
+            {
+                output?.Add(new Move(a, b));
+                return true;
+            }
+            if (pb.Color == board[a].Color)
             {
                 return false;
             }

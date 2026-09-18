@@ -98,6 +98,9 @@ namespace CrushRoyale.Core.Board
 
         public int SpecialsActivated { get; internal set; }
 
+        /// <summary>Bonus + bonus swaps fused in this wave (0 or 1).</summary>
+        public int CombosTriggered { get; internal set; }
+
         /// <summary>Cleared gems per color, indexed by (int)PieceColor.</summary>
         public int[] ClearedByColor { get; } = new int[6];
 
@@ -194,9 +197,56 @@ namespace CrushRoyale.Core.Board
                 return OperationResult<ResolutionResult>.Fail(error);
             }
 
+            bool combo = MoveFinder.IsSpecialCombo(board, a, b);
+            Piece first = board[a];
+            Piece second = board[b];
             board.Swap(a, b);
             List<MatchGroup> groups = MatchFinder.FindMatches(board);
-            return OperationResult<ResolutionResult>.Ok(Run(board, groups, null, ClearCause.PowerUp, a, b, true, options ?? ResolveOptions.None));
+            if (!combo)
+            {
+                return OperationResult<ResolutionResult>.Ok(Run(board, groups, null, ClearCause.PowerUp, a, b, true, options ?? ResolveOptions.None));
+            }
+
+            // Bonus + bonus: both pieces fuse where the player dropped the first one, into one bigger blast.
+            var comboCells = new List<Pos> { b, a };
+            ClearCause cause = ComboCells(board, b, first.Type, second.Type, comboCells);
+            var fused = new HashSet<int> { first.Id, second.Id };
+            return OperationResult<ResolutionResult>.Ok(Run(board, groups, comboCells, cause, a, b, true, options ?? ResolveOptions.None, fused));
+        }
+
+        /// <summary>
+        /// Combined effect of two swapped bonuses, centered on <paramref name="center"/>:
+        /// line + line = full row and column; line + bomb = three rows and three columns; bomb + bomb = 5x5 blast.
+        /// </summary>
+        private static ClearCause ComboCells(GameBoard board, Pos center, PieceType first, PieceType second, List<Pos> cells)
+        {
+            bool firstBomb = first == PieceType.AreaBomb;
+            bool secondBomb = second == PieceType.AreaBomb;
+            if (firstBomb && secondBomb)
+            {
+                for (int dy = -2; dy <= 2; dy++)
+                {
+                    for (int dx = -2; dx <= 2; dx++)
+                    {
+                        cells.Add(new Pos(center.X + dx, center.Y + dy));
+                    }
+                }
+                return ClearCause.AreaBlast;
+            }
+
+            int half = firstBomb || secondBomb ? 1 : 0;
+            for (int offset = -half; offset <= half; offset++)
+            {
+                for (int x = 0; x < board.Width; x++)
+                {
+                    cells.Add(new Pos(x, center.Y + offset));
+                }
+                for (int y = 0; y < board.Height; y++)
+                {
+                    cells.Add(new Pos(center.X + offset, y));
+                }
+            }
+            return ClearCause.LineBlast;
         }
 
         /// <summary>Clears arbitrary cells (power-ups), then lets cascades play out.</summary>
@@ -217,14 +267,16 @@ namespace CrushRoyale.Core.Board
             Pos swapA,
             Pos swapB,
             bool hasSwap,
-            ResolveOptions options)
+            ResolveOptions options,
+            HashSet<int> fused = null)
         {
             var result = new ResolutionResult();
             int level = 0;
 
             while (groups.Count > 0 || (forced != null && forced.Count > 0))
             {
-                ResolutionStep step = ExecuteStep(board, level, groups, forced, forcedCause, swapA, swapB, hasSwap, options, result);
+                ResolutionStep step = ExecuteStep(board, level, groups, forced, forcedCause, swapA, swapB, hasSwap, options, result, fused);
+                fused = null;
                 result.Steps.Add(step);
 
                 level++;
@@ -259,7 +311,8 @@ namespace CrushRoyale.Core.Board
             Pos swapB,
             bool hasSwap,
             ResolveOptions options,
-            ResolutionResult result)
+            ResolutionResult result,
+            HashSet<int> fused)
         {
             var step = new ResolutionStep { CascadeLevel = level };
             step.Groups.AddRange(groups);
@@ -353,6 +406,17 @@ namespace CrushRoyale.Core.Board
 
             // 3) Chain reactions: any bonus caught in the clear set detonates (order-stable BFS).
             var detonated = new HashSet<int>();
+            if (fused != null)
+            {
+                // The two combined bonuses already gave their (bigger) effect through the forced cells.
+                foreach (int id in fused)
+                {
+                    detonated.Add(id);
+                    step.SpecialsActivated++;
+                    points += _scoring.SpecialActivationBonus;
+                }
+                step.CombosTriggered++;
+            }
             for (int i = 0; i < order.Count; i++)
             {
                 Pos p = order[i];

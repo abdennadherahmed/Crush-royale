@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Быстрые сундуки",
   "guild.tech.ChestSpeed.desc": "Сундуки открываются на 5% быстрее за ранг.",
   "guild.tech.PetXp": "Королевский питомник",
-  "guild.tech.PetXp.desc": "+10% опыта питомца за ранг."
+  "guild.tech.PetXp.desc": "+10% опыта питомца за ранг.",
+  "update.checking": "Проверка обновлений…",
+  "update.downloading": "Загрузка новой версии",
+  "update.installing": "Установка обновления…",
+  "update.title": "Новая версия",
+  "update.readyBody": "Новая версия загружена. Установить сейчас?",
+  "update.requiredBody": "Эта версия больше не поддерживается онлайн. Установите обновление, чтобы продолжить игру.",
+  "update.permissionTitle": "Разрешить обновления",
+  "update.permissionBody": "Только один раз: на следующем экране включите «Разрешить из этого источника» и вернитесь. Дальше Crush Royale будет обновляться сам.",
+  "update.allow": "Разрешить",
+  "update.install": "Установить",
+  "update.later": "Позже",
+  "update.failed": "Не удалось загрузить обновление. Повторим при следующем запуске.",
+  "update.failedRequired": "Не удалось установить обновление. Проверьте подключение и повторите попытку.",
+  "hud.fusion": "СЛИЯНИЕ!",
+  "friends.invite": "Пригласить друга",
+  "leaderboard.playNow": "Играть в PvP"
 }

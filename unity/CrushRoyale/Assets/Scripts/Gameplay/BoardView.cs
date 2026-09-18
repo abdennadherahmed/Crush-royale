@@ -221,22 +221,85 @@ namespace CrushRoyale.Game.Gameplay
             }
         }
 
+        private Coroutine _hintRoutine;
+
+        /// <summary>Idle hint: pulsing rings on both cells and the two gems nudging toward each other.</summary>
         public void ShowHint(Move move)
         {
             if (_hintA == null)
             {
                 return;
             }
+            ClearHint();
             _hintA.rectTransform.anchoredPosition = CellPosition(move.From);
             _hintB.rectTransform.anchoredPosition = CellPosition(move.To);
-            _hintA.color = _hintB.color = new Color(1f, 0.95f, 0.5f, 0.9f);
+            _hintRoutine = StartCoroutine(HintPulse(move));
         }
 
         public void ClearHint()
         {
+            if (_hintRoutine != null)
+            {
+                StopCoroutine(_hintRoutine);
+                _hintRoutine = null;
+                foreach (PieceView view in _pieces.Values)
+                {
+                    if (view != null)
+                    {
+                        view.Rect.anchoredPosition = CellPosition(view.Cell);
+                        view.Rect.localScale = Vector3.one;
+                    }
+                }
+            }
             if (_hintA != null)
             {
                 _hintA.color = _hintB.color = new Color(1, 1, 1, 0);
+                _hintA.rectTransform.localScale = _hintB.rectTransform.localScale = Vector3.one;
+            }
+        }
+
+        private PieceView PieceAt(Pos cell)
+        {
+            foreach (PieceView view in _pieces.Values)
+            {
+                if (view != null && view.Cell.Equals(cell))
+                {
+                    return view;
+                }
+            }
+            return null;
+        }
+
+        private IEnumerator HintPulse(Move move)
+        {
+            PieceView a = PieceAt(move.From);
+            PieceView b = PieceAt(move.To);
+            Vector2 from = CellPosition(move.From);
+            Vector2 to = CellPosition(move.To);
+            Vector2 toward = (to - from) * 0.16f;
+            float start = Time.unscaledTime;
+            while (true)
+            {
+                float t = Time.unscaledTime - start;
+                float pulse = 0.5f + 0.5f * Mathf.Sin(t * 5.5f);
+                _hintA.color = _hintB.color = new Color(1f, 0.93f, 0.45f, 0.45f + 0.5f * pulse);
+                _hintA.rectTransform.localScale = _hintB.rectTransform.localScale = Vector3.one * (1f + 0.1f * pulse);
+
+                // Every 1.4 s the two gems lean into each other twice, like a swap about to happen.
+                float cycle = t % 1.4f;
+                float nudge = cycle < 0.5f ? Mathf.Sin(cycle / 0.5f * Mathf.PI * 2f) : 0f;
+                nudge = Mathf.Max(0f, nudge);
+                if (a != null)
+                {
+                    a.Rect.anchoredPosition = from + toward * nudge;
+                    a.Rect.localScale = Vector3.one * (1f + 0.08f * nudge);
+                }
+                if (b != null)
+                {
+                    b.Rect.anchoredPosition = to - toward * nudge;
+                    b.Rect.localScale = Vector3.one * (1f + 0.08f * nudge);
+                }
+                yield return null;
             }
         }
 
@@ -245,6 +308,10 @@ namespace CrushRoyale.Game.Gameplay
             if (_hintA == null)
             {
                 return;
+            }
+            if (cell.HasValue && _hintRoutine != null)
+            {
+                ClearHint();
             }
             if (cell.HasValue)
             {

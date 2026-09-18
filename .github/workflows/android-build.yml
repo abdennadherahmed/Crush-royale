@@ -5,6 +5,8 @@
 # Optional release signing (created with tools/create-keystore.py); without them the APK is debug-signed:
 #   ANDROID_KEYSTORE_BASE64  base64 of the keystore file
 #   ANDROID_KEYSTORE_PASS    keystore and key password (alias "crushroyale")
+# In-game updates (installed APKs download new builds by themselves, see tools/publish-update.ps1):
+#   SUPABASE_SERVICE_ROLE_KEY  Supabase secret key (Project Settings > API Keys)
 name: Android build
 
 on:
@@ -136,6 +138,14 @@ jobs:
           name: CrushRoyale-${{ inputs.format || 'apk' }}-${{ github.run_number }}
           path: build/Android/CrushRoyale.${{ inputs.format || 'apk' }}
           retention-days: 14
+
+      - name: Publish for in-game updates
+        if: success() && (inputs.format || 'apk') == 'apk'
+        shell: pwsh
+        env:
+          SUPABASE_URL: https://gzivxtzugewlvygnxkhn.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: ./tools/publish-update.ps1 -Apk build/Android/CrushRoyale.apk -VersionCode ${{ github.run_number }}
 
       - name: Upload Unity logs
         if: always()

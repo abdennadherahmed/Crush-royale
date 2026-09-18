@@ -1,5 +1,6 @@
 using System.IO;
 using System.Xml;
+using UnityEditor;
 using UnityEditor.Android;
 using UnityEngine;
 
@@ -21,6 +22,50 @@ namespace CrushRoyale.EditorTools
             // "path" is the unityLibrary module; the launcher module sits next to it.
             Harden(Path.Combine(path, "src", "main", "AndroidManifest.xml"));
             Harden(Path.Combine(path, "..", "launcher", "src", "main", "AndroidManifest.xml"));
+
+            // Directly-installed APKs update themselves (AppUpdater + ApkInstaller.java). Google Play bundles update
+            // through the store, and Play restricts REQUEST_INSTALL_PACKAGES: never declared there.
+            if (!EditorUserBuildSettings.buildAppBundle)
+            {
+                AddSelfUpdate(Path.Combine(path, "src", "main", "AndroidManifest.xml"));
+            }
+        }
+
+        private static void AddSelfUpdate(string manifestPath)
+        {
+            if (!File.Exists(manifestPath))
+            {
+                return;
+            }
+            var doc = new XmlDocument();
+            doc.Load(manifestPath);
+            XmlElement manifest = doc.DocumentElement;
+            if (manifest == null)
+            {
+                return;
+            }
+            if (doc.OuterXml.Contains("com.crushroyale.updater.ApkFileProvider"))
+            {
+                return;
+            }
+            XmlElement permission = doc.CreateElement("uses-permission");
+            permission.SetAttribute("name", AndroidNs, "android.permission.REQUEST_INSTALL_PACKAGES");
+            manifest.PrependChild(permission);
+
+            XmlElement application = manifest.SelectSingleNode("application") as XmlElement;
+            if (application == null)
+            {
+                application = doc.CreateElement("application");
+                manifest.AppendChild(application);
+            }
+            XmlElement provider = doc.CreateElement("provider");
+            provider.SetAttribute("name", AndroidNs, "com.crushroyale.updater.ApkFileProvider");
+            provider.SetAttribute("authorities", AndroidNs, "${applicationId}.apkprovider");
+            provider.SetAttribute("exported", AndroidNs, "false");
+            provider.SetAttribute("grantUriPermissions", AndroidNs, "true");
+            application.AppendChild(provider);
+            doc.Save(manifestPath);
+            Debug.Log("In-game updater declared in " + manifestPath);
         }
 
         private static void Harden(string manifestPath)

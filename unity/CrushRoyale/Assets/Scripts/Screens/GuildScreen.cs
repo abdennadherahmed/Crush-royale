@@ -38,7 +38,7 @@ namespace CrushRoyale.Game.Screens
             RectTransform body = Frame("guild.title");
             if (!_loaded)
             {
-                Text loading = UIFactory.Label(body, Loc.T("common.loading"), Theme.BodySize, Theme.TextMuted);
+                Text loading = Widgets.Loading(body, Loc);
                 UIFactory.Stretch(loading.rectTransform);
                 return;
             }
@@ -644,7 +644,7 @@ namespace CrushRoyale.Game.Screens
             GuildBossDto boss = _guild.Boss;
             if (boss == null)
             {
-                UIFactory.Height(UIFactory.Label(list, Loc.T("common.loading"), Theme.BodySize), 80);
+                Widgets.Loading(list, Loc, 80);
                 return;
             }
             long hp = Math.Max(0, boss.MaxHp - boss.Damage);

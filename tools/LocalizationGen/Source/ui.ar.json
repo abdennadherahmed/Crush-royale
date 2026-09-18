@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "صناديق سريعة",
   "guild.tech.ChestSpeed.desc": "تُفتح الصناديق أسرع بنسبة 5% لكل رتبة.",
   "guild.tech.PetXp": "الوكر الملكي",
-  "guild.tech.PetXp.desc": "+10% خبرة للرفيق لكل رتبة."
+  "guild.tech.PetXp.desc": "+10% خبرة للرفيق لكل رتبة.",
+  "update.checking": "جارٍ البحث عن تحديث…",
+  "update.downloading": "تنزيل الإصدار الجديد",
+  "update.installing": "جارٍ تثبيت التحديث…",
+  "update.title": "إصدار جديد",
+  "update.readyBody": "تم تنزيل الإصدار الجديد. هل تريد تثبيته الآن؟",
+  "update.requiredBody": "هذا الإصدار لم يعد مدعومًا عبر الإنترنت. ثبّت التحديث لمواصلة اللعب.",
+  "update.permissionTitle": "السماح بالتحديثات",
+  "update.permissionBody": "مرة واحدة فقط: في الشاشة التالية فعّل «السماح من هذا المصدر» ثم ارجع. بعدها سيحدّث Crush Royale نفسه تلقائيًا.",
+  "update.allow": "سماح",
+  "update.install": "تثبيت",
+  "update.later": "لاحقًا",
+  "update.failed": "تعذّر تنزيل التحديث. ستتم إعادة المحاولة عند التشغيل التالي.",
+  "update.failedRequired": "تعذّر تثبيت التحديث. تحقّق من اتصالك ثم حاول مجددًا.",
+  "hud.fusion": "اندماج!",
+  "friends.invite": "ادعُ صديقًا",
+  "leaderboard.playNow": "العب PvP الآن"
 }

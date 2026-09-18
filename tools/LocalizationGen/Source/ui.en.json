@@ -931,5 +931,21 @@
   "guild.tech.ChestSpeed": "Express Chests",
   "guild.tech.ChestSpeed.desc": "Chests open 5% faster per rank.",
   "guild.tech.PetXp": "Royal Kennel",
-  "guild.tech.PetXp.desc": "+10% pet XP per rank."
+  "guild.tech.PetXp.desc": "+10% pet XP per rank.",
+  "update.checking": "Checking for updates…",
+  "update.downloading": "Downloading the new version",
+  "update.installing": "Installing the update…",
+  "update.title": "New version",
+  "update.readyBody": "The new version is downloaded. Install it now?",
+  "update.requiredBody": "This version is no longer supported online. Install the update to keep playing.",
+  "update.permissionTitle": "Allow updates",
+  "update.permissionBody": "Only once: on the next screen, turn on \"Allow from this source\", then come back. Crush Royale will then update itself.",
+  "update.allow": "Allow",
+  "update.install": "Install",
+  "update.later": "Later",
+  "update.failed": "The update could not be downloaded. It will be retried at the next launch.",
+  "update.failedRequired": "The update could not be installed. Check your connection, then try again.",
+  "hud.fusion": "FUSION!",
+  "friends.invite": "Invite a friend",
+  "leaderboard.playNow": "Play PvP now"
 }

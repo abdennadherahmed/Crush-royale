@@ -68,7 +68,10 @@ namespace CrushRoyale.Game.UI
                 display.text = Mathf.RoundToInt(current * 100) + "%";
                 onChange(current);
             }, Theme.PanelLight, Theme.HeaderSize, Theme.Text), 120);
-            display = UIFactory.Label(row.transform, Mathf.RoundToInt(current * 100) + "%", Theme.BodySize, Theme.Gold);
+            display = UIFactory.Label(row.transform, Mathf.RoundToInt(current * 100) + "%", Theme.BodySize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            // Wide enough for "100%" (a narrow wrapped label only showed its last line: "0%").
+            display.horizontalOverflow = HorizontalWrapMode.Overflow;
+            UIFactory.Width(display, 170);
             UIFactory.Width(UIFactory.Button(row.transform, "+", () =>
             {
                 current = Mathf.Clamp01(Mathf.Round((current + 0.1f) * 10f) / 10f);
@@ -123,6 +126,52 @@ namespace CrushRoyale.Game.UI
                 UIFactory.Anchor(label.rectTransform, 0.42f, 0f, 1f, 1f);
                 TitleOutline(label);
             }
+        }
+
+        /// <summary>Illustrated empty state: glowing icon, friendly message and an optional call to action.</summary>
+        public static RectTransform EmptyState(Transform parent, string icon, string message, string action = null, Action onAction = null)
+        {
+            Image card = UIFactory.Panel("Empty", parent, Theme.Panel);
+            UIFactory.Height(card, action != null ? 520 : 400);
+            UiKit.CardFrame(card);
+            card.gameObject.AddComponent<PopIn>();
+            float iconBottom = action != null ? 0.5f : 0.38f;
+            Image glow = UIFactory.Icon(card.transform, ProceduralSprites.Glow(128), new Color(0.55f, 0.85f, 1f, 0.45f), 0);
+            UIFactory.Anchor(glow.rectTransform, 0.3f, iconBottom - 0.04f, 0.7f, 0.98f);
+            glow.gameObject.AddComponent<Pulse>();
+            Sprite art = UiKit.Art(icon);
+            if (art != null)
+            {
+                Image image = UIFactory.Icon(card.transform, art, Color.white, 0);
+                image.preserveAspect = true;
+                UIFactory.Anchor(image.rectTransform, 0.36f, iconBottom, 0.64f, 0.93f);
+                image.gameObject.AddComponent<Breathe>().Amount = 0.04f;
+            }
+            Text text = UIFactory.Label(card.transform, message, Theme.BodySize - 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(text.rectTransform, 0.06f, action != null ? 0.26f : 0.06f, 0.94f, iconBottom);
+            TitleOutline(text);
+            if (action != null && onAction != null)
+            {
+                Button button = UIFactory.Button(card.transform, action, onAction, Theme.Gold, Theme.BodySize);
+                UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.2f, 0.05f, 0.8f, 0.22f);
+                button.gameObject.AddComponent<Breathe>().Amount = 0.025f;
+            }
+            return card.rectTransform;
+        }
+
+        /// <summary>"Loading" label with a spinning ring in front of it (a bare word looked like a frozen screen).</summary>
+        public static Text Loading(Transform parent, Localization loc, float height = 0f)
+        {
+            Text label = UIFactory.Label(parent, loc.T("common.loading"), Theme.BodySize, Theme.TextMuted);
+            if (height > 0f)
+            {
+                UIFactory.Height(label, height);
+            }
+            Image ring = UIFactory.Icon(label.transform, ProceduralSprites.Ring(), Theme.Crystal, 64);
+            ring.rectTransform.anchorMin = ring.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            ring.rectTransform.anchoredPosition = new Vector2(-label.preferredWidth * 0.5f - 56f, 0f);
+            ring.gameObject.AddComponent<Spinner>();
+            return label;
         }
 
         public static Text SectionTitle(Transform parent, string text)
