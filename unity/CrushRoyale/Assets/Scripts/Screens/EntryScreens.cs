@@ -618,7 +618,9 @@ namespace CrushRoyale.Game.Screens
                 }
                 DailyWheelPopup.Show();
             });
-            float top = 0.815f - 3 * SideStep;
+            // One step below the bag: both used to sit on 0.815 - 3 * SideStep, and the wheel, built last, covered
+            // the bag button completely. The bag was in the hub all along and simply could not be seen.
+            float top = 0.815f - 4 * SideStep;
             RectTransform rect = UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.815f, top - SideHeight, 0.985f, top);
             Transform wheelIcon = rect.childCount > 0 ? rect.GetChild(0) : null;
             Caption(rect, Loc.T("menu.wheel"), Game.Backend.IsOnline);

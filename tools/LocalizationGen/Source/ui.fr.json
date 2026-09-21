@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "Jouer ma partie",
   "friends.duelStarted": "Joue ta partie : ton ami recevra ensuite le défi.",
   "guild.suggested": "Des guildes qui recrutent",
-  "guild.suggestedHelp": "Des guildes ouvertes avec de la place. Tu peux aussi chercher par nom."
+  "guild.suggestedHelp": "Des guildes ouvertes avec de la place. Tu peux aussi chercher par nom.",
+  "battlepass.buyTier": "{0} orbes",
+  "battlepass.buyTierTitle": "Passer un palier",
+  "battlepass.buyTierBody": "Dépense {0} orbes pour passer directement au palier {1}. Chaque palier acheté coûte un peu plus cher.",
+  "battlepass.buyTierConfirm": "Acheter le palier"
 }
 

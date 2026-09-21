@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "Meine Runde spielen",
   "friends.duelStarted": "Spiele deine Runde: dein Freund bekommt danach die Herausforderung.",
   "guild.suggested": "Gilden, die rekrutieren",
-  "guild.suggestedHelp": "Offene Gilden mit freien Plätzen. Du kannst auch nach Namen suchen."
+  "guild.suggestedHelp": "Offene Gilden mit freien Plätzen. Du kannst auch nach Namen suchen.",
+  "battlepass.buyTier": "{0} Kugeln",
+  "battlepass.buyTierTitle": "Stufe überspringen",
+  "battlepass.buyTierBody": "Gib {0} Kugeln aus, um direkt auf Stufe {1} zu springen. Jede gekaufte Stufe kostet etwas mehr.",
+  "battlepass.buyTierConfirm": "Stufe kaufen"
 }
 

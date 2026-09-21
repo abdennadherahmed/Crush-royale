@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "开始我的一局",
   "friends.duelStarted": "先玩你的一局，随后好友会收到挑战。",
   "guild.suggested": "正在招募的公会",
-  "guild.suggestedHelp": "有空位的公开公会。也可以按名称搜索。"
+  "guild.suggestedHelp": "有空位的公开公会。也可以按名称搜索。",
+  "battlepass.buyTier": "{0} 魔珠",
+  "battlepass.buyTierTitle": "跳过一阶",
+  "battlepass.buyTierBody": "花费 {0} 魔珠直接升到第 {1} 阶。每多买一阶，价格都会略微上涨。",
+  "battlepass.buyTierConfirm": "购买该阶"
 }
 

@@ -301,6 +301,9 @@ namespace CrushRoyale.Client
         public Task<BattlePassResponse> GetBattlePassAsync(CancellationToken ct = default) => Transport.GetAsync<BattlePassResponse>(ApiRoutes.BattlePass, ct);
         public Task<ClaimResponse> ClaimBattlePassAsync(int tier, bool premium, CancellationToken ct = default) => Transport.PostAsync<ClaimResponse>(ApiRoutes.BattlePassClaim, new BattlePassClaimRequest { Tier = tier, Premium = premium }, ct);
 
+        /// <summary>Skips ahead in the pass with orbes. The pass itself is a real-money purchase.</summary>
+        public Task<BattlePassResponse> BuyBattlePassTierAsync(int tiers = 1, CancellationToken ct = default) => Transport.PostAsync<BattlePassResponse>(ApiRoutes.BattlePassBuyTier, new BattlePassTierPurchase { Tiers = tiers }, ct);
+
         // Reports
         public Task<object> ReportCheatAsync(string playerId, string matchId, string reason, CancellationToken ct = default) => Transport.PostAsync<object>(ApiRoutes.ReportCheat, new ReportCheatRequest { PlayerId = playerId, MatchId = matchId, Reason = reason }, ct);
     }

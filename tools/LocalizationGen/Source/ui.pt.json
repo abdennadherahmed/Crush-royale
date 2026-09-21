@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "Jogar minha partida",
   "friends.duelStarted": "Jogue sua partida: seu amigo receberá o desafio depois.",
   "guild.suggested": "Guildas recrutando",
-  "guild.suggestedHelp": "Guildas abertas com vagas. Você também pode buscar por nome."
+  "guild.suggestedHelp": "Guildas abertas com vagas. Você também pode buscar por nome.",
+  "battlepass.buyTier": "{0} orbes",
+  "battlepass.buyTierTitle": "Pular um nível",
+  "battlepass.buyTierBody": "Gaste {0} orbes para pular direto para o nível {1}. Cada nível comprado custa um pouco mais.",
+  "battlepass.buyTierConfirm": "Comprar o nível"
 }
 

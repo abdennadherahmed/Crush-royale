@@ -1,5 +1,6 @@
 using CrushRoyale.Contracts;
 using CrushRoyale.Core.Common;
+using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Economy;
 using CrushRoyale.Core.Progression;
 using CrushRoyale.Server.Infrastructure;
@@ -118,6 +119,7 @@ public sealed class ProgressionService
                 Tier = BattlePass.TierForXp(bp.Xp, live),
                 XpPerTier = live.BattlePassXpPerTier,
                 Premium = ws.State.Inventory.PremiumPassSeason == bp.SeasonIndex,
+                TierPriceOrbes = BattlePass.TierPrice(bp, ws.Balance.Economy),
                 SeasonEndUnixMs = TimeUtil.ToUnixMs(BattlePass.SeasonEndUtc(bp.SeasonIndex, live)),
                 Tiers = Enumerable.Range(1, live.BattlePassTiers).Select(tier =>
                 {
@@ -133,6 +135,32 @@ public sealed class ProgressionService
                 }).ToList()
             };
         }, ct);
+
+    /// <summary>A mis-tap must never empty a wallet: one call can never buy more than this.</summary>
+    private const int MaxTiersPerPurchase = 10;
+
+    /// <summary>
+    /// Buys the next tier with orbes. The pass itself stays a real-money purchase; this only sells impatience, and
+    /// the price climbs with every tier bought, so buying the whole track is never the cheap way through.
+    /// </summary>
+    public async Task<BattlePassResponse> BuyBattlePassTierAsync(Guid userId, BattlePassTierPurchase request, CancellationToken ct)
+    {
+        await _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            BattlePass.EnsureSeason(ws.State.BattlePass, ws.Now, ws.Balance.LiveOps);
+            BattlePassState bp = ws.State.BattlePass;
+            int tiers = Math.Min(Math.Max(1, request?.Tiers ?? 1), MaxTiersPerPurchase);
+            for (int i = 0; i < tiers; i++)
+            {
+                int price = BattlePass.TierPrice(bp, ws.Balance.Economy);
+                ws.Wallet.Debit(Currency.Orbes, price, TransactionReason.BattlePassReward, "bp:tier:" + bp.SeasonIndex + ":" + bp.TiersBought).ThrowIfFailed();
+                BattlePass.BuyTier(bp, ws.Balance.LiveOps).ThrowIfFailed();
+            }
+            return true;
+        }, ct).ConfigureAwait(false);
+        return await GetBattlePassAsync(userId, ct).ConfigureAwait(false);
+    }
 
     public Task<ClaimResponse> ClaimBattlePassAsync(Guid userId, BattlePassClaimRequest request, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx =>

@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "Gioca la mia partita",
   "friends.duelStarted": "Gioca la tua partita: il tuo amico riceverà poi la sfida.",
   "guild.suggested": "Gilde che reclutano",
-  "guild.suggestedHelp": "Gilde aperte con posti liberi. Puoi anche cercare per nome."
+  "guild.suggestedHelp": "Gilde aperte con posti liberi. Puoi anche cercare per nome.",
+  "battlepass.buyTier": "{0} orbi",
+  "battlepass.buyTierTitle": "Salta un livello",
+  "battlepass.buyTierBody": "Spendi {0} orbi per saltare al livello {1}. Ogni livello acquistato costa un po' di più.",
+  "battlepass.buyTierConfirm": "Acquista il livello"
 }
 

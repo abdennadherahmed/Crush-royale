@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "自分のプレイをする",
   "friends.duelStarted": "自分のプレイをすると、友達に挑戦が届きます。",
   "guild.suggested": "メンバー募集中のギルド",
-  "guild.suggestedHelp": "空きのある公開ギルド。名前で検索もできます。"
+  "guild.suggestedHelp": "空きのある公開ギルド。名前で検索もできます。",
+  "battlepass.buyTier": "{0} オーブ",
+  "battlepass.buyTierTitle": "ティアをスキップ",
+  "battlepass.buyTierBody": "{0} オーブでティア {1} に進みます。購入するたびに価格が少し上がります。",
+  "battlepass.buyTierConfirm": "ティアを購入"
 }
 

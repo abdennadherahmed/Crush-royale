@@ -17,6 +17,9 @@ namespace CrushRoyale.Core.Progression
         public HashSet<int> ClaimedFree { get; set; } = new HashSet<int>();
 
         public HashSet<int> ClaimedPremium { get; set; } = new HashSet<int>();
+
+        /// <summary>Tiers bought with orbes this season: each one makes the next a little dearer.</summary>
+        public int TiersBought { get; set; }
     }
 
     public sealed class BattlePassTierReward
@@ -51,6 +54,7 @@ namespace CrushRoyale.Core.Progression
             state.Xp = 0;
             state.ClaimedFree.Clear();
             state.ClaimedPremium.Clear();
+            state.TiersBought = 0;
             return true;
         }
 
@@ -132,6 +136,46 @@ namespace CrushRoyale.Core.Progression
                 premium.Cosmetics.Add(SeasonCatalog.ByIndex(season).ExclusiveCosmeticId);
             }
             return new BattlePassTierReward { Tier = tier, Free = free, Premium = premium };
+        }
+
+        /// <summary>
+        /// Orbes for the next tier. Each purchase raises the price, so buying the whole track costs far more than
+        /// playing it: the pass stays something you earn, with impatience as the only thing money saves.
+        /// </summary>
+        public static int TierPrice(BattlePassState state, EconomyBalance economy)
+        {
+            long price = Math.Max(1, economy.BattlePassTierPriceOrbes);
+            int escalation = Math.Max(1000, economy.BattlePassTierEscalationPermille);
+            for (int i = 0; i < Math.Max(0, state.TiersBought); i++)
+            {
+                price = price * escalation / 1000;
+                if (price > int.MaxValue / 2)
+                {
+                    break;
+                }
+            }
+            return (int)price;
+        }
+
+        /// <summary>
+        /// Skips one tier: the experience jumps to the start of the next tier, so a bought tier is worth exactly the
+        /// same as a played one and never wastes the progress already made inside the current tier.
+        /// </summary>
+        public static OperationResult BuyTier(BattlePassState state, LiveOpsBalance balance)
+        {
+            if (state == null)
+            {
+                return OperationResult.Fail(ErrorCode.InvalidArgument);
+            }
+            int tier = TierForXp(state.Xp, balance);
+            if (tier >= balance.BattlePassTiers)
+            {
+                return OperationResult.Fail(ErrorCode.LimitReached, "The pass is already complete.");
+            }
+            long target = (long)(tier + 1) * Math.Max(1, balance.BattlePassXpPerTier);
+            state.Xp = Math.Max(state.Xp, target);
+            state.TiersBought++;
+            return OperationResult.Ok();
         }
 
         public static OperationResult<RewardData> Claim(BattlePassState state, int tier, bool premiumTrack, bool hasPremium, LiveOpsBalance balance)

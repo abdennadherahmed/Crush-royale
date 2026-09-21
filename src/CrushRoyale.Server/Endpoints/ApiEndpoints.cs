@@ -138,6 +138,7 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.LoginBonus, (ClaimsPrincipal user, ProgressionService s, CancellationToken ct) => s.ClaimLoginBonusAsync(Me(user), ct));
         api.MapGet(ApiRoutes.BattlePass, (ClaimsPrincipal user, ProgressionService s, CancellationToken ct) => s.GetBattlePassAsync(Me(user), ct));
         api.MapPost(ApiRoutes.BattlePassClaim, (BattlePassClaimRequest body, ClaimsPrincipal user, ProgressionService s, CancellationToken ct) => s.ClaimBattlePassAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.BattlePassBuyTier, (BattlePassTierPurchase body, ClaimsPrincipal user, ProgressionService s, CancellationToken ct) => s.BuyBattlePassTierAsync(Me(user), body, ct));
     }
 
     private static void MapAdmin(RouteGroupBuilder api)

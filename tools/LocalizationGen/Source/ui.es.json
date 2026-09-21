@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "Jugar mi partida",
   "friends.duelStarted": "Juega tu partida: tu amigo recibirá el reto después.",
   "guild.suggested": "Clanes que reclutan",
-  "guild.suggestedHelp": "Clanes abiertos con plazas libres. También puedes buscar por nombre."
+  "guild.suggestedHelp": "Clanes abiertos con plazas libres. También puedes buscar por nombre.",
+  "battlepass.buyTier": "{0} orbes",
+  "battlepass.buyTierTitle": "Saltar un nivel",
+  "battlepass.buyTierBody": "Gasta {0} orbes para saltar al nivel {1}. Cada nivel que compras cuesta un poco más.",
+  "battlepass.buyTierConfirm": "Comprar el nivel"
 }
 

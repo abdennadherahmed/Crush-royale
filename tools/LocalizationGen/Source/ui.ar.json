@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "العب جولتي",
   "friends.duelStarted": "العب جولتك: سيتلقى صديقك التحدي بعدها.",
   "guild.suggested": "نقابات تبحث عن أعضاء",
-  "guild.suggestedHelp": "نقابات مفتوحة بها أماكن. يمكنك أيضًا البحث بالاسم."
+  "guild.suggestedHelp": "نقابات مفتوحة بها أماكن. يمكنك أيضًا البحث بالاسم.",
+  "battlepass.buyTier": "{0} كرة",
+  "battlepass.buyTierTitle": "تخطّ مستوى",
+  "battlepass.buyTierBody": "أنفق {0} كرة للانتقال مباشرة إلى المستوى {1}. كل مستوى تشتريه يكلف أكثر قليلاً.",
+  "battlepass.buyTierConfirm": "اشترِ المستوى"
 }
 

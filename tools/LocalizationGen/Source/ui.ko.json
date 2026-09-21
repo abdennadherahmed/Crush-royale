@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "내 판 플레이",
   "friends.duelStarted": "내 판을 플레이하면 친구에게 도전장이 갑니다.",
   "guild.suggested": "모집 중인 길드",
-  "guild.suggestedHelp": "자리가 있는 공개 길드예요. 이름으로 검색할 수도 있어요."
+  "guild.suggestedHelp": "자리가 있는 공개 길드예요. 이름으로 검색할 수도 있어요.",
+  "battlepass.buyTier": "오브 {0}개",
+  "battlepass.buyTierTitle": "티어 건너뛰기",
+  "battlepass.buyTierBody": "오브 {0}개로 티어 {1}(으)로 바로 이동합니다. 구매할 때마다 가격이 조금씩 오릅니다.",
+  "battlepass.buyTierConfirm": "티어 구매"
 }
 

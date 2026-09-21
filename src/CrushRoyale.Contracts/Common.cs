@@ -94,6 +94,7 @@ namespace CrushRoyale.Contracts
         public const string LoginBonus = Prefix + "/login-bonus/claim";
         public const string BattlePass = Prefix + "/battlepass";
         public const string BattlePassClaim = Prefix + "/battlepass/claim";
+        public const string BattlePassBuyTier = Prefix + "/battlepass/tier";
 
         public const string ReportCheat = Prefix + "/admin/report/cheat";
         public const string AdminFlags = Prefix + "/admin/flags";

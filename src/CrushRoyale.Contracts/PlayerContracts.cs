@@ -669,9 +669,18 @@ namespace CrushRoyale.Contracts
 
         public bool Premium { get; set; }
 
+        /// <summary>Orbes the next tier costs right now (it climbs with every tier already bought).</summary>
+        public int TierPriceOrbes { get; set; }
+
         public long SeasonEndUnixMs { get; set; }
 
         public List<BattlePassTierDto> Tiers { get; set; } = new List<BattlePassTierDto>();
+    }
+
+    /// <summary>Buys one or more tiers of the pass with orbes.</summary>
+    public sealed class BattlePassTierPurchase
+    {
+        public int Tiers { get; set; } = 1;
     }
 
     public sealed class BattlePassClaimRequest

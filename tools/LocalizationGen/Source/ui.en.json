@@ -2077,6 +2077,10 @@
   "friends.duelPlay": "Play my run",
   "friends.duelStarted": "Play your run: your friend will then get the challenge.",
   "guild.suggested": "Guilds recruiting",
-  "guild.suggestedHelp": "Open guilds with room left. You can also search by name."
+  "guild.suggestedHelp": "Open guilds with room left. You can also search by name.",
+  "battlepass.buyTier": "{0} orbes",
+  "battlepass.buyTierTitle": "Skip a tier",
+  "battlepass.buyTierBody": "Spend {0} orbes to jump straight to tier {1}. Each tier you buy costs a little more.",
+  "battlepass.buyTierConfirm": "Buy the tier"
 }
 

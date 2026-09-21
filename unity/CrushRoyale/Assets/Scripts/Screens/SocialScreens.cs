@@ -754,7 +754,12 @@ namespace CrushRoyale.Game.Screens
             if (!maxed)
             {
                 Text missing = UIFactory.Label(panel.transform, Loc.T("battlepass.xpMissing", _pass.XpPerTier - live.IntoTier), Theme.SmallSize - 2, Theme.Text, TextAnchor.MiddleLeft);
-                UIFactory.Anchor(missing.rectTransform, 0.33f, 0.3f, 0.97f, 0.42f);
+                UIFactory.Anchor(missing.rectTransform, 0.33f, 0.28f, 0.63f, 0.42f);
+
+                // Orbes buy patience, never the pass itself: the price climbs with every tier already bought.
+                Button skip = UIFactory.Button(panel.transform, Loc.T("battlepass.buyTier", Loc.Number(_pass.TierPriceOrbes)),
+                    () => _ = BuyTierAsync(), Theme.Orbe, Theme.SmallSize);
+                UIFactory.Anchor(skip.GetComponent<RectTransform>(), 0.65f, 0.27f, 0.97f, 0.43f);
             }
 
             if (!_pass.Premium)
@@ -773,6 +778,29 @@ namespace CrushRoyale.Game.Screens
             {
                 Text premium = UIFactory.Label(panel.transform, "✔ " + Loc.T("battlepass.premiumActive"), Theme.BodySize, Theme.Success, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Anchor(premium.rectTransform, 0.05f, 0.05f, 0.95f, 0.26f);
+            }
+        }
+
+        /// <summary>Buys the next tier with orbes, after saying out loud what it costs.</summary>
+        private async Task BuyTierAsync()
+        {
+            int price = _pass.TierPriceOrbes;
+            if (!await UI.Confirm(Loc.T("battlepass.buyTierTitle"), Loc.T("battlepass.buyTierBody", Loc.Number(price), _pass.Tier + 1),
+                    Loc.T("battlepass.buyTierConfirm"), Loc.T("common.cancel")))
+            {
+                return;
+            }
+            BattlePassResponse pass = await Api(api => api.BuyBattlePassTierAsync());
+            if (pass == null || this == null)
+            {
+                return;
+            }
+            _pass = pass;
+            Game.Audio.PlaySFX(Audio.SoundIds.Coins);
+            await Game.Backend.RefreshProfileAsync();
+            if (this != null)
+            {
+                Rebuild();
             }
         }
 

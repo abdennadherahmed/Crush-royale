@@ -305,7 +305,8 @@ namespace CrushRoyale.Core.Economy
             }
             if (ctx.Inventory.State.PremiumPassSeason != ctx.BattlePassSeason)
             {
-                items.Add(new ShopItem { Id = "battlepass", Kind = ShopItemKind.BattlePass, Sku = _balance.Economy.BattlePassSku, PriceCents = _balance.Economy.BattlePassPriceCents, PriceOrbes = _balance.Economy.BattlePassPriceOrbes });
+                // Real money only: no PriceOrbes, so the pass cannot be ground out for free.
+                items.Add(new ShopItem { Id = "battlepass", Kind = ShopItemKind.BattlePass, Sku = _balance.Economy.BattlePassSku, PriceCents = _balance.Economy.BattlePassPriceCents });
             }
             if (!ctx.Inventory.State.RarePerkUnlocked)
             {
@@ -393,8 +394,10 @@ namespace CrushRoyale.Core.Economy
                     result.Granted.Cosmetics.Add(item.CosmeticId);
                     break;
                 case ShopItemKind.BattlePass:
-                    ctx.Inventory.State.PremiumPassSeason = ctx.BattlePassSeason;
-                    break;
+                    // Unreachable through the shop list (no orbe price) and refused here as well, so no future
+                    // caller can quietly hand out the season pass for in-game currency.
+                    ctx.Wallet.Credit(currency, price, TransactionReason.Refund, item.Id);
+                    return PurchaseResult.Fail(ErrorCode.InvalidArgument, "The season pass is a real-money purchase.");
                 default:
                     ctx.Wallet.Credit(currency, price, TransactionReason.Refund, item.Id);
                     return PurchaseResult.Fail(ErrorCode.InvalidArgument, "Item is not purchasable with in-game currency.");

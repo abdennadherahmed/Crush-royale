@@ -73,7 +73,14 @@ namespace CrushRoyale.Core.Config
 
         public int BattlePassPriceCents { get; set; } = 999;
 
-        public int BattlePassPriceOrbes { get; set; } = 950;
+        /// <summary>
+        /// Orbes for one tier of the pass. The pass itself is real money only: selling it for orbes let a player
+        /// who grinds enough never pay, which is the opposite of what a season pass is for.
+        /// </summary>
+        public int BattlePassTierPriceOrbes { get; set; } = 60;
+
+        /// <summary>Each bought tier costs a little more, so buying the whole track is never the cheap route.</summary>
+        public int BattlePassTierEscalationPermille { get; set; } = 1040;
 
         public string RarePerkSku { get; set; } = "crushroyale.crown";
 
