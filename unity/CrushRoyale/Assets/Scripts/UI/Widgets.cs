@@ -31,24 +31,35 @@ namespace CrushRoyale.Game.UI
             return field;
         }
 
-        /// <summary>Row of tab buttons; returns a setter to highlight the active tab.</summary>
+        /// <summary>
+        /// Tab strip: one raised gold plate among sunken glass wells, instead of a row of identical coloured pills.
+        /// Returns a setter to move the highlight; the labels follow (gold ink on the active tab, muted on the rest).
+        /// </summary>
         public static Action<int> Tabs(Transform parent, IList<string> labels, Action<int> onSelect)
         {
-            HorizontalLayoutGroup row = UIFactory.Row(parent, 110, 12);
-            var buttons = new List<Image>();
+            HorizontalLayoutGroup row = UIFactory.Row(parent, 110, 10);
+            var faces = new List<Image>();
+            var texts = new List<Text>();
             for (int i = 0; i < labels.Count; i++)
             {
                 int index = i;
-                Button button = UIFactory.Button(row.transform, labels[i], () => onSelect(index), Theme.PanelLight, Theme.SmallSize + 2, Theme.Text);
-                buttons.Add(button.GetComponent<Image>());
+                Button button = UIFactory.Button(row.transform, labels[i], () => onSelect(index), UIFactory.ButtonTier.Tertiary, Theme.SmallSize + 2);
+                faces.Add(button.GetComponent<Image>());
+                texts.Add(button.GetComponentInChildren<Text>());
             }
             return active =>
             {
-                for (int i = 0; i < buttons.Count; i++)
+                for (int i = 0; i < faces.Count; i++)
                 {
-                    if (buttons[i] != null)
+                    if (faces[i] == null)
                     {
-                        UiKit.Recolor(buttons[i], i == active ? Theme.GoldDark : Theme.PanelLight);
+                        continue;
+                    }
+                    bool on = i == active;
+                    UiKit.Tab(faces[i], on);
+                    if (texts[i] != null)
+                    {
+                        texts[i].color = on ? Theme.Text : Theme.TextMuted;
                     }
                 }
             };
@@ -133,7 +144,7 @@ namespace CrushRoyale.Game.UI
         {
             Image card = UIFactory.Panel("Empty", parent, Theme.Panel);
             UIFactory.Height(card, action != null ? 520 : 400);
-            UiKit.CardFrame(card);
+            UiKit.GlassCard(card);
             card.gameObject.AddComponent<PopIn>();
             float iconBottom = action != null ? 0.5f : 0.38f;
             Image glow = UIFactory.Icon(card.transform, ProceduralSprites.Glow(128), new Color(0.55f, 0.85f, 1f, 0.45f), 0);
@@ -178,7 +189,24 @@ namespace CrushRoyale.Game.UI
         {
             Text title = UIFactory.Label(parent, text, Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
             UIFactory.Height(title, 90);
+            UIFactory.OverArt(title);
+            // Hairline under the heading: separates blocks without adding yet another box to the stack.
+            RectTransform rule = UIFactory.Anchor(UIFactory.Rect("Rule", title.transform), 0f, 0.02f, 1f, 0.02f);
+            rule.sizeDelta = new Vector2(0, 3);
+            Image line = rule.gameObject.AddComponent<Image>();
+            line.color = Theme.Hairline;
+            line.raycastTarget = false;
             return title;
+        }
+
+        /// <summary>Ornamental gold rail with a crystal centre, for separating blocks inside a scroll list.</summary>
+        public static void Separator(Transform parent)
+        {
+            if (UiKit.Divider(parent) == null)
+            {
+                Image line = UIFactory.Panel("Separator", parent, Theme.Hairline, rounded: false);
+                UIFactory.Height(line, 3);
+            }
         }
 
         /// <summary>Card with a vertical layout; returns the content transform.</summary>
@@ -187,7 +215,8 @@ namespace CrushRoyale.Game.UI
             Image card = UIFactory.Panel("Card", parent, color ?? Theme.Panel);
             if (!color.HasValue)
             {
-                UiKit.CardFrame(card);
+                // Glass by default: the backdrop art shows through and the row gets a shadow and a lit top lip.
+                UiKit.GlassCard(card);
             }
             UIFactory.Height(card, height);
             VerticalLayoutGroup layout = card.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -249,9 +278,27 @@ namespace CrushRoyale.Game.UI
             return image;
         }
 
-        public static Image Backdrop(Transform parent, CrushRoyale.Core.Story.Kingdom kingdom, float brightness = 0.72f)
+        public static Image Backdrop(Transform parent, CrushRoyale.Core.Story.Kingdom kingdom, float brightness = 0.72f) =>
+            Place(parent, ArtLibrary.Background(kingdom), brightness);
+
+        /// <summary>
+        /// Per-screen backdrop. <paramref name="sceneId"/> names an image in Resources/Art/Backgrounds ("hub",
+        /// "shop", "vip", "settings"...); a "scene_" prefixed file wins, then the bare name, and when neither exists
+        /// the castle art the whole game used before is kept, so a screen never ends up on a flat colour.
+        /// Adds the tilt parallax and a slow drift of dust motes on top (both off under reduced motion).
+        /// </summary>
+        public static Image Backdrop(Transform parent, string sceneId, float brightness = 0.55f)
         {
-            Sprite sprite = ArtLibrary.Background(kingdom);
+            Sprite sprite = null;
+            if (!string.IsNullOrEmpty(sceneId))
+            {
+                sprite = ArtLibrary.Load("Art/Backgrounds/scene_" + sceneId) ?? ArtLibrary.Load("Art/Backgrounds/" + sceneId);
+            }
+            return Place(parent, sprite ?? ArtLibrary.Background(CrushRoyale.Core.Story.Kingdom.Central), brightness);
+        }
+
+        private static Image Place(Transform parent, Sprite sprite, float brightness)
+        {
             if (sprite == null)
             {
                 return null;
@@ -270,7 +317,80 @@ namespace CrushRoyale.Game.UI
             AspectRatioFitter fitter = rect.gameObject.AddComponent<AspectRatioFitter>();
             fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
             fitter.aspectRatio = sprite.rect.width / sprite.rect.height;
+
+            // Motes drift in their own layer above the art but behind everything else: the screen is never dead still.
+            Dust.Attach(UIFactory.Stretch(UIFactory.Rect("Dust", holder)));
             return image;
+        }
+    }
+
+    /// <summary>
+    /// Slow drift of dust motes over a backdrop. The particles are created once and then only have their position and
+    /// alpha written, so the effect costs no allocation per frame; it switches itself off under reduced motion.
+    /// </summary>
+    public sealed class Dust : MonoBehaviour
+    {
+        /// <summary>Few on purpose: enough to feel alive on a phone, cheap enough not to cost a draw call batch.</summary>
+        public int Count = 14;
+
+        private RectTransform _rect;
+        private RectTransform[] _motes;
+        private Image[] _images;
+        private Vector2[] _velocity;
+        private float[] _phase;
+
+        public static Dust Attach(RectTransform parent)
+        {
+            if (GameRoot.Instance != null && GameRoot.Instance.Save.Settings.ReduceMotion)
+            {
+                return null;
+            }
+            return parent.gameObject.AddComponent<Dust>();
+        }
+
+        private void Start()
+        {
+            _rect = (RectTransform)transform;
+            _motes = new RectTransform[Count];
+            _images = new Image[Count];
+            _velocity = new Vector2[Count];
+            _phase = new float[Count];
+            Sprite sprite = ProceduralSprites.Glow(32);
+            for (int i = 0; i < Count; i++)
+            {
+                float size = UnityEngine.Random.Range(6f, 16f);
+                Image image = UIFactory.Icon(_rect, sprite, new Color(1f, 0.93f, 0.72f, UnityEngine.Random.Range(0.12f, 0.34f)), size);
+                image.rectTransform.anchorMin = image.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                image.rectTransform.anchoredPosition = new Vector2(UnityEngine.Random.Range(-560f, 560f), UnityEngine.Random.Range(-960f, 960f));
+                _motes[i] = image.rectTransform;
+                _images[i] = image;
+                _velocity[i] = new Vector2(UnityEngine.Random.Range(-6f, 6f), UnityEngine.Random.Range(9f, 26f));
+                _phase[i] = UnityEngine.Random.value * 6.28f;
+            }
+        }
+
+        private void Update()
+        {
+            if (_motes == null)
+            {
+                return;
+            }
+            float dt = Time.unscaledDeltaTime;
+            float now = Time.unscaledTime;
+            for (int i = 0; i < _motes.Length; i++)
+            {
+                RectTransform mote = _motes[i];
+                Vector2 position = mote.anchoredPosition + _velocity[i] * dt;
+                position.x += Mathf.Sin(now * 0.6f + _phase[i]) * 8f * dt;
+                if (position.y > 1000f)
+                {
+                    // Wrap instead of respawning: no allocation, and the field never thins out.
+                    position = new Vector2(UnityEngine.Random.Range(-560f, 560f), -1000f);
+                }
+                mote.anchoredPosition = position;
+                Color color = _images[i].color;
+                _images[i].color = new Color(color.r, color.g, color.b, Mathf.Abs(Mathf.Sin(now * 0.35f + _phase[i])) * 0.3f + 0.08f);
+            }
         }
     }
 
@@ -399,18 +519,35 @@ namespace CrushRoyale.Game.UI
         }
     }
 
-    /// <summary>Idle "breathing" of a character or a call-to-action (scale around the pivot).</summary>
+    /// <summary>
+    /// Idle "breathing" of a character or a call-to-action (scale around the pivot). This is the gentle life that
+    /// keeps a primary button from looking like a printed rectangle; it stands down while the button is being
+    /// pressed, because ButtonFeedback owns the scale then, and entirely under reduced motion.
+    /// </summary>
     public sealed class Breathe : MonoBehaviour
     {
         public float Amount = 0.014f;
         public float Speed = 1.7f;
 
         private float _phase;
+        private ButtonFeedback _press;
 
-        private void Awake() => _phase = UnityEngine.Random.value * 6f;
+        private void Awake()
+        {
+            _phase = UnityEngine.Random.value * 6f;
+            _press = GetComponent<ButtonFeedback>();
+            if (GameRoot.Instance != null && GameRoot.Instance.Save.Settings.ReduceMotion)
+            {
+                enabled = false;
+            }
+        }
 
         private void Update()
         {
+            if (_press != null && _press.enabled)
+            {
+                return;
+            }
             float k = Mathf.Sin(Time.unscaledTime * Speed + _phase);
             transform.localScale = new Vector3(1f - k * Amount * 0.4f, 1f + k * Amount, 1f);
         }
@@ -429,6 +566,11 @@ namespace CrushRoyale.Game.UI
         {
             _image = GetComponent<Image>();
             _baseAlpha = _image != null ? _image.color.a : 1f;
+            if (GameRoot.Instance != null && GameRoot.Instance.Save.Settings.ReduceMotion)
+            {
+                // Accessibility: a pulsing halo is motion too. The element keeps its resting alpha.
+                enabled = false;
+            }
         }
 
         private void Update()

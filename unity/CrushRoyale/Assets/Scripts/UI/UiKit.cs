@@ -15,7 +15,22 @@ namespace CrushRoyale.Game.UI
             Gold,
             Purple,
             Green,
-            Red
+            Red,
+
+            /// <summary>Cold silver-stone face, no gold rim: the secondary tier of the emphasis ladder.</summary>
+            Stone
+        }
+
+        /// <summary>Illustrated family that carries a button tier (Tertiary has no face: it is drawn as glass).</summary>
+        public static ButtonStyle StyleOf(UIFactory.ButtonTier tier)
+        {
+            switch (tier)
+            {
+                case UIFactory.ButtonTier.Positive: return ButtonStyle.Green;
+                case UIFactory.ButtonTier.Destructive: return ButtonStyle.Red;
+                case UIFactory.ButtonTier.Secondary: return ButtonStyle.Stone;
+                default: return ButtonStyle.Gold;
+            }
         }
 
         private static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>();
@@ -72,6 +87,12 @@ namespace CrushRoyale.Game.UI
                 return false;
             }
             Color.RGBToHSV(color, out float h, out float s, out float v);
+            if (Mathf.Abs(color.r - Theme.Stone.r) < 0.06f && Mathf.Abs(color.g - Theme.Stone.g) < 0.06f && Mathf.Abs(color.b - Theme.Stone.b) < 0.06f)
+            {
+                // The explicit secondary tone; the other desaturated surfaces keep the violet face they always had.
+                style = ButtonStyle.Stone;
+                return true;
+            }
             if (s < 0.35f || v < 0.35f)
             {
                 // Dark panels, grey and violet surfaces: secondary actions.
@@ -137,6 +158,81 @@ namespace CrushRoyale.Game.UI
 
         /// <summary>Gold-trimmed card frame for list rows.</summary>
         public static bool CardFrame(Image image) => Apply(image, Sliced("card_frame", 0.3f), 30f);
+
+        /// <summary>
+        /// Glass card: translucent dark pane, violet bevel, slim gold hairline. The default surface of the game -
+        /// unlike CardFrame it lets the backdrop illustration show through, which is what stops a page of rows from
+        /// reading as a stack of opaque slabs. Falls back to the procedural glass tile when the art is absent.
+        /// </summary>
+        public static bool GlassCard(Image image) => Apply(image, Sliced("glass_card", 0.32f), 34f);
+
+        /// <summary>
+        /// Wide title plate with gold rails and crystal studs: the header of a full-width title bar. The border share
+        /// is large on purpose - the studs sit ~50 px in from the ends and must stay inside the unstretched corners.
+        /// </summary>
+        public static bool Banner(Image image) => Apply(image, Sliced("header_banner", 0.44f), 52f);
+
+        /// <summary>Square gold-rimmed pad for single-glyph buttons (back arrow, cog, close).</summary>
+        public static bool IconButton(Image image) => Apply(image, Sliced("icon_button", 0.38f), 30f);
+
+        /// <summary>
+        /// Tab plate. The active tab is the illustrated gold one; an inactive tab is deliberately NOT an illustration
+        /// but a sunken glass well, so the strip reads as one raised tab among holes instead of a row of rectangles.
+        /// </summary>
+        public static bool Tab(Image image, bool active)
+        {
+            if (active && Apply(image, Sliced("tab_active", 0.3f), 26f))
+            {
+                return true;
+            }
+            image.sprite = ProceduralSprites.Surface(active ? ProceduralSprites.SurfaceTone.Gold : ProceduralSprites.SurfaceTone.Sunken, Theme.ChipRadius);
+            image.type = Image.Type.Sliced;
+            image.color = Color.white;
+            KitSlice slice = image.GetComponent<KitSlice>();
+            if (slice != null)
+            {
+                // The procedural tile is authored at final scale: no border rescaling, unlike the illustrated pieces.
+                UnityEngine.Object.Destroy(slice);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Gold rail with a crystal at its centre: separates blocks inside a page without adding another box.
+        /// The rail and the crystal are two images on purpose - a 9-sliced strip stretches its middle band, so an
+        /// ornament baked into the centre of the sprite would smear as soon as the divider got wider.
+        /// </summary>
+        public static Image Divider(Transform parent, float height = 28f)
+        {
+            Texture2D texture = Resources.Load<Texture2D>("Art/Kit/divider");
+            if (texture == null)
+            {
+                return null;
+            }
+            if (!Cache.TryGetValue("divider-h", out Sprite sprite))
+            {
+                // Sliced on the horizontal only: the ends keep their taper and the plain rail in between stretches.
+                float side = Mathf.Floor(texture.width * 0.2f);
+                sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f, 0,
+                    SpriteMeshType.FullRect, new Vector4(side, 0, side, 0));
+                Cache["divider-h"] = sprite;
+            }
+            Image image = UIFactory.Icon(parent, sprite, Color.white, 0);
+            image.preserveAspect = false;
+            image.type = Image.Type.Sliced;
+            image.gameObject.AddComponent<KitSlice>().MatchHeight = true;
+            UIFactory.Height(image, height);
+
+            Sprite crystal = Art("round_crystal");
+            if (crystal != null)
+            {
+                Image jewel = UIFactory.Icon(image.transform, crystal, Color.white, 0);
+                jewel.rectTransform.anchorMin = jewel.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                jewel.rectTransform.anchoredPosition = Vector2.zero;
+                jewel.rectTransform.sizeDelta = new Vector2(height * 1.5f, height * 1.5f);
+            }
+            return image;
+        }
 
         /// <summary>Purple ribbon behind a title (stretched to its parent; only the middle band stretches).</summary>
         public static Image Ribbon(RectTransform parent)

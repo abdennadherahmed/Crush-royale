@@ -514,3 +514,6 @@ $RECYCLE.BIN/
 !unity/CrushRoyale/Packages/
 !unity/CrushRoyale/Packages/*
 !unity/CrushRoyale/Assets/Plugins/CrushRoyale/link.xml
+
+## Claude Code worktrees and session files
+.claude/
