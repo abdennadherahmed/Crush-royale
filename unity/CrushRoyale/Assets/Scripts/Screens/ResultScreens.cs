@@ -99,6 +99,13 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Height(UIFactory.Label(list, Loc.T("result.rejected", Loc.T("error." + _args.Server.Error)), Theme.BodySize, Theme.Danger), 140);
             }
 
+            // Which stage this was: the result screen never said it, so you could not tell what you had just finished.
+            StageData finished = Game.Backend.Catalog?.Get(_args.StageId);
+            Text which = UIFactory.Label(list, Loc.T(_args.Local.Won ? "result.stageWon" : "result.stageLost", _args.StageId,
+                finished != null ? Loc.T("kingdom." + finished.Kingdom) : string.Empty), Theme.BodySize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Height(which, 70);
+            Widgets.TitleOutline(which);
+
             int stars = _args.Server?.Stars ?? _args.Local.Stars;
             StarBurst(list, _args.Local.Won ? stars : 0);
 

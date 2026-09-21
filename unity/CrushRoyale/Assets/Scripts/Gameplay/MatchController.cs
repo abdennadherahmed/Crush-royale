@@ -124,7 +124,12 @@ namespace CrushRoyale.Game.Gameplay
             {
                 return false;
             }
+            // The board was locked when the stage ended: give the player back the controls (paid continues were dead).
             _finished = false;
+            Input.Interactable = true;
+            Board.ClearHint();
+            _hintShown = false;
+            _lastActivityMs = Clock.NowMs;
             Clock.Resume();
             Changed?.Invoke();
             return true;

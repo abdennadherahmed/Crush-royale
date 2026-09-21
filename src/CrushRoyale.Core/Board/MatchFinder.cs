@@ -16,7 +16,10 @@ namespace CrushRoyale.Core.Board
         Cross = 2,
 
         /// <summary>5+ in a line: clears every gem of that color (GDD "Match 5").</summary>
-        Line5 = 3
+        Line5 = 3,
+
+        /// <summary>2x2 block of the same color: creates a Cross bomb (row + column).</summary>
+        Square = 4
     }
 
     /// <summary>One straight run of 3+ same-colored gems.</summary>
@@ -42,6 +45,16 @@ namespace CrushRoyale.Core.Board
     /// <summary>Runs of the same color that share at least one cell, merged into a single match.</summary>
     public sealed class MatchGroup
     {
+        /// <summary>Square match: the four cells of a 2x2 block, kept as one "run" so spawn logic stays uniform.</summary>
+        internal MatchGroup(PieceColor color, List<Pos> cells, MatchShape shape)
+        {
+            Color = color;
+            Cells = cells;
+            Runs = new List<MatchRun> { new MatchRun(color, true, new List<Pos>(cells)) };
+            Shape = shape;
+            LongestRun = 2;
+        }
+
         internal MatchGroup(PieceColor color, List<MatchRun> runs, List<Pos> cells)
         {
             Color = color;
@@ -120,6 +133,9 @@ namespace CrushRoyale.Core.Board
             var groups = new List<MatchGroup>();
             if (runs.Count == 0)
             {
+                // No line, but a 2x2 block is a match on its own.
+                AddSquares(board, groups);
+                groups.Sort((a, b) => ComparePos(a.Cells[0], b.Cells[0]));
                 return groups;
             }
 
@@ -176,8 +192,88 @@ namespace CrushRoyale.Core.Board
                 groups.Add(new MatchGroup(groupRuns[0].Color, groupRuns, cells));
             }
 
+            AddSquares(board, groups);
             groups.Sort((a, b) => ComparePos(a.Cells[0], b.Cells[0]));
             return groups;
+        }
+
+        /// <summary>
+        /// 2x2 blocks of one color also count (players expect it from other match-3 games) and create a Cross bomb.
+        /// Cells already taken by a line match are skipped: a line always wins over the square it overlaps.
+        /// </summary>
+        private static void AddSquares(GameBoard board, List<MatchGroup> groups)
+        {
+            var taken = new HashSet<Pos>();
+            foreach (MatchGroup group in groups)
+            {
+                foreach (Pos cell in group.Cells)
+                {
+                    taken.Add(cell);
+                }
+            }
+            for (int y = 0; y + 1 < board.Height; y++)
+            {
+                for (int x = 0; x + 1 < board.Width; x++)
+                {
+                    var corner = new Pos(x, y);
+                    if (!IsSquareAt(board, corner))
+                    {
+                        continue;
+                    }
+                    var cells = new List<Pos> { corner, new Pos(x + 1, y), new Pos(x, y + 1), new Pos(x + 1, y + 1) };
+                    bool free = true;
+                    foreach (Pos cell in cells)
+                    {
+                        free &= !taken.Contains(cell);
+                    }
+                    if (!free)
+                    {
+                        continue;
+                    }
+                    foreach (Pos cell in cells)
+                    {
+                        taken.Add(cell);
+                    }
+                    cells.Sort(ComparePos);
+                    groups.Add(new MatchGroup(board[corner].Color, cells, MatchShape.Square));
+                }
+            }
+        }
+
+        /// <summary>True if (x,y) is the bottom-left corner of a 2x2 block of the same color.</summary>
+        public static bool IsSquareAt(GameBoard board, Pos corner)
+        {
+            Piece piece = board[corner];
+            if (!piece.IsMatchable || !board.InBounds(corner.X + 1, corner.Y + 1))
+            {
+                return false;
+            }
+            return Same(board, corner.X + 1, corner.Y, piece.Color)
+                && Same(board, corner.X, corner.Y + 1, piece.Color)
+                && Same(board, corner.X + 1, corner.Y + 1, piece.Color);
+        }
+
+        private static bool Same(GameBoard board, int x, int y, PieceColor color)
+        {
+            Piece p = board[x, y];
+            return p.IsMatchable && p.Color == color;
+        }
+
+        /// <summary>True if the gem at <paramref name="p"/> belongs to a 2x2 block of its color.</summary>
+        public static bool HasSquareAt(GameBoard board, Pos p)
+        {
+            for (int dy = -1; dy <= 0; dy++)
+            {
+                for (int dx = -1; dx <= 0; dx++)
+                {
+                    var corner = new Pos(p.X + dx, p.Y + dy);
+                    if (board.InBounds(corner) && IsSquareAt(board, corner))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         /// <summary>True if the gem at <paramref name="p"/> is part of a horizontal or vertical run of 3+.</summary>
@@ -196,7 +292,7 @@ namespace CrushRoyale.Core.Board
             }
 
             int vertical = 1 + CountDirection(board, p, 0, -1, piece.Color) + CountDirection(board, p, 0, 1, piece.Color);
-            return vertical >= 3;
+            return vertical >= 3 || HasSquareAt(board, p);
         }
 
         /// <summary>True if the board contains any run of 3+.</summary>

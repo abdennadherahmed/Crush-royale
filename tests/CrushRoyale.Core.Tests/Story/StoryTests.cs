@@ -118,7 +118,8 @@ public class BalancingTests(ITestOutputHelper output)
         foreach (var (from, to) in bands)
         {
             int wins = 0, total = 0;
-            for (int id = from; id <= to; id += Math.Max(1, (to - from) / 24))
+            // Dense sampling: 25 stages per band was noisy enough to flip the comparison between bands.
+            for (int id = from; id <= to; id += Math.Max(1, (to - from) / 60))
             {
                 var stage = catalog.Get(id);
                 var session = new GameSession(SessionConfig.ForStage(stage, Fixtures.Balance, null, League.Bronze), Fixtures.Balance);

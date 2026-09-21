@@ -127,8 +127,8 @@
   "pause.quitStory": "Quit this stage? You will lose a life.",
   "pause.quitPvp": "Quit the match? It counts as a defeat.",
   "continue.title": "Out of moves!",
-  "continue.free": "Continue for free with +{0} moves?",
-  "continue.body": "Continue with +{0} moves for {1}?",
+  "continue.free": "Keep playing with {0}, free?",
+  "continue.body": "Keep playing with {0} for {1} orbs? (you have {2})",
   "continue.accept": "Continue",
   "continue.decline": "Give up",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Make two matches next to an egg: it hatches into a bonus gem right where it stood!",
   "hud.defused": "DEFUSED!",
   "hud.hatched": "HATCHED!",
-  "hud.boom": "BOOM!"
+  "hud.boom": "BOOM!",
+  "continue.moves": "+{0} moves",
+  "continue.seconds": "+{0} seconds",
+  "powerup.ChronoBomb.descMoves": "+4 moves right away.",
+  "powerup.CoinBooster.descMoves": "x1.5 score for the next 5 moves.",
+  "powerup.BrightSpark.descMoves": "Every match-3 also drops a line bomb, for 5 moves.",
+  "powerup.Multiplier2x.descMoves": "Double score for the next 4 moves.",
+  "powerup.CascadeInfinity.descMoves": "Cascades keep their multiplier for 4 moves.",
+  "result.stageWon": "Stage {0} cleared - {1}",
+  "result.stageLost": "Stage {0} failed - {1}"
 }

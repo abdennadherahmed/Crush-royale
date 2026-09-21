@@ -127,8 +127,8 @@
   "pause.quitStory": "이 스테이지를 나갈까요? 생명 하나를 잃습니다.",
   "pause.quitPvp": "대전을 나갈까요? 패배로 처리됩니다.",
   "continue.title": "이동 횟수 소진!",
-  "continue.free": "이동 +{0}회로 무료로 계속할까요?",
-  "continue.body": "{1}에 이동 +{0}회로 계속할까요?",
+  "continue.free": "{0}로 무료로 계속할까요?",
+  "continue.body": "{0}을(를) 오브 {1}개로 이어서 할까요? (보유 {2})",
   "continue.accept": "계속하기",
   "continue.decline": "포기하기",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "알 옆에서 두 번 맞추면 부화해서 그 자리에 보너스 보석이 생겨요!",
   "hud.defused": "해체!",
   "hud.hatched": "부화!",
-  "hud.boom": "쾅!"
+  "hud.boom": "쾅!",
+  "continue.moves": "+{0}회 이동",
+  "continue.seconds": "+{0}초",
+  "powerup.ChronoBomb.descMoves": "즉시 +4회 이동.",
+  "powerup.CoinBooster.descMoves": "5회 이동 동안 점수 1.5배.",
+  "powerup.BrightSpark.descMoves": "5회 이동 동안 매치3마다 라인 보석 생성.",
+  "powerup.Multiplier2x.descMoves": "4회 이동 동안 점수 2배.",
+  "powerup.CascadeInfinity.descMoves": "4회 이동 동안 연쇄 배율 유지.",
+  "result.stageWon": "스테이지 {0} 클리어 - {1}",
+  "result.stageLost": "스테이지 {0} 실패 - {1}"
 }

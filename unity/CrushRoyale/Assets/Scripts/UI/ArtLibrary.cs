@@ -69,6 +69,7 @@ namespace CrushRoyale.Game.UI
                 case PieceType.LineHorizontal: return Load("Art/Gems/special_line_h");
                 case PieceType.LineVertical: return Load("Art/Gems/special_line_v");
                 case PieceType.AreaBomb: return Load("Art/Gems/special_bomb");
+                case PieceType.Cross: return Load("Art/Gems/special_cross");
                 default: return null;
             }
         }

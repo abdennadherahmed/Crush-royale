@@ -757,9 +757,14 @@ namespace CrushRoyale.Game.Screens
             }
             bool free = profile?.Lives?.FreeContinues > 0;
             int price = ContinuePrice(session.ContinuesUsed);
+            // Timed stages buy seconds, moves stages buy moves: say exactly what the orbes pay for, and what is left.
+            bool timed = !session.Config.HasMoveLimit;
+            string gain = timed
+                ? Loc.T("continue.seconds", Game.Backend.Balance.Stamina.ContinueExtraTimeMs / 1000)
+                : Loc.T("continue.moves", Game.Backend.Balance.Stamina.ContinueExtraMoves);
             string body = free
-                ? Loc.T("continue.free", Game.Backend.Balance.Stamina.ContinueExtraMoves)
-                : Loc.T("continue.body", Game.Backend.Balance.Stamina.ContinueExtraMoves, price);
+                ? Loc.T("continue.free", gain)
+                : Loc.T("continue.body", gain, Loc.Number(price), Loc.Number(profile?.Wallet?.Orbes ?? 0));
 
             if (!await UI.Confirm(Loc.T("continue.title"), body, Loc.T("continue.accept"), Loc.T("continue.decline")))
             {

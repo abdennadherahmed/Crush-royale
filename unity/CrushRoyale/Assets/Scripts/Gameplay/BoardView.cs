@@ -688,6 +688,10 @@ namespace CrushRoyale.Game.Gameplay
                     case PieceType.AreaBomb:
                         _fx.Firework(at, color, 1.25f);
                         break;
+                    case PieceType.Cross:
+                        _fx.LineBlast(at, true, color, boardSize);
+                        _fx.LineBlast(at, false, color, boardSize);
+                        break;
                 }
                 if (cleared.Cause == ClearCause.ColorBlast)
                 {

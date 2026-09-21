@@ -127,8 +127,8 @@
   "pause.quitStory": "Sair desta fase? Você perderá uma vida.",
   "pause.quitPvp": "Sair da partida? Contará como derrota.",
   "continue.title": "Sem jogadas!",
-  "continue.free": "Continuar de graça com +{0} jogadas?",
-  "continue.body": "Continuar com +{0} jogadas por {1}?",
+  "continue.free": "Continuar com {0}, de graça?",
+  "continue.body": "Continuar com {0} por {1} orbes? (você tem {2})",
   "continue.accept": "Continuar",
   "continue.decline": "Desistir",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Faça duas combinações ao lado de um ovo: ele choca e deixa uma gema bônus no lugar!",
   "hud.defused": "DESARMADA!",
   "hud.hatched": "CHOCOU!",
-  "hud.boom": "BUM!"
+  "hud.boom": "BUM!",
+  "continue.moves": "+{0} jogadas",
+  "continue.seconds": "+{0} segundos",
+  "powerup.ChronoBomb.descMoves": "+4 jogadas na hora.",
+  "powerup.CoinBooster.descMoves": "Pontuação x1,5 por 5 jogadas.",
+  "powerup.BrightSpark.descMoves": "Cada match-3 também cria uma gema linha, por 5 jogadas.",
+  "powerup.Multiplier2x.descMoves": "Pontuação dobrada por 4 jogadas.",
+  "powerup.CascadeInfinity.descMoves": "As cascatas mantêm o multiplicador por 4 jogadas.",
+  "result.stageWon": "Fase {0} concluída - {1}",
+  "result.stageLost": "Fase {0} perdida - {1}"
 }

@@ -45,7 +45,10 @@ namespace CrushRoyale.Core.Board
         /// Countdown bomb (from stage 101): a normal colored gem whose Hp is the number of moves left; the stage is lost
         /// when it reaches 0. Matching or blasting it defuses it.
         /// </summary>
-        TimeBomb = 7
+        TimeBomb = 7,
+
+        /// <summary>Cross bomb from a 2x2 match: clears its whole row AND column.</summary>
+        Cross = 8
     }
 
     /// <summary>
@@ -105,7 +108,7 @@ namespace CrushRoyale.Core.Board
         public bool IsPlainGem => !IsEmpty && Type == PieceType.Normal;
 
         /// <summary>Line or area bomb.</summary>
-        public bool IsSpecial => !IsEmpty && (Type == PieceType.LineHorizontal || Type == PieceType.LineVertical || Type == PieceType.AreaBomb);
+        public bool IsSpecial => !IsEmpty && (Type == PieceType.LineHorizontal || Type == PieceType.LineVertical || Type == PieceType.AreaBomb || Type == PieceType.Cross);
 
         /// <summary>Can take part in a color match.</summary>
         public bool IsMatchable => !IsEmpty && !IsBlockType(Type);

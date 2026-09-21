@@ -824,7 +824,7 @@ namespace CrushRoyale.Game.Screens
             if (Game.Backend.IsOnline)
             {
                 Widgets.SectionTitle(list, Loc.T("stage.boostsTitle"));
-                LoadoutPicker.Build(list, _selected, pvp: false, rebuild: Rebuild);
+                LoadoutPicker.Build(list, _selected, pvp: false, rebuild: Rebuild, movesStage: stage.MoveLimit > 0);
                 RewardRow(list, stage.RewardCoins, stage.RewardOrbes);
             }
             else

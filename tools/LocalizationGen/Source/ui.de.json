@@ -127,8 +127,8 @@
   "pause.quitStory": "Dieses Level verlassen? Du verlierst ein Leben.",
   "pause.quitPvp": "Match verlassen? Es zählt als Niederlage.",
   "continue.title": "Keine Züge mehr!",
-  "continue.free": "Kostenlos mit +{0} Zügen weiterspielen?",
-  "continue.body": "Mit +{0} Zügen für {1} weiterspielen?",
+  "continue.free": "Mit {0} weiterspielen, gratis?",
+  "continue.body": "Mit {0} für {1} Orbs weiterspielen? (du hast {2})",
   "continue.accept": "Weiterspielen",
   "continue.decline": "Aufgeben",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Zwei Kombinationen neben einem Ei: Es schlüpft und hinterlässt einen Bonus-Edelstein!",
   "hud.defused": "ENTSCHÄRFT!",
   "hud.hatched": "GESCHLÜPFT!",
-  "hud.boom": "BUMM!"
+  "hud.boom": "BUMM!",
+  "continue.moves": "+{0} Züge",
+  "continue.seconds": "+{0} Sekunden",
+  "powerup.ChronoBomb.descMoves": "Sofort +4 Züge.",
+  "powerup.CoinBooster.descMoves": "x1,5 Punkte für 5 Züge.",
+  "powerup.BrightSpark.descMoves": "Jedes 3er-Match erzeugt 5 Züge lang zusätzlich eine Linien-Gemme.",
+  "powerup.Multiplier2x.descMoves": "Doppelte Punkte für 4 Züge.",
+  "powerup.CascadeInfinity.descMoves": "Kaskaden behalten ihren Multiplikator 4 Züge lang.",
+  "result.stageWon": "Level {0} geschafft - {1}",
+  "result.stageLost": "Level {0} gescheitert - {1}"
 }

@@ -127,8 +127,8 @@
   "pause.quitStory": "الخروج من هذه المرحلة؟ ستخسر روحًا.",
   "pause.quitPvp": "مغادرة المباراة؟ ستُحتسب خسارة.",
   "continue.title": "نفدت الحركات!",
-  "continue.free": "المتابعة مجانًا مع {0}+ حركات؟",
-  "continue.body": "المتابعة مع {0}+ حركات مقابل {1}؟",
+  "continue.free": "تابع مع {0} مجانًا؟",
+  "continue.body": "تابع مع {0} مقابل {1} كرة؟ (لديك {2})",
   "continue.accept": "متابعة",
   "continue.decline": "استسلام",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "طابق مرتين بجانب البيضة: تفقس وتترك جوهرة مكافأة مكانها!",
   "hud.defused": "تم التعطيل!",
   "hud.hatched": "فقست!",
-  "hud.boom": "بووم!"
+  "hud.boom": "بووم!",
+  "continue.moves": "+{0} حركات",
+  "continue.seconds": "+{0} ثانية",
+  "powerup.ChronoBomb.descMoves": "+4 حركات فورًا.",
+  "powerup.CoinBooster.descMoves": "مضاعفة النقاط 1.5 لمدة 5 حركات.",
+  "powerup.BrightSpark.descMoves": "كل تطابق ثلاثي ينتج جوهرة خط، لمدة 5 حركات.",
+  "powerup.Multiplier2x.descMoves": "مضاعفة النقاط لمدة 4 حركات.",
+  "powerup.CascadeInfinity.descMoves": "تحتفظ السلاسل بمضاعفها لمدة 4 حركات.",
+  "result.stageWon": "اكتملت المرحلة {0} - {1}",
+  "result.stageLost": "فشلت المرحلة {0} - {1}"
 }

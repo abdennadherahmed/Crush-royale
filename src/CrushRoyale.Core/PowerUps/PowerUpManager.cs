@@ -24,6 +24,14 @@ namespace CrushRoyale.Core.PowerUps
         public int EndMs { get; }
 
         public bool IsActiveAt(int timeMs) => timeMs >= StartMs && timeMs < EndMs;
+
+        /// <summary>Move window (stages played in moves): StartMs/EndMs then hold move indices.</summary>
+        public bool CountsMoves { get; private set; }
+
+        public bool IsActiveAtMove(int movesUsed) => movesUsed >= StartMs && movesUsed < EndMs;
+
+        public static ActiveEffect ForMoves(PowerUpType type, int startMove, int endMove) =>
+            new ActiveEffect(type, startMove, endMove) { CountsMoves = true };
     }
 
     public readonly struct PowerUpPrice
@@ -83,6 +91,22 @@ namespace CrushRoyale.Core.PowerUps
         public bool GoldenChainArmed { get; private set; }
 
         public int ExtraTimeMs { get; private set; }
+
+        /// <summary>Moves granted by Chrono Bomb on a stage played in moves, waiting to be added to the session.</summary>
+        public int PendingExtraMoves { get; private set; }
+
+        /// <summary>Moves already played, kept in sync by the session so move-based effect windows can be evaluated.</summary>
+        public int MovesUsed { get; set; }
+
+        /// <summary>True when the stage counts moves: boosters then last a number of moves instead of seconds.</summary>
+        public bool CountsMoves => _config.HasMoveLimit;
+
+        public int TakePendingExtraMoves()
+        {
+            int moves = PendingExtraMoves;
+            PendingExtraMoves = 0;
+            return moves;
+        }
 
         public IReadOnlyList<ActiveEffect> Effects => _effects;
 
@@ -163,7 +187,14 @@ namespace CrushRoyale.Core.PowerUps
             switch (type)
             {
                 case PowerUpType.ChronoBomb:
-                    ExtraTimeMs += def.EffectValue;
+                    if (CountsMoves)
+                    {
+                        PendingExtraMoves += def.EffectMoves;
+                    }
+                    else
+                    {
+                        ExtraTimeMs += def.EffectValue;
+                    }
                     break;
                 case PowerUpType.GoldenChain:
                     GoldenChainArmed = true;
@@ -173,7 +204,9 @@ namespace CrushRoyale.Core.PowerUps
                 case PowerUpType.Multiplier2x:
                 case PowerUpType.FreezingGel:
                 case PowerUpType.CascadeInfinity:
-                    _effects.Add(new ActiveEffect(type, nowMs, nowMs + def.DurationMs));
+                    _effects.Add(CountsMoves && def.DurationMoves > 0
+                        ? ActiveEffect.ForMoves(type, MovesUsed, MovesUsed + def.DurationMoves)
+                        : new ActiveEffect(type, nowMs, nowMs + def.DurationMs));
                     break;
             }
 
@@ -186,7 +219,11 @@ namespace CrushRoyale.Core.PowerUps
         {
             foreach (ActiveEffect e in _effects)
             {
-                if (e.Type == type && e.IsActiveAt(nowMs))
+                if (e.Type != type)
+                {
+                    continue;
+                }
+                if (e.CountsMoves ? e.IsActiveAtMove(MovesUsed) : e.IsActiveAt(nowMs))
                 {
                     return true;
                 }

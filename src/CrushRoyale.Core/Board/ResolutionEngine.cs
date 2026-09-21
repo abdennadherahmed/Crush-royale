@@ -229,8 +229,8 @@ namespace CrushRoyale.Core.Board
         /// </summary>
         private static ClearCause ComboCells(GameBoard board, Pos center, PieceType first, PieceType second, List<Pos> cells)
         {
-            bool firstBomb = first == PieceType.AreaBomb;
-            bool secondBomb = second == PieceType.AreaBomb;
+            bool firstBomb = first == PieceType.AreaBomb || first == PieceType.Cross;
+            bool secondBomb = second == PieceType.AreaBomb || second == PieceType.Cross;
             if (firstBomb && secondBomb)
             {
                 for (int dy = -2; dy <= 2; dy++)
@@ -371,6 +371,10 @@ namespace CrushRoyale.Core.Board
                         points += _scoring.CrossBonus;
                         AddSpecial(spawn, group.Color, PieceType.AreaBomb);
                         break;
+                    case MatchShape.Square:
+                        points += _scoring.SquareBonus;
+                        AddSpecial(spawn, group.Color, PieceType.Cross);
+                        break;
                     case MatchShape.Line5:
                         points += _scoring.Line5SuperBonus;
                         foreach (Pos p in board.AllPositions())
@@ -446,6 +450,16 @@ namespace CrushRoyale.Core.Board
                         }
                         break;
                     case PieceType.LineVertical:
+                        for (int y = 0; y < board.Height; y++)
+                        {
+                            Mark(new Pos(p.X, y), ClearCause.LineBlast);
+                        }
+                        break;
+                    case PieceType.Cross:
+                        for (int x = 0; x < board.Width; x++)
+                        {
+                            Mark(new Pos(x, p.Y), ClearCause.LineBlast);
+                        }
                         for (int y = 0; y < board.Height; y++)
                         {
                             Mark(new Pos(p.X, y), ClearCause.LineBlast);

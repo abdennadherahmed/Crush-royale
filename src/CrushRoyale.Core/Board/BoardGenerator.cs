@@ -238,7 +238,12 @@ namespace CrushRoyale.Core.Board
             {
                 return true;
             }
-            return y >= 2 && Same(board, x, y - 1, color) && Same(board, x, y - 2, color);
+            if (y >= 2 && Same(board, x, y - 1, color) && Same(board, x, y - 2, color))
+            {
+                return true;
+            }
+            // 2x2 blocks are matches too (they create a Cross bomb), so the opening board must not contain one.
+            return x >= 1 && y >= 1 && Same(board, x - 1, y, color) && Same(board, x, y - 1, color) && Same(board, x - 1, y - 1, color);
         }
 
         private static bool Same(GameBoard board, int x, int y, PieceColor color)

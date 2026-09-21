@@ -20,16 +20,29 @@ namespace CrushRoyale.Game.UI
     {
         private readonly HashSet<string> _selected;
         private readonly bool _pvp;
+        private readonly bool _movesStage;
         private readonly Action _rebuild;
         private readonly List<Image> _slotIcons = new List<Image>();
         private readonly Dictionary<string, (Image Frame, GameObject Check)> _cards = new Dictionary<string, (Image, GameObject)>();
         private Text _slotsTitle;
 
-        private LoadoutPicker(HashSet<string> selected, bool pvp, Action rebuild)
+        private LoadoutPicker(HashSet<string> selected, bool pvp, Action rebuild, bool movesStage)
         {
             _selected = selected;
             _pvp = pvp;
             _rebuild = rebuild;
+            _movesStage = movesStage;
+        }
+
+        /// <summary>
+        /// What a boost does, worded for the stage it will be played on: on a stage counted in moves the effects last
+        /// moves, not seconds, and the Chrono Bomb hands out moves. Saying "20 seconds" there made boosts look useless.
+        /// </summary>
+        public static string Effect(PowerUpType type, bool movesStage)
+        {
+            string key = "powerup." + type + (movesStage ? ".descMoves" : ".desc");
+            string text = Loc.T(key);
+            return text == key ? Loc.T("powerup." + type + ".desc") : text;
         }
 
         private static GameRoot Game => GameRoot.Instance;
@@ -37,9 +50,9 @@ namespace CrushRoyale.Game.UI
         private static Localization Loc => GameRoot.Instance.Loc;
 
         /// <summary>Adds the slot bar and the boost grid to a vertical list. <paramref name="rebuild"/> refreshes the screen after a purchase.</summary>
-        public static void Build(Transform list, HashSet<string> selected, bool pvp, Action rebuild)
+        public static void Build(Transform list, HashSet<string> selected, bool pvp, Action rebuild, bool movesStage = false)
         {
-            var picker = new LoadoutPicker(selected, pvp, rebuild);
+            var picker = new LoadoutPicker(selected, pvp, rebuild, movesStage);
             picker.BuildSlots(list);
             picker.BuildGrid(list);
             picker.Refresh();
@@ -86,15 +99,16 @@ namespace CrushRoyale.Game.UI
             RectTransform gridRect = UIFactory.Rect("Loadout", list);
             List<PowerUpDefinition> defs = balance.PowerUps.Definitions.Where(d => _pvp || !d.PvpOnly).ToList();
             int rows = (defs.Count + 2) / 3;
-            UIFactory.Height(gridRect, rows * 330 + (rows - 1) * 18);
+            const int cellHeight = 390;
+            UIFactory.Height(gridRect, rows * cellHeight + (rows - 1) * 18);
             GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(312, 330);
+            grid.cellSize = new Vector2(312, cellHeight);
             grid.spacing = new Vector2(18, 18);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 3;
             grid.childAlignment = TextAnchor.UpperCenter;
             grid.padding = new RectOffset(8, 8, 8, 8);
-            UIFactory.Height(gridRect, rows * 330 + (rows - 1) * 18 + 16);
+            UIFactory.Height(gridRect, rows * cellHeight + (rows - 1) * 18 + 16);
             GridFit.On(grid);
 
             foreach (PowerUpDefinition def in defs)
@@ -119,11 +133,18 @@ namespace CrushRoyale.Game.UI
             if (art != null)
             {
                 Image icon = UIFactory.Icon(frame.transform, art, leagueLocked || count == 0 ? new Color(0.45f, 0.45f, 0.5f, 1f) : Color.white, 0);
-                UIFactory.Anchor(icon.rectTransform, 0.18f, 0.4f, 0.82f, 0.92f);
+                UIFactory.Anchor(icon.rectTransform, 0.2f, 0.52f, 0.8f, 0.95f);
             }
             Text name = UIFactory.Label(frame.transform, Loc.T("powerup." + type), Theme.SmallSize - 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(name.rectTransform, 0.05f, 0.24f, 0.95f, 0.42f);
+            UIFactory.Anchor(name.rectTransform, 0.05f, 0.4f, 0.95f, 0.53f);
             Widgets.TitleOutline(name);
+
+            // What it actually does, on every card: without it the boost screen was a row of unreadable icons.
+            Text effect = UIFactory.Label(frame.transform, Effect(def.Type, _movesStage), Theme.SmallSize - 6, Theme.Crystal, TextAnchor.UpperCenter);
+            effect.resizeTextForBestFit = true;
+            effect.resizeTextMinSize = UIFactory.MinFontSize;
+            effect.resizeTextMaxSize = Theme.SmallSize - 4;
+            UIFactory.Anchor(effect.rectTransform, 0.06f, 0.24f, 0.94f, 0.4f);
 
             // Owned count in a gold coin at the top-right corner.
             RectTransform badge = UIFactory.Anchor(UIFactory.Rect("Count", frame.transform), 0.7f, 0.76f, 0.98f, 1.02f);
@@ -151,7 +172,7 @@ namespace CrushRoyale.Game.UI
                     UIFactory.Anchor(lockIcon.rectTransform, 0.36f, 0.5f, 0.64f, 0.82f);
                 }
                 Text league = UIFactory.Label(frame.transform, Loc.T("stage.boostLeague", Loc.T("league." + def.UnlockLeague)), Theme.SmallSize - 6, Theme.Warning, TextAnchor.MiddleCenter, FontStyle.Bold);
-                UIFactory.Anchor(league.rectTransform, 0.06f, 0.05f, 0.94f, 0.24f);
+                UIFactory.Anchor(league.rectTransform, 0.06f, 0.04f, 0.94f, 0.22f);
                 button.onClick.AddListener(() => UI.Toast(Loc.T("stage.boostLeagueToast", Loc.T("league." + def.UnlockLeague))));
                 return;
             }
@@ -159,13 +180,13 @@ namespace CrushRoyale.Game.UI
             if (count == 0)
             {
                 Button get = UIFactory.Button(frame.transform, Loc.T("stage.get"), () => _ = GetItemPopup.ShowAsync(def.Type, _rebuild), Theme.Success, Theme.SmallSize - 2);
-                UIFactory.Anchor(get.GetComponent<RectTransform>(), 0.1f, 0.04f, 0.9f, 0.24f);
+                UIFactory.Anchor(get.GetComponent<RectTransform>(), 0.1f, 0.03f, 0.9f, 0.22f);
                 button.onClick.AddListener(() => _ = GetItemPopup.ShowAsync(def.Type, _rebuild));
                 return;
             }
 
             Text hint = UIFactory.Label(frame.transform, Loc.T("stage.tapToEquip"), Theme.SmallSize - 8, Theme.TextMuted, TextAnchor.MiddleCenter);
-            UIFactory.Anchor(hint.rectTransform, 0.06f, 0.06f, 0.94f, 0.24f);
+            UIFactory.Anchor(hint.rectTransform, 0.06f, 0.04f, 0.94f, 0.22f);
             button.onClick.AddListener(() => Toggle(type));
         }
 
@@ -241,7 +262,7 @@ namespace CrushRoyale.Game.UI
                 UIFactory.Anchor(icon.rectTransform, 0.06f, 0.7f, 0.32f, 0.87f);
                 icon.gameObject.AddComponent<Breathe>().Amount = 0.03f;
             }
-            Text desc = UIFactory.Label(box, loc.T("powerup." + type + ".desc"), Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleLeft);
+            Text desc = UIFactory.Label(box, LoadoutPicker.Effect(type, false), Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleLeft);
             UIFactory.Anchor(desc.rectTransform, 0.34f, 0.7f, 0.94f, 0.87f);
 
             void Close()

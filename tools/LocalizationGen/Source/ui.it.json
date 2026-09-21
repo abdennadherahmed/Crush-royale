@@ -127,8 +127,8 @@
   "pause.quitStory": "Uscire dal livello? Perderai una vita.",
   "pause.quitPvp": "Uscire dalla partita? Conterà come sconfitta.",
   "continue.title": "Mosse esaurite!",
-  "continue.free": "Continuare gratis con +{0} mosse?",
-  "continue.body": "Continuare con +{0} mosse per {1}?",
+  "continue.free": "Continuare con {0}, gratis?",
+  "continue.body": "Continuare con {0} per {1} orbi? (ne hai {2})",
   "continue.accept": "Continua",
   "continue.decline": "Arrenditi",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Fai due abbinamenti accanto a un uovo: si schiude e lascia una gemma bonus al suo posto!",
   "hud.defused": "DISINNESCATA!",
   "hud.hatched": "SCHIUSO!",
-  "hud.boom": "BUM!"
+  "hud.boom": "BUM!",
+  "continue.moves": "+{0} mosse",
+  "continue.seconds": "+{0} secondi",
+  "powerup.ChronoBomb.descMoves": "+4 mosse subito.",
+  "powerup.CoinBooster.descMoves": "Punteggio x1,5 per 5 mosse.",
+  "powerup.BrightSpark.descMoves": "Ogni match-3 crea anche una gemma linea, per 5 mosse.",
+  "powerup.Multiplier2x.descMoves": "Punteggio doppio per 4 mosse.",
+  "powerup.CascadeInfinity.descMoves": "Le cascate mantengono il moltiplicatore per 4 mosse.",
+  "result.stageWon": "Livello {0} completato - {1}",
+  "result.stageLost": "Livello {0} fallito - {1}"
 }

@@ -127,8 +127,8 @@
   "pause.quitStory": "¿Salir de este nivel? Perderás una vida.",
   "pause.quitPvp": "¿Salir de la partida? Contará como derrota.",
   "continue.title": "¡Sin movimientos!",
-  "continue.free": "¿Continuar gratis con +{0} movimientos?",
-  "continue.body": "¿Continuar con +{0} movimientos por {1}?",
+  "continue.free": "¿Seguir con {0}, gratis?",
+  "continue.body": "¿Seguir con {0} por {1} orbes? (tienes {2})",
   "continue.accept": "Continuar",
   "continue.decline": "Rendirse",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Haz dos combinaciones junto a un huevo: ¡eclosiona y deja una gema bonus en su lugar!",
   "hud.defused": "¡DESACTIVADA!",
   "hud.hatched": "¡ECLOSIÓN!",
-  "hud.boom": "¡BUM!"
+  "hud.boom": "¡BUM!",
+  "continue.moves": "+{0} movimientos",
+  "continue.seconds": "+{0} segundos",
+  "powerup.ChronoBomb.descMoves": "+4 movimientos al instante.",
+  "powerup.CoinBooster.descMoves": "Puntuación x1,5 durante 5 movimientos.",
+  "powerup.BrightSpark.descMoves": "Cada match-3 crea una gema línea, durante 5 movimientos.",
+  "powerup.Multiplier2x.descMoves": "Puntuación doble durante 4 movimientos.",
+  "powerup.CascadeInfinity.descMoves": "Las cascadas mantienen su multiplicador durante 4 movimientos.",
+  "result.stageWon": "Nivel {0} superado - {1}",
+  "result.stageLost": "Nivel {0} fallido - {1}"
 }

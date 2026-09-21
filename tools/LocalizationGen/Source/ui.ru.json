@@ -127,8 +127,8 @@
   "pause.quitStory": "Выйти из уровня? Вы потеряете жизнь.",
   "pause.quitPvp": "Покинуть матч? Это будет засчитано как поражение.",
   "continue.title": "Ходы закончились!",
-  "continue.free": "Продолжить бесплатно с +{0} ходами?",
-  "continue.body": "Продолжить с +{0} ходами за {1}?",
+  "continue.free": "Продолжить с {0} бесплатно?",
+  "continue.body": "Продолжить с {0} за {1} сфер? (у вас {2})",
   "continue.accept": "Продолжить",
   "continue.decline": "Сдаться",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Соберите два ряда рядом с яйцом: оно вылупится и оставит бонусный камень!",
   "hud.defused": "ОБЕЗВРЕЖЕНА!",
   "hud.hatched": "ВЫЛУПИЛСЯ!",
-  "hud.boom": "БУМ!"
+  "hud.boom": "БУМ!",
+  "continue.moves": "+{0} ходов",
+  "continue.seconds": "+{0} секунд",
+  "powerup.ChronoBomb.descMoves": "Сразу +4 хода.",
+  "powerup.CoinBooster.descMoves": "Счёт x1,5 на 5 ходов.",
+  "powerup.BrightSpark.descMoves": "Каждый матч-3 создаёт линейный камень, 5 ходов.",
+  "powerup.Multiplier2x.descMoves": "Двойной счёт на 4 хода.",
+  "powerup.CascadeInfinity.descMoves": "Каскады сохраняют множитель 4 хода.",
+  "result.stageWon": "Уровень {0} пройден - {1}",
+  "result.stageLost": "Уровень {0} не пройден - {1}"
 }

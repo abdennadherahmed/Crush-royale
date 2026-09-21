@@ -127,8 +127,8 @@
   "pause.quitStory": "Quitter ce niveau ? Tu perdras une vie.",
   "pause.quitPvp": "Quitter le match ? Il comptera comme une défaite.",
   "continue.title": "Plus de coups !",
-  "continue.free": "Continuer gratuitement avec +{0} coups ?",
-  "continue.body": "Continuer avec +{0} coups pour {1} ?",
+  "continue.free": "Continuer avec {0}, gratuitement ?",
+  "continue.body": "Continuer avec {0} pour {1} orbes ? (tu en as {2})",
   "continue.accept": "Continuer",
   "continue.decline": "Abandonner",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "Fais deux matchs à côté d'un œuf : il éclot et laisse une gemme bonus à sa place !",
   "hud.defused": "DÉSAMORCÉE !",
   "hud.hatched": "ÉCLOSION !",
-  "hud.boom": "BOUM !"
+  "hud.boom": "BOUM !",
+  "continue.moves": "+{0} coups",
+  "continue.seconds": "+{0} secondes",
+  "powerup.ChronoBomb.descMoves": "+4 coups tout de suite.",
+  "powerup.CoinBooster.descMoves": "Score x1,5 pendant 5 coups.",
+  "powerup.BrightSpark.descMoves": "Chaque match-3 crée aussi une gemme ligne, pendant 5 coups.",
+  "powerup.Multiplier2x.descMoves": "Score doublé pendant 4 coups.",
+  "powerup.CascadeInfinity.descMoves": "Les cascades gardent leur multiplicateur pendant 4 coups.",
+  "result.stageWon": "Niveau {0} terminé - {1}",
+  "result.stageLost": "Niveau {0} échoué - {1}"
 }

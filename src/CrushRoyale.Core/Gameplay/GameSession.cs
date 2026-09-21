@@ -459,6 +459,8 @@ namespace CrushRoyale.Core.Gameplay
                 }
 
                 _powerUps.Consume(action.PowerUp, t);
+                // Chrono Bomb pays in moves on a stage played in moves (its 20 seconds were invisible there).
+                MovesLeft += _powerUps.TakePendingExtraMoves();
                 OnPowerUpActivated?.Invoke(action.PowerUp);
 
                 if (action.PowerUp == PowerUpType.NuclearBomb)
@@ -472,6 +474,8 @@ namespace CrushRoyale.Core.Gameplay
                 baseDuration = _balance.Timing.PowerUpAnimationMs;
             }
 
+            // Effect windows counted in moves need the move counter of this action.
+            _powerUps.MovesUsed = MovesUsed;
             var outcome = new ActionOutcome(action) { Accepted = true, Resolution = resolution };
             if (resolution != null)
             {
@@ -908,21 +912,40 @@ namespace CrushRoyale.Core.Gameplay
             }
         }
 
+        /// <summary>
+        /// Stars reward the score OR how comfortably the stage was won: finishing a goal with most of the moves (or the
+        /// clock) left is a 3-star performance even when the score stayed low, which score-only stars used to punish.
+        /// </summary>
         private int ComputeStars()
         {
             if (State != SessionState.Won)
             {
                 return 0;
             }
-            if (Config.ThreeStarScore > 0 && Score >= Config.ThreeStarScore)
+            int spare = SparePermille();
+            ScoringBalance s = _balance.Scoring;
+            if ((Config.ThreeStarScore > 0 && Score >= Config.ThreeStarScore) || spare >= s.ThreeStarSparePermille)
             {
                 return 3;
             }
-            if (Config.TwoStarScore > 0 && Score >= Config.TwoStarScore)
+            if ((Config.TwoStarScore > 0 && Score >= Config.TwoStarScore) || spare >= s.TwoStarSparePermille)
             {
                 return 2;
             }
             return 1;
+        }
+
+        /// <summary>Share (permille) of the moves - or of the clock on timed stages - still unused when the stage was won.</summary>
+        private int SparePermille()
+        {
+            if (Config.HasMoveLimit)
+            {
+                int limit = Math.Max(1, Config.MoveLimit + Config.AssistExtraMoves);
+                return (int)Math.Min(1000L, (long)Math.Max(0, MovesLeft) * 1000 / limit);
+            }
+            int total = Math.Max(1, TimeLimitMs);
+            int left = Math.Max(0, total - Math.Max(0, _endTimeMs));
+            return (int)Math.Min(1000L, (long)left * 1000 / total);
         }
 
         private ActionOutcome Reject(PlayerAction action, ErrorCode error) =>

@@ -71,10 +71,18 @@ namespace CrushRoyale.Core.Config
         public int MaxScoreMultiplierPermille { get; set; } = 5000;
 
         /// <summary>Story: points per unused move when the stage is won early.</summary>
+        /// <summary>Bonus points for a 2x2 square match (between a Line4 and an L/T cross).</summary>
+        public int SquareBonus { get; set; } = 120;
+
         public int RemainingMoveBonus { get; set; } = 150;
 
         /// <summary>Story: points per unused full second when the stage is won early.</summary>
         public int RemainingSecondBonus { get; set; } = 20;
+
+        /// <summary>Share of the moves (or of the clock) left that already earns the 2nd / 3rd star, whatever the score.</summary>
+        public int TwoStarSparePermille { get; set; } = 250;
+
+        public int ThreeStarSparePermille { get; set; } = 450;
 
         public int GetCascadeMultiplierPermille(int cascadeLevel)
         {
@@ -101,7 +109,8 @@ namespace CrushRoyale.Core.Config
         {
             h.Add(PointsPerPiece).Add(Line4Bonus).Add(CrossBonus).Add(Line5SuperBonus).Add(SpecialActivationBonus)
                 .Add(StonePoints).Add(IceLayerPoints).Add(MegaCascadeLevel).Add(ChainBonusPerCascadePermille)
-                .Add(MaxChainBonusPermille).Add(MaxScoreMultiplierPermille).Add(RemainingMoveBonus).Add(RemainingSecondBonus);
+                .Add(MaxChainBonusPermille).Add(MaxScoreMultiplierPermille).Add(RemainingMoveBonus).Add(RemainingSecondBonus)
+                .Add(TwoStarSparePermille).Add(ThreeStarSparePermille).Add(SquareBonus);
             foreach (int m in CascadeMultipliersPermille)
             {
                 h.Add(m);
@@ -196,6 +205,15 @@ namespace CrushRoyale.Core.Config
 
         public PowerUpTier Tier { get; set; }
 
+        /// <summary>
+        /// How long the effect lasts on a stage played in MOVES (0 = the effect is not a window). Stages with a move
+        /// limit ignore <see cref="DurationMs"/>: a timer nobody can see made every booster feel useless.
+        /// </summary>
+        public int DurationMoves { get; set; }
+
+        /// <summary>Moves granted instead of time on a stage played in moves (Chrono Bomb).</summary>
+        public int EffectMoves { get; set; }
+
         public int PriceCoins { get; set; }
 
         /// <summary>Alternative price in Orbes (shop shows both when relevant).</summary>
@@ -236,15 +254,15 @@ namespace CrushRoyale.Core.Config
 
         public List<PowerUpDefinition> Definitions { get; set; } = new List<PowerUpDefinition>
         {
-            new PowerUpDefinition { Type = PowerUpType.ChronoBomb, Tier = PowerUpTier.Common, PriceCoins = 50, PriceOrbes = 5, EffectValue = 20000, UnlockLeague = League.Bronze },
-            new PowerUpDefinition { Type = PowerUpType.CoinBooster, Tier = PowerUpTier.Common, PriceCoins = 60, PriceOrbes = 6, DurationMs = 20000, EffectValue = 1500, UnlockLeague = League.Bronze },
-            new PowerUpDefinition { Type = PowerUpType.BrightSpark, Tier = PowerUpTier.Common, PriceCoins = 70, PriceOrbes = 7, DurationMs = 20000, UnlockLeague = League.Bronze },
-            new PowerUpDefinition { Type = PowerUpType.Multiplier2x, Tier = PowerUpTier.Rare, PriceCoins = 200, PriceOrbes = 20, DurationMs = 15000, EffectValue = 2000, OncePerMatch = true, UnlockLeague = League.Silver },
+            new PowerUpDefinition { Type = PowerUpType.ChronoBomb, Tier = PowerUpTier.Common, PriceCoins = 50, PriceOrbes = 5, EffectValue = 20000, EffectMoves = 4, UnlockLeague = League.Bronze },
+            new PowerUpDefinition { Type = PowerUpType.CoinBooster, Tier = PowerUpTier.Common, PriceCoins = 60, PriceOrbes = 6, DurationMs = 20000, DurationMoves = 5, EffectValue = 1500, UnlockLeague = League.Bronze },
+            new PowerUpDefinition { Type = PowerUpType.BrightSpark, Tier = PowerUpTier.Common, PriceCoins = 70, PriceOrbes = 7, DurationMs = 20000, DurationMoves = 5, UnlockLeague = League.Bronze },
+            new PowerUpDefinition { Type = PowerUpType.Multiplier2x, Tier = PowerUpTier.Rare, PriceCoins = 200, PriceOrbes = 20, DurationMs = 15000, DurationMoves = 4, EffectValue = 2000, OncePerMatch = true, UnlockLeague = League.Silver },
             new PowerUpDefinition { Type = PowerUpType.GoldenChain, Tier = PowerUpTier.Rare, PriceCoins = 180, PriceOrbes = 18, OncePerMatch = true, UnlockLeague = League.Silver },
             new PowerUpDefinition { Type = PowerUpType.FreezingGel, Tier = PowerUpTier.Rare, PriceCoins = 220, PriceOrbes = 22, DurationMs = 10000, EffectValue = 1000, OncePerMatch = true, PvpOnly = true, UnlockLeague = League.Silver },
             new PowerUpDefinition { Type = PowerUpType.NuclearBomb, Tier = PowerUpTier.Epic, PriceCoins = 500, PriceOrbes = 50, OncePerMatch = true, NeedsTarget = true, UnlockLeague = League.Gold },
             new PowerUpDefinition { Type = PowerUpType.FireStorm, Tier = PowerUpTier.Epic, PriceCoins = 480, PriceOrbes = 48, OncePerMatch = true, UnlockLeague = League.Gold },
-            new PowerUpDefinition { Type = PowerUpType.CascadeInfinity, Tier = PowerUpTier.Epic, PriceCoins = 550, PriceOrbes = 55, DurationMs = 30000, EffectValue = 2000, OncePerMatch = true, UnlockLeague = League.Gold }
+            new PowerUpDefinition { Type = PowerUpType.CascadeInfinity, Tier = PowerUpTier.Epic, PriceCoins = 550, PriceOrbes = 55, DurationMs = 30000, DurationMoves = 4, EffectValue = 2000, OncePerMatch = true, UnlockLeague = League.Gold }
         };
 
         public PowerUpDefinition Get(PowerUpType type)
@@ -275,7 +293,7 @@ namespace CrushRoyale.Core.Config
             h.Add(LoadoutSlots).Add(NuclearRadius);
             foreach (PowerUpDefinition d in Definitions)
             {
-                h.Add((int)d.Type).Add(d.DurationMs).Add(d.EffectValue).Add(d.OncePerMatch ? 1 : 0).Add(d.PvpOnly ? 1 : 0).Add(d.NeedsTarget ? 1 : 0);
+                h.Add((int)d.Type).Add(d.DurationMs).Add(d.EffectValue).Add(d.OncePerMatch ? 1 : 0).Add(d.PvpOnly ? 1 : 0).Add(d.NeedsTarget ? 1 : 0).Add(d.DurationMoves).Add(d.EffectMoves);
             }
         }
     }

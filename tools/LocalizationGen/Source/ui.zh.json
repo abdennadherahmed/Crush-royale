@@ -127,8 +127,8 @@
   "pause.quitStory": "退出本关？你将失去一条生命。",
   "pause.quitPvp": "退出对局？将计为失败。",
   "continue.title": "步数用完了！",
-  "continue.free": "免费获得 +{0} 步继续游戏？",
-  "continue.body": "花费 {1} 获得 +{0} 步继续游戏？",
+  "continue.free": "免费获得{0}继续？",
+  "continue.body": "花费 {1} 魔珠获得{0}继续？（你有 {2}）",
   "continue.accept": "继续",
   "continue.decline": "放弃",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "在龙蛋旁消除两次：它会孵化并在原地留下奖励宝石！",
   "hud.defused": "已拆除！",
   "hud.hatched": "孵化！",
-  "hud.boom": "轰！"
+  "hud.boom": "轰！",
+  "continue.moves": "+{0} 步",
+  "continue.seconds": "+{0} 秒",
+  "powerup.ChronoBomb.descMoves": "立即 +4 步。",
+  "powerup.CoinBooster.descMoves": "接下来 5 步得分 x1.5。",
+  "powerup.BrightSpark.descMoves": "5 步内每次三消额外生成线形宝石。",
+  "powerup.Multiplier2x.descMoves": "接下来 4 步得分翻倍。",
+  "powerup.CascadeInfinity.descMoves": "接下来 4 步连锁倍率不衰减。",
+  "result.stageWon": "第 {0} 关通过 - {1}",
+  "result.stageLost": "第 {0} 关失败 - {1}"
 }

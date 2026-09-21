@@ -208,6 +208,11 @@ namespace CrushRoyale.Game.Gameplay
                     _overlay.sprite = ArtLibrary.Special(piece.Type) ?? ProceduralSprites.Stripes(false);
                     _overlay.color = Color.white;
                     break;
+                case PieceType.Cross:
+                    _overlay.enabled = true;
+                    _overlay.sprite = ArtLibrary.Special(piece.Type) ?? ProceduralSprites.Ring();
+                    _overlay.color = Color.white;
+                    break;
                 case PieceType.AreaBomb:
                     _overlay.enabled = true;
                     Sprite bomb = ArtLibrary.Special(piece.Type);

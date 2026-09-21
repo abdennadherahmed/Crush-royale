@@ -286,6 +286,7 @@ namespace CrushRoyale.Core.Board
                 case PieceType.LineHorizontal: return c + "h";
                 case PieceType.LineVertical: return c + "v";
                 case PieceType.AreaBomb: return c + "a";
+                case PieceType.Cross: return c + "x";
                 default: return c + ".";
             }
         }
@@ -320,6 +321,7 @@ namespace CrushRoyale.Core.Board
                 case 'h': return board.CreatePiece(color, PieceType.LineHorizontal);
                 case 'v': return board.CreatePiece(color, PieceType.LineVertical);
                 case 'a': return board.CreatePiece(color, PieceType.AreaBomb);
+                case 'x': return board.CreatePiece(color, PieceType.Cross);
                 case 't': return board.CreatePiece(color, PieceType.TimeBomb, 5);
                 default: throw new FormatException("Invalid piece type in token '" + token + "'.");
             }

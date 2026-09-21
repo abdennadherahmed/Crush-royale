@@ -195,12 +195,20 @@ public class PowerUpTests
     [Fact]
     public void ChronoBomb_ExtendsTimer_AndIsReusable()
     {
+        // Timed stage: the Chrono Bomb buys seconds.
+        var timed = new GameSession(SessionConfig.ForStage(Fixtures.Stage(moves: 0, timeMs: 60000), Fixtures.Balance,
+            new[] { new LoadoutEntry(PowerUpType.ChronoBomb, 2) }, League.Bronze), Fixtures.Balance);
+        int before = timed.TimeLimitMs;
+        Assert.True(timed.ActivatePowerUp(PowerUpType.ChronoBomb, null, 100).Accepted);
+        Assert.True(timed.ActivatePowerUp(PowerUpType.ChronoBomb, null, timed.NextActionAllowedAtMs).Accepted);
+        Assert.Equal(before + 40000, timed.TimeLimitMs);
+        Assert.Equal(ErrorCode.NotEnoughItems, timed.ActivatePowerUp(PowerUpType.ChronoBomb, null, timed.NextActionAllowedAtMs).Error);
+
+        // Moves stage: seconds are invisible there, so it buys moves instead.
         var session = Fixtures.StorySession(null, League.Bronze, new LoadoutEntry(PowerUpType.ChronoBomb, 2));
-        int before = session.TimeLimitMs;
+        int moves = session.MovesLeft;
         Assert.True(session.ActivatePowerUp(PowerUpType.ChronoBomb, null, 100).Accepted);
-        Assert.True(session.ActivatePowerUp(PowerUpType.ChronoBomb, null, session.NextActionAllowedAtMs).Accepted);
-        Assert.Equal(before + 40000, session.TimeLimitMs);
-        Assert.Equal(ErrorCode.NotEnoughItems, session.ActivatePowerUp(PowerUpType.ChronoBomb, null, session.NextActionAllowedAtMs).Error);
+        Assert.Equal(moves + Fixtures.Balance.PowerUps.Get(PowerUpType.ChronoBomb).EffectMoves, session.MovesLeft);
     }
 
     [Fact]

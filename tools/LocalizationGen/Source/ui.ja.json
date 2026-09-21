@@ -127,8 +127,8 @@
   "pause.quitStory": "このステージをやめますか？ライフを1つ失います。",
   "pause.quitPvp": "マッチをやめますか？敗北扱いになります。",
   "continue.title": "手数切れ！",
-  "continue.free": "無料で+{0}手追加して続けますか？",
-  "continue.body": "{1}で+{0}手追加して続けますか？",
+  "continue.free": "{0}で無料で続ける？",
+  "continue.body": "{0}を{1}オーブで購入して続ける？（所持{2}）",
   "continue.accept": "続ける",
   "continue.decline": "あきらめる",
 
@@ -959,5 +959,14 @@
   "mechanic.egg.body": "卵の隣で2回そろえると孵化して、その場にボーナス宝石が生まれる！",
   "hud.defused": "解除！",
   "hud.hatched": "孵化！",
-  "hud.boom": "ドカーン！"
+  "hud.boom": "ドカーン！",
+  "continue.moves": "+{0}手",
+  "continue.seconds": "+{0}秒",
+  "powerup.ChronoBomb.descMoves": "すぐに+4手。",
+  "powerup.CoinBooster.descMoves": "5手の間スコア1.5倍。",
+  "powerup.BrightSpark.descMoves": "5手の間、マッチ3ごとにラインジェムが生まれる。",
+  "powerup.Multiplier2x.descMoves": "4手の間スコア2倍。",
+  "powerup.CascadeInfinity.descMoves": "4手の間、連鎖倍率が下がらない。",
+  "result.stageWon": "ステージ{0}クリア - {1}",
+  "result.stageLost": "ステージ{0}失敗 - {1}"
 }
