@@ -245,6 +245,12 @@ namespace CrushRoyale.Client
         public Task<GuildLeaderboardResponse> GetGuildLeaderboardAsync(CancellationToken ct = default) => Transport.GetAsync<GuildLeaderboardResponse>(ApiRoutes.LeaderboardGuilds, ct);
 
         // Social
+        public Task<FriendsResponse> SendLifeAsync(string friendId, CancellationToken ct = default) =>
+            Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendSendLife, new FriendTargetRequest { PlayerId = friendId }, ct);
+
+        public Task<FriendsResponse> AcceptLifeAsync(CancellationToken ct = default) =>
+            Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendAcceptLife, null, ct);
+
         public Task<FriendsResponse> GetFriendsAsync(CancellationToken ct = default) => Transport.GetAsync<FriendsResponse>(ApiRoutes.Friends, ct);
         public Task<FriendsResponse> SendFriendRequestAsync(string playerId, CancellationToken ct = default) => Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendRequest, new FriendTargetRequest { PlayerId = playerId }, ct);
         public Task<FriendsResponse> AcceptFriendAsync(string playerId, CancellationToken ct = default) => Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendAccept, new FriendTargetRequest { PlayerId = playerId }, ct);

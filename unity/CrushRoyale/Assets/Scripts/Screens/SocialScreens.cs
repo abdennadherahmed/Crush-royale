@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CrushRoyale.Contracts;
+using CrushRoyale.Core.Progression;
 using CrushRoyale.Game.Gameplay;
 using CrushRoyale.Game.UI;
 using UnityEngine;
@@ -58,6 +59,25 @@ namespace CrushRoyale.Game.Screens
                 }
             }
 
+            if (_friends.LifeGifts.Count > 0)
+            {
+                Widgets.SectionTitle(list, Loc.T("friends.giftsTitle"));
+                foreach (PublicProfileDto giver in _friends.LifeGifts)
+                {
+                    RectTransform card = PlayerCard(list, giver);
+                    HorizontalLayoutGroup giftRow = UIFactory.Row(card, 80, 12);
+                    UIFactory.Label(giftRow.transform, Loc.T("friends.giftFrom", giver.DisplayName), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleLeft, FontStyle.Bold);
+                    Button take = UIFactory.Button(giftRow.transform, Loc.T("friends.giftAccept"), () => _ = AcceptLifeAsync(), Theme.Success, Theme.SmallSize);
+                    take.interactable = _friends.CanAcceptLife;
+                }
+                if (!_friends.CanAcceptLife)
+                {
+                    // Says WHY it is greyed out: full lives, or the daily gift already taken.
+                    bool full = (_friends.Lives?.Lives ?? 0) >= (Game.Backend.Balance?.Stamina?.MaxRegenLives ?? 5);
+                    UIFactory.Height(UIFactory.Label(list, Loc.T(full ? "friends.giftFull" : "friends.giftTaken"), Theme.SmallSize, Theme.Warning), 60);
+                }
+            }
+
             Widgets.SectionTitle(list, Loc.T("friends.list", _friends.Friends.Count));
             if (_friends.Friends.Count == 0)
             {
@@ -73,6 +93,8 @@ namespace CrushRoyale.Game.Screens
                 challenge.interactable = cooldown <= 0;
                 UIFactory.Button(actions.transform, Loc.T("profile.view"), () => UI.Show<ProfileScreen>(id), Theme.Hex("5BA8FF"), Theme.SmallSize);
                 UIFactory.Button(actions.transform, Loc.T("friends.remove"), () => _ = RemoveAsync(id), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                Button gift = UIFactory.Button(actions.transform, Loc.T("friends.giftSend"), () => _ = SendLifeAsync(id), Theme.Crystal, Theme.SmallSize);
+                gift.interactable = _friends.CanSendLife;
             }
 
             if (_friends.Outgoing.Count > 0)
@@ -81,6 +103,20 @@ namespace CrushRoyale.Game.Screens
                 foreach (PublicProfileDto player in _friends.Outgoing)
                 {
                     PlayerCard(list, player);
+                }
+            }
+
+            if (_friends.Suggestions.Count > 0)
+            {
+                Widgets.SectionTitle(list, Loc.T("friends.suggestions"));
+                UIFactory.Height(UIFactory.Label(list, Loc.T("friends.suggestionsHelp"), Theme.SmallSize, Theme.TextMuted), 60);
+                foreach (PublicProfileDto player in _friends.Suggestions)
+                {
+                    RectTransform card = PlayerCard(list, player);
+                    HorizontalLayoutGroup actions = UIFactory.Row(card, 80, 12);
+                    string id = player.Id;
+                    UIFactory.Button(actions.transform, Loc.T("friends.add"), () => _ = ActAsync("request", id), Theme.Gold, Theme.SmallSize);
+                    UIFactory.Button(actions.transform, Loc.T("profile.view"), () => UI.Show<ProfileScreen>(id), Theme.Hex("5BA8FF"), Theme.SmallSize);
                 }
             }
 
@@ -108,6 +144,29 @@ namespace CrushRoyale.Game.Screens
             }
             UIFactory.Label(card, Loc.T("friends.line", Loc.T("league." + player.League), player.Trophies, player.HighestStage), Theme.SmallSize, Theme.League(player.League), TextAnchor.MiddleLeft);
             return card;
+        }
+
+        private async Task SendLifeAsync(string friendId)
+        {
+            FriendsResponse response = await Api(api => api.SendLifeAsync(friendId));
+            if (response != null)
+            {
+                _friends = response;
+                UI.Toast(Loc.T("friends.giftSent"));
+                Rebuild();
+            }
+        }
+
+        private async Task AcceptLifeAsync()
+        {
+            FriendsResponse response = await Api(api => api.AcceptLifeAsync());
+            if (response != null)
+            {
+                _friends = response;
+                Game.Backend.ApplyLives(response.Lives);
+                UI.Toast(Loc.T("friends.giftTaken2"));
+                Rebuild();
+            }
         }
 
         private async Task SearchAsync()
@@ -555,7 +614,9 @@ namespace CrushRoyale.Game.Screens
             UiKit.FramePanel(panel);
 
             TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(_pass.SeasonEndUnixMs) - DateTimeOffset.UtcNow;
-            Text season = UIFactory.Label(panel.transform, Loc.T("battlepass.seasonShort", _pass.Season, Math.Max(0, left.Days)), Theme.SmallSize, Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
+            SeasonDefinition definition = SeasonCatalog.ByIndex(_pass.Season);
+            Text season = UIFactory.Label(panel.transform, Loc.T("battlepass.seasonShort", Loc.T(definition.NameKey, definition.Index), Math.Max(0, left.Days)),
+                Theme.SmallSize, definition.IsBeta ? Theme.Crystal : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(season.rectTransform, 0.05f, 0.8f, 0.95f, 0.94f);
 
             RectTransform medal = UIFactory.Anchor(UIFactory.Rect("Tier", panel.transform), 0.04f, 0.3f, 0.3f, 0.82f);
@@ -602,26 +663,47 @@ namespace CrushRoyale.Game.Screens
         /// <summary>How to earn pass XP: daily quests (with live progress) and every match mode, each with a "Go" button.</summary>
         private void BuildMissions(Transform list)
         {
-            Widgets.SectionTitle(list, Loc.T("battlepass.missions"));
             var live = Game.Backend.Balance.LiveOps;
-            if (_quests != null)
+            if (_quests != null && _quests.Quests.Count > 0)
             {
-                foreach (QuestDto quest in _quests.Quests)
+                Widgets.SectionTitle(list, Loc.T("battlepass.missionsDaily"));
+                // Sorted "to do" first, then ready to claim, claimed last: the list used to mix them and looked doubled.
+                List<QuestDto> quests = _quests.Quests.OrderBy(q => q.Claimed ? 2 : (q.Progress >= q.Target ? 0 : 1)).ToList();
+                foreach (QuestDto quest in quests)
                 {
-                    Mission(list, "item_medal", Loc.T("quest." + quest.Type, quest.Target), live.XpQuest, quest.Claimed ? 1f : quest.Progress / (float)Math.Max(1, quest.Target),
-                        quest.Claimed ? "✔" : quest.Progress + "/" + quest.Target, () => UI.Show<QuestsScreen>());
+                    bool ready = !quest.Claimed && quest.Progress >= quest.Target;
+                    string state = quest.Claimed ? Loc.T("battlepass.stateClaimed") : ready ? Loc.T("battlepass.stateReady") : Loc.T("battlepass.stateToDo");
+                    Mission(list, "item_medal", Loc.T("quest." + quest.Type, quest.Target), live.XpQuest,
+                        quest.Claimed ? 1f : quest.Progress / (float)Math.Max(1, quest.Target),
+                        quest.Claimed ? "✔" : quest.Progress + "/" + quest.Target,
+                        quest.Claimed ? null : (Action)(() => UI.Show<QuestsScreen>()),
+                        state, quest.Claimed ? Theme.TextMuted : ready ? Theme.Success : Theme.Crystal,
+                        ready ? Loc.T("battlepass.claimNow") : Loc.T("get.go"));
                 }
             }
-            Mission(list, "item_stars", Loc.T("battlepass.missionStory"), live.XpStoryWin, -1f, null, () => UI.Show<WorldMapScreen>());
-            Mission(list, "item_trophy", Loc.T("battlepass.missionPvp"), live.XpPvpWin, -1f, null, () => UI.Show<PvpScreen>());
-            Mission(list, "item_bolt", Loc.T("battlepass.missionBoss"), live.XpGuildBossAttack, -1f, null, () => UI.Show<GuildScreen>());
+
+            Widgets.SectionTitle(list, Loc.T("battlepass.missionsAlways"));
+            Mission(list, "item_stars", Loc.T("battlepass.missionStory"), live.XpStoryWin, -1f, null, () => UI.Show<WorldMapScreen>(), Loc.T("battlepass.stateRepeat"), Theme.TextMuted, Loc.T("get.go"));
+            Mission(list, "item_trophy", Loc.T("battlepass.missionPvp"), live.XpPvpWin, -1f, null, () => UI.Show<PvpScreen>(), Loc.T("battlepass.stateRepeat"), Theme.TextMuted, Loc.T("get.go"));
+            Mission(list, "item_bolt", Loc.T("battlepass.missionBoss"), live.XpGuildBossAttack, -1f, null, () => UI.Show<GuildScreen>(), Loc.T("battlepass.stateRepeat"), Theme.TextMuted, Loc.T("get.go"));
         }
 
-        private void Mission(Transform list, string icon, string text, int xp, float progress, string progressText, Action go)
+        private void Mission(Transform list, string icon, string text, int xp, float progress, string progressText, Action go,
+            string state = null, Color? stateColor = null, string action = null)
         {
             Image row = UIFactory.Panel("Mission", list, Theme.Panel);
-            UIFactory.Height(row, 150);
+            UIFactory.Height(row, 170);
             UiKit.CardFrame(row);
+            if (go == null)
+            {
+                // Claimed: greyed out so the eye skips it instead of reading it as another thing to do.
+                row.color = new Color(row.color.r, row.color.g, row.color.b, row.color.a * 0.6f);
+            }
+            if (!string.IsNullOrEmpty(state))
+            {
+                Text pill = UIFactory.Label(row.transform, state, Theme.SmallSize - 6, stateColor ?? Theme.Crystal, TextAnchor.MiddleLeft, FontStyle.Bold);
+                UIFactory.Anchor(pill.rectTransform, 0.15f, 0.04f, 0.62f, 0.2f);
+            }
             Sprite art = UiKit.Art(icon);
             if (art != null)
             {
@@ -629,11 +711,11 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Anchor(image.rectTransform, 0.02f, 0.12f, 0.13f, 0.88f);
             }
             Text label = UIFactory.Label(row.transform, text, Theme.SmallSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(label.rectTransform, 0.15f, progress >= 0 ? 0.48f : 0.1f, 0.62f, 0.92f);
+            UIFactory.Anchor(label.rectTransform, 0.15f, progress >= 0 ? 0.52f : 0.2f, 0.62f, 0.94f);
             if (progress >= 0)
             {
                 UIFactory.ProgressBar(row.transform, progress, Theme.Success, out RectTransform bar);
-                UIFactory.Anchor(bar, 0.15f, 0.14f, 0.62f, 0.44f);
+                UIFactory.Anchor(bar, 0.15f, 0.22f, 0.62f, 0.5f);
                 Text count = UIFactory.Label(bar, progressText, Theme.SmallSize - 8, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Stretch(count.rectTransform);
             }
@@ -646,8 +728,11 @@ namespace CrushRoyale.Game.Screens
             Text xpText = UIFactory.Label(row.transform, "+" + xp, Theme.BodySize, Theme.Crystal, TextAnchor.MiddleLeft, FontStyle.Bold);
             UIFactory.Anchor(xpText.rectTransform, 0.71f, 0.1f, 0.8f, 0.9f);
             Widgets.TitleOutline(xpText);
-            Button button = UIFactory.Button(row.transform, Loc.T("get.go"), go, Theme.Success, Theme.SmallSize);
-            UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.81f, 0.2f, 0.98f, 0.8f);
+            if (go != null)
+            {
+                Button button = UIFactory.Button(row.transform, action ?? Loc.T("get.go"), go, Theme.Success, Theme.SmallSize);
+                UIFactory.Anchor(button.GetComponent<RectTransform>(), 0.81f, 0.2f, 0.98f, 0.8f);
+            }
         }
 
         private void BuildTrackHeader(Transform list)

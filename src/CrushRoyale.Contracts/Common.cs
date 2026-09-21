@@ -63,6 +63,8 @@ namespace CrushRoyale.Contracts
         public const string FriendRemove = Prefix + "/friends/remove";
         public const string FriendBlock = Prefix + "/friends/block";
         public const string FriendChallenge = Prefix + "/friends/{friendId}/challenge";
+        public const string FriendSendLife = Prefix + "/friends/life/send";
+        public const string FriendAcceptLife = Prefix + "/friends/life/accept";
         public const string WorldMap = Prefix + "/friends/map";
 
         public const string GuildCreate = Prefix + "/guild/create";

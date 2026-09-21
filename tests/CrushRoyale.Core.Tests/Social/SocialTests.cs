@@ -245,6 +245,33 @@ public class FriendsTests
     }
 
     [Fact]
+    public void LifeGifts_OnePerDay_AndNeverWhenFull()
+    {
+        var friends = new FriendsManager(Fixtures.Balance, EconomyFixtures.Clock());
+        var alice = new FriendsState();
+        var bob = new FriendsState();
+        Assert.True(friends.SendRequest("alice", alice, "bob", bob).Success);
+        Assert.True(friends.Accept("bob", bob, "alice", alice).Success);
+        const int today = 100;
+        const int max = 5;
+
+        Assert.Equal(ErrorCode.NotFound, friends.SendLife("alice", alice, "carol", new FriendsState(), today).Error);
+        Assert.True(friends.SendLife("alice", alice, "bob", bob, today).Success);
+        Assert.Equal(new[] { "alice" }, bob.LifeGifts);
+        Assert.Equal(ErrorCode.LimitReached, friends.SendLife("alice", alice, "bob", bob, today).Error);
+        // The next day the gift is allowed again, but only one can wait at a time.
+        Assert.Equal(ErrorCode.LimitReached, friends.SendLife("alice", alice, "bob", bob, today + 1).Error);
+
+        // A full player cannot take the gift: it stays waiting instead of being wasted.
+        Assert.Equal(ErrorCode.LimitReached, friends.AcceptLife(bob, today, max, max).Error);
+        Assert.Single(bob.LifeGifts);
+        Assert.True(friends.AcceptLife(bob, today, 2, max).Success);
+        Assert.Empty(bob.LifeGifts);
+        Assert.False(FriendsManager.CanAcceptLife(bob, today, 2, max));
+        Assert.Equal(ErrorCode.NotFound, friends.AcceptLife(bob, today, 2, max).Error);
+    }
+
+    [Fact]
     public void MutualRequests_AutoAccept()
     {
         var friends = new FriendsManager(Fixtures.Balance, EconomyFixtures.Clock());

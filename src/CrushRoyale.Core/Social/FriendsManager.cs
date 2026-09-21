@@ -18,6 +18,15 @@ namespace CrushRoyale.Core.Social
 
         /// <summary>friendId -> last friendly challenge (unix ms).</summary>
         public Dictionary<string, long> LastChallengeUnixMs { get; set; } = new Dictionary<string, long>();
+
+        /// <summary>UTC day of the last life sent to a friend (one gift per day).</summary>
+        public int LifeSentDay { get; set; } = -1;
+
+        /// <summary>UTC day of the last life accepted from a friend (one received per day).</summary>
+        public int LifeTakenDay { get; set; } = -1;
+
+        /// <summary>Ids of the friends whose life gift is waiting to be accepted.</summary>
+        public List<string> LifeGifts { get; set; } = new List<string>();
     }
 
     /// <summary>
@@ -26,6 +35,14 @@ namespace CrushRoyale.Core.Social
     /// </summary>
     public sealed class FriendsManager
     {
+        /// <summary>A life offered by a friend, and whether it can be accepted right now.</summary>
+        public sealed class LifeGiftView
+        {
+            public string FriendId { get; internal set; }
+
+            public bool CanAccept { get; internal set; }
+        }
+
         private readonly GameBalance _balance;
         private readonly IClock _clock;
 
@@ -192,5 +209,59 @@ namespace CrushRoyale.Core.Social
                 throw new ArgumentNullException(nameof(theirs));
             }
         }
+
+        // ------------------------------------------------------------------ life gifts
+
+        /// <summary>One life can be offered to one friend per UTC day; the friend accepts it when a slot is free.</summary>
+        public OperationResult SendLife(string senderId, FriendsState mine, string friendId, FriendsState theirs, int today)
+        {
+            if (mine == null || theirs == null || string.IsNullOrEmpty(friendId))
+            {
+                return OperationResult.Fail(ErrorCode.InvalidArgument);
+            }
+            if (!mine.Friends.Contains(friendId))
+            {
+                return OperationResult.Fail(ErrorCode.NotFound);
+            }
+            if (mine.LifeSentDay == today)
+            {
+                return OperationResult.Fail(ErrorCode.LimitReached, "A life was already sent today.");
+            }
+            if (theirs.LifeGifts.Contains(senderId))
+            {
+                return OperationResult.Fail(ErrorCode.LimitReached, "This friend already has a life waiting.");
+            }
+            mine.LifeSentDay = today;
+            theirs.LifeGifts.Add(senderId);
+            return OperationResult.Ok();
+        }
+
+        /// <summary>Accepts one waiting life. Refused when the day is used up or the player is already full.</summary>
+        public OperationResult AcceptLife(FriendsState mine, int today, int currentLives, int maxLives)
+        {
+            if (mine == null || mine.LifeGifts.Count == 0)
+            {
+                return OperationResult.Fail(ErrorCode.NotFound);
+            }
+            if (mine.LifeTakenDay == today)
+            {
+                return OperationResult.Fail(ErrorCode.LimitReached, "A life was already received today.");
+            }
+            if (currentLives >= maxLives)
+            {
+                // Refusing here is the point: a full player must not waste a friend gift.
+                return OperationResult.Fail(ErrorCode.LimitReached, "Lives are already full.");
+            }
+            mine.LifeTakenDay = today;
+            mine.LifeGifts.RemoveAt(0);
+            return OperationResult.Ok();
+        }
+
+        /// <summary>True when a life can still be offered today.</summary>
+        public static bool CanSendLife(FriendsState state, int today) => state != null && state.LifeSentDay != today;
+
+        /// <summary>True when a waiting life can be accepted right now.</summary>
+        public static bool CanAcceptLife(FriendsState state, int today, int currentLives, int maxLives) =>
+            state != null && state.LifeGifts.Count > 0 && state.LifeTakenDay != today && currentLives < maxLives;
     }
 }

@@ -1,1024 +1,2065 @@
-{
-  "common.ok": "OK",
-  "common.cancel": "Abbrechen",
-  "common.loading": "Wird geladen…",
-  "common.search": "Suchen",
-  "common.on": "AN",
-  "common.off": "AUS",
-  "common.offline": "Offline",
-  "common.online": "nur online",
-  "common.menu": "Menü",
-  "error.title": "Hoppla",
-  "error.generic": "Etwas ist schiefgelaufen: {0}",
-  "error.offline": "Du bist offline. Verbinde dich mit dem Internet, um diese Funktion zu nutzen.",
-  "error.config": "Dieses Match konnte nicht überprüft werden. Bitte aktualisiere das Spiel.",
-  "error.InvalidArgument": "Ungültige Anfrage.",
-  "error.NotFound": "Nicht gefunden.",
-  "error.NotAdjacent": "Tausche zwei benachbarte Edelsteine.",
-  "error.NotSwappable": "Dieses Teil kann nicht bewegt werden.",
-  "error.NoMatch": "Keine Kombination. Versuch einen anderen Tausch!",
-  "error.SessionOver": "Das Match ist bereits vorbei.",
-  "error.TooFast": "Langsam! Lass das Spielfeld zur Ruhe kommen.",
-  "error.TimestampOutOfOrder": "Die Matchdaten sind nicht synchron.",
-  "error.TimeExpired": "Die Zeit ist um!",
-  "error.PowerUpLocked": "Dieses Power-up wird in einer höheren Liga freigeschaltet.",
-  "error.PowerUpNotInLoadout": "Dieses Power-up ist nicht in deiner Ausrüstung.",
-  "error.PowerUpAlreadyUsed": "In diesem Match bereits benutzt.",
-  "error.PowerUpNotAvailableInMode": "In diesem Modus nicht verfügbar.",
-  "error.PowerUpNeedsTarget": "Tippe auf ein Feld, um zu zielen.",
-  "error.NotEnoughCoins": "Nicht genug Münzen.",
-  "error.NotEnoughOrbes": "Nicht genug Orbes.",
-  "error.NotEnoughLives": "Keine Leben mehr. Warte auf die Aufladung oder kaufe eins.",
-  "error.NotEnoughItems": "Du hast nicht genug von diesem Gegenstand.",
-  "error.LimitReached": "Limit erreicht. Komm später wieder!",
-  "error.CooldownActive": "Bitte warte, bevor du es erneut versuchst.",
-  "error.FeatureLocked": "Spiele in der Geschichte weiter, um das freizuschalten.",
-  "error.StageLocked": "Schließe zuerst das vorherige Level ab.",
-  "error.AlreadyClaimed": "Bereits abgeholt.",
-  "error.AlreadyMember": "Du bist bereits in einer Gilde.",
-  "error.NotMember": "Du bist kein Mitglied dieser Gilde.",
-  "error.GuildFull": "Diese Gilde ist voll.",
-  "error.PermissionDenied": "Das darfst du nicht.",
-  "error.NameInvalid": "Dieser Name ist nicht erlaubt.",
-  "error.NameTaken": "Dieser Name ist bereits vergeben.",
-  "error.Banned": "Dein Konto wurde wegen Verstoßes gegen die Fair-Play-Regeln gesperrt.",
-  "error.ReplayInvalid": "Die Matchdaten konnten nicht überprüft werden.",
-  "error.ReplayMismatch": "Das Matchergebnis konnte nicht überprüft werden und wurde nicht gewertet.",
-  "error.VersionMismatch": "Eine neue Version von Crush Royale ist verfügbar. Bitte aktualisiere das Spiel.",
-  "error.DuplicateRequest": "Bereits verarbeitet.",
-  "error.MessageRejected": "Nachricht vom Chatfilter blockiert.",
-  "error.Network": "Verbindungsproblem. Überprüfe dein Internet.",
-  "error.Timeout": "Der Server hat zu lange gebraucht.",
-  "error.AuthFailed": "Anmeldung fehlgeschlagen.",
-  "error.InvalidConfig": "Die Spieldaten sind beschädigt. Bitte starte das Spiel neu.",
-  "error.StoreUnavailable": "Der Shop ist gerade nicht verfügbar.",
-  "error.PurchaseFailed": "Der Kauf wurde nicht abgeschlossen. Dir wurde nichts berechnet.",
-  "error.Cancelled": "Abgebrochen.",
-  "error.Unauthorized": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
-  "error.RateLimited": "Zu viele Anfragen. Mach mal langsam.",
-  "error.Conflict": "Bitte versuche es erneut.",
-  "error.Internal": "Serverfehler. Bitte versuche es später erneut.",
-  "hud.surge": "RED SURGE!",
-  "hud.tutoSwap": "Wische einen Edelstein zu seinem Nachbarn, um 3 gleichfarbige Steine in eine Reihe zu bringen. Probier die leuchtenden!",
-  "hud.tutoBonus": "Gut gemacht! Verbinde 4 oder 5 Steine zu einem Bonusstein und lass ihn explodieren, um das Feld abzuräumen.",
-  "hud.tutoSurge": "Verkette Combos, um die rote Leiste zu füllen und den RED SURGE auszulösen. Deine Power-ups findest du unten. Du bist dran!",
-  "hud.tutoTap": "Tippen zum Fortfahren",
-  "hud.combo2": "Super!",
-  "hud.combo3": "Genial!",
-  "hud.combo4": "Unglaublich!",
-  "hud.combo5": "GÖTTLICH!",
-  "menu.pets": "Begleiter",
-  "hud.petMove": "Begleiter-Zug!",
-  "pets.title": "Begleiter",
-  "pets.summonTitle": "Beschwörung",
-  "pets.odds": "Ganzer Begleiter: 1 zu {0} pro Zug, sonst Fragmente. Garantiert in {1} Zug/Zügen.",
-  "pets.summon1": "Beschwören x1\n{0}",
-  "pets.summon10": "Beschwören x10\n{0}",
-  "pets.level": "Lv {0}",
-  "pets.chance": "{0}% Auto-Zug",
-  "pets.notOwned": "Noch nicht erhalten",
-  "pets.fragments": "{0} Fragmente",
-  "pets.gift": "Lv {0}: schenkt {1} einmal pro Match",
-  "pets.equip": "Ausrüsten",
-  "pets.equipped": "Ausgerüstet",
-  "pets.awaken": "Erwecken\n{0} Frag. + {1} Münzen",
-  "pets.awakened": "{0} ist erwacht!",
-  "pets.new": "NEUER BEGLEITER!",
-  "pets.duplicate": "Duplikat: +{0} Fragmente",
-  "pets.fragmentsGain": "+{0} Fragmente",
-  "pet.FrostFox": "Frostfuchs",
-  "pet.SunFennec": "Sonnenfennek",
-  "pet.ForestOwl": "Waldeule",
-  "pet.EmberSalamander": "Glutsalamander",
-  "pet.CrystalDrake": "Kristalldrache",
-  "chest.empty": "Freier Platz",
-  "chest.open": "ÖFFNEN!",
-  "chest.oneAtATime": "Es wird immer nur eine Truhe entsperrt.",
-  "chest.skipTitle": "Jetzt öffnen?",
-  "chest.skipBody": "Diese Truhe sofort für {0} Orbes öffnen?",
-  "chest.petFragments": "+{0} Fragmente: {1}",
-  "chest.won": "Truhe gewonnen!",
-  "chest.full": "Truhe verloren: alle 4 Plätze sind voll. Öffne eine Truhe!",
-  "notif.chest.title": "Deine Truhe ist bereit!",
-  "notif.chest.body": "Öffne sie und hol dir deine Belohnungen.",
-  "challenge.share": "Freund herausfordern",
-  "challenge.shareSubject": "Crush Royale-Herausforderung",
-  "challenge.shareText": "Ich habe gerade {0} Punkte in Crush Royale gemacht. Gleiches Feld – schlägst du mich? {1}",
-  "challenge.copied": "Link kopiert: füge ihn in eine Nachricht ein!",
-  "challenge.foundTitle": "Herausforderung erhalten!",
-  "challenge.foundBody": "Ein Freund hat dir ein Duell geschickt: gleiches Feld, schlag seine Punkte!",
-  "challenge.play": "Annehmen",
-  "challenge.haveCode": "Ich habe einen Code",
-  "challenge.enterCode": "Herausforderungscode",
-  "challenge.invalid": "Der Code scheint falsch (Format CR-XXXX-XXXXX).",
-  "challenge.versus": "Duell gegen {0}!",
-  "pvp.firstDuelTitle": "Dein erstes Duell!",
-  "pvp.firstDuelBody": "Aufwärmen gegen einen Lehrling. Mach mehr Punkte als er, bevor die Zeit abläuft!",
-  "hud.noPowerUps": "Keine Power-ups ausgerüstet",
-  "hud.moves": "Züge: {0}",
-  "hud.opponent": "Gegner: {0}",
-  "hud.pickTarget": "Tippe auf ein Feld, um zu zielen",
-  "hud.paused": "Pausiert",
-  "hud.noPause": "Match läuft: die Uhr tickt weiter",
-  "pause.resume": "Weiter",
-  "pause.quit": "Beenden",
-  "pause.quitStory": "Dieses Level verlassen? Du verlierst ein Leben.",
-  "pause.quitPvp": "Match verlassen? Es zählt als Niederlage.",
-  "continue.title": "Keine Züge mehr!",
-  "continue.free": "Mit {0} weiterspielen, gratis?",
-  "continue.body": "Mit {0} für {1} Orbs weiterspielen? (du hast {2})",
-  "continue.accept": "Weiterspielen",
-  "continue.decline": "Aufgeben",
-  "boss.title": "Gildenboss",
-  "boss.queued": "Keine Verbindung: dein Angriff wird automatisch gesendet.",
-  "boss.defeated": "Boss besiegt! Du hast {0} Schaden verursacht. Verbleibende Angriffe: {1}",
-  "boss.damage": "Du hast {0} Schaden verursacht! Verbleibende Angriffe: {1}",
-  "boss.MiniBoss": "Mini-Boss",
-  "boss.ChapterBoss": "Kapitelboss",
-  "boss.ActBoss": "Aktboss",
-  "boss.FinalBoss": "Endboss",
-  "boss.valdorax.name": "Valdorax, der Kristalldrache",
-  "gen.boss.MiniBoss": "{0} (klein)",
-  "gen.boss.ChapterBoss": "{0} (uralt)",
-  "gen.boss.creatures.North": "Frostwolf|Eisgolem|Schneegeist|Gletschertroll|Sturmharpyie|Raureifritter|Frostschlange|Gefrorener Wächter|Kristall-Yeti|Winter-Lich",
-  "gen.boss.creatures.East": "Sandskorpion|Dünendschinn|Sonnenschlange|Trugbildjäger|Grabmumie|Riesenskarabäus|Sphinxwächter|Glutgeier|Sandsturmgolem|Finsternispriester",
-  "gen.boss.creatures.West": "Dornenbestie|Moostroll|Sporenhexer|Rankenschlange|Borkengolem|Schattenhirsch|Seuchenwolf|Pilzschrecken|Wilde Hydra|Moderdruide",
-  "gen.boss.creatures.South": "Magmahund|Aschegeist|Obsidiangolem|Lavaschlange|Glutkobold|Rauchassassine|Schmiedetitan|Flammensalamander|Vulkanwurm|Glutzauberer",
-  "gen.boss.creatures.Central": "Prismaritter|Spiegelgeist|Splittergolem|Kristallwyvern|Echophantom|Glashydra|Diamantwächter|Leerenkristall|Herzwächter|Drachenblut-Champion",
-  "gen.boss.act.1": "Königin Frostbane",
-  "gen.boss.act.2": "Der Finsternis-Pharao",
-  "gen.boss.act.3": "Der Uralte Baumhirte",
-  "gen.boss.act.4": "Pyraxis, der Magmakönig",
-  "splash.subtitle": "Zerschmettern. Verketten. Erobern.",
-  "splash.connecting": "Verbindung zu Crystalheim…",
-  "splash.playOffline": "Offline spielen",
-  "splash.online": "Mit Crystalheim verbunden!",
-  "splash.offline": "Offline: Übungsmodus (keine Belohnungen).",
-  "splash.notConfigured": "Server nicht konfiguriert: Übungsmodus (keine Belohnungen).",
-  "privacy.title": "Deine Privatsphäre",
-  "privacy.body": "Crush Royale speichert deinen Fortschritt und deine Käufe auf unseren Servern und nutzt anonyme Gerätedaten gegen Betrug. Wir verkaufen deine Daten niemals. Du kannst dein Konto jederzeit in den Einstellungen löschen.",
-  "privacy.accept": "Akzeptieren",
-  "privacy.read": "Richtlinie lesen",
-  "hero.title": "Dein Held",
-  "hero.choose": "Wähle deinen Helden",
-  "hero.male": "Held",
-  "hero.female": "Heldin",
-  "hero.story": "Die Kristalle von Crystalheim zerbrechen. Nur ein Crusher kann die Splitter kombinieren und Valdorax, den Kristalldrachen, aufhalten.",
-  "hero.namePlaceholder": "Name des Helden",
-  "hero.displayPlaceholder": "Spielername (für andere sichtbar)",
-  "hero.agePlaceholder": "Dein Alter",
-  "hero.pseudoPlaceholder": "Dein Spielername",
-  "hero.pseudoInvalid": "Wähle einen Namen mit 3 bis 20 Buchstaben oder Ziffern.",
-  "hero.ageWhy": "Dein Alter wird nur verwendet, um Ausgabenlimits für junge Spieler festzulegen.",
-  "hero.confirm": "Das Abenteuer beginnen",
-  "hero.nameRequired": "Gib deinem Helden einen Namen.",
-  "menu.practiceTitle": "Übungsmodus",
-  "menu.map": "Karte",
-  "menu.stageShort": "Level {0}",
-  "menu.practiceBody": "Offline-Training: Level 1-50 und PvP gegen einen Bot. Fortschritt und Belohnungen benötigen eine Verbindung.",
-  "menu.profileLine": "{0} · {1} Trophäen · Level {2} · VIP {3}",
-  "menu.locked": "Gesperrt: {0}",
-  "menu.lockedToast": "Freischalten: {0}",
-  "menu.stage": "erreiche Level {0}",
-  "menu.quitTitle": "Spiel verlassen?",
-  "menu.quitBody": "Dein Fortschritt ist gespeichert.",
-  "menu.story": "Geschichte",
-  "menu.pvp": "PvP-Arena",
-  "menu.shop": "Shop",
-  "menu.guild": "Gilde",
-  "menu.friends": "Freunde",
-  "menu.leaderboard": "Ranglisten",
-  "menu.quests": "Quests",
-  "menu.battlepass": "Battle Pass",
-  "menu.achievements": "Erfolge",
-  "menu.settings": "Einstellungen",
-  "login.title": "Login-Bonus Tag {0}!",
-  "login.calendar": "Login-Kalender",
-  "login.day": "Tag {0}",
-  "settings.title": "Einstellungen",
-  "settings.audio": "Audio",
-  "settings.master": "Gesamtlautstärke",
-  "settings.music": "Musik",
-  "settings.sfx": "Soundeffekte",
-  "settings.mute": "Alles stumm",
-  "settings.gameplay": "Spiel",
-  "settings.haptics": "Vibration",
-  "settings.colorBlind": "Farbenblind-Modus",
-  "settings.notifications": "Benachrichtigungen",
-  "settings.language": "Sprache",
-  "settings.account": "Konto",
-  "settings.playerId": "Spieler-ID: {0}",
-  "settings.vip": "VIP {0} · {1} % bis zur nächsten Stufe",
-  "settings.copyId": "Spieler-ID kopieren",
-  "settings.copied": "Kopiert!",
-  "settings.guestWarning": "Du spielst als Gast. Verknüpfe ein Google-Konto, um deinen Fortschritt bei einem Handywechsel zu behalten.",
-  "settings.linkGoogle": "Google-Konto verknüpfen",
-  "settings.linked": "Google-Konto verknüpft!",
-  "settings.signOut": "Abmelden",
-  "settings.signOutBody": "Du kehrst zum Titelbildschirm zurück.",
-  "settings.editHero": "Helden bearbeiten",
-  "settings.legal": "Rechtliches",
-  "settings.privacy": "Datenschutzerklärung",
-  "settings.terms": "Nutzungsbedingungen",
-  "settings.deleteAccount": "Mein Konto löschen",
-  "settings.deleteAccountBody": "Dein Konto, dein Fortschritt, deine Käufe und deine Freunde werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.",
-  "settings.deleteAccountDone": "Dein Konto wurde gelöscht.",
-  "settings.version": "Version {0}",
-  "language.en": "English",
-  "language.fr": "Français",
-  "language.ar": "العربية",
-  "language.es": "Español",
-  "language.de": "Deutsch",
-  "language.it": "Italiano",
-  "language.pt": "Português",
-  "language.ru": "Русский",
-  "language.ja": "日本語",
-  "language.ko": "한국어",
-  "language.zh": "中文",
-  "map.title": "Weltkarte",
-  "map.chapterLocked": "Kapitel gesperrt",
-  "map.boss": "BOSS",
-  "map.stageLocked": "Schließe das vorherige Level ab, um dieses freizuschalten.",
-  "chapter.title": "Kapitel {0}: {1}",
-  "kingdom.North": "Frostreach",
-  "kingdom.North.short": "Akt I",
-  "kingdom.East": "Sunspire",
-  "kingdom.East.short": "Akt II",
-  "kingdom.West": "Wildlande",
-  "kingdom.West.short": "Akt III",
-  "kingdom.South": "Emberfall",
-  "kingdom.South.short": "Akt IV",
-  "kingdom.Central": "Crystalheim",
-  "kingdom.Central.short": "Akt V",
-  "stage.title": "Level",
-  "stage.heading": "Level {0} · {1}",
-  "stage.limits": "{0} Züge · {1} s",
-  "stage.difficulty": "Schwierigkeit {0} %",
-  "stage.stars": "Ziel {0} · 2 Sterne {1} · 3 Sterne {2}",
-  "stage.objectives": "Ziele",
-  "stage.obstacles": "Hindernisse: {0} Steine · {1} Eisfelder",
-  "stage.rewards": "Belohnungen: {0} Münzen · {1} Orbes",
-  "stage.play": "Spielen",
-  "stage.loadout": "Power-ups ({0} Plätze)",
-  "objective.ReachScore": "Punkte",
-  "objective.ClearIce": "Eis",
-  "objective.CollectColor": "{0} Edelsteine",
-  "objective.BreakStones": "Steine",
-  "objective.DefeatBoss": "Boss",
-  "color.Red": "Rote",
-  "color.Blue": "Blaue",
-  "color.Green": "Grüne",
-  "color.Yellow": "Gelbe",
-  "color.Purple": "Lila",
-  "color.Orange": "Orange",
-  "lives.emptyTitle": "Keine Leben mehr",
-  "lives.emptyBody": "Ein Leben auffüllen ({0} Münzen / {1} Orbes)?",
-  "lives.buy": "Kaufen",
-  "result.win": "Level geschafft!",
-  "result.lose": "Level verloren",
-  "result.practice": "Übungsmodus: keine Belohnungen und kein gespeicherter Fortschritt.",
-  "result.rejected": "Ergebnis abgelehnt: {0}",
-  "result.score": "Punkte: {0}",
-  "result.bonus": "Endbonus: +{0}",
-  "result.stats": "{0} Kaskaden · max. Stufe {1} · {2} Bonus-Edelsteine",
-  "result.queued": "Keine Verbindung: dein Ergebnis wird automatisch gesendet.",
-  "result.firstWin": "Erster Sieg!",
-  "result.rewards": "+{0} Münzen · +{1} Orbes",
-  "result.unlocked": "Neue Funktion: {0}",
-  "result.joined": "{0} schließt sich deiner Gruppe an!",
-  "result.achievement": "Erfolg freigeschaltet: {0}",
-  "result.map": "Karte",
-  "result.retry": "Nochmal",
-  "result.next": "Weiter",
-  "pvp.title": "PvP-Arena",
-  "pvp.result": "Matchergebnis",
-  "pvp.record": "{0} Trophäen · {1} S / {2} N · Serie {3}",
-  "pvp.rules": "Gleiches Spielfeld, gleicher Seed, 90 Sekunden. Erziele mehr Punkte als dein Gegner: reines Können.",
-  "pvp.practiceBody": "Offline-Training gegen einen Bot. Keine Trophäen im Spiel.",
-  "pvp.find": "Match suchen",
-  "pvp.practice": "Gegen Bot üben",
-  "pvp.searching": "Suche… {0} s (±{1} Trophäen)",
-  "pvp.noOpponent": "Kein Gegner gefunden. Versuch es nochmal!",
-  "pvp.botTitle": "Noch kein Gegner",
-  "pvp.botBody": "Gerade sind nur wenige Spieler online. Gegen einen Trainingsbot deiner Liga antreten? (Keine Trophäen im Spiel.)",
-  "pvp.liveOpponent": "Live-Gegner",
-  "pvp.again": "Nochmal spielen",
-  "pvp.win": "SIEG",
-  "pvp.loss": "NIEDERLAGE",
-  "pvp.draw": "UNENTSCHIEDEN",
-  "pvp.pending": "WARTEN",
-  "pvp.scores": "{0} – {1}",
-  "pvp.frozen": "Eingefrorene Punkte: du {0} · Gegner {1}",
-  "pvp.trophies": "{0} Trophäen ({1} gesamt · {2})",
-  "pvp.promoted": "Aufstieg in {0}!",
-  "pvp.rankup": "Zum ersten Mal in dieser Liga: +{0} Orbes",
-  "pvp.friendly": "Freundschaftsspiel: keine Trophäen im Spiel.",
-  "pvp.waiting": "Dein Gegner spielt noch. Das Ergebnis kommt bald.",
-  "league.Bronze": "Bronze",
-  "league.Silver": "Silber",
-  "league.Gold": "Gold",
-  "league.Platinum": "Platin",
-  "league.Diamond": "Diamant",
-  "league.Master": "Meister",
-  "feature.DailyQuests": "Tägliche Quests",
-  "feature.Ads": "Bonusvideos",
-  "feature.Shop": "Shop",
-  "feature.Friends": "Freunde",
-  "feature.Pvp": "PvP-Arena",
-  "feature.BattlePass": "Battle Pass",
-  "feature.Guilds": "Gilden",
-  "char.hero": "Held",
-  "char.narrator": "Erzähler",
-  "char.lyra": "Lyra",
-  "char.kael": "Kael",
-  "char.mira": "Mira",
-  "char.thorin": "Thorin",
-  "char.zara": "Zara",
-  "char.elian": "Elian",
-  "char.mark": "Mark",
-  "char.soren": "Soren",
-  "char.valdorax": "Valdorax",
-  "choice.locked": "erfordert frühere Entscheidungen",
-  "currency.coins": "{0} Münzen",
-  "currency.orbes": "{0} Orbes",
-  "currency.lives": "{0} Leben",
-  "powerup.ChronoBomb": "Chronobombe",
-  "powerup.ChronoBomb.desc": "Fügt der Uhr 20 Sekunden hinzu.",
-  "powerup.CoinBooster": "Münzbooster",
-  "powerup.CoinBooster.desc": "Erhalte 20 Sekunden lang 50 % mehr Münzen.",
-  "powerup.BrightSpark": "Heller Funke",
-  "powerup.BrightSpark.desc": "20 Sekunden lang erzeugen deine Kombinationen leichter Bonus-Edelsteine.",
-  "powerup.Multiplier2x": "Multiplikator x2",
-  "powerup.Multiplier2x.desc": "Verdoppelt 15 Sekunden lang alle deine Punkte.",
-  "powerup.GoldenChain": "Goldene Kette",
-  "powerup.GoldenChain.desc": "Deine nächste Kaskade setzt sich mit goldenem Nachschub fort.",
-  "powerup.FreezingGel": "Frostgel",
-  "powerup.FreezingGel.desc": "Nur PvP: Punkte deines Gegners in den nächsten 10 Sekunden zählen nicht.",
-  "powerup.NuclearBomb": "Atombombe",
-  "powerup.NuclearBomb.desc": "Tippe auf ein Feld, um einen großen Bereich darum zu sprengen.",
-  "powerup.FireStorm": "Feuersturm",
-  "powerup.FireStorm.desc": "Setzt das Spielfeld in Brand und verbrennt eine Welle von Edelsteinen.",
-  "powerup.CascadeInfinity": "Endlose Kaskade",
-  "powerup.CascadeInfinity.desc": "30 Sekunden lang zählt jede Kaskade doppelt.",
-  "battlepass.title": "Battle Pass",
-  "battlepass.xp": "{0} Pass-EP",
-  "battlepass.season": "Saison {0} · Stufe {1} · noch {2} Tage",
-  "battlepass.unlockPremium": "Premium-Pfad freischalten",
-  "battlepass.tier": "Stufe {0}",
-  "battlepass.free": "Gratis",
-  "battlepass.premium": "Premium",
-  "achievements.title": "Erfolge",
-  "achievements.page": "Seite {0}/{1} · Münzbonus +{2} %",
-  "achievements.pageDone": "Seite abgeschlossen!",
-  "achievements.pageReward": "Schließe die Seite ab und erhalte: {0}",
-  "achievements.claimed": "Abgeholt",
-  "achievements.claim": "Abholen",
-  "ach.first_steps.title": "Erste Schritte",
-  "ach.perfectionist_1.title": "Aufsteigender Stern",
-  "ach.cascade_1.title": "Kettenstarter",
-  "ach.bonus_1.title": "Bonusmacher",
-  "ach.first_boss.title": "Bossbrecher",
-  "ach.stage_100.title": "Zenturio",
-  "ach.boss_10.title": "Bossjäger",
-  "ach.act_1.title": "Held von Frostreach",
-  "ach.companions_3.title": "Die Gefährten",
-  "ach.stars_100.title": "Sternengucker",
-  "ach.cascade_50.title": "Kaskaden-Adept",
-  "ach.cascade_500.title": "Kaskaden-Experte",
-  "ach.mega_10.title": "Megakette",
-  "ach.surge_25.title": "Red-Surge-Reiter",
-  "ach.chain_6.title": "Kettenreaktion",
-  "ach.pvp_10.title": "Herausforderer",
-  "ach.pvp_wins_10.title": "Duellant",
-  "ach.pvp_wins_100.title": "Gladiator",
-  "ach.streak_5.title": "Nicht zu stoppen",
-  "ach.league_silver.title": "Silberner Aufstieg",
-  "ach.league_gold.title": "Goldener Ruhm",
-  "ach.league_platinum.title": "Platin-Prestige",
-  "ach.league_diamond.title": "Diamantgeist",
-  "ach.league_master.title": "Großmeister",
-  "ach.trophies_3000.title": "Trophäen-Titan",
-  "ach.line5_20.title": "Fünf in einer Reihe",
-  "ach.bonus_500.title": "Bonusfabrik",
-  "ach.blast_1000.title": "Abrissexperte",
-  "ach.stones_500.title": "Steinbrecher",
-  "ach.ice_500.title": "Eisbrecher",
-  "ach.stage_500.title": "Halbzeitlegende",
-  "ach.boss_50.title": "Bosstöter",
-  "ach.act_3.title": "Hüter der Wildlande",
-  "ach.stars_1000.title": "Sternbild",
-  "ach.choices_3.title": "Entschlossen",
-  "ach.friends_5.title": "Gute Gesellschaft",
-  "ach.guild_join.title": "Gildenmitglied",
-  "ach.guild_boss_20.title": "Plünderer",
-  "ach.donations_5.title": "Großzügige Seele",
-  "ach.challenges_10.title": "Freundlicher Rivale",
-  "ach.powerup_set.title": "Meister des Arsenals",
-  "ach.powerups_100.title": "Power-Spieler",
-  "ach.nuclear_10.title": "Kernschmelze",
-  "ach.chrono_25.title": "Zeitwächter",
-  "ach.gel_10.title": "Eiskalt",
-  "ach.cosmetics_10.title": "Fashionista",
-  "ach.cosmetics_25.title": "Stilikone",
-  "ach.login_30.title": "Treu",
-  "ach.quests_50.title": "Questsucher",
-  "ach.pass_50.title": "Pass-Champion",
-  "ach.stage_1000.title": "Retter von Crystalheim",
-  "ach.valdorax.title": "Drachentöter",
-  "ach.all_endings.title": "Alle Wege gegangen",
-  "ach.endless_100.title": "Endloser Wanderer",
-  "ach.perfectionist_900.title": "Perfektionist",
-  "ach.millionaire.title": "Millionär",
-  "ach.orbe_hoarder.title": "Orbe-Sammler",
-  "ach.pvp_wins_1000.title": "Legende der Arena",
-  "ach.cascade_10000.title": "Kaskadenmeister",
-  "ach.guild_slayer.title": "Gildenboss-Bezwinger",
-  "gen.stat.HighestStage": "Schließe Level {0} ab",
-  "gen.stat.ThreeStarStages": "Hol 3 Sterne in {0} Levels",
-  "gen.stat.TotalStars": "Sammle {0} Sterne",
-  "gen.stat.BossesDefeated": "Besiege {0} Bosse",
-  "gen.stat.BossesDefeated.one": "Besiege deinen ersten Boss",
-  "gen.stat.CharactersMet": "Triff {0} Gefährten",
-  "gen.stat.ChoicesMade": "Triff {0} Entscheidungen in der Geschichte",
-  "gen.stat.EndingsReached": "Entdecke {0} verschiedene Enden",
-  "gen.stat.EndingsReached.one": "Besiege Valdorax und erreiche ein Ende",
-  "gen.stat.CascadesTriggered": "Löse {0} Kaskaden aus",
-  "gen.stat.MegaCascades": "Löse {0} Megakaskaden aus",
-  "gen.stat.RedSurges": "Löse {0} Red Surges aus",
-  "gen.stat.MaxCascadeLevel": "Erreiche Kaskadenstufe {0}",
-  "gen.stat.SpecialsCreated": "Erzeuge {0} Bonus-Edelsteine",
-  "gen.stat.SpecialsActivated": "Aktiviere {0} Bonus-Edelsteine",
-  "gen.stat.Line5Matches": "Kombiniere {0}-mal 5 Edelsteine in einer Reihe",
-  "gen.stat.StonesDestroyed": "Zerstöre {0} Steine",
-  "gen.stat.IceBroken": "Brich {0} Eisschichten",
-  "gen.stat.PvpMatches": "Spiele {0} PvP-Matches",
-  "gen.stat.PvpWins": "Gewinne {0} PvP-Matches",
-  "gen.stat.BestWinStreak": "Gewinne {0} PvP-Matches in Folge",
-  "gen.stat.HighestLeague": "Erreiche die Liga {0}",
-  "gen.stat.MaxTrophies": "Erreiche {0} Trophäen",
-  "gen.stat.FriendsCount": "Habe {0} Freunde",
-  "gen.stat.GuildsJoined": "Tritt {0} Gilden bei",
-  "gen.stat.GuildsJoined.one": "Tritt einer Gilde bei",
-  "gen.stat.GuildBossAttacks": "Greife den Gildenboss {0}-mal an",
-  "gen.stat.GuildDonations": "Spende {0}-mal an deine Gilde",
-  "gen.stat.GuildBossesDefeated": "Besiege {0} Gildenbosse",
-  "gen.stat.FriendlyChallenges": "Spiele {0} Freundschaftsduelle",
-  "gen.stat.PowerUpTypesUsed": "Nutze alle {0} Power-up-Arten",
-  "gen.stat.PowerUpsUsed": "Nutze {0} Power-ups",
-  "gen.stat.NuclearBombsUsed": "Nutze {0} Atombomben",
-  "gen.stat.ChronoBombsUsed": "Nutze {0} Chronobomben",
-  "gen.stat.FreezingGelsUsed": "Nutze {0} Frostgels",
-  "gen.stat.CosmeticsOwned": "Besitze {0} kosmetische Gegenstände",
-  "gen.stat.LoginDays": "Melde dich an {0} Tagen an",
-  "gen.stat.QuestsCompleted": "Schließe {0} tägliche Quests ab",
-  "gen.stat.BattlePassTiers": "Erreiche Stufe {0} im Battle Pass",
-  "gen.stat.CoinsEarned": "Verdiene {0} Münzen",
-  "gen.stat.OrbesEarned": "Verdiene {0} Orbes",
-  "quests.title": "Tägliche Quests",
-  "quests.reset": "Neue Quests in {0} Std. {1} Min.",
-  "quests.claim": "Abholen ({0}/{1})",
-  "quest.WinStages": "Gewinne {0} Levels",
-  "quest.EarnStars": "Verdiene {0} Sterne",
-  "quest.TriggerCascades": "Löse {0} Kaskaden aus",
-  "quest.CreateSpecials": "Erzeuge {0} Bonus-Edelsteine",
-  "quest.BreakStones": "Zerbrich {0} Steine",
-  "quest.UsePowerUps": "Nutze {0} Power-ups",
-  "quest.PlayPvp": "Spiele {0} PvP-Matches",
-  "quest.WinPvp": "Gewinne {0} PvP-Matches",
-  "quest.AttackGuildBoss": "Greife den Gildenboss {0}-mal an",
-  "shop.title": "Shop",
-  "shop.tab.powerups": "Power-ups",
-  "shop.tab.orbes": "Orbes",
-  "shop.tab.coins": "Münzen & Leben",
-  "shop.tab.cosmetics": "Stil",
-  "shop.refreshIn": "Neue Angebote in {0} Std. {1} Min.",
-  "shop.soldOut": "Ausverkauft",
-  "shop.refresh": "Angebote erneuern ({0} Orbes)",
-  "shop.refreshTitle": "Angebote erneuern?",
-  "shop.vip": "VIP-Stufe {0}",
-  "shop.vipNext": "{0} % bis zur nächsten VIP-Stufe",
-  "shop.vipMax": "Höchste VIP-Stufe erreicht",
-  "shop.transparency": "Jedes Paket zeigt seinen echten Preis und wie viele Orbes du pro Euro erhältst.",
-  "shop.perEuro": "{0} Orbes pro €",
-  "shop.item.RemoveAds": "Werbung entfernen",
-  "shop.item.RemoveAds.desc": "Keine Zwischenwerbung mehr. Optionale Belohnungsvideos bleiben verfügbar.",
-  "shop.item.BattlePass": "Premium Battle Pass",
-  "shop.item.BattlePass.desc": "Schaltet den Premium-Belohnungspfad der aktuellen Saison frei.",
-  "shop.item.RarePerk": "Königskrone",
-  "shop.item.RarePerk.desc": "Eine goldene Krone in deinem Profil und +10 % Münzen. Kein Spielvorteil.",
-  "shop.cosmetics": "Kosmetik",
-  "shop.requiresVip": "Benötigt VIP {0}",
-  "shop.owned": "Meine Sammlung",
-  "shop.equip": "Ausrüsten",
-  "shop.bought": "Kauf abgeschlossen!",
-  "shop.alreadyGranted": "Dieser Kauf wurde bereits geliefert.",
-  "cosmetic.board.classic": "Klassisches Spielfeld",
-  "cosmetic.pieces.classic": "Klassische Edelsteine",
-  "cosmetic.emote.gg": "GG",
-  "cosmetic.frame.bronze": "Bronzerahmen",
-  "cosmetic.frame.silver": "Silberrahmen",
-  "cosmetic.frame.gold": "Goldrahmen",
-  "cosmetic.board.ice": "Gefrorenes Spielfeld",
-  "cosmetic.board.lava": "Lava-Spielfeld",
-  "cosmetic.board.forest": "Wald-Spielfeld",
-  "cosmetic.board.cavern": "Höhlen-Spielfeld",
-  "cosmetic.pieces.gems": "Königliche Edelsteine",
-  "cosmetic.outfit.east": "Sunspire-Outfit",
-  "cosmetic.outfit.west": "Wildland-Outfit",
-  "cosmetic.emote.wow": "Wow!",
-  "cosmetic.emote.fire": "Feuer!",
-  "cosmetic.emote.crown": "Kronen-Emote",
-  "cosmetic.frame.crystal": "Kristallrahmen",
-  "cosmetic.pieces.runes": "Runen-Edelsteine",
-  "cosmetic.frame.royal": "Königlicher Rahmen",
-  "cosmetic.board.golden": "Goldenes Spielfeld",
-  "cosmetic.outfit.royal": "Königliches Outfit",
-  "cosmetic.title.patron": "Mäzen",
-  "cosmetic.frame.crown": "Kronenrahmen",
-  "cosmetic.title.cascade_master": "Kaskadenmeister",
-  "cosmetic.title.dragon_slayer": "Drachentöter",
-  "cosmetic.title.legend": "Legende",
-  "cosmetic.board.valdorax": "Valdorax' Hort",
-  "cosmetic.outfit.corrupted": "Verderbte Rüstung",
-  "cosmetic.outfit.purified": "Geläuterte Rüstung",
-  "gen.cosmetic.pageFrame": "Sammlungsrahmen {0}",
-  "gen.cosmetic.bp.frame": "Rahmen Saison {0}",
-  "gen.cosmetic.bp.board": "Spielfeld Saison {0}",
-  "gen.cosmetic.bp.pieces": "Edelsteine Saison {0}",
-  "guild.title": "Gilde",
-  "guild.create": "Gilde gründen",
-  "guild.namePlaceholder": "Gildenname",
-  "guild.descriptionPlaceholder": "Beschreibung",
-  "guild.createButton": "Gründen ({0} Münzen)",
-  "guild.search": "Gilde finden",
-  "guild.searchPlaceholder": "Gildenname",
-  "guild.summary": "Stufe {0} · {1}/{2} Mitglieder · {3} Trophäen · min. {4}",
-  "guild.join": "Beitreten",
-  "guild.closed": "Nur mit Einladung",
-  "guild.header": "Stufe {0} · {1} Mitglieder · {2} Trophäen · Platz {3}",
-  "guild.tab.members": "Mitglieder",
-  "guild.tab.upgrades": "Verbesserungen",
-  "guild.tab.boss": "Boss",
-  "guild.tab.chat": "Chat",
-  "guild.role.Member": "Mitglied",
-  "guild.role.Officer": "Offizier",
-  "guild.role.Leader": "Anführer",
-  "guild.memberLine": "{0} Trophäen · gespendet {1} Münzen / {2} Orbes · Bossschaden {3}",
-  "guild.promote": "Befördern",
-  "guild.demote": "Degradieren",
-  "guild.makeLeader": "Zum Anführer machen",
-  "guild.kick": "Rauswerfen",
-  "guild.kickConfirm": "Dieses Mitglied aus der Gilde entfernen?",
-  "guild.leave": "Gilde verlassen",
-  "guild.leaveConfirm": "Deine Gilde verlassen? Deine Spenden bleiben bei der Gilde.",
-  "guild.level": "Gildenstufe {0}",
-  "guild.nextLevel": "Spenden: {0} / {1}",
-  "guild.amount": "Betrag",
-  "guild.donate": "Spenden",
-  "guild.maxLevel": "Höchststufe erreicht!",
-  "guild.tech": "Technologiebaum ({0} Punkte)",
-  "guild.tech.CoinBonus": "Schatzkammer",
-  "guild.tech.CoinBonus.desc": "+2 % Münzen pro Rang für alle Mitglieder.",
-  "guild.tech.BossDamage": "Kriegstrommeln",
-  "guild.tech.BossDamage.desc": "+3 % Bossschaden pro Rang.",
-  "guild.tech.LifeRecharge": "Heilquellen",
-  "guild.tech.LifeRecharge.desc": "Leben laden sich pro Rang 5 % schneller auf.",
-  "guild.tech.MaxLives": "Kaserne",
-  "guild.tech.MaxLives.desc": "+1 maximales Leben pro Rang.",
-  "guild.tech.PowerUpDiscount": "Handelspakt",
-  "guild.tech.PowerUpDiscount.desc": "-2 % auf Power-up-Preise pro Rang.",
-  "guild.tech.BattlePassXp": "Kriegschroniken",
-  "guild.tech.BattlePassXp.desc": "+5 % Battle-Pass-EP pro Rang.",
-  "guild.upgrade": "Verbessern",
-  "guild.bossTitle": "Wochenboss Nr. {0}",
-  "guild.bossHp": "{0} / {1} LP",
-  "guild.bossReset": "Neuer Boss in {0} T {1} Std.",
-  "guild.bossDefeated": "Boss besiegt! Tolle Teamarbeit.",
-  "guild.attack": "Angreifen ({0} heute übrig)",
-  "guild.damageBoard": "Schadensrangliste",
-  "guild.chatPlaceholder": "Nachricht…",
-  "guild.send": "Senden",
-  "friends.title": "Freunde",
-  "friends.searchPlaceholder": "Spielername oder ID",
-  "friends.results": "Suchergebnisse",
-  "friends.add": "Hinzufügen",
-  "friends.incoming": "Freundschaftsanfragen",
-  "friends.accept": "Annehmen",
-  "friends.decline": "Ablehnen",
-  "friends.list": "Freunde ({0})",
-  "friends.empty": "Noch keine Freunde. Suche nach Spielern, um sie hinzuzufügen!",
-  "friends.cooldown": "Warte {0} Min.",
-  "friends.challenge": "Herausfordern",
-  "friends.remove": "Entfernen",
-  "friends.removeConfirm": "Diesen Freund entfernen?",
-  "friends.outgoing": "Gesendete Anfragen",
-  "friends.myId": "Meine ID: {0}",
-  "friends.line": "{0} · {1} Trophäen · Level {2}",
-  "friends.requestSent": "Freundschaftsanfrage gesendet!",
-  "leaderboard.title": "Ranglisten",
-  "leaderboard.all": "Alle",
-  "leaderboard.guilds": "Gilden",
-  "leaderboard.myRank": "Mein Platz: {0}",
-  "leaderboard.myGuildRank": "Meine Gilde: Platz {0}",
-  "leaderboard.reset": "Wöchentlicher Reset in {0} T {1} Std.",
-  "notif.channel": "Spielerinnerungen",
-  "notif.lives.title": "Leben aufgefüllt!",
-  "notif.lives.body": "Deine Leben sind voll. Crystalheim braucht dich!",
-  "notif.daily.title": "Dein Tagesbonus wartet",
-  "notif.daily.body": "Melde dich an, um deine Belohnung und neue Quests abzuholen.",
-  "notif.boss.title": "Angriff auf den Gildenboss!",
-  "notif.boss.body": "Deine Angriffe sind bereit. Kämpfe mit deiner Gilde gegen den Wochenboss!",
-  "achievements.bonus": "Dauerhafter Münzbonus: +{0}%",
-  "achievements.pageShort": "Seite {0} / {1}",
-  "achievements.summary": "{0} / {1} Erfolge",
-  "battlepass.maxed": "Pass abgeschlossen!",
-  "battlepass.missionBoss": "Greife den Gildenboss an",
-  "battlepass.missionPvp": "Gewinne ein PvP-Duell",
-  "battlepass.missionStory": "Gewinne ein Story-Level",
-  "battlepass.missions": "Missionen: Pass-EP sammeln",
-  "battlepass.nextTier": "Nächste Stufe: {0}",
-  "battlepass.premiumActive": "Premium-Pfad aktiv",
-  "battlepass.rewards": "Stufenbelohnungen",
-  "battlepass.seasonShort": "Saison {0} · noch {1} Tage",
-  "battlepass.xpMissing": "Noch {0} EP bis zur nächsten Stufe",
-  "battlepass.xpProgress": "{0} / {1} EP",
-  "chest.openedTitle": "Truhe geöffnet!",
-  "common.close": "Schließen",
-  "get.buyNow": "Jetzt kaufen",
-  "get.free": "Oder kostenlos verdienen",
-  "get.go": "Los",
-  "get.notInShop": "In deiner Liga noch nicht erhältlich.",
-  "get.sourceAchievements": "Erfolgsbelohnungen",
-  "get.sourceChests": "Siegestruhen",
-  "get.sourcePass": "Kampfpass-Stufen",
-  "get.sourceQuests": "Tägliche Quests",
-  "hud.goalMoves": "in {0} Zügen",
-  "hud.goalTime": "in {0} Sekunden",
-  "hud.goalTitle": "ZIEL",
-  "hud.movesLabel": "ZÜGE",
-  "hud.scoreLabel": "PUNKTE",
-  "leaderboard.empty": "Diese Woche noch niemand gelistet. Sei der Erste!",
-  "map.kingdomLocked": "Beende das vorige Königreich, um hierher zu reisen.",
-  "pets.collection": "Meine Begleiter",
-  "pets.fragmentProgress": "{0} / {1} Fragmente",
-  "pets.getFragments": "Beschwöre für Fragmente",
-  "pets.getFragmentsToast": "Jede Beschwörung gibt Fragmente. Siegestruhen auch!",
-  "pets.lockedHint": "Sammle {0} Fragmente zum Freischalten",
-  "pets.maxLevel": "MAX. STUFE",
-  "pets.oddsFragments": "Sonst {0}-{1} Fragmente eines zufälligen Begleiters ({2} Begleiter, gleiche Chance)",
-  "pets.oddsUnlock": "{0} Fragmente eines Begleiters = Begleiter freigeschaltet",
-  "pets.oddsWhole": "Ganzer Begleiter: {0}% pro Beschwörung (1 zu {1})",
-  "pets.pity": "Ganzer Begleiter garantiert in {0} Beschwörungen",
-  "pets.unlock": "Freischalten!",
-  "pets.unlockTitle": "Begleiter freigeschaltet",
-  "pets.xp": "EP {0} / {1}",
-  "reveal.skip": "Überspringen",
-  "shop.alwaysAvailable": "Immer erhältlich",
-  "shop.bestDeal": "TOP-ANGEBOT",
-  "shop.bestValue": "BESTER WERT",
-  "shop.coinsSection": "Münzen",
-  "shop.dailyDeals": "Tagesangebote",
-  "shop.livesSection": "Leben",
-  "shop.popular": "BELIEBT",
-  "stage.all": "Alles",
-  "stage.boostLeague": "Liga {0}",
-  "stage.boostLeagueToast": "Erreiche im PvP die Liga {0}, um diesen Boost freizuschalten.",
-  "stage.boostsTitle": "Wähle deine Boosts",
-  "stage.get": "+ Holen",
-  "stage.rewardsTitle": "Belohnungen",
-  "stage.slots": "Ausgerüstete Boosts: {0} / {1}",
-  "stage.slotsFull": "Alle {0} Plätze belegt. Tippe einen Boost an, um ihn zu entfernen.",
-  "stage.tapToEquip": "Tippen zum Ausrüsten",
-  "vip.badge": "VIP {0}",
-  "vip.basicCosmetics": "Exklusive VIP-Kosmetik",
-  "vip.become": "Werde VIP",
-  "vip.coinBonus": "+{0}% Münzen bei jedem Sieg",
-  "vip.current": "DEINE STUFE",
-  "vip.details": "Vorteile",
-  "vip.doubleEvents": "Doppelte Event-Belohnungen",
-  "vip.freeContinue": "1 kostenloses Weiterspielen pro Tag",
-  "vip.freeLife": "Jeden Tag 1 Gratisleben",
-  "vip.how": "VIP-Stufen steigen mit deinen Käufen und sinken nie.",
-  "vip.locked": "Gesperrt",
-  "vip.next": "VIP {0} in {1}",
-  "vip.none": "Noch kein VIP",
-  "vip.orbeBonus": "+{0}% Orben bei Orbenpaketen",
-  "vip.rareCosmetics": "Seltene VIP-Kosmetik",
-  "vip.rarePerk": "Königskrone im Profil",
-  "vip.reached": "Erreicht",
-  "vip.recharge": "Leben laden 20% schneller",
-  "vip.skipAd": "1 Werbung pro Tag überspringen",
-  "vip.steal": "{0}% Chance, in Freundschaftsduellen einen Boost zu stehlen",
-  "vip.threshold": "Ab {0} Ausgaben",
-  "vip.title": "VIP-Status",
-  "vip.toShop": "Zum Shop",
-  "boss.damageTotal": "Schaden: {0}",
-  "boss.guildName": "Kristallgolem",
-  "boss.taunt1": "Du kannst mich nicht besiegen!",
-  "boss.taunt2": "Deine Edelsteine gehören mir!",
-  "boss.taunt3": "Spüre meinen Zorn!",
-  "hud.botName": "Trainingsrivale",
-  "hud.fight": "LOS GEHT'S!",
-  "hud.finalBonus": "FINALBONUS!",
-  "hud.hype.amazing": "UNGLAUBLICH!",
-  "hud.hype.awesome": "KLASSE!",
-  "hud.hype.divine": "GÖTTLICH!",
-  "hud.hype.great": "SUPER!",
-  "hud.hype.incredible": "PHÄNOMENAL!",
-  "hud.hype.legendary": "LEGENDÄR!",
-  "hud.hype.sweet": "SÜSS!",
-  "hud.hype.unstoppable": "UNAUFHALTSAM!",
-  "hud.say.combo1": "Was für eine Kombo!",
-  "hud.say.combo2": "Die Edelsteine tanzen!",
-  "hud.say.combo3": "Crystalheim ist stolz auf dich!",
-  "hud.say.goal1": "Ein Ziel geschafft!",
-  "hud.say.goal2": "Gut gemacht, weiter so!",
-  "hud.say.idle1": "Suche 4 oder 5 in einer Reihe!",
-  "hud.say.idle2": "Bonus-Edelsteine machen große Explosionen!",
-  "hud.say.idle3": "Spiele unten für mehr Kaskaden.",
-  "hud.say.lose1": "Nächstes Mal schaffen wir es!",
-  "hud.say.lose2": "So knapp! Noch einmal?",
-  "hud.say.lowMoves1": "Vorsicht, nur noch wenige Züge!",
-  "hud.say.lowMoves2": "Jeder Zug zählt!",
-  "hud.say.start1": "Los, zusammen sind wir unschlagbar!",
-  "hud.say.start2": "Die Kristalle zählen auf uns!",
-  "hud.say.start3": "Zeig ihnen, was du kannst!",
-  "hud.say.win1": "Sieg! Du warst großartig!",
-  "hud.say.win2": "Auf zum nächsten Abenteuer!",
-  "pvp.taunt1": "Zu einfach!",
-  "pvp.taunt2": "Versuch mitzuhalten!",
-  "pvp.taunt3": "Hast du die Kombo gesehen?",
-  "pvp.taunt4": "Die Arena gehört mir!",
-  "pvp.worried1": "He, nicht so schnell!",
-  "pvp.worried2": "Oh oh...",
-  "vip.progress": "{0}% bis VIP {1}",
-  "vip.unlockFirst": "Schalte zuerst VIP {0} frei, um diese Belohnungen zu entdecken",
-  "vip.nextLabel": "NÄCHSTE STUFE",
-  "vip.discount": "-{0}% auf Boosts im Shop",
-  "vip.dailyGift": "Tägliches VIP-Geschenk",
-  "vip.giftLine": "Tagesgeschenk: {0} Orben, {1} Münzen, {2} Boosts, {3} Begleiter-Fragmente",
-  "vip.giftLives": "+{0} Leben pro Tag",
-  "vip.giftClaim": "Geschenk abholen",
-  "vip.giftTomorrow": "Abgeholt! Morgen gibt es ein neues.",
-  "map.chestOpen": "Öffnen!",
-  "map.chestClaimed": "Diese Truhe hast du schon geöffnet.",
-  "map.chestNeed": "Noch {0} Sterne in diesem Kapitel ({1} nötig).",
-  "map.chestTitle": "{0}-Sterne-Truhe",
-  "profile.title": "Profil",
-  "profile.view": "Profil",
-  "profile.stats": "Statistiken",
-  "profile.trophies": "Trophäen",
-  "profile.bestLeague": "Beste Liga",
-  "profile.wins": "PvP-Siege",
-  "profile.winRate": "Siegquote",
-  "profile.bestStreak": "Beste Serie",
-  "profile.stars": "Sterne",
-  "profile.stage": "Story-Level",
-  "profile.achievements": "Erfolge",
-  "profile.pets": "Begleiter",
-  "profile.cosmetics": "Kosmetik",
-  "profile.weeklyRank": "Wochenrang",
-  "profile.bonusTitle": "Sammelbonus ({0} Kosmetik)",
-  "profile.bonusValues": "+{0}% Münzen · +{1}% Pass-EP",
-  "profile.bonusRule": "Jede Kosmetik gibt einen stapelbaren Bonus: gewöhnlich +0,5% Münzen, selten +1% Münzen +0,5% EP, episch +2% Münzen +1% EP, legendär +4% Münzen +2% EP (Münzen bis +{0}%). Kein Vorteil im Match.",
-  "profile.equipped": "Ausgerüstet",
-  "profile.kind.frame": "Rahmen",
-  "profile.kind.title": "Titel",
-  "profile.kind.outfit": "Outfit",
-  "profile.kind.board": "Spielbrett",
-  "profile.kind.pieces": "Edelsteine",
-  "profile.kind.emote": "Emote",
-  "profile.collection": "Sammlung ({0}/{1})",
-  "profile.coinsShort": "Münzen",
-  "profile.source.shop": "Im Shop",
-  "profile.source.achievements": "Erfolge",
-  "profile.source.pass": "Kampfpass",
-  "profile.source.story": "Story",
-  "profile.bpFrame": "Rahmen Saison {0}",
-  "profile.bpBoard": "Spielbrett Saison {0}",
-  "profile.bpPieces": "Edelsteine Saison {0}",
-  "profile.pageFrame": "Sammlerrahmen {0}",
-  "hud.voice.bossDefeated": "Boss besiegt!",
-  "hud.guildBossHp": "Gildenboss: {0} / {1} LP",
-  "settings.reduceMotion": "Animationen reduzieren",
-  "boss.defeatedDuring": "Deine Gilde hat den Boss während deines Kampfes besiegt! Deine {0} Schaden zählen, dein Angriff bleibt erhalten und die Belohnung gehört dir.",
-  "chest.howTo": "Zeittruhen: Gewinne gewertete PvP-Kämpfe, besiege einen Kapitelboss zum ersten Mal oder schaffe Level 3 (Willkommenstruhe). Tippe eine Truhe an, um den Timer zu starten (eine nach der anderen).",
-  "guild.bossStamp": "BESIEGT",
-  "guild.bossWeek": "Boss Nr. {0}",
-  "guild.coinsDaily": "Münzen · Tageskontingent",
-  "guild.coinsDone": "Münzkontingent erreicht: morgen wieder! Orbs gehen weiterhin.",
-  "guild.coinsToday": "Heute {0} / {1}",
-  "guild.donateConfirm": "{0} Orbs an die Gilde spenden?",
-  "guild.donateMax": "Max {0}",
-  "guild.donateNextLevel": "Nächste Stufe ({0})",
-  "guild.donateRule": "{0} Münzen = 1 Punkt · 1 Orb = 1 Punkt · große Spenden steigen mehrere Stufen",
-  "guild.donateTitle": "Spenden",
-  "guild.donated": "+{0} Gildenpunkte!",
-  "guild.levelProgress": "Stufe {0}: {1} / {2} P.",
-  "guild.levelShort": "ST {0}",
-  "guild.levelsUp": "+{0} Stufe(n)! Die Gilde ist jetzt Stufe {1}!",
-  "guild.memberToday": "Heute: {0} Münzen gespendet · {1} Bossangriffe übrig",
-  "guild.minTrophies": "Min. {0} Trophäen",
-  "guild.orbesHint": "Unbegrenzt · {0} Punkte bis zur nächsten Stufe",
-  "guild.orbesUnlimited": "Orbs · ohne Limit",
-  "guild.pitchBody": "Tu dich mit bis zu 20 Spielern zusammen: wöchentlicher Boss mit geteilten Belohnungen, Tech-Boni für alle, tägliche Spenden und Live-Chat.",
-  "guild.pitchTitle": "Gemeinsam stärker!",
-  "guild.techMax": "MAX. RANG",
-  "guild.techOfficers": "Anführer und Offiziere wählen",
-  "guild.techPoints": "{0} Tech-Punkte",
-  "guild.techTitle": "Techbaum",
-  "guild.you": "Du",
-  "menu.offlineBanner": "OFFLINE · nur Training (Story & PvP gegen Bot) · tippen zum Verbinden",
-  "menu.offlineLocked": "Internet nötig: Shop, Gilde, Begleiter und Freunde gehören zur Online-Welt, damit offline nichts in Konflikt gerät.",
-  "menu.offlineRetry": "Verbinde neu…",
-  "pets.convert": "Tauschen",
-  "pets.convertAmount": "{0} geben → {1} erhalten",
-  "pets.convertGo": "Tauschen!",
-  "pets.convertMax": "Max ({0})",
-  "pets.convertPick": "Wähle einen noch gesperrten Begleiter",
-  "pets.convertRate": "{0} ➜ 1",
-  "pets.convertTitle": "Fragmente tauschen",
-  "pets.converted": "+{0} Fragmente für {1}!",
-  "splash.onlineNow": "Wieder online! Alles, was du jetzt tust, wird in deinem Konto gespeichert.",
-  "hud.timeLabel": "ZEIT",
-  "stage.limitsMoves": "🎯 {0} Züge, ohne Uhr",
-  "stage.limitsTimed": "⏱ {0} s, unbegrenzte Züge",
-  "stage.tierHard": "SCHWERES LEVEL",
-  "stage.tierSuperHard": "SUPERSCHWERES LEVEL",
-  "stage.tierReward": "Größere Belohnungen bei Sieg!",
-  "map.hard": "SCHWER",
-  "map.superHard": "SUPERSCHWER",
-  "menu.wheel": "Glücksrad",
-  "pause.quitStreak": "Du verlierst deine Serie von {0} Siegen!",
-  "streak.boosters": "🔥 {0} Siege in Folge: {1} Bonus auf dem Brett!",
-  "streak.explain": "Siegesserie: Gewinne neue Level in Folge. 3 Siege = 1 Startbonus, 5 = 2, 7 = 3. Eine Niederlage setzt sie zurück.",
-  "streak.lost": "💔 Serie von {0} Siegen verloren",
-  "streak.max": "Maximaler Bonus!",
-  "streak.next": "noch {0} Sieg(e) bis zum nächsten Bonus",
-  "streak.now": "🔥 Serie: {0}",
-  "wheel.jackpot": "JACKPOT",
-  "wheel.odds": "Chancen:",
-  "wheel.spin": "DREHEN!",
-  "wheel.title": "Tägliches Glücksrad",
-  "wheel.tomorrow": "Komm morgen wieder",
-  "wheel.won": "Gewonnen!",
-  "kingdom.title": "Crystalheim",
-  "menu.kingdom": "Königreich",
-  "kingdom.zone": "Zone {0}/{1}: {2}",
-  "kingdom.progress": "{0}/{1} aufgebaut",
-  "kingdom.build": "Bauen ★{0}",
-  "kingdom.built": "Aufgebaut",
-  "kingdom.needStars": "Noch {0} Stern(e) nötig: gewinne Level!",
-  "kingdom.zoneDone": "{0} wiederhergestellt!",
-  "kingdom.finished": "Crystalheim erstrahlt wieder! Danke, Held.",
-  "kingdom.z1": "Der Marktplatz",
-  "kingdom.z2": "Die Kristallbrücke",
-  "kingdom.z3": "Die Königsgärten",
-  "kingdom.z4": "Der Magierturm",
-  "kingdom.z5": "Der Thronsaal",
-  "kingdom.z1.t1": "Kristallbrunnen",
-  "kingdom.z1.t2": "Marktstände",
-  "kingdom.z1.t3": "Festlaternen",
-  "kingdom.z1.t4": "Pflaster des Platzes",
-  "kingdom.z1.t5": "Königsbanner",
-  "kingdom.z1.t6": "Heldenstatue",
-  "kingdom.z2.t1": "Brückenpfeiler",
-  "kingdom.z2.t2": "Brückenbahn",
-  "kingdom.z2.t3": "Geländer",
-  "kingdom.z2.t4": "Wachtürme",
-  "kingdom.z2.t5": "Großer Bogen",
-  "kingdom.z2.t6": "Wächterkristalle",
-  "kingdom.z3.t1": "Gartenwege",
-  "kingdom.z3.t2": "Blumenbeete",
-  "kingdom.z3.t3": "Pavillon",
-  "kingdom.z3.t4": "Seerosenteich",
-  "kingdom.z3.t5": "Kristallbäume",
-  "kingdom.z3.t6": "Gewächshaus",
-  "kingdom.z4.t1": "Fundament",
-  "kingdom.z4.t2": "Wendeltreppe",
-  "kingdom.z4.t3": "Bibliothek",
-  "kingdom.z4.t4": "Observatorium",
-  "kingdom.z4.t5": "Arkaner Orb",
-  "kingdom.z4.t6": "Turmspitze",
-  "kingdom.z5.t1": "Marmorsäulen",
-  "kingdom.z5.t2": "Buntglasfenster",
-  "kingdom.z5.t3": "Königsteppich",
-  "kingdom.z5.t4": "Kristallleuchter",
-  "kingdom.z5.t5": "Der Thron",
-  "kingdom.z5.t6": "Kristallkrone",
-  "guild.tech.ChestSpeed": "Express-Truhen",
-  "guild.tech.ChestSpeed.desc": "Truhen öffnen sich pro Rang 5 % schneller.",
-  "guild.tech.PetXp": "Königlicher Zwinger",
-  "guild.tech.PetXp.desc": "+10 % Begleiter-EP pro Rang.",
-  "update.checking": "Suche nach Updates…",
-  "update.downloading": "Neue Version wird geladen",
-  "update.installing": "Update wird installiert…",
-  "update.title": "Neue Version",
-  "update.readyBody": "Die neue Version ist geladen. Jetzt installieren?",
-  "update.requiredBody": "Diese Version wird online nicht mehr unterstützt. Installiere das Update, um weiterzuspielen.",
-  "update.permissionTitle": "Updates erlauben",
-  "update.permissionBody": "Nur einmal: Aktiviere auf dem nächsten Bildschirm „Dieser Quelle vertrauen“ und kehre zurück. Danach aktualisiert sich Crush Royale selbst.",
-  "update.allow": "Erlauben",
-  "update.install": "Installieren",
-  "update.later": "Später",
-  "update.failed": "Das Update konnte nicht geladen werden. Neuer Versuch beim nächsten Start.",
-  "update.failedRequired": "Das Update konnte nicht installiert werden. Prüfe deine Verbindung und versuche es erneut.",
-  "hud.fusion": "FUSION!",
-  "friends.invite": "Freund einladen",
-  "leaderboard.playNow": "Jetzt PvP spielen",
-  "guild.bossDaily": "3 Angriffe pro Tag · der Boss behält seine LP die ganze Woche",
-  "mechanic.new": "NEU!",
-  "mechanic.ok": "Verstanden!",
-  "mechanic.bomb.title": "Zeitbomben",
-  "mechanic.bomb.body": "Die Zahl zeigt die übrigen Züge. Kombiniere den Bomben-Edelstein vor 0, sonst ist das Level verloren!",
-  "mechanic.blight.title": "Verderbter Kristall",
-  "mechanic.blight.body": "Er befällt nach jedem Zug ohne Treffer einen Nachbarstein. Kombiniere direkt daneben, um ihn zu zerstören!",
-  "mechanic.egg.title": "Dracheneier",
-  "mechanic.egg.body": "Zwei Kombinationen neben einem Ei: Es schlüpft und hinterlässt einen Bonus-Edelstein!",
-  "hud.defused": "ENTSCHÄRFT!",
-  "hud.hatched": "GESCHLÜPFT!",
-  "hud.boom": "BUMM!",
-  "continue.moves": "+{0} Züge",
-  "continue.seconds": "+{0} Sekunden",
-  "powerup.ChronoBomb.descMoves": "Sofort +4 Züge.",
-  "powerup.CoinBooster.descMoves": "x1,5 Punkte für 5 Züge.",
-  "powerup.BrightSpark.descMoves": "Jedes 3er-Match erzeugt 5 Züge lang zusätzlich eine Linien-Gemme.",
-  "powerup.Multiplier2x.descMoves": "Doppelte Punkte für 4 Züge.",
-  "powerup.CascadeInfinity.descMoves": "Kaskaden behalten ihren Multiplikator 4 Züge lang.",
-  "result.stageWon": "Level {0} geschafft - {1}",
-  "result.stageLost": "Level {0} gescheitert - {1}",
-  "wheel.oddsButton": "Chancen ansehen",
-  "menu.bag": "Beutel",
-  "bag.title": "Mein Beutel",
-  "bag.wallet": "Geldbeutel",
-  "bag.boosts": "Booster",
-  "bag.fragments": "Begleiter-Fragmente",
-  "bag.fragmentsHelp": "Tausche {0} Fragmente eines Begleiters gegen 1 eines anderen.",
-  "bag.fragmentCount": "{0} Fragmente (nächste Stufe: {1})",
-  "bag.noFragments": "Noch keine Fragmente. Beschwörungen und Truhen geben welche.",
-  "bag.goSummon": "Zu den Beschwörungen",
-  "bag.continues": "Gratis-Fortsetzungen",
-  "bag.livesFull": "Leben voll",
-  "bag.livesIn": "Nächstes Leben in {0} Min {1} s",
-  "bag.cosmetics": "Kosmetik",
-  "bag.cosmeticsOwned": "{0} im Besitz",
-  "bag.openCollection": "Sammlung öffnen",
-  "season.beta": "Beta-Saison",
-  "season.s1": "Frostreach-Morgen",
-  "season.s2": "Sunspire-Sande",
-  "season.s3": "Wildnisblüte",
-  "season.s4": "Emberfall-Schmiede",
-  "season.s5": "Prismawache",
-  "season.s6": "Polarlichtjagd",
-  "season.s7": "Trugbildschleier",
-  "season.s8": "Wurzel und Rune",
-  "season.s9": "Magmakrone",
-  "season.s10": "Splitterkammer",
-  "season.s11": "Winterhof",
-  "season.s12": "Kristallsouverän",
-  "season.encore": "Saison {0}",
-  "cosmetic.outfit.season_firstlight": "Erstlicht-Ornat",
-  "cosmetic.outfit.season_frostdawn": "Frostmorgen-Rüstung",
-  "cosmetic.outfit.season_sunsteel": "Sonnenstahl-Gewand",
-  "cosmetic.outfit.season_thornbloom": "Dornblüten-Tracht",
-  "cosmetic.outfit.season_emberforge": "Glutschmiede-Panzer",
-  "cosmetic.outfit.season_prismguard": "Prismawächter-Rüstung",
-  "cosmetic.outfit.season_aurorahunt": "Polarlichtjäger",
-  "cosmetic.outfit.season_mirageveil": "Trugbildschleier",
-  "cosmetic.outfit.season_rootrune": "Wurzelrunen-Umhang",
-  "cosmetic.outfit.season_magmacrown": "Magmakronen-Ornat",
-  "cosmetic.outfit.season_shardvault": "Splitterkammer-Wache",
-  "cosmetic.outfit.season_wintercourt": "Winterhof-Mantel",
-  "cosmetic.outfit.season_sovereign": "Kristallsouverän",
-  "kingdom.header": "Zone {0}/{1} · {2}/{3} Baustellen · {4} Sterne verfügbar",
-  "kingdom.missing": "★{0} fehlen",
-  "kingdom.fx.structure": "Enthüllt diesen Teil der wiederaufgebauten Stadt",
-  "kingdom.fx.water": "Das Wasser fließt und funkelt wieder",
-  "kingdom.fx.banner": "Banner steigen auf und wehen im Wind",
-  "kingdom.fx.torch": "Fackeln entzünden sich und flackern",
-  "kingdom.fx.smoke": "Schornsteine rauchen: Die Zone atmet wieder",
-  "kingdom.fx.radiance": "Krönt die Zone mit tanzenden Lichtern",
-  "kingdom.z1.t7": "Brunnenwasser",
-  "kingdom.z1.t8": "Festbanner",
-  "kingdom.z1.t9": "Gassenfackeln",
-  "kingdom.z1.t10": "Marktfest",
-  "kingdom.z2.t7": "Stromschnellen",
-  "kingdom.z2.t8": "Brückenwimpel",
-  "kingdom.z2.t9": "Leuchtfeuer-Kohlebecken",
-  "kingdom.z2.t10": "Brückenlichter",
-  "kingdom.z3.t7": "Teichquellen",
-  "kingdom.z3.t8": "Gartenlaternen",
-  "kingdom.z3.t9": "Gewächshaus-Schornstein",
-  "kingdom.z3.t10": "Blütentanz",
-  "kingdom.z4.t7": "Alchemiedämpfe",
-  "kingdom.z4.t8": "Wandfackeln",
-  "kingdom.z4.t9": "Turmbanner",
-  "kingdom.z4.t10": "Arkane Aurora",
-  "kingdom.z5.t7": "Kristallfälle",
-  "kingdom.z5.t8": "Thronbecken",
-  "kingdom.z5.t9": "Königsstandarten",
-  "kingdom.z5.t10": "Krönungslichter",
-  "guildboss.7kou.title": "Der Gefrorene Wächter",
-  "guildboss.escobaros.title": "Der Kristallkönig",
-  "guildboss.majors_blue.title": "Der Verfluchte Archivar"
-}
+{
+
+  "common.ok": "OK",
+
+  "common.cancel": "Abbrechen",
+
+  "common.loading": "Wird geladen…",
+
+  "common.search": "Suchen",
+
+  "common.on": "AN",
+
+  "common.off": "AUS",
+
+  "common.offline": "Offline",
+
+  "common.online": "nur online",
+
+  "common.menu": "Menü",
+
+  "error.title": "Hoppla",
+
+  "error.generic": "Etwas ist schiefgelaufen: {0}",
+
+  "error.offline": "Du bist offline. Verbinde dich mit dem Internet, um diese Funktion zu nutzen.",
+
+  "error.config": "Dieses Match konnte nicht überprüft werden. Bitte aktualisiere das Spiel.",
+
+  "error.InvalidArgument": "Ungültige Anfrage.",
+
+  "error.NotFound": "Nicht gefunden.",
+
+  "error.NotAdjacent": "Tausche zwei benachbarte Edelsteine.",
+
+  "error.NotSwappable": "Dieses Teil kann nicht bewegt werden.",
+
+  "error.NoMatch": "Keine Kombination. Versuch einen anderen Tausch!",
+
+  "error.SessionOver": "Das Match ist bereits vorbei.",
+
+  "error.TooFast": "Langsam! Lass das Spielfeld zur Ruhe kommen.",
+
+  "error.TimestampOutOfOrder": "Die Matchdaten sind nicht synchron.",
+
+  "error.TimeExpired": "Die Zeit ist um!",
+
+  "error.PowerUpLocked": "Dieses Power-up wird in einer höheren Liga freigeschaltet.",
+
+  "error.PowerUpNotInLoadout": "Dieses Power-up ist nicht in deiner Ausrüstung.",
+
+  "error.PowerUpAlreadyUsed": "In diesem Match bereits benutzt.",
+
+  "error.PowerUpNotAvailableInMode": "In diesem Modus nicht verfügbar.",
+
+  "error.PowerUpNeedsTarget": "Tippe auf ein Feld, um zu zielen.",
+
+  "error.NotEnoughCoins": "Nicht genug Münzen.",
+
+  "error.NotEnoughOrbes": "Nicht genug Orbes.",
+
+  "error.NotEnoughLives": "Keine Leben mehr. Warte auf die Aufladung oder kaufe eins.",
+
+  "error.NotEnoughItems": "Du hast nicht genug von diesem Gegenstand.",
+
+  "error.LimitReached": "Limit erreicht. Komm später wieder!",
+
+  "error.CooldownActive": "Bitte warte, bevor du es erneut versuchst.",
+
+  "error.FeatureLocked": "Spiele in der Geschichte weiter, um das freizuschalten.",
+
+  "error.StageLocked": "Schließe zuerst das vorherige Level ab.",
+
+  "error.AlreadyClaimed": "Bereits abgeholt.",
+
+  "error.AlreadyMember": "Du bist bereits in einer Gilde.",
+
+  "error.NotMember": "Du bist kein Mitglied dieser Gilde.",
+
+  "error.GuildFull": "Diese Gilde ist voll.",
+
+  "error.PermissionDenied": "Das darfst du nicht.",
+
+  "error.NameInvalid": "Dieser Name ist nicht erlaubt.",
+
+  "error.NameTaken": "Dieser Name ist bereits vergeben.",
+
+  "error.Banned": "Dein Konto wurde wegen Verstoßes gegen die Fair-Play-Regeln gesperrt.",
+
+  "error.ReplayInvalid": "Die Matchdaten konnten nicht überprüft werden.",
+
+  "error.ReplayMismatch": "Das Matchergebnis konnte nicht überprüft werden und wurde nicht gewertet.",
+
+  "error.VersionMismatch": "Eine neue Version von Crush Royale ist verfügbar. Bitte aktualisiere das Spiel.",
+
+  "error.DuplicateRequest": "Bereits verarbeitet.",
+
+  "error.MessageRejected": "Nachricht vom Chatfilter blockiert.",
+
+  "error.Network": "Verbindungsproblem. Überprüfe dein Internet.",
+
+  "error.Timeout": "Der Server hat zu lange gebraucht.",
+
+  "error.AuthFailed": "Anmeldung fehlgeschlagen.",
+
+  "error.InvalidConfig": "Die Spieldaten sind beschädigt. Bitte starte das Spiel neu.",
+
+  "error.StoreUnavailable": "Der Shop ist gerade nicht verfügbar.",
+
+  "error.PurchaseFailed": "Der Kauf wurde nicht abgeschlossen. Dir wurde nichts berechnet.",
+
+  "error.Cancelled": "Abgebrochen.",
+
+  "error.Unauthorized": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+
+  "error.RateLimited": "Zu viele Anfragen. Mach mal langsam.",
+
+  "error.Conflict": "Bitte versuche es erneut.",
+
+  "error.Internal": "Serverfehler. Bitte versuche es später erneut.",
+
+  "hud.surge": "RED SURGE!",
+
+  "hud.tutoSwap": "Wische einen Edelstein zu seinem Nachbarn, um 3 gleichfarbige Steine in eine Reihe zu bringen. Probier die leuchtenden!",
+
+  "hud.tutoBonus": "Gut gemacht! Verbinde 4 oder 5 Steine zu einem Bonusstein und lass ihn explodieren, um das Feld abzuräumen.",
+
+  "hud.tutoSurge": "Verkette Combos, um die rote Leiste zu füllen und den RED SURGE auszulösen. Deine Power-ups findest du unten. Du bist dran!",
+
+  "hud.tutoTap": "Tippen zum Fortfahren",
+
+  "hud.combo2": "Super!",
+
+  "hud.combo3": "Genial!",
+
+  "hud.combo4": "Unglaublich!",
+
+  "hud.combo5": "GÖTTLICH!",
+
+  "menu.pets": "Begleiter",
+
+  "hud.petMove": "Begleiter-Zug!",
+
+  "pets.title": "Begleiter",
+
+  "pets.summonTitle": "Beschwörung",
+
+  "pets.odds": "Ganzer Begleiter: 1 zu {0} pro Zug, sonst Fragmente. Garantiert in {1} Zug/Zügen.",
+
+  "pets.summon1": "Beschwören x1\n{0}",
+
+  "pets.summon10": "Beschwören x10\n{0}",
+
+  "pets.level": "Lv {0}",
+
+  "pets.chance": "{0}% Auto-Zug",
+
+  "pets.notOwned": "Noch nicht erhalten",
+
+  "pets.fragments": "{0} Fragmente",
+
+  "pets.gift": "Lv {0}: schenkt {1} einmal pro Match",
+
+  "pets.equip": "Ausrüsten",
+
+  "pets.equipped": "Ausgerüstet",
+
+  "pets.awaken": "Erwecken\n{0} Frag. + {1} Münzen",
+
+  "pets.awakened": "{0} ist erwacht!",
+
+  "pets.new": "NEUER BEGLEITER!",
+
+  "pets.duplicate": "Duplikat: +{0} Fragmente",
+
+  "pets.fragmentsGain": "+{0} Fragmente",
+
+  "pet.FrostFox": "Frostfuchs",
+
+  "pet.SunFennec": "Sonnenfennek",
+
+  "pet.ForestOwl": "Waldeule",
+
+  "pet.EmberSalamander": "Glutsalamander",
+
+  "pet.CrystalDrake": "Kristalldrache",
+
+  "chest.empty": "Freier Platz",
+
+  "chest.open": "ÖFFNEN!",
+
+  "chest.oneAtATime": "Es wird immer nur eine Truhe entsperrt.",
+
+  "chest.skipTitle": "Jetzt öffnen?",
+
+  "chest.skipBody": "Diese Truhe sofort für {0} Orbes öffnen?",
+
+  "chest.petFragments": "+{0} Fragmente: {1}",
+
+  "chest.won": "Truhe gewonnen!",
+
+  "chest.full": "Truhe verloren: alle 4 Plätze sind voll. Öffne eine Truhe!",
+
+  "notif.chest.title": "Deine Truhe ist bereit!",
+
+  "notif.chest.body": "Öffne sie und hol dir deine Belohnungen.",
+
+  "challenge.share": "Freund herausfordern",
+
+  "challenge.shareSubject": "Crush Royale-Herausforderung",
+
+  "challenge.shareText": "Ich habe gerade {0} Punkte in Crush Royale gemacht. Gleiches Feld – schlägst du mich? {1}",
+
+  "challenge.copied": "Link kopiert: füge ihn in eine Nachricht ein!",
+
+  "challenge.foundTitle": "Herausforderung erhalten!",
+
+  "challenge.foundBody": "Ein Freund hat dir ein Duell geschickt: gleiches Feld, schlag seine Punkte!",
+
+  "challenge.play": "Annehmen",
+
+  "challenge.haveCode": "Ich habe einen Code",
+
+  "challenge.enterCode": "Herausforderungscode",
+
+  "challenge.invalid": "Der Code scheint falsch (Format CR-XXXX-XXXXX).",
+
+  "challenge.versus": "Duell gegen {0}!",
+
+  "pvp.firstDuelTitle": "Dein erstes Duell!",
+
+  "pvp.firstDuelBody": "Aufwärmen gegen einen Lehrling. Mach mehr Punkte als er, bevor die Zeit abläuft!",
+
+  "hud.noPowerUps": "Keine Power-ups ausgerüstet",
+
+  "hud.moves": "Züge: {0}",
+
+  "hud.opponent": "Gegner: {0}",
+
+  "hud.pickTarget": "Tippe auf ein Feld, um zu zielen",
+
+  "hud.paused": "Pausiert",
+
+  "hud.noPause": "Match läuft: die Uhr tickt weiter",
+
+  "pause.resume": "Weiter",
+
+  "pause.quit": "Beenden",
+
+  "pause.quitStory": "Dieses Level verlassen? Du verlierst ein Leben.",
+
+  "pause.quitPvp": "Match verlassen? Es zählt als Niederlage.",
+
+  "continue.title": "Keine Züge mehr!",
+
+  "continue.free": "Mit {0} weiterspielen, gratis?",
+
+  "continue.body": "Mit {0} für {1} Orbs weiterspielen? (du hast {2})",
+
+  "continue.accept": "Weiterspielen",
+
+  "continue.decline": "Aufgeben",
+
+  "boss.title": "Gildenboss",
+
+  "boss.queued": "Keine Verbindung: dein Angriff wird automatisch gesendet.",
+
+  "boss.defeated": "Boss besiegt! Du hast {0} Schaden verursacht. Verbleibende Angriffe: {1}",
+
+  "boss.damage": "Du hast {0} Schaden verursacht! Verbleibende Angriffe: {1}",
+
+  "boss.MiniBoss": "Mini-Boss",
+
+  "boss.ChapterBoss": "Kapitelboss",
+
+  "boss.ActBoss": "Aktboss",
+
+  "boss.FinalBoss": "Endboss",
+
+  "boss.valdorax.name": "Valdorax, der Kristalldrache",
+
+  "gen.boss.MiniBoss": "{0} (klein)",
+
+  "gen.boss.ChapterBoss": "{0} (uralt)",
+
+  "gen.boss.creatures.North": "Frostwolf|Eisgolem|Schneegeist|Gletschertroll|Sturmharpyie|Raureifritter|Frostschlange|Gefrorener Wächter|Kristall-Yeti|Winter-Lich",
+
+  "gen.boss.creatures.East": "Sandskorpion|Dünendschinn|Sonnenschlange|Trugbildjäger|Grabmumie|Riesenskarabäus|Sphinxwächter|Glutgeier|Sandsturmgolem|Finsternispriester",
+
+  "gen.boss.creatures.West": "Dornenbestie|Moostroll|Sporenhexer|Rankenschlange|Borkengolem|Schattenhirsch|Seuchenwolf|Pilzschrecken|Wilde Hydra|Moderdruide",
+
+  "gen.boss.creatures.South": "Magmahund|Aschegeist|Obsidiangolem|Lavaschlange|Glutkobold|Rauchassassine|Schmiedetitan|Flammensalamander|Vulkanwurm|Glutzauberer",
+
+  "gen.boss.creatures.Central": "Prismaritter|Spiegelgeist|Splittergolem|Kristallwyvern|Echophantom|Glashydra|Diamantwächter|Leerenkristall|Herzwächter|Drachenblut-Champion",
+
+  "gen.boss.act.1": "Königin Frostbane",
+
+  "gen.boss.act.2": "Der Finsternis-Pharao",
+
+  "gen.boss.act.3": "Der Uralte Baumhirte",
+
+  "gen.boss.act.4": "Pyraxis, der Magmakönig",
+
+  "splash.subtitle": "Zerschmettern. Verketten. Erobern.",
+
+  "splash.connecting": "Verbindung zu Crystalheim…",
+
+  "splash.playOffline": "Offline spielen",
+
+  "splash.online": "Mit Crystalheim verbunden!",
+
+  "splash.offline": "Offline: Übungsmodus (keine Belohnungen).",
+
+  "splash.notConfigured": "Server nicht konfiguriert: Übungsmodus (keine Belohnungen).",
+
+  "privacy.title": "Deine Privatsphäre",
+
+  "privacy.body": "Crush Royale speichert deinen Fortschritt und deine Käufe auf unseren Servern und nutzt anonyme Gerätedaten gegen Betrug. Wir verkaufen deine Daten niemals. Du kannst dein Konto jederzeit in den Einstellungen löschen.",
+
+  "privacy.accept": "Akzeptieren",
+
+  "privacy.read": "Richtlinie lesen",
+
+  "hero.title": "Dein Held",
+
+  "hero.choose": "Wähle deinen Helden",
+
+  "hero.male": "Held",
+
+  "hero.female": "Heldin",
+
+  "hero.story": "Die Kristalle von Crystalheim zerbrechen. Nur ein Crusher kann die Splitter kombinieren und Valdorax, den Kristalldrachen, aufhalten.",
+
+  "hero.namePlaceholder": "Name des Helden",
+
+  "hero.displayPlaceholder": "Spielername (für andere sichtbar)",
+
+  "hero.agePlaceholder": "Dein Alter",
+
+  "hero.pseudoPlaceholder": "Dein Spielername",
+
+  "hero.pseudoInvalid": "Wähle einen Namen mit 3 bis 20 Buchstaben oder Ziffern.",
+
+  "hero.ageWhy": "Dein Alter wird nur verwendet, um Ausgabenlimits für junge Spieler festzulegen.",
+
+  "hero.confirm": "Das Abenteuer beginnen",
+
+  "hero.nameRequired": "Gib deinem Helden einen Namen.",
+
+  "menu.practiceTitle": "Übungsmodus",
+
+  "menu.map": "Karte",
+
+  "menu.stageShort": "Level {0}",
+
+  "menu.practiceBody": "Offline-Training: Level 1-50 und PvP gegen einen Bot. Fortschritt und Belohnungen benötigen eine Verbindung.",
+
+  "menu.profileLine": "{0} · {1} Trophäen · Level {2} · VIP {3}",
+
+  "menu.locked": "Gesperrt: {0}",
+
+  "menu.lockedToast": "Freischalten: {0}",
+
+  "menu.stage": "erreiche Level {0}",
+
+  "menu.quitTitle": "Spiel verlassen?",
+
+  "menu.quitBody": "Dein Fortschritt ist gespeichert.",
+
+  "menu.story": "Geschichte",
+
+  "menu.pvp": "PvP-Arena",
+
+  "menu.shop": "Shop",
+
+  "menu.guild": "Gilde",
+
+  "menu.friends": "Freunde",
+
+  "menu.leaderboard": "Ranglisten",
+
+  "menu.quests": "Quests",
+
+  "menu.battlepass": "Battle Pass",
+
+  "menu.achievements": "Erfolge",
+
+  "menu.settings": "Einstellungen",
+
+  "login.title": "Login-Bonus Tag {0}!",
+
+  "login.calendar": "Login-Kalender",
+
+  "login.day": "Tag {0}",
+
+  "settings.title": "Einstellungen",
+
+  "settings.audio": "Audio",
+
+  "settings.master": "Gesamtlautstärke",
+
+  "settings.music": "Musik",
+
+  "settings.sfx": "Soundeffekte",
+
+  "settings.mute": "Alles stumm",
+
+  "settings.gameplay": "Spiel",
+
+  "settings.haptics": "Vibration",
+
+  "settings.colorBlind": "Farbenblind-Modus",
+
+  "settings.notifications": "Benachrichtigungen",
+
+  "settings.language": "Sprache",
+
+  "settings.account": "Konto",
+
+  "settings.playerId": "Spieler-ID: {0}",
+
+  "settings.vip": "VIP {0} · {1} % bis zur nächsten Stufe",
+
+  "settings.copyId": "Spieler-ID kopieren",
+
+  "settings.copied": "Kopiert!",
+
+  "settings.guestWarning": "Du spielst als Gast. Verknüpfe ein Google-Konto, um deinen Fortschritt bei einem Handywechsel zu behalten.",
+
+  "settings.linkGoogle": "Google-Konto verknüpfen",
+
+  "settings.linked": "Google-Konto verknüpft!",
+
+  "settings.signOut": "Abmelden",
+
+  "settings.signOutBody": "Du kehrst zum Titelbildschirm zurück.",
+
+  "settings.editHero": "Helden bearbeiten",
+
+  "settings.legal": "Rechtliches",
+
+  "settings.privacy": "Datenschutzerklärung",
+
+  "settings.terms": "Nutzungsbedingungen",
+
+  "settings.deleteAccount": "Mein Konto löschen",
+
+  "settings.deleteAccountBody": "Dein Konto, dein Fortschritt, deine Käufe und deine Freunde werden endgültig gelöscht. Das kann nicht rückgängig gemacht werden.",
+
+  "settings.deleteAccountDone": "Dein Konto wurde gelöscht.",
+
+  "settings.version": "Version {0}",
+
+  "language.en": "English",
+
+  "language.fr": "Français",
+
+  "language.ar": "العربية",
+
+  "language.es": "Español",
+
+  "language.de": "Deutsch",
+
+  "language.it": "Italiano",
+
+  "language.pt": "Português",
+
+  "language.ru": "Русский",
+
+  "language.ja": "日本語",
+
+  "language.ko": "한국어",
+
+  "language.zh": "中文",
+
+  "map.title": "Weltkarte",
+
+  "map.chapterLocked": "Kapitel gesperrt",
+
+  "map.boss": "BOSS",
+
+  "map.stageLocked": "Schließe das vorherige Level ab, um dieses freizuschalten.",
+
+  "chapter.title": "Kapitel {0}: {1}",
+
+  "kingdom.North": "Frostreach",
+
+  "kingdom.North.short": "Akt I",
+
+  "kingdom.East": "Sunspire",
+
+  "kingdom.East.short": "Akt II",
+
+  "kingdom.West": "Wildlande",
+
+  "kingdom.West.short": "Akt III",
+
+  "kingdom.South": "Emberfall",
+
+  "kingdom.South.short": "Akt IV",
+
+  "kingdom.Central": "Crystalheim",
+
+  "kingdom.Central.short": "Akt V",
+
+  "stage.title": "Level",
+
+  "stage.heading": "Level {0} · {1}",
+
+  "stage.limits": "{0} Züge · {1} s",
+
+  "stage.difficulty": "Schwierigkeit {0} %",
+
+  "stage.stars": "Ziel {0} · 2 Sterne {1} · 3 Sterne {2}",
+
+  "stage.objectives": "Ziele",
+
+  "stage.obstacles": "Hindernisse: {0} Steine · {1} Eisfelder",
+
+  "stage.rewards": "Belohnungen: {0} Münzen · {1} Orbes",
+
+  "stage.play": "Spielen",
+
+  "stage.loadout": "Power-ups ({0} Plätze)",
+
+  "objective.ReachScore": "Punkte",
+
+  "objective.ClearIce": "Eis",
+
+  "objective.CollectColor": "{0} Edelsteine",
+
+  "objective.BreakStones": "Steine",
+
+  "objective.DefeatBoss": "Boss",
+
+  "color.Red": "Rote",
+
+  "color.Blue": "Blaue",
+
+  "color.Green": "Grüne",
+
+  "color.Yellow": "Gelbe",
+
+  "color.Purple": "Lila",
+
+  "color.Orange": "Orange",
+
+  "lives.emptyTitle": "Keine Leben mehr",
+
+  "lives.emptyBody": "Ein Leben auffüllen ({0} Münzen / {1} Orbes)?",
+
+  "lives.buy": "Kaufen",
+
+  "result.win": "Level geschafft!",
+
+  "result.lose": "Level verloren",
+
+  "result.practice": "Übungsmodus: keine Belohnungen und kein gespeicherter Fortschritt.",
+
+  "result.rejected": "Ergebnis abgelehnt: {0}",
+
+  "result.score": "Punkte: {0}",
+
+  "result.bonus": "Endbonus: +{0}",
+
+  "result.stats": "{0} Kaskaden · max. Stufe {1} · {2} Bonus-Edelsteine",
+
+  "result.queued": "Keine Verbindung: dein Ergebnis wird automatisch gesendet.",
+
+  "result.firstWin": "Erster Sieg!",
+
+  "result.rewards": "+{0} Münzen · +{1} Orbes",
+
+  "result.unlocked": "Neue Funktion: {0}",
+
+  "result.joined": "{0} schließt sich deiner Gruppe an!",
+
+  "result.achievement": "Erfolg freigeschaltet: {0}",
+
+  "result.map": "Karte",
+
+  "result.retry": "Nochmal",
+
+  "result.next": "Weiter",
+
+  "pvp.title": "PvP-Arena",
+
+  "pvp.result": "Matchergebnis",
+
+  "pvp.record": "{0} Trophäen · {1} S / {2} N · Serie {3}",
+
+  "pvp.rules": "Gleiches Spielfeld, gleicher Seed, 90 Sekunden. Erziele mehr Punkte als dein Gegner: reines Können.",
+
+  "pvp.practiceBody": "Offline-Training gegen einen Bot. Keine Trophäen im Spiel.",
+
+  "pvp.find": "Match suchen",
+
+  "pvp.practice": "Gegen Bot üben",
+
+  "pvp.searching": "Suche… {0} s (±{1} Trophäen)",
+
+  "pvp.noOpponent": "Kein Gegner gefunden. Versuch es nochmal!",
+
+  "pvp.botTitle": "Noch kein Gegner",
+
+  "pvp.botBody": "Gerade sind nur wenige Spieler online. Gegen einen Trainingsbot deiner Liga antreten? (Keine Trophäen im Spiel.)",
+
+  "pvp.liveOpponent": "Live-Gegner",
+
+  "pvp.again": "Nochmal spielen",
+
+  "pvp.win": "SIEG",
+
+  "pvp.loss": "NIEDERLAGE",
+
+  "pvp.draw": "UNENTSCHIEDEN",
+
+  "pvp.pending": "WARTEN",
+
+  "pvp.scores": "{0} – {1}",
+
+  "pvp.frozen": "Eingefrorene Punkte: du {0} · Gegner {1}",
+
+  "pvp.trophies": "{0} Trophäen ({1} gesamt · {2})",
+
+  "pvp.promoted": "Aufstieg in {0}!",
+
+  "pvp.rankup": "Zum ersten Mal in dieser Liga: +{0} Orbes",
+
+  "pvp.friendly": "Freundschaftsspiel: keine Trophäen im Spiel.",
+
+  "pvp.waiting": "Dein Gegner spielt noch. Das Ergebnis kommt bald.",
+
+  "league.Bronze": "Bronze",
+
+  "league.Silver": "Silber",
+
+  "league.Gold": "Gold",
+
+  "league.Platinum": "Platin",
+
+  "league.Diamond": "Diamant",
+
+  "league.Master": "Meister",
+
+  "feature.DailyQuests": "Tägliche Quests",
+
+  "feature.Ads": "Bonusvideos",
+
+  "feature.Shop": "Shop",
+
+  "feature.Friends": "Freunde",
+
+  "feature.Pvp": "PvP-Arena",
+
+  "feature.BattlePass": "Battle Pass",
+
+  "feature.Guilds": "Gilden",
+
+  "char.hero": "Held",
+
+  "char.narrator": "Erzähler",
+
+  "char.lyra": "Lyra",
+
+  "char.kael": "Kael",
+
+  "char.mira": "Mira",
+
+  "char.thorin": "Thorin",
+
+  "char.zara": "Zara",
+
+  "char.elian": "Elian",
+
+  "char.mark": "Mark",
+
+  "char.soren": "Soren",
+
+  "char.valdorax": "Valdorax",
+
+  "choice.locked": "erfordert frühere Entscheidungen",
+
+  "currency.coins": "{0} Münzen",
+
+  "currency.orbes": "{0} Orbes",
+
+  "currency.lives": "{0} Leben",
+
+  "powerup.ChronoBomb": "Chronobombe",
+
+  "powerup.ChronoBomb.desc": "Fügt der Uhr 20 Sekunden hinzu.",
+
+  "powerup.CoinBooster": "Münzbooster",
+
+  "powerup.CoinBooster.desc": "Erhalte 20 Sekunden lang 50 % mehr Münzen.",
+
+  "powerup.BrightSpark": "Heller Funke",
+
+  "powerup.BrightSpark.desc": "20 Sekunden lang erzeugen deine Kombinationen leichter Bonus-Edelsteine.",
+
+  "powerup.Multiplier2x": "Multiplikator x2",
+
+  "powerup.Multiplier2x.desc": "Verdoppelt 15 Sekunden lang alle deine Punkte.",
+
+  "powerup.GoldenChain": "Goldene Kette",
+
+  "powerup.GoldenChain.desc": "Deine nächste Kaskade setzt sich mit goldenem Nachschub fort.",
+
+  "powerup.FreezingGel": "Frostgel",
+
+  "powerup.FreezingGel.desc": "Nur PvP: Punkte deines Gegners in den nächsten 10 Sekunden zählen nicht.",
+
+  "powerup.NuclearBomb": "Atombombe",
+
+  "powerup.NuclearBomb.desc": "Tippe auf ein Feld, um einen großen Bereich darum zu sprengen.",
+
+  "powerup.FireStorm": "Feuersturm",
+
+  "powerup.FireStorm.desc": "Setzt das Spielfeld in Brand und verbrennt eine Welle von Edelsteinen.",
+
+  "powerup.CascadeInfinity": "Endlose Kaskade",
+
+  "powerup.CascadeInfinity.desc": "30 Sekunden lang zählt jede Kaskade doppelt.",
+
+  "battlepass.title": "Battle Pass",
+
+  "battlepass.xp": "{0} Pass-EP",
+
+  "battlepass.season": "Saison {0} · Stufe {1} · noch {2} Tage",
+
+  "battlepass.unlockPremium": "Premium-Pfad freischalten",
+
+  "battlepass.tier": "Stufe {0}",
+
+  "battlepass.free": "Gratis",
+
+  "battlepass.premium": "Premium",
+
+  "achievements.title": "Erfolge",
+
+  "achievements.page": "Seite {0}/{1} · Münzbonus +{2} %",
+
+  "achievements.pageDone": "Seite abgeschlossen!",
+
+  "achievements.pageReward": "Schließe die Seite ab und erhalte: {0}",
+
+  "achievements.claimed": "Abgeholt",
+
+  "achievements.claim": "Abholen",
+
+  "ach.first_steps.title": "Erste Schritte",
+
+  "ach.perfectionist_1.title": "Aufsteigender Stern",
+
+  "ach.cascade_1.title": "Kettenstarter",
+
+  "ach.bonus_1.title": "Bonusmacher",
+
+  "ach.first_boss.title": "Bossbrecher",
+
+  "ach.stage_100.title": "Zenturio",
+
+  "ach.boss_10.title": "Bossjäger",
+
+  "ach.act_1.title": "Held von Frostreach",
+
+  "ach.companions_3.title": "Die Gefährten",
+
+  "ach.stars_100.title": "Sternengucker",
+
+  "ach.cascade_50.title": "Kaskaden-Adept",
+
+  "ach.cascade_500.title": "Kaskaden-Experte",
+
+  "ach.mega_10.title": "Megakette",
+
+  "ach.surge_25.title": "Red-Surge-Reiter",
+
+  "ach.chain_6.title": "Kettenreaktion",
+
+  "ach.pvp_10.title": "Herausforderer",
+
+  "ach.pvp_wins_10.title": "Duellant",
+
+  "ach.pvp_wins_100.title": "Gladiator",
+
+  "ach.streak_5.title": "Nicht zu stoppen",
+
+  "ach.league_silver.title": "Silberner Aufstieg",
+
+  "ach.league_gold.title": "Goldener Ruhm",
+
+  "ach.league_platinum.title": "Platin-Prestige",
+
+  "ach.league_diamond.title": "Diamantgeist",
+
+  "ach.league_master.title": "Großmeister",
+
+  "ach.trophies_3000.title": "Trophäen-Titan",
+
+  "ach.line5_20.title": "Fünf in einer Reihe",
+
+  "ach.bonus_500.title": "Bonusfabrik",
+
+  "ach.blast_1000.title": "Abrissexperte",
+
+  "ach.stones_500.title": "Steinbrecher",
+
+  "ach.ice_500.title": "Eisbrecher",
+
+  "ach.stage_500.title": "Halbzeitlegende",
+
+  "ach.boss_50.title": "Bosstöter",
+
+  "ach.act_3.title": "Hüter der Wildlande",
+
+  "ach.stars_1000.title": "Sternbild",
+
+  "ach.choices_3.title": "Entschlossen",
+
+  "ach.friends_5.title": "Gute Gesellschaft",
+
+  "ach.guild_join.title": "Gildenmitglied",
+
+  "ach.guild_boss_20.title": "Plünderer",
+
+  "ach.donations_5.title": "Großzügige Seele",
+
+  "ach.challenges_10.title": "Freundlicher Rivale",
+
+  "ach.powerup_set.title": "Meister des Arsenals",
+
+  "ach.powerups_100.title": "Power-Spieler",
+
+  "ach.nuclear_10.title": "Kernschmelze",
+
+  "ach.chrono_25.title": "Zeitwächter",
+
+  "ach.gel_10.title": "Eiskalt",
+
+  "ach.cosmetics_10.title": "Fashionista",
+
+  "ach.cosmetics_25.title": "Stilikone",
+
+  "ach.login_30.title": "Treu",
+
+  "ach.quests_50.title": "Questsucher",
+
+  "ach.pass_50.title": "Pass-Champion",
+
+  "ach.stage_1000.title": "Retter von Crystalheim",
+
+  "ach.valdorax.title": "Drachentöter",
+
+  "ach.all_endings.title": "Alle Wege gegangen",
+
+  "ach.endless_100.title": "Endloser Wanderer",
+
+  "ach.perfectionist_900.title": "Perfektionist",
+
+  "ach.millionaire.title": "Millionär",
+
+  "ach.orbe_hoarder.title": "Orbe-Sammler",
+
+  "ach.pvp_wins_1000.title": "Legende der Arena",
+
+  "ach.cascade_10000.title": "Kaskadenmeister",
+
+  "ach.guild_slayer.title": "Gildenboss-Bezwinger",
+
+  "gen.stat.HighestStage": "Schließe Level {0} ab",
+
+  "gen.stat.ThreeStarStages": "Hol 3 Sterne in {0} Levels",
+
+  "gen.stat.TotalStars": "Sammle {0} Sterne",
+
+  "gen.stat.BossesDefeated": "Besiege {0} Bosse",
+
+  "gen.stat.BossesDefeated.one": "Besiege deinen ersten Boss",
+
+  "gen.stat.CharactersMet": "Triff {0} Gefährten",
+
+  "gen.stat.ChoicesMade": "Triff {0} Entscheidungen in der Geschichte",
+
+  "gen.stat.EndingsReached": "Entdecke {0} verschiedene Enden",
+
+  "gen.stat.EndingsReached.one": "Besiege Valdorax und erreiche ein Ende",
+
+  "gen.stat.CascadesTriggered": "Löse {0} Kaskaden aus",
+
+  "gen.stat.MegaCascades": "Löse {0} Megakaskaden aus",
+
+  "gen.stat.RedSurges": "Löse {0} Red Surges aus",
+
+  "gen.stat.MaxCascadeLevel": "Erreiche Kaskadenstufe {0}",
+
+  "gen.stat.SpecialsCreated": "Erzeuge {0} Bonus-Edelsteine",
+
+  "gen.stat.SpecialsActivated": "Aktiviere {0} Bonus-Edelsteine",
+
+  "gen.stat.Line5Matches": "Kombiniere {0}-mal 5 Edelsteine in einer Reihe",
+
+  "gen.stat.StonesDestroyed": "Zerstöre {0} Steine",
+
+  "gen.stat.IceBroken": "Brich {0} Eisschichten",
+
+  "gen.stat.PvpMatches": "Spiele {0} PvP-Matches",
+
+  "gen.stat.PvpWins": "Gewinne {0} PvP-Matches",
+
+  "gen.stat.BestWinStreak": "Gewinne {0} PvP-Matches in Folge",
+
+  "gen.stat.HighestLeague": "Erreiche die Liga {0}",
+
+  "gen.stat.MaxTrophies": "Erreiche {0} Trophäen",
+
+  "gen.stat.FriendsCount": "Habe {0} Freunde",
+
+  "gen.stat.GuildsJoined": "Tritt {0} Gilden bei",
+
+  "gen.stat.GuildsJoined.one": "Tritt einer Gilde bei",
+
+  "gen.stat.GuildBossAttacks": "Greife den Gildenboss {0}-mal an",
+
+  "gen.stat.GuildDonations": "Spende {0}-mal an deine Gilde",
+
+  "gen.stat.GuildBossesDefeated": "Besiege {0} Gildenbosse",
+
+  "gen.stat.FriendlyChallenges": "Spiele {0} Freundschaftsduelle",
+
+  "gen.stat.PowerUpTypesUsed": "Nutze alle {0} Power-up-Arten",
+
+  "gen.stat.PowerUpsUsed": "Nutze {0} Power-ups",
+
+  "gen.stat.NuclearBombsUsed": "Nutze {0} Atombomben",
+
+  "gen.stat.ChronoBombsUsed": "Nutze {0} Chronobomben",
+
+  "gen.stat.FreezingGelsUsed": "Nutze {0} Frostgels",
+
+  "gen.stat.CosmeticsOwned": "Besitze {0} kosmetische Gegenstände",
+
+  "gen.stat.LoginDays": "Melde dich an {0} Tagen an",
+
+  "gen.stat.QuestsCompleted": "Schließe {0} tägliche Quests ab",
+
+  "gen.stat.BattlePassTiers": "Erreiche Stufe {0} im Battle Pass",
+
+  "gen.stat.CoinsEarned": "Verdiene {0} Münzen",
+
+  "gen.stat.OrbesEarned": "Verdiene {0} Orbes",
+
+  "quests.title": "Tägliche Quests",
+
+  "quests.reset": "Neue Quests in {0} Std. {1} Min.",
+
+  "quests.claim": "Abholen ({0}/{1})",
+
+  "quest.WinStages": "Gewinne {0} Levels",
+
+  "quest.EarnStars": "Verdiene {0} Sterne",
+
+  "quest.TriggerCascades": "Löse {0} Kaskaden aus",
+
+  "quest.CreateSpecials": "Erzeuge {0} Bonus-Edelsteine",
+
+  "quest.BreakStones": "Zerbrich {0} Steine",
+
+  "quest.UsePowerUps": "Nutze {0} Power-ups",
+
+  "quest.PlayPvp": "Spiele {0} PvP-Matches",
+
+  "quest.WinPvp": "Gewinne {0} PvP-Matches",
+
+  "quest.AttackGuildBoss": "Greife den Gildenboss {0}-mal an",
+
+  "shop.title": "Shop",
+
+  "shop.tab.powerups": "Power-ups",
+
+  "shop.tab.orbes": "Orbes",
+
+  "shop.tab.coins": "Münzen & Leben",
+
+  "shop.tab.cosmetics": "Stil",
+
+  "shop.refreshIn": "Neue Angebote in {0} Std. {1} Min.",
+
+  "shop.soldOut": "Ausverkauft",
+
+  "shop.refresh": "Angebote erneuern ({0} Orbes)",
+
+  "shop.refreshTitle": "Angebote erneuern?",
+
+  "shop.vip": "VIP-Stufe {0}",
+
+  "shop.vipNext": "{0} % bis zur nächsten VIP-Stufe",
+
+  "shop.vipMax": "Höchste VIP-Stufe erreicht",
+
+  "shop.transparency": "Jedes Paket zeigt seinen echten Preis und wie viele Orbes du pro Euro erhältst.",
+
+  "shop.perEuro": "{0} Orbes pro €",
+
+  "shop.item.RemoveAds": "Werbung entfernen",
+
+  "shop.item.RemoveAds.desc": "Keine Zwischenwerbung mehr. Optionale Belohnungsvideos bleiben verfügbar.",
+
+  "shop.item.BattlePass": "Premium Battle Pass",
+
+  "shop.item.BattlePass.desc": "Schaltet den Premium-Belohnungspfad der aktuellen Saison frei.",
+
+  "shop.item.RarePerk": "Königskrone",
+
+  "shop.item.RarePerk.desc": "Eine goldene Krone in deinem Profil und +10 % Münzen. Kein Spielvorteil.",
+
+  "shop.cosmetics": "Kosmetik",
+
+  "shop.requiresVip": "Benötigt VIP {0}",
+
+  "shop.owned": "Meine Sammlung",
+
+  "shop.equip": "Ausrüsten",
+
+  "shop.bought": "Kauf abgeschlossen!",
+
+  "shop.alreadyGranted": "Dieser Kauf wurde bereits geliefert.",
+
+  "cosmetic.board.classic": "Klassisches Spielfeld",
+
+  "cosmetic.pieces.classic": "Klassische Edelsteine",
+
+  "cosmetic.emote.gg": "GG",
+
+  "cosmetic.frame.bronze": "Bronzerahmen",
+
+  "cosmetic.frame.silver": "Silberrahmen",
+
+  "cosmetic.frame.gold": "Goldrahmen",
+
+  "cosmetic.board.ice": "Gefrorenes Spielfeld",
+
+  "cosmetic.board.lava": "Lava-Spielfeld",
+
+  "cosmetic.board.forest": "Wald-Spielfeld",
+
+  "cosmetic.board.cavern": "Höhlen-Spielfeld",
+
+  "cosmetic.pieces.gems": "Königliche Edelsteine",
+
+  "cosmetic.outfit.east": "Sunspire-Outfit",
+
+  "cosmetic.outfit.west": "Wildland-Outfit",
+
+  "cosmetic.emote.wow": "Wow!",
+
+  "cosmetic.emote.fire": "Feuer!",
+
+  "cosmetic.emote.crown": "Kronen-Emote",
+
+  "cosmetic.frame.crystal": "Kristallrahmen",
+
+  "cosmetic.pieces.runes": "Runen-Edelsteine",
+
+  "cosmetic.frame.royal": "Königlicher Rahmen",
+
+  "cosmetic.board.golden": "Goldenes Spielfeld",
+
+  "cosmetic.outfit.royal": "Königliches Outfit",
+
+  "cosmetic.title.patron": "Mäzen",
+
+  "cosmetic.frame.crown": "Kronenrahmen",
+
+  "cosmetic.title.cascade_master": "Kaskadenmeister",
+
+  "cosmetic.title.dragon_slayer": "Drachentöter",
+
+  "cosmetic.title.legend": "Legende",
+
+  "cosmetic.board.valdorax": "Valdorax' Hort",
+
+  "cosmetic.outfit.corrupted": "Verderbte Rüstung",
+
+  "cosmetic.outfit.purified": "Geläuterte Rüstung",
+
+  "gen.cosmetic.pageFrame": "Sammlungsrahmen {0}",
+
+  "gen.cosmetic.bp.frame": "Rahmen Saison {0}",
+
+  "gen.cosmetic.bp.board": "Spielfeld Saison {0}",
+
+  "gen.cosmetic.bp.pieces": "Edelsteine Saison {0}",
+
+  "guild.title": "Gilde",
+
+  "guild.create": "Gilde gründen",
+
+  "guild.namePlaceholder": "Gildenname",
+
+  "guild.descriptionPlaceholder": "Beschreibung",
+
+  "guild.createButton": "Gründen ({0} Münzen)",
+
+  "guild.search": "Gilde finden",
+
+  "guild.searchPlaceholder": "Gildenname",
+
+  "guild.summary": "Stufe {0} · {1}/{2} Mitglieder · {3} Trophäen · min. {4}",
+
+  "guild.join": "Beitreten",
+
+  "guild.closed": "Nur mit Einladung",
+
+  "guild.header": "Stufe {0} · {1} Mitglieder · {2} Trophäen · Platz {3}",
+
+  "guild.tab.members": "Mitglieder",
+
+  "guild.tab.upgrades": "Verbesserungen",
+
+  "guild.tab.boss": "Boss",
+
+  "guild.tab.chat": "Chat",
+
+  "guild.role.Member": "Mitglied",
+
+  "guild.role.Officer": "Offizier",
+
+  "guild.role.Leader": "Anführer",
+
+  "guild.memberLine": "{0} Trophäen · gespendet {1} Münzen / {2} Orbes · Bossschaden {3}",
+
+  "guild.promote": "Befördern",
+
+  "guild.demote": "Degradieren",
+
+  "guild.makeLeader": "Zum Anführer machen",
+
+  "guild.kick": "Rauswerfen",
+
+  "guild.kickConfirm": "Dieses Mitglied aus der Gilde entfernen?",
+
+  "guild.leave": "Gilde verlassen",
+
+  "guild.leaveConfirm": "Deine Gilde verlassen? Deine Spenden bleiben bei der Gilde.",
+
+  "guild.level": "Gildenstufe {0}",
+
+  "guild.nextLevel": "Spenden: {0} / {1}",
+
+  "guild.amount": "Betrag",
+
+  "guild.donate": "Spenden",
+
+  "guild.maxLevel": "Höchststufe erreicht!",
+
+  "guild.tech": "Technologiebaum ({0} Punkte)",
+
+  "guild.tech.CoinBonus": "Schatzkammer",
+
+  "guild.tech.CoinBonus.desc": "+2 % Münzen pro Rang für alle Mitglieder.",
+
+  "guild.tech.BossDamage": "Kriegstrommeln",
+
+  "guild.tech.BossDamage.desc": "+3 % Bossschaden pro Rang.",
+
+  "guild.tech.LifeRecharge": "Heilquellen",
+
+  "guild.tech.LifeRecharge.desc": "Leben laden sich pro Rang 5 % schneller auf.",
+
+  "guild.tech.MaxLives": "Kaserne",
+
+  "guild.tech.MaxLives.desc": "+1 maximales Leben pro Rang.",
+
+  "guild.tech.PowerUpDiscount": "Handelspakt",
+
+  "guild.tech.PowerUpDiscount.desc": "-2 % auf Power-up-Preise pro Rang.",
+
+  "guild.tech.BattlePassXp": "Kriegschroniken",
+
+  "guild.tech.BattlePassXp.desc": "+5 % Battle-Pass-EP pro Rang.",
+
+  "guild.upgrade": "Verbessern",
+
+  "guild.bossTitle": "Wochenboss Nr. {0}",
+
+  "guild.bossHp": "{0} / {1} LP",
+
+  "guild.bossReset": "Neuer Boss in {0} T {1} Std.",
+
+  "guild.bossDefeated": "Boss besiegt! Tolle Teamarbeit.",
+
+  "guild.attack": "Angreifen ({0} heute übrig)",
+
+  "guild.damageBoard": "Schadensrangliste",
+
+  "guild.chatPlaceholder": "Nachricht…",
+
+  "guild.send": "Senden",
+
+  "friends.title": "Freunde",
+
+  "friends.searchPlaceholder": "Spielername oder ID",
+
+  "friends.results": "Suchergebnisse",
+
+  "friends.add": "Hinzufügen",
+
+  "friends.incoming": "Freundschaftsanfragen",
+
+  "friends.accept": "Annehmen",
+
+  "friends.decline": "Ablehnen",
+
+  "friends.list": "Freunde ({0})",
+
+  "friends.empty": "Noch keine Freunde. Suche nach Spielern, um sie hinzuzufügen!",
+
+  "friends.cooldown": "Warte {0} Min.",
+
+  "friends.challenge": "Herausfordern",
+
+  "friends.remove": "Entfernen",
+
+  "friends.removeConfirm": "Diesen Freund entfernen?",
+
+  "friends.outgoing": "Gesendete Anfragen",
+
+  "friends.myId": "Meine ID: {0}",
+
+  "friends.line": "{0} · {1} Trophäen · Level {2}",
+
+  "friends.requestSent": "Freundschaftsanfrage gesendet!",
+
+  "leaderboard.title": "Ranglisten",
+
+  "leaderboard.all": "Alle",
+
+  "leaderboard.guilds": "Gilden",
+
+  "leaderboard.myRank": "Mein Platz: {0}",
+
+  "leaderboard.myGuildRank": "Meine Gilde: Platz {0}",
+
+  "leaderboard.reset": "Wöchentlicher Reset in {0} T {1} Std.",
+
+  "notif.channel": "Spielerinnerungen",
+
+  "notif.lives.title": "Leben aufgefüllt!",
+
+  "notif.lives.body": "Deine Leben sind voll. Crystalheim braucht dich!",
+
+  "notif.daily.title": "Dein Tagesbonus wartet",
+
+  "notif.daily.body": "Melde dich an, um deine Belohnung und neue Quests abzuholen.",
+
+  "notif.boss.title": "Angriff auf den Gildenboss!",
+
+  "notif.boss.body": "Deine Angriffe sind bereit. Kämpfe mit deiner Gilde gegen den Wochenboss!",
+
+  "achievements.bonus": "Dauerhafter Münzbonus: +{0}%",
+
+  "achievements.pageShort": "Seite {0} / {1}",
+
+  "achievements.summary": "{0} / {1} Erfolge",
+
+  "battlepass.maxed": "Pass abgeschlossen!",
+
+  "battlepass.missionBoss": "Greife den Gildenboss an",
+
+  "battlepass.missionPvp": "Gewinne ein PvP-Duell",
+
+  "battlepass.missionStory": "Gewinne ein Story-Level",
+
+  "battlepass.missions": "Missionen: Pass-EP sammeln",
+
+  "battlepass.nextTier": "Nächste Stufe: {0}",
+
+  "battlepass.premiumActive": "Premium-Pfad aktiv",
+
+  "battlepass.rewards": "Stufenbelohnungen",
+
+  "battlepass.seasonShort": "{0} · noch {1} Tage",
+
+  "battlepass.xpMissing": "Noch {0} EP bis zur nächsten Stufe",
+
+  "battlepass.xpProgress": "{0} / {1} EP",
+
+  "chest.openedTitle": "Truhe geöffnet!",
+
+  "common.close": "Schließen",
+
+  "get.buyNow": "Jetzt kaufen",
+
+  "get.free": "Oder kostenlos verdienen",
+
+  "get.go": "Los",
+
+  "get.notInShop": "In deiner Liga noch nicht erhältlich.",
+
+  "get.sourceAchievements": "Erfolgsbelohnungen",
+
+  "get.sourceChests": "Siegestruhen",
+
+  "get.sourcePass": "Kampfpass-Stufen",
+
+  "get.sourceQuests": "Tägliche Quests",
+
+  "hud.goalMoves": "in {0} Zügen",
+
+  "hud.goalTime": "in {0} Sekunden",
+
+  "hud.goalTitle": "ZIEL",
+
+  "hud.movesLabel": "ZÜGE",
+
+  "hud.scoreLabel": "PUNKTE",
+
+  "leaderboard.empty": "Diese Woche noch niemand gelistet. Sei der Erste!",
+
+  "map.kingdomLocked": "Beende das vorige Königreich, um hierher zu reisen.",
+
+  "pets.collection": "Meine Begleiter",
+
+  "pets.fragmentProgress": "{0} / {1} Fragmente",
+
+  "pets.getFragments": "Beschwöre für Fragmente",
+
+  "pets.getFragmentsToast": "Jede Beschwörung gibt Fragmente. Siegestruhen auch!",
+
+  "pets.lockedHint": "Sammle {0} Fragmente zum Freischalten",
+
+  "pets.maxLevel": "MAX. STUFE",
+
+  "pets.oddsFragments": "Sonst {0}-{1} Fragmente eines zufälligen Begleiters ({2} Begleiter, gleiche Chance)",
+
+  "pets.oddsUnlock": "{0} Fragmente eines Begleiters = Begleiter freigeschaltet",
+
+  "pets.oddsWhole": "Ganzer Begleiter: {0}% pro Beschwörung (1 zu {1})",
+
+  "pets.pity": "Ganzer Begleiter garantiert in {0} Beschwörungen",
+
+  "pets.unlock": "Freischalten!",
+
+  "pets.unlockTitle": "Begleiter freigeschaltet",
+
+  "pets.xp": "EP {0} / {1}",
+
+  "reveal.skip": "Überspringen",
+
+  "shop.alwaysAvailable": "Immer erhältlich",
+
+  "shop.bestDeal": "TOP-ANGEBOT",
+
+  "shop.bestValue": "BESTER WERT",
+
+  "shop.coinsSection": "Münzen",
+
+  "shop.dailyDeals": "Tagesangebote",
+
+  "shop.livesSection": "Leben",
+
+  "shop.popular": "BELIEBT",
+
+  "stage.all": "Alles",
+
+  "stage.boostLeague": "Liga {0}",
+
+  "stage.boostLeagueToast": "Erreiche im PvP die Liga {0}, um diesen Boost freizuschalten.",
+
+  "stage.boostsTitle": "Wähle deine Boosts",
+
+  "stage.get": "+ Holen",
+
+  "stage.rewardsTitle": "Belohnungen",
+
+  "stage.slots": "Ausgerüstete Boosts: {0} / {1}",
+
+  "stage.slotsFull": "Alle {0} Plätze belegt. Tippe einen Boost an, um ihn zu entfernen.",
+
+  "stage.tapToEquip": "Tippen zum Ausrüsten",
+
+  "vip.badge": "VIP {0}",
+
+  "vip.basicCosmetics": "Exklusive VIP-Kosmetik",
+
+  "vip.become": "Werde VIP",
+
+  "vip.coinBonus": "+{0}% Münzen bei jedem Sieg",
+
+  "vip.current": "DEINE STUFE",
+
+  "vip.details": "Vorteile",
+
+  "vip.doubleEvents": "Doppelte Event-Belohnungen",
+
+  "vip.freeContinue": "1 kostenloses Weiterspielen pro Tag",
+
+  "vip.freeLife": "Jeden Tag 1 Gratisleben",
+
+  "vip.how": "VIP-Stufen steigen mit deinen Käufen und sinken nie.",
+
+  "vip.locked": "Gesperrt",
+
+  "vip.next": "VIP {0} in {1}",
+
+  "vip.none": "Noch kein VIP",
+
+  "vip.orbeBonus": "+{0}% Orben bei Orbenpaketen",
+
+  "vip.rareCosmetics": "Seltene VIP-Kosmetik",
+
+  "vip.rarePerk": "Königskrone im Profil",
+
+  "vip.reached": "Erreicht",
+
+  "vip.recharge": "Leben laden 20% schneller",
+
+  "vip.skipAd": "1 Werbung pro Tag überspringen",
+
+  "vip.steal": "{0}% Chance, in Freundschaftsduellen einen Boost zu stehlen",
+
+  "vip.threshold": "Ab {0} Ausgaben",
+
+  "vip.title": "VIP-Status",
+
+  "vip.toShop": "Zum Shop",
+
+  "boss.damageTotal": "Schaden: {0}",
+
+  "boss.guildName": "Kristallgolem",
+
+  "boss.taunt1": "Du kannst mich nicht besiegen!",
+
+  "boss.taunt2": "Deine Edelsteine gehören mir!",
+
+  "boss.taunt3": "Spüre meinen Zorn!",
+
+  "hud.botName": "Trainingsrivale",
+
+  "hud.fight": "LOS GEHT'S!",
+
+  "hud.finalBonus": "FINALBONUS!",
+
+  "hud.hype.amazing": "UNGLAUBLICH!",
+
+  "hud.hype.awesome": "KLASSE!",
+
+  "hud.hype.divine": "GÖTTLICH!",
+
+  "hud.hype.great": "SUPER!",
+
+  "hud.hype.incredible": "PHÄNOMENAL!",
+
+  "hud.hype.legendary": "LEGENDÄR!",
+
+  "hud.hype.sweet": "SÜSS!",
+
+  "hud.hype.unstoppable": "UNAUFHALTSAM!",
+
+  "hud.say.combo1": "Was für eine Kombo!",
+
+  "hud.say.combo2": "Die Edelsteine tanzen!",
+
+  "hud.say.combo3": "Crystalheim ist stolz auf dich!",
+
+  "hud.say.goal1": "Ein Ziel geschafft!",
+
+  "hud.say.goal2": "Gut gemacht, weiter so!",
+
+  "hud.say.idle1": "Suche 4 oder 5 in einer Reihe!",
+
+  "hud.say.idle2": "Bonus-Edelsteine machen große Explosionen!",
+
+  "hud.say.idle3": "Spiele unten für mehr Kaskaden.",
+
+  "hud.say.lose1": "Nächstes Mal schaffen wir es!",
+
+  "hud.say.lose2": "So knapp! Noch einmal?",
+
+  "hud.say.lowMoves1": "Vorsicht, nur noch wenige Züge!",
+
+  "hud.say.lowMoves2": "Jeder Zug zählt!",
+
+  "hud.say.start1": "Los, zusammen sind wir unschlagbar!",
+
+  "hud.say.start2": "Die Kristalle zählen auf uns!",
+
+  "hud.say.start3": "Zeig ihnen, was du kannst!",
+
+  "hud.say.win1": "Sieg! Du warst großartig!",
+
+  "hud.say.win2": "Auf zum nächsten Abenteuer!",
+
+  "pvp.taunt1": "Zu einfach!",
+
+  "pvp.taunt2": "Versuch mitzuhalten!",
+
+  "pvp.taunt3": "Hast du die Kombo gesehen?",
+
+  "pvp.taunt4": "Die Arena gehört mir!",
+
+  "pvp.worried1": "He, nicht so schnell!",
+
+  "pvp.worried2": "Oh oh...",
+
+  "vip.progress": "{0}% bis VIP {1}",
+
+  "vip.unlockFirst": "Schalte zuerst VIP {0} frei, um diese Belohnungen zu entdecken",
+
+  "vip.nextLabel": "NÄCHSTE STUFE",
+
+  "vip.discount": "-{0}% auf Boosts im Shop",
+
+  "vip.dailyGift": "Tägliches VIP-Geschenk",
+
+  "vip.giftLine": "Tagesgeschenk: {0} Orben, {1} Münzen, {2} Boosts, {3} Begleiter-Fragmente",
+
+  "vip.giftLives": "+{0} Leben pro Tag",
+
+  "vip.giftClaim": "Geschenk abholen",
+
+  "vip.giftTomorrow": "Abgeholt! Morgen gibt es ein neues.",
+
+  "map.chestOpen": "Öffnen!",
+
+  "map.chestClaimed": "Diese Truhe hast du schon geöffnet.",
+
+  "map.chestNeed": "Noch {0} Sterne in diesem Kapitel ({1} nötig).",
+
+  "map.chestTitle": "{0}-Sterne-Truhe",
+
+  "profile.title": "Profil",
+
+  "profile.view": "Profil",
+
+  "profile.stats": "Statistiken",
+
+  "profile.trophies": "Trophäen",
+
+  "profile.bestLeague": "Beste Liga",
+
+  "profile.wins": "PvP-Siege",
+
+  "profile.winRate": "Siegquote",
+
+  "profile.bestStreak": "Beste Serie",
+
+  "profile.stars": "Sterne",
+
+  "profile.stage": "Story-Level",
+
+  "profile.achievements": "Erfolge",
+
+  "profile.pets": "Begleiter",
+
+  "profile.cosmetics": "Kosmetik",
+
+  "profile.weeklyRank": "Wochenrang",
+
+  "profile.bonusTitle": "Sammelbonus ({0} Kosmetik)",
+
+  "profile.bonusValues": "+{0}% Münzen · +{1}% Pass-EP",
+
+  "profile.bonusRule": "Jede Kosmetik gibt einen stapelbaren Bonus: gewöhnlich +0,5% Münzen, selten +1% Münzen +0,5% EP, episch +2% Münzen +1% EP, legendär +4% Münzen +2% EP (Münzen bis +{0}%). Kein Vorteil im Match.",
+
+  "profile.equipped": "Ausgerüstet",
+
+  "profile.kind.frame": "Rahmen",
+
+  "profile.kind.title": "Titel",
+
+  "profile.kind.outfit": "Outfit",
+
+  "profile.kind.board": "Spielbrett",
+
+  "profile.kind.pieces": "Edelsteine",
+
+  "profile.kind.emote": "Emote",
+
+  "profile.collection": "Sammlung ({0}/{1})",
+
+  "profile.coinsShort": "Münzen",
+
+  "profile.source.shop": "Im Shop",
+
+  "profile.source.achievements": "Erfolge",
+
+  "profile.source.pass": "Kampfpass",
+
+  "profile.source.story": "Story",
+
+  "profile.bpFrame": "Rahmen Saison {0}",
+
+  "profile.bpBoard": "Spielbrett Saison {0}",
+
+  "profile.bpPieces": "Edelsteine Saison {0}",
+
+  "profile.pageFrame": "Sammlerrahmen {0}",
+
+  "hud.voice.bossDefeated": "Boss besiegt!",
+
+  "hud.guildBossHp": "Gildenboss: {0} / {1} LP",
+
+  "settings.reduceMotion": "Animationen reduzieren",
+
+  "boss.defeatedDuring": "Deine Gilde hat den Boss während deines Kampfes besiegt! Deine {0} Schaden zählen, dein Angriff bleibt erhalten und die Belohnung gehört dir.",
+
+  "chest.howTo": "Zeittruhen: Gewinne gewertete PvP-Kämpfe, besiege einen Kapitelboss zum ersten Mal oder schaffe Level 3 (Willkommenstruhe). Tippe eine Truhe an, um den Timer zu starten (eine nach der anderen).",
+
+  "guild.bossStamp": "BESIEGT",
+
+  "guild.bossWeek": "Boss Nr. {0}",
+
+  "guild.coinsDaily": "Münzen · Tageskontingent",
+
+  "guild.coinsDone": "Münzkontingent erreicht: morgen wieder! Orbs gehen weiterhin.",
+
+  "guild.coinsToday": "Heute {0} / {1}",
+
+  "guild.donateConfirm": "{0} Orbs an die Gilde spenden?",
+
+  "guild.donateMax": "Max {0}",
+
+  "guild.donateNextLevel": "Nächste Stufe ({0})",
+
+  "guild.donateRule": "{0} Münzen = 1 Punkt · 1 Orb = 1 Punkt · große Spenden steigen mehrere Stufen",
+
+  "guild.donateTitle": "Spenden",
+
+  "guild.donated": "+{0} Gildenpunkte!",
+
+  "guild.levelProgress": "Stufe {0}: {1} / {2} P.",
+
+  "guild.levelShort": "ST {0}",
+
+  "guild.levelsUp": "+{0} Stufe(n)! Die Gilde ist jetzt Stufe {1}!",
+
+  "guild.memberToday": "Heute: {0} Münzen gespendet · {1} Bossangriffe übrig",
+
+  "guild.minTrophies": "Min. {0} Trophäen",
+
+  "guild.orbesHint": "Unbegrenzt · {0} Punkte bis zur nächsten Stufe",
+
+  "guild.orbesUnlimited": "Orbs · ohne Limit",
+
+  "guild.pitchBody": "Tu dich mit bis zu 20 Spielern zusammen: wöchentlicher Boss mit geteilten Belohnungen, Tech-Boni für alle, tägliche Spenden und Live-Chat.",
+
+  "guild.pitchTitle": "Gemeinsam stärker!",
+
+  "guild.techMax": "MAX. RANG",
+
+  "guild.techOfficers": "Anführer und Offiziere wählen",
+
+  "guild.techPoints": "{0} Tech-Punkte",
+
+  "guild.techTitle": "Techbaum",
+
+  "guild.you": "Du",
+
+  "menu.offlineBanner": "OFFLINE · nur Training (Story & PvP gegen Bot) · tippen zum Verbinden",
+
+  "menu.offlineLocked": "Internet nötig: Shop, Gilde, Begleiter und Freunde gehören zur Online-Welt, damit offline nichts in Konflikt gerät.",
+
+  "menu.offlineRetry": "Verbinde neu…",
+
+  "pets.convert": "Tauschen",
+
+  "pets.convertAmount": "{0} geben → {1} erhalten",
+
+  "pets.convertGo": "Tauschen!",
+
+  "pets.convertMax": "Max ({0})",
+
+  "pets.convertPick": "Wähle einen noch gesperrten Begleiter",
+
+  "pets.convertRate": "{0} ➜ 1",
+
+  "pets.convertTitle": "Fragmente tauschen",
+
+  "pets.converted": "+{0} Fragmente für {1}!",
+
+  "splash.onlineNow": "Wieder online! Alles, was du jetzt tust, wird in deinem Konto gespeichert.",
+
+  "hud.timeLabel": "ZEIT",
+
+  "stage.limitsMoves": "🎯 {0} Züge, ohne Uhr",
+
+  "stage.limitsTimed": "⏱ {0} s, unbegrenzte Züge",
+
+  "stage.tierHard": "SCHWERES LEVEL",
+
+  "stage.tierSuperHard": "SUPERSCHWERES LEVEL",
+
+  "stage.tierReward": "Größere Belohnungen bei Sieg!",
+
+  "map.hard": "SCHWER",
+
+  "map.superHard": "SUPERSCHWER",
+
+  "menu.wheel": "Glücksrad",
+
+  "pause.quitStreak": "Du verlierst deine Serie von {0} Siegen!",
+
+  "streak.boosters": "🔥 {0} Siege in Folge: {1} Bonus auf dem Brett!",
+
+  "streak.explain": "Siegesserie: Gewinne neue Level in Folge. 3 Siege = 1 Startbonus, 5 = 2, 7 = 3. Eine Niederlage setzt sie zurück.",
+
+  "streak.lost": "💔 Serie von {0} Siegen verloren",
+
+  "streak.max": "Maximaler Bonus!",
+
+  "streak.next": "noch {0} Sieg(e) bis zum nächsten Bonus",
+
+  "streak.now": "🔥 Serie: {0}",
+
+  "wheel.jackpot": "JACKPOT",
+
+  "wheel.odds": "Chancen:",
+
+  "wheel.spin": "DREHEN!",
+
+  "wheel.title": "Tägliches Glücksrad",
+
+  "wheel.tomorrow": "Komm morgen wieder",
+
+  "wheel.won": "Gewonnen!",
+
+  "kingdom.title": "Crystalheim",
+
+  "menu.kingdom": "Königreich",
+
+  "kingdom.zone": "Zone {0}/{1}: {2}",
+
+  "kingdom.progress": "{0}/{1} aufgebaut",
+
+  "kingdom.build": "Bauen ★{0}",
+
+  "kingdom.built": "Aufgebaut",
+
+  "kingdom.needStars": "Noch {0} Stern(e) nötig: gewinne Level!",
+
+  "kingdom.zoneDone": "{0} wiederhergestellt!",
+
+  "kingdom.finished": "Crystalheim erstrahlt wieder! Danke, Held.",
+
+  "kingdom.z1": "Der Marktplatz",
+
+  "kingdom.z2": "Die Kristallbrücke",
+
+  "kingdom.z3": "Die Königsgärten",
+
+  "kingdom.z4": "Der Magierturm",
+
+  "kingdom.z5": "Der Thronsaal",
+
+  "kingdom.z1.t1": "Kristallbrunnen",
+
+  "kingdom.z1.t2": "Marktstände",
+
+  "kingdom.z1.t3": "Festlaternen",
+
+  "kingdom.z1.t4": "Pflaster des Platzes",
+
+  "kingdom.z1.t5": "Königsbanner",
+
+  "kingdom.z1.t6": "Heldenstatue",
+
+  "kingdom.z2.t1": "Brückenpfeiler",
+
+  "kingdom.z2.t2": "Brückenbahn",
+
+  "kingdom.z2.t3": "Geländer",
+
+  "kingdom.z2.t4": "Wachtürme",
+
+  "kingdom.z2.t5": "Großer Bogen",
+
+  "kingdom.z2.t6": "Wächterkristalle",
+
+  "kingdom.z3.t1": "Gartenwege",
+
+  "kingdom.z3.t2": "Blumenbeete",
+
+  "kingdom.z3.t3": "Pavillon",
+
+  "kingdom.z3.t4": "Seerosenteich",
+
+  "kingdom.z3.t5": "Kristallbäume",
+
+  "kingdom.z3.t6": "Gewächshaus",
+
+  "kingdom.z4.t1": "Fundament",
+
+  "kingdom.z4.t2": "Wendeltreppe",
+
+  "kingdom.z4.t3": "Bibliothek",
+
+  "kingdom.z4.t4": "Observatorium",
+
+  "kingdom.z4.t5": "Arkaner Orb",
+
+  "kingdom.z4.t6": "Turmspitze",
+
+  "kingdom.z5.t1": "Marmorsäulen",
+
+  "kingdom.z5.t2": "Buntglasfenster",
+
+  "kingdom.z5.t3": "Königsteppich",
+
+  "kingdom.z5.t4": "Kristallleuchter",
+
+  "kingdom.z5.t5": "Der Thron",
+
+  "kingdom.z5.t6": "Kristallkrone",
+
+  "guild.tech.ChestSpeed": "Express-Truhen",
+
+  "guild.tech.ChestSpeed.desc": "Truhen öffnen sich pro Rang 5 % schneller.",
+
+  "guild.tech.PetXp": "Königlicher Zwinger",
+
+  "guild.tech.PetXp.desc": "+10 % Begleiter-EP pro Rang.",
+
+  "update.checking": "Suche nach Updates…",
+
+  "update.downloading": "Neue Version wird geladen",
+
+  "update.installing": "Update wird installiert…",
+
+  "update.title": "Neue Version",
+
+  "update.readyBody": "Die neue Version ist geladen. Jetzt installieren?",
+
+  "update.requiredBody": "Diese Version wird online nicht mehr unterstützt. Installiere das Update, um weiterzuspielen.",
+
+  "update.permissionTitle": "Updates erlauben",
+
+  "update.permissionBody": "Nur einmal: Aktiviere auf dem nächsten Bildschirm „Dieser Quelle vertrauen“ und kehre zurück. Danach aktualisiert sich Crush Royale selbst.",
+
+  "update.allow": "Erlauben",
+
+  "update.install": "Installieren",
+
+  "update.later": "Später",
+
+  "update.failed": "Das Update konnte nicht geladen werden. Neuer Versuch beim nächsten Start.",
+
+  "update.failedRequired": "Das Update konnte nicht installiert werden. Prüfe deine Verbindung und versuche es erneut.",
+
+  "hud.fusion": "FUSION!",
+
+  "friends.invite": "Freund einladen",
+
+  "leaderboard.playNow": "Jetzt PvP spielen",
+
+  "guild.bossDaily": "3 Angriffe pro Tag · der Boss behält seine LP die ganze Woche",
+
+  "mechanic.new": "NEU!",
+
+  "mechanic.ok": "Verstanden!",
+
+  "mechanic.bomb.title": "Zeitbomben",
+
+  "mechanic.bomb.body": "Die Zahl zeigt die übrigen Züge. Kombiniere den Bomben-Edelstein vor 0, sonst ist das Level verloren!",
+
+  "mechanic.blight.title": "Verderbter Kristall",
+
+  "mechanic.blight.body": "Er befällt nach jedem Zug ohne Treffer einen Nachbarstein. Kombiniere direkt daneben, um ihn zu zerstören!",
+
+  "mechanic.egg.title": "Dracheneier",
+
+  "mechanic.egg.body": "Zwei Kombinationen neben einem Ei: Es schlüpft und hinterlässt einen Bonus-Edelstein!",
+
+  "hud.defused": "ENTSCHÄRFT!",
+
+  "hud.hatched": "GESCHLÜPFT!",
+
+  "hud.boom": "BUMM!",
+
+  "continue.moves": "+{0} Züge",
+
+  "continue.seconds": "+{0} Sekunden",
+
+  "powerup.ChronoBomb.descMoves": "Sofort +4 Züge.",
+
+  "powerup.CoinBooster.descMoves": "x1,5 Punkte für 5 Züge.",
+
+  "powerup.BrightSpark.descMoves": "Jedes 3er-Match erzeugt 5 Züge lang zusätzlich eine Linien-Gemme.",
+
+  "powerup.Multiplier2x.descMoves": "Doppelte Punkte für 4 Züge.",
+
+  "powerup.CascadeInfinity.descMoves": "Kaskaden behalten ihren Multiplikator 4 Züge lang.",
+
+  "result.stageWon": "Level {0} geschafft - {1}",
+
+  "result.stageLost": "Level {0} gescheitert - {1}",
+
+  "wheel.oddsButton": "Chancen ansehen",
+
+  "menu.bag": "Beutel",
+
+  "bag.title": "Mein Beutel",
+
+  "bag.wallet": "Geldbeutel",
+
+  "bag.boosts": "Booster",
+
+  "bag.fragments": "Begleiter-Fragmente",
+
+  "bag.fragmentsHelp": "Tausche {0} Fragmente eines Begleiters gegen 1 eines anderen.",
+
+  "bag.fragmentCount": "{0} Fragmente (nächste Stufe: {1})",
+
+  "bag.noFragments": "Noch keine Fragmente. Beschwörungen und Truhen geben welche.",
+
+  "bag.goSummon": "Zu den Beschwörungen",
+
+  "bag.continues": "Gratis-Fortsetzungen",
+
+  "bag.livesFull": "Leben voll",
+
+  "bag.livesIn": "Nächstes Leben in {0} Min {1} s",
+
+  "bag.cosmetics": "Kosmetik",
+
+  "bag.cosmeticsOwned": "{0} im Besitz",
+
+  "bag.openCollection": "Sammlung öffnen",
+
+  "season.beta": "Beta-Saison",
+
+  "season.s1": "Frostreach-Morgen",
+
+  "season.s2": "Sunspire-Sande",
+
+  "season.s3": "Wildnisblüte",
+
+  "season.s4": "Emberfall-Schmiede",
+
+  "season.s5": "Prismawache",
+
+  "season.s6": "Polarlichtjagd",
+
+  "season.s7": "Trugbildschleier",
+
+  "season.s8": "Wurzel und Rune",
+
+  "season.s9": "Magmakrone",
+
+  "season.s10": "Splitterkammer",
+
+  "season.s11": "Winterhof",
+
+  "season.s12": "Kristallsouverän",
+
+  "season.encore": "Saison {0}",
+
+  "cosmetic.outfit.season_firstlight": "Erstlicht-Ornat",
+
+  "cosmetic.outfit.season_frostdawn": "Frostmorgen-Rüstung",
+
+  "cosmetic.outfit.season_sunsteel": "Sonnenstahl-Gewand",
+
+  "cosmetic.outfit.season_thornbloom": "Dornblüten-Tracht",
+
+  "cosmetic.outfit.season_emberforge": "Glutschmiede-Panzer",
+
+  "cosmetic.outfit.season_prismguard": "Prismawächter-Rüstung",
+
+  "cosmetic.outfit.season_aurorahunt": "Polarlichtjäger",
+
+  "cosmetic.outfit.season_mirageveil": "Trugbildschleier",
+
+  "cosmetic.outfit.season_rootrune": "Wurzelrunen-Umhang",
+
+  "cosmetic.outfit.season_magmacrown": "Magmakronen-Ornat",
+
+  "cosmetic.outfit.season_shardvault": "Splitterkammer-Wache",
+
+  "cosmetic.outfit.season_wintercourt": "Winterhof-Mantel",
+
+  "cosmetic.outfit.season_sovereign": "Kristallsouverän",
+
+  "kingdom.header": "Zone {0}/{1} · {2}/{3} Baustellen · {4} Sterne verfügbar",
+
+  "kingdom.missing": "★{0} fehlen",
+
+  "kingdom.fx.structure": "Enthüllt diesen Teil der wiederaufgebauten Stadt",
+
+  "kingdom.fx.water": "Das Wasser fließt und funkelt wieder",
+
+  "kingdom.fx.banner": "Banner steigen auf und wehen im Wind",
+
+  "kingdom.fx.torch": "Fackeln entzünden sich und flackern",
+
+  "kingdom.fx.smoke": "Schornsteine rauchen: Die Zone atmet wieder",
+
+  "kingdom.fx.radiance": "Krönt die Zone mit tanzenden Lichtern",
+
+  "kingdom.z1.t7": "Brunnenwasser",
+
+  "kingdom.z1.t8": "Festbanner",
+
+  "kingdom.z1.t9": "Gassenfackeln",
+
+  "kingdom.z1.t10": "Marktfest",
+
+  "kingdom.z2.t7": "Stromschnellen",
+
+  "kingdom.z2.t8": "Brückenwimpel",
+
+  "kingdom.z2.t9": "Leuchtfeuer-Kohlebecken",
+
+  "kingdom.z2.t10": "Brückenlichter",
+
+  "kingdom.z3.t7": "Teichquellen",
+
+  "kingdom.z3.t8": "Gartenlaternen",
+
+  "kingdom.z3.t9": "Gewächshaus-Schornstein",
+
+  "kingdom.z3.t10": "Blütentanz",
+
+  "kingdom.z4.t7": "Alchemiedämpfe",
+
+  "kingdom.z4.t8": "Wandfackeln",
+
+  "kingdom.z4.t9": "Turmbanner",
+
+  "kingdom.z4.t10": "Arkane Aurora",
+
+  "kingdom.z5.t7": "Kristallfälle",
+
+  "kingdom.z5.t8": "Thronbecken",
+
+  "kingdom.z5.t9": "Königsstandarten",
+
+  "kingdom.z5.t10": "Krönungslichter",
+
+  "guildboss.7kou.title": "Der Gefrorene Wächter",
+
+  "guildboss.escobaros.title": "Der Kristallkönig",
+
+  "guildboss.majors_blue.title": "Der Verfluchte Archivar",
+
+  "battlepass.missionsDaily": "Heutige Aufgaben",
+  "battlepass.missionsAlways": "Pass-XP, jeden Tag",
+  "battlepass.stateToDo": "Offen",
+  "battlepass.stateReady": "Abholbereit!",
+  "battlepass.stateClaimed": "Abgeholt",
+  "battlepass.stateRepeat": "Bei jedem Spiel",
+  "battlepass.claimNow": "Abholen",
+  "friends.giftsTitle": "Leben für dich",
+  "friends.giftFrom": "{0} schenkt dir ein Leben",
+  "friends.giftAccept": "Annehmen",
+  "friends.giftSend": "Leben schenken",
+  "friends.giftSent": "Leben gesendet! Eines pro Tag.",
+  "friends.giftFull": "Deine Leben sind voll: komm wieder, wenn du eines verbraucht hast.",
+  "friends.giftTaken": "Du hast heute schon ein Leben erhalten.",
+  "friends.giftTaken2": "Leben erhalten!",
+  "friends.suggestions": "Spieler zum Einladen",
+  "friends.suggestionsHelp": "Aktive Spieler, die noch nicht deine Freunde sind."
+}
+

@@ -100,6 +100,8 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.FriendRemove, (FriendTargetRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.ActAsync(Me(user), "remove", body, ct));
         api.MapPost(ApiRoutes.FriendBlock, (FriendTargetRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.ActAsync(Me(user), "block", body, ct));
         api.MapPost(ApiRoutes.FriendChallenge, (string friendId, StartStageRequest? body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.ChallengeAsync(Me(user), friendId, body, ct));
+        api.MapPost(ApiRoutes.FriendSendLife, (FriendTargetRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.SendLifeAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.FriendAcceptLife, (ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.AcceptLifeAsync(Me(user), ct));
         api.MapGet(ApiRoutes.WorldMap, (ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.WorldMapAsync(Me(user), ct));
     }
 

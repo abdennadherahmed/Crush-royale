@@ -460,6 +460,21 @@ namespace CrushRoyale.Contracts
         public List<PublicProfileDto> Outgoing { get; set; } = new List<PublicProfileDto>();
 
         public Dictionary<string, long> ChallengeCooldownMs { get; set; } = new Dictionary<string, long>();
+
+        /// <summary>Players to invite: active players who are not friends yet (5 to 10).</summary>
+        public List<PublicProfileDto> Suggestions { get; set; } = new List<PublicProfileDto>();
+
+        /// <summary>Friends whose life gift is waiting.</summary>
+        public List<PublicProfileDto> LifeGifts { get; set; } = new List<PublicProfileDto>();
+
+        /// <summary>A life can still be offered today.</summary>
+        public bool CanSendLife { get; set; }
+
+        /// <summary>A waiting life can be accepted right now (not full, none taken today).</summary>
+        public bool CanAcceptLife { get; set; }
+
+        /// <summary>Lives after accepting a gift, so the hub can refresh without another call.</summary>
+        public LivesDto Lives { get; set; }
     }
 
     public sealed class WorldMapFriendDto
