@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "接受对决",
   "friends.duelDecline": "拒绝",
   "friends.duelPlay": "开始我的一局",
-  "friends.duelStarted": "先玩你的一局，随后好友会收到挑战。"
+  "friends.duelStarted": "先玩你的一局，随后好友会收到挑战。",
+  "guild.suggested": "正在招募的公会",
+  "guild.suggestedHelp": "有空位的公开公会。也可以按名称搜索。"
 }
 

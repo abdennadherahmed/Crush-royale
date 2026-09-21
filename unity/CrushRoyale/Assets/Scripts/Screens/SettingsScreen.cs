@@ -9,6 +9,10 @@ namespace CrushRoyale.Game.Screens
     /// <summary>Settings and profile: audio, haptics, notifications, accessibility, language, account, VIP, legal.</summary>
     public sealed class SettingsScreen : UIScreen
     {
+        protected override string BackdropScene => "settings";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.North;
+
         public override System.Type BackTarget => typeof(MainMenuScreen);
 
         protected override void Build()

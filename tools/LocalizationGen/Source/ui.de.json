@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "Duell annehmen",
   "friends.duelDecline": "Ablehnen",
   "friends.duelPlay": "Meine Runde spielen",
-  "friends.duelStarted": "Spiele deine Runde: dein Freund bekommt danach die Herausforderung."
+  "friends.duelStarted": "Spiele deine Runde: dein Freund bekommt danach die Herausforderung.",
+  "guild.suggested": "Gilden, die rekrutieren",
+  "guild.suggestedHelp": "Offene Gilden mit freien Plätzen. Du kannst auch nach Namen suchen."
 }
 

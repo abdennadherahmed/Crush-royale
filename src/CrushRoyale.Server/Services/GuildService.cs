@@ -66,9 +66,14 @@ public sealed class GuildService
         IReadOnlyList<GuildSummary> rows;
         if (q.Length == 0)
         {
+            // First visit: suggest guilds that can actually be joined (open, with room), strongest first.
             IReadOnlyList<GuildRankingRow> top = await _ops.Store.TopGuildsAsync(50, ct).ConfigureAwait(false);
             rows = await _ops.Store.SearchGuildsAsync(string.Empty, 50, ct).ConfigureAwait(false);
-            rows = rows.OrderBy(r => top.FirstOrDefault(t => t.GuildId == r.Id)?.Rank ?? int.MaxValue).ToList();
+            int maxMembers = _ops.Balance.Current.Guild.MaxMembers;
+            rows = rows
+                .OrderBy(r => r.IsOpen && r.Members < maxMembers ? 0 : 1)
+                .ThenBy(r => top.FirstOrDefault(t => t.GuildId == r.Id)?.Rank ?? int.MaxValue)
+                .ToList();
         }
         else
         {

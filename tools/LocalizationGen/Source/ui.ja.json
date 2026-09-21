@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "デュエルを受ける",
   "friends.duelDecline": "辞退する",
   "friends.duelPlay": "自分のプレイをする",
-  "friends.duelStarted": "自分のプレイをすると、友達に挑戦が届きます。"
+  "friends.duelStarted": "自分のプレイをすると、友達に挑戦が届きます。",
+  "guild.suggested": "メンバー募集中のギルド",
+  "guild.suggestedHelp": "空きのある公開ギルド。名前で検索もできます。"
 }
 

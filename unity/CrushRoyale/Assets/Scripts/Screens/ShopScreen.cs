@@ -29,6 +29,10 @@ namespace CrushRoyale.Game.Screens
         private ShopResponse _shop;
         private RectTransform _list;
 
+        protected override string BackdropScene => "shop";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.East;
+
         public override Type BackTarget => typeof(MainMenuScreen);
 
         private bool _argsApplied;

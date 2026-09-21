@@ -61,10 +61,23 @@ namespace CrushRoyale.Game.UI
         /// <summary>Kingdom illustrated behind framed screens (darkened); override to match the screen's context.</summary>
         protected virtual CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.Central;
 
+        /// <summary>
+        /// Scene id of a dedicated background ("shop", "vip", "settings"...). When the image is not there yet the
+        /// kingdom art above is used, so every screen already stops sharing the very same castle.
+        /// </summary>
+        protected virtual string BackdropScene => null;
+
         /// <summary>Safe-area content container with a title bar and optional back button.</summary>
         protected RectTransform Frame(string titleKey, bool backButton = true)
         {
-            Widgets.Backdrop(Root, BackdropKingdom, 0.45f);
+            if (string.IsNullOrEmpty(BackdropScene))
+            {
+                Widgets.Backdrop(Root, BackdropKingdom, 0.45f);
+            }
+            else
+            {
+                Widgets.Backdrop(Root, BackdropScene, 0.45f);
+            }
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
             safe.gameObject.AddComponent<SafeArea>();
 

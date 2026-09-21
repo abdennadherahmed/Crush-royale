@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "Aceptar el duelo",
   "friends.duelDecline": "Rechazar",
   "friends.duelPlay": "Jugar mi partida",
-  "friends.duelStarted": "Juega tu partida: tu amigo recibirá el reto después."
+  "friends.duelStarted": "Juega tu partida: tu amigo recibirá el reto después.",
+  "guild.suggested": "Clanes que reclutan",
+  "guild.suggestedHelp": "Clanes abiertos con plazas libres. También puedes buscar por nombre."
 }
 

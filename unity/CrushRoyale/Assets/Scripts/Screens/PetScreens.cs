@@ -18,6 +18,10 @@ namespace CrushRoyale.Game.Screens
     {
         private RectTransform _list;
 
+        protected override string BackdropScene => "pets";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.West;
+
         public override Type BackTarget => typeof(MainMenuScreen);
 
         /// <summary>Sprite of a pet ("FrostFox" -> Art/Pets/frostfox), or the summon egg for null.</summary>

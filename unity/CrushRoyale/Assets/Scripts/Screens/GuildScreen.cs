@@ -31,6 +31,10 @@ namespace CrushRoyale.Game.Screens
         private InputField _chatInput;
         private InputField _searchInput;
 
+        protected override string BackdropScene => "guild";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.South;
+
         public override Type BackTarget => typeof(MainMenuScreen);
 
         protected override void Build()
@@ -196,8 +200,12 @@ namespace CrushRoyale.Game.Screens
             Button createButton = UIFactory.Button(create.transform, Loc.T("guild.createButton", Game.Backend.Balance.Guild.CreateCostCoins), () => _ = CreateAsync(name.text, description.text), Theme.Gold);
             UIFactory.Anchor(createButton.GetComponent<RectTransform>(), 0.2f, 0.05f, 0.8f, 0.26f);
 
-            // Search.
-            Widgets.SectionTitle(list, Loc.T("guild.search"));
+            // Suggestions first: a new player lands on guilds that are actually recruiting, without typing anything.
+            Widgets.SectionTitle(list, Loc.T(string.IsNullOrEmpty(_searchInput?.text) ? "guild.suggested" : "guild.search"));
+            if (string.IsNullOrEmpty(_searchInput?.text))
+            {
+                UIFactory.Height(UIFactory.Label(list, Loc.T("guild.suggestedHelp"), Theme.SmallSize, Theme.TextMuted), 60);
+            }
             HorizontalLayoutGroup row = UIFactory.Row(list, 120, 16);
             _searchInput = Widgets.Input(row.transform, Loc.T("guild.searchPlaceholder"), 20);
             UIFactory.Width(UIFactory.Button(row.transform, Loc.T("common.search"), () => _ = SearchAsync(_searchInput.text), Theme.PanelLight, Theme.BodySize, Theme.Text), 260);

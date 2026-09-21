@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "Accept the duel",
   "friends.duelDecline": "Decline",
   "friends.duelPlay": "Play my run",
-  "friends.duelStarted": "Play your run: your friend will then get the challenge."
+  "friends.duelStarted": "Play your run: your friend will then get the challenge.",
+  "guild.suggested": "Guilds recruiting",
+  "guild.suggestedHelp": "Open guilds with room left. You can also search by name."
 }
 

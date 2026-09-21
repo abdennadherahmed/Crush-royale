@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "Принять дуэль",
   "friends.duelDecline": "Отклонить",
   "friends.duelPlay": "Сыграть свой раунд",
-  "friends.duelStarted": "Сыграйте свой раунд: друг получит вызов после этого."
+  "friends.duelStarted": "Сыграйте свой раунд: друг получит вызов после этого.",
+  "guild.suggested": "Гильдии набирают",
+  "guild.suggestedHelp": "Открытые гильдии со свободными местами. Можно искать по названию."
 }
 

@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "듀얼 수락",
   "friends.duelDecline": "거절",
   "friends.duelPlay": "내 판 플레이",
-  "friends.duelStarted": "내 판을 플레이하면 친구에게 도전장이 갑니다."
+  "friends.duelStarted": "내 판을 플레이하면 친구에게 도전장이 갑니다.",
+  "guild.suggested": "모집 중인 길드",
+  "guild.suggestedHelp": "자리가 있는 공개 길드예요. 이름으로 검색할 수도 있어요."
 }
 

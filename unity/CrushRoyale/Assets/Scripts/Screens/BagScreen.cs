@@ -17,6 +17,10 @@ namespace CrushRoyale.Game.Screens
     {
         private RectTransform _list;
 
+        protected override string BackdropScene => "bag";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.East;
+
         public override Type BackTarget => typeof(MainMenuScreen);
 
         protected override void Build()

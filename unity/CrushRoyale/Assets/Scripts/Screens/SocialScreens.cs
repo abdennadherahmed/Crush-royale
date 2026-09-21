@@ -14,6 +14,10 @@ namespace CrushRoyale.Game.Screens
     /// <summary>Friends: list, requests, search by id or name, friendly challenges (5-minute cooldown, no trophies).</summary>
     public sealed class FriendsScreen : UIScreen
     {
+        protected override string BackdropScene => "friends";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.North;
+
         private FriendsResponse _friends;
         private SearchPlayersResponse _search;
         private InputField _query;
@@ -330,6 +334,10 @@ namespace CrushRoyale.Game.Screens
     /// <summary>Weekly leaderboards per league and for guilds: podium for the top 3, then framed rows, reset countdown.</summary>
     public sealed class LeaderboardScreen : UIScreen
     {
+        protected override string BackdropScene => "leaderboard";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.Central;
+
         private static readonly string[] Leagues = { null, "Bronze", "Silver", "Gold", "Platinum", "Diamond", "Master", "Guilds" };
 
         private int _tab;
@@ -685,6 +693,10 @@ namespace CrushRoyale.Game.Screens
     /// </summary>
     public sealed class BattlePassScreen : UIScreen
     {
+        protected override string BackdropScene => "battlepass";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.West;
+
         private BattlePassResponse _pass;
         private QuestsResponse _quests;
 

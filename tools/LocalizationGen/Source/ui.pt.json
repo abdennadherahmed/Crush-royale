@@ -2075,6 +2075,8 @@
   "friends.duelAccept": "Aceitar o duelo",
   "friends.duelDecline": "Recusar",
   "friends.duelPlay": "Jogar minha partida",
-  "friends.duelStarted": "Jogue sua partida: seu amigo receberá o desafio depois."
+  "friends.duelStarted": "Jogue sua partida: seu amigo receberá o desafio depois.",
+  "guild.suggested": "Guildas recrutando",
+  "guild.suggestedHelp": "Guildas abertas com vagas. Você também pode buscar por nome."
 }
 

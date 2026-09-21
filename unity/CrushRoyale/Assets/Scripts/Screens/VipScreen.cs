@@ -17,6 +17,10 @@ namespace CrushRoyale.Game.Screens
     /// </summary>
     public sealed class VipScreen : UIScreen
     {
+        protected override string BackdropScene => "vip";
+
+        protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.Central;
+
         public override System.Type BackTarget => typeof(MainMenuScreen);
 
         protected override void Build()
