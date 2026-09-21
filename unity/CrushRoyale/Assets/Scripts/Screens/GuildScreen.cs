@@ -613,30 +613,21 @@ namespace CrushRoyale.Game.Screens
         // ------------------------------------------------------------------ boss
 
         /// <summary>The weekly boss changes every week: its portrait and name follow the boss index.</summary>
-        public static string GuildBossName(Localization loc, int index)
+        /// <summary>Name of the boss on duty this week (a proper noun, the same in every language).</summary>
+        public static string GuildBossName(Localization loc, int index) => CrushRoyale.Core.Social.GuildBossRoster.For(index).Name;
+
+        /// <summary>Epithet shown under the name. Literal keys: the localization validator only sees complete keys.</summary>
+        public static string GuildBossTitle(Localization loc, int index)
         {
-            switch (((Math.Max(1, index) - 1) % 6))
+            switch (CrushRoyale.Core.Social.GuildBossRoster.For(index).Id)
             {
-                case 1: return loc.T("boss.a3.c30.actboss.name");
-                case 2: return loc.T("boss.a1.c10.actboss.name");
-                case 3: return loc.T("boss.a4.c40.actboss.name");
-                case 4: return loc.T("boss.a2.c20.actboss.name");
-                case 5: return loc.T("boss.valdorax.name");
-                default: return loc.T("boss.guildName");
+                case "7kou": return loc.T("guildboss.7kou.title");
+                case "escobaros": return loc.T("guildboss.escobaros.title");
+                default: return loc.T("guildboss.majors_blue.title");
             }
         }
 
-        private static CrushRoyale.Core.Story.Kingdom BossKingdom(int index)
-        {
-            switch (((Math.Max(1, index) - 1) % 6))
-            {
-                case 1: return CrushRoyale.Core.Story.Kingdom.West;
-                case 2: return CrushRoyale.Core.Story.Kingdom.North;
-                case 3: return CrushRoyale.Core.Story.Kingdom.South;
-                case 4: return CrushRoyale.Core.Story.Kingdom.East;
-                default: return CrushRoyale.Core.Story.Kingdom.Central;
-            }
-        }
+        private static CrushRoyale.Core.Story.Kingdom BossKingdom(int index) => CrushRoyale.Core.Social.GuildBossRoster.For(index).Kingdom;
 
         private void BuildBoss()
         {
@@ -683,6 +674,8 @@ namespace CrushRoyale.Game.Screens
             UiKit.Ribbon(ribbon);
             Text title = Outlined(ribbon, GuildBossName(Loc, boss.BossIndex), Theme.BodySize, Theme.Text, TextAnchor.MiddleCenter);
             UIFactory.Anchor(title.rectTransform, 0.18f, 0.34f, 0.82f, 0.92f);
+            Text epithet = Outlined(scene, GuildBossTitle(Loc, boss.BossIndex), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter);
+            UIFactory.Anchor(epithet.rectTransform, 0.06f, 0.82f, 0.94f, 0.87f);
             Chip(scene, "item_medal", Loc.T("guild.bossWeek", boss.BossIndex), 0.03f, 0.3f, 0.79f, 0.86f);
             TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(boss.ResetAtUnixMs) - DateTimeOffset.UtcNow;
             if (left < TimeSpan.Zero)

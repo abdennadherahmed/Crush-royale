@@ -118,12 +118,9 @@ namespace CrushRoyale.Game.UI
 
         public static Sprite GuildBoss() => Load("Art/Bosses/golem");
 
-        /// <summary>Weekly guild boss portrait: the six illustrated bosses take turns (index 1 = the crystal golem).</summary>
-        public static Sprite GuildBoss(int index)
-        {
-            string[] bosses = { "golem", "treant", "frostbane", "pyraxis", "eclipse_pharaoh", "valdorax" };
-            return Load("Art/Bosses/" + bosses[(System.Math.Max(1, index) - 1) % bosses.Length]) ?? GuildBoss();
-        }
+        /// <summary>Weekly guild boss portrait: 7kou, Escobaros and Majors Blue take turns (see GuildBossRoster).</summary>
+        public static Sprite GuildBoss(int index) =>
+            Load("Art/Bosses/" + CrushRoyale.Core.Social.GuildBossRoster.For(index).Id) ?? GuildBoss();
 
         /// <summary>Dialogue portrait by story character id ("hero", "lyra", ...).</summary>
         public static Sprite Character(string id) => string.IsNullOrEmpty(id) ? null : Load("Art/Characters/" + id);
