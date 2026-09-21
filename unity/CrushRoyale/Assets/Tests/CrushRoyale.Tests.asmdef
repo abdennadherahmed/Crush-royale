@@ -1,9 +1,12 @@
 {
-  "name": "CrushRoyale.Editor",
-  "rootNamespace": "CrushRoyale.EditorTools",
+  "name": "CrushRoyale.Tests",
+  "rootNamespace": "CrushRoyale.Tests",
   "references": [
     "CrushRoyale.Game",
-    "UnityEngine.UI"
+    "CrushRoyale.Editor",
+    "UnityEngine.UI",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
   ],
   "includePlatforms": [
     "Editor"
@@ -12,13 +15,16 @@
   "allowUnsafeCode": false,
   "overrideReferences": true,
   "precompiledReferences": [
+    "nunit.framework.dll",
     "Newtonsoft.Json.dll",
     "CrushRoyale.Core.dll",
     "CrushRoyale.Contracts.dll",
     "CrushRoyale.Client.dll"
   ],
   "autoReferenced": false,
-  "defineConstraints": [],
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
   "versionDefines": [],
   "noEngineReferences": false
 }

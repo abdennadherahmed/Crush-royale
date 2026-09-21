@@ -125,6 +125,8 @@ namespace CrushRoyale.Game.Gameplay
                 return false;
             }
             _finished = false;
+            // Finish() disabled the board when the stage was lost: without this the continued stage was unplayable.
+            Input.Interactable = !_animating;
             Clock.Resume();
             Changed?.Invoke();
             return true;

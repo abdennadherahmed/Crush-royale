@@ -74,7 +74,14 @@ namespace CrushRoyale.Game.Networking
 
         public CrushApiException LastError { get; private set; }
 
-        public ProfileDto Profile => IsOnline ? Client.Profile : null;
+        /// <summary>
+        /// Profile served while offline, set only by the editor screenshot tool and the UI tests: without a server the
+        /// screens would all render their empty state, so nothing would ever exercise the populated layouts.
+        /// Always null in a player build.
+        /// </summary>
+        internal ProfileDto OfflineProfile { get; set; }
+
+        public ProfileDto Profile => IsOnline ? Client.Profile : OfflineProfile;
 
         public string PlayerId => Client?.Auth.UserId ?? "offline-player";
 

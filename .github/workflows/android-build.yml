@@ -43,6 +43,126 @@ jobs:
       - name: Run engine, server and client tests
         run: dotnet test CrushRoyale.sln -c Release
 
+  screenshots:
+    name: Unity screenshots + UI tests
+    # Nobody on the team opens Unity: this job renders every screen to a PNG and runs the UI tests, so a broken
+    # screen is visible (and a regression fails the build) without installing anything.
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Sync shared assemblies, game data and localization
+        shell: pwsh
+        run: ./tools/sync-unity.ps1
+
+      - name: Cache Unity Library
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.PROJECT_PATH }}/Library
+          key: Library-Screens-win-${{ env.UNITY_VERSION }}-${{ hashFiles('unity/CrushRoyale/Packages/manifest.json', 'unity/CrushRoyale/ProjectSettings/**', 'unity/CrushRoyale/Assets/**', '!unity/CrushRoyale/Assets/**/*.cs') }}
+          restore-keys: Library-Screens-win-${{ env.UNITY_VERSION }}-
+
+      - name: Install Unity
+        id: unity_setup
+        continue-on-error: true
+        # Same modules as the build job: the editor scripts compile UnityEditor.Android code behind UNITY_ANDROID,
+        # which only exists when Android support is installed.
+        uses: RageAgainstThePixel/unity-setup@v2
+        with:
+          unity-version: ${{ env.UNITY_VERSION }}
+          version-file: ${{ env.PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
+          build-targets: Android
+          modules: android-sdk-ndk-tools, android-open-jdk
+          cache-installation: false
+          auto-update-hub: false
+
+      - name: Install Unity (retry)
+        if: steps.unity_setup.outcome == 'failure'
+        uses: RageAgainstThePixel/unity-setup@v2
+        with:
+          unity-version: ${{ env.UNITY_VERSION }}
+          version-file: ${{ env.PROJECT_PATH }}/ProjectSettings/ProjectVersion.txt
+          build-targets: Android
+          modules: android-sdk-ndk-tools, android-open-jdk
+          cache-installation: false
+          auto-update-hub: false
+
+      - name: Activate Unity Personal license
+        uses: RageAgainstThePixel/activate-unity-license@v2
+        with:
+          license: Personal
+          username: ${{ secrets.UNITY_USERNAME }}
+          password: ${{ secrets.UNITY_PASSWORD }}
+
+      - name: Run UI tests (EditMode)
+        id: ui_tests
+        # Reported at the end of the job so a failure here still leaves the screenshots to look at.
+        continue-on-error: true
+        uses: RageAgainstThePixel/unity-action@v3
+        with:
+          project-path: ${{ env.PROJECT_PATH }}
+          build-target: Android
+          log-name: ui-tests
+          args: >-
+            -batchmode -runTests -testPlatform EditMode
+            -testResults ${{ github.workspace }}/test-results/editmode.xml
+
+      - name: Capture screenshots of every screen
+        id: capture
+        continue-on-error: true
+        # No -nographics: batchmode can only render with a graphics device, and the screens are rendered through a
+        # camera into a 1080x1920 render texture.
+        uses: RageAgainstThePixel/unity-action@v3
+        with:
+          project-path: ${{ env.PROJECT_PATH }}
+          build-target: Android
+          log-name: screenshots
+          args: >-
+            -quit -batchmode
+            -executeMethod CrushRoyale.EditorTools.ScreenshotTool.CaptureAll
+            -screenshotOutput ${{ github.workspace }}/screenshots
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: screenshots
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ui-test-results-${{ github.run_number }}
+          path: test-results
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Unity logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: unity-screens-logs-${{ github.run_number }}
+          path: |
+            ${{ github.workspace }}/**/*ui-tests*.log
+            ${{ github.workspace }}/**/*screenshots*.log
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Fail on test or capture failure
+        if: steps.ui_tests.outcome == 'failure' || steps.capture.outcome == 'failure'
+        shell: pwsh
+        run: |
+          Write-Host "UI tests: ${{ steps.ui_tests.outcome }}, screenshot capture: ${{ steps.capture.outcome }}"
+          exit 1
+
   android:
     name: Unity Android APK
     # Runs in parallel with the .NET tests (they only guard the shared engine; Unity compiles the same sources).
