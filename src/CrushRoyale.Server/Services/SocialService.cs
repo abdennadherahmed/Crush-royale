@@ -217,20 +217,28 @@ public sealed class SocialService
             return;
         }
 
-        await _ops.RunPairAsync(userId, opponent, (me, them) =>
+        try
         {
-            var manager = new FriendsManager(me.Player.Balance, me.Player.Clock);
-            DuelOutcome outcome = manager.RecordDuelRun(me.Player.State.Friends, them.Player.State.Friends, duelId, score, replayId, me.Player.NowMs);
-            if (outcome == DuelOutcome.Won)
+            await _ops.RunPairAsync(userId, opponent, (me, them) =>
             {
-                me.Player.Wallet.Credit(Currency.Coins, me.Player.Balance.Economy.FriendlyDuelWinCoins, TransactionReason.PvpReward, duelId);
-            }
-            else if (outcome == DuelOutcome.Lost)
-            {
-                them.Player.Wallet.Credit(Currency.Coins, me.Player.Balance.Economy.FriendlyDuelWinCoins, TransactionReason.PvpReward, duelId);
-            }
-            return Task.FromResult(true);
-        }, ct).ConfigureAwait(false);
+                var manager = new FriendsManager(me.Player.Balance, me.Player.Clock);
+                DuelOutcome outcome = manager.RecordDuelRun(me.Player.State.Friends, them.Player.State.Friends, duelId, score, replayId, me.Player.NowMs);
+                if (outcome == DuelOutcome.Won)
+                {
+                    me.Player.Wallet.Credit(Currency.Coins, me.Player.Balance.Economy.FriendlyDuelWinCoins, TransactionReason.PvpReward, duelId);
+                }
+                else if (outcome == DuelOutcome.Lost)
+                {
+                    them.Player.Wallet.Credit(Currency.Coins, me.Player.Balance.Economy.FriendlyDuelWinCoins, TransactionReason.PvpReward, duelId);
+                }
+                return Task.FromResult(true);
+            }, ct).ConfigureAwait(false);
+        }
+        catch (ApiException)
+        {
+            // The opponent deleted their account, was banned, or dismissed the duel first. Bookkeeping for a friendly
+            // duel must never cost the player the run they just finished: the match result is submitted either way.
+        }
     }
 
     /// <summary>Offers one of your lives to a friend (once per day, and only one waiting gift per friend).</summary>
