@@ -32,7 +32,7 @@ namespace CrushRoyale.Tools.LocalizationGen
         private static readonly string[] BattlePassParts = { "frame", "board", "pieces" };
         private const int GeneratedSeasons = 12;
 
-        private static readonly Regex CodeKey = new Regex("\"((?:chapter|hud|pause|continue|boss|splash|privacy|hero|menu|login|settings|map|stage|result|pvp|lives|shop|guild|friends|leaderboard|achievements|battlepass|quests|common|error|choice|notif|currency|pets|pet|chest|challenge|vip|get|reveal|profile|kingdom|streak|wheel|update|mechanic|bag)\\.[A-Za-z0-9_.]*[A-Za-z0-9_])\"");
+        private static readonly Regex CodeKey = new Regex("\"((?:chapter|hud|pause|continue|boss|splash|privacy|hero|menu|login|settings|map|stage|result|pvp|lives|shop|guild|friends|leaderboard|achievements|battlepass|quests|common|error|choice|notif|currency|pets|pet|chest|challenge|vip|get|reveal|profile|kingdom|season|streak|wheel|update|mechanic|bag|guildboss)\\.[A-Za-z0-9_.]*[A-Za-z0-9_])\"");
         private static readonly Regex Placeholder = new Regex("\\{(\\d+)(?:[,:][^}]*)?\\}");
         private static readonly Regex DialogueLine = new Regex("^dlg\\..+\\.\\d+$");
 
@@ -323,6 +323,12 @@ namespace CrushRoyale.Tools.LocalizationGen
             {
                 keys.Add("cosmetic." + c.Id);
             }
+            // Season display names come from the catalog, not from a literal in the scripts.
+            foreach (SeasonDefinition season in SeasonCatalog.All)
+            {
+                keys.Add(season.NameKey);
+            }
+            keys.Add("season.encore");
             foreach (AchievementData a in AchievementCatalog.All)
             {
                 keys.Add(a.TitleKey);

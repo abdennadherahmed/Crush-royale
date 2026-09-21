@@ -351,16 +351,16 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
     {
         var (id, http, _) = await _app.NewPlayerAsync();
         await http.PostError(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = "z1.t1" }, HttpStatusCode.Conflict);
-        await _app.MutateAsync(id, s => s.Story.TotalStars = 20);
+        await _app.MutateAsync(id, s => s.Story.TotalStars = 69);
 
         await http.PostError(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = "z2.t1" }, HttpStatusCode.Forbidden);
         RestorationBuildResponse last = null!;
-        foreach (string task in new[] { "z1.t1", "z1.t2", "z1.t3", "z1.t4", "z1.t5", "z1.t6" })
+        foreach (RestorationTask task in Restoration.Zones[0].Tasks)
         {
-            last = await http.PostOk<RestorationBuildResponse>(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = task });
+            last = await http.PostOk<RestorationBuildResponse>(ApiRoutes.RestorationBuild, new RestorationBuildRequest { TaskId = task.Id });
         }
         Assert.Equal(1, last.ZoneCompleted);
-        Assert.True(last.Reward.Coins >= 1500);
+        Assert.True(last.Reward.Coins >= 2000);
         Assert.Equal(9, last.Restoration.StarsAvailable);
         Assert.Equal(2, last.Restoration.CurrentZone);
     }

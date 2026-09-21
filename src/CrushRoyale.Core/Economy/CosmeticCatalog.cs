@@ -131,6 +131,13 @@ namespace CrushRoyale.Core.Economy
                 Def("outfit.purified", CosmeticKind.HeroOutfit, CosmeticRarity.Legendary, CosmeticSource.Story)
             };
 
+            // One exclusive hero outfit per battle pass season: never sold, never re-granted, so the season really is
+            // the only way to get it. Legendary from season 5 on, when the pass is the player's long-term goal.
+            foreach (Progression.SeasonDefinition season in Progression.SeasonCatalog.All)
+            {
+                list.Add(Def(season.ExclusiveCosmeticId, CosmeticKind.HeroOutfit, season.Index >= 5 ? CosmeticRarity.Legendary : CosmeticRarity.Epic, CosmeticSource.BattlePass));
+            }
+
             for (int page = 1; page <= 12; page++)
             {
                 list.Add(Def(PageFrame(page), CosmeticKind.AvatarFrame, page >= 10 ? CosmeticRarity.Legendary : page >= 6 ? CosmeticRarity.Epic : CosmeticRarity.Rare, CosmeticSource.Achievement));
