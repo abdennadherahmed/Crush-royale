@@ -27,6 +27,67 @@ namespace CrushRoyale.Core.Social
 
         /// <summary>Ids of the friends whose life gift is waiting to be accepted.</summary>
         public List<string> LifeGifts { get; set; } = new List<string>();
+
+        /// <summary>Duels in flight or freshly finished, newest first (see <see cref="FriendDuel"/>).</summary>
+        public List<FriendDuel> Duels { get; set; } = new List<FriendDuel>();
+    }
+
+    /// <summary>Where a duel stands, from the point of view of the player holding the entry.</summary>
+    public enum DuelState : byte
+    {
+        /// <summary>The challenger has not played their run yet.</summary>
+        ChallengerPlaying = 0,
+
+        /// <summary>The invitation is waiting for this player: play the same board or decline.</summary>
+        Invited = 1,
+
+        /// <summary>This player has played; waiting for the other one.</summary>
+        WaitingOpponent = 2,
+
+        /// <summary>Both scores are in (or the duel was declined): <see cref="FriendDuel.Outcome"/> tells what happened.</summary>
+        Finished = 3
+    }
+
+    public enum DuelOutcome : byte
+    {
+        None = 0,
+        Won = 1,
+        Lost = 2,
+        Draw = 3,
+        Declined = 4
+    }
+
+    /// <summary>
+    /// A real duel between two friends: both play the SAME board and the scores are compared. Each player keeps their
+    /// own copy of the entry, so a duel never needs a table of its own.
+    /// </summary>
+    public sealed class FriendDuel
+    {
+        public string Id { get; set; }
+
+        public string OpponentId { get; set; }
+
+        public string OpponentName { get; set; }
+
+        public ulong Seed { get; set; }
+
+        public bool IamChallenger { get; set; }
+
+        public DuelState State { get; set; }
+
+        public DuelOutcome Outcome { get; set; }
+
+        /// <summary>Score to beat (0 until the challenger has played).</summary>
+        public long OpponentScore { get; set; }
+
+        public long MyScore { get; set; }
+
+        /// <summary>Replay of the opponent's run, replayed as a live ghost when this player takes the duel.</summary>
+        public long OpponentReplayId { get; set; }
+
+        public long CreatedUnixMs { get; set; }
+
+        public long UpdatedUnixMs { get; set; }
     }
 
     /// <summary>
@@ -263,5 +324,122 @@ namespace CrushRoyale.Core.Social
         /// <summary>True when a waiting life can be accepted right now.</summary>
         public static bool CanAcceptLife(FriendsState state, int today, int currentLives, int maxLives) =>
             state != null && state.LifeGifts.Count > 0 && state.LifeTakenDay != today && currentLives < maxLives;
+
+        // ------------------------------------------------------------------ duels
+
+        /// <summary>Duels kept per player: older finished ones are dropped so the list stays readable.</summary>
+        public const int MaxDuels = 12;
+
+        /// <summary>Opens a duel: both sides get their entry, the challenger plays first.</summary>
+        public OperationResult StartDuel(FriendsState mine, string myName, FriendsState theirs, string theirName,
+            string myId, string theirId, string duelId, ulong seed, long nowMs)
+        {
+            if (mine == null || theirs == null || string.IsNullOrEmpty(duelId))
+            {
+                return OperationResult.Fail(ErrorCode.InvalidArgument);
+            }
+            if (!mine.Friends.Contains(theirId))
+            {
+                return OperationResult.Fail(ErrorCode.NotFound);
+            }
+            if (mine.Duels.Exists(d => d.OpponentId == theirId && d.State != DuelState.Finished))
+            {
+                return OperationResult.Fail(ErrorCode.DuplicateRequest, "A duel with this friend is already running.");
+            }
+            Add(mine, new FriendDuel
+            {
+                Id = duelId, OpponentId = theirId, OpponentName = theirName, Seed = seed, IamChallenger = true,
+                State = DuelState.ChallengerPlaying, CreatedUnixMs = nowMs, UpdatedUnixMs = nowMs
+            });
+            Add(theirs, new FriendDuel
+            {
+                Id = duelId, OpponentId = myId, OpponentName = myName, Seed = seed, IamChallenger = false,
+                State = DuelState.ChallengerPlaying, CreatedUnixMs = nowMs, UpdatedUnixMs = nowMs
+            });
+            return OperationResult.Ok();
+        }
+
+        /// <summary>Records a run. Returns the outcome for the player who just played (None while the duel is open).</summary>
+        public DuelOutcome RecordDuelRun(FriendsState mine, FriendsState theirs, string duelId, long score, long replayId, long nowMs)
+        {
+            FriendDuel mineEntry = Find(mine, duelId);
+            FriendDuel theirEntry = Find(theirs, duelId);
+            if (mineEntry == null)
+            {
+                return DuelOutcome.None;
+            }
+            mineEntry.MyScore = score;
+            mineEntry.UpdatedUnixMs = nowMs;
+            if (theirEntry != null)
+            {
+                theirEntry.OpponentScore = score;
+                theirEntry.OpponentReplayId = replayId;
+                theirEntry.UpdatedUnixMs = nowMs;
+            }
+
+            bool bothPlayed = theirEntry != null && theirEntry.MyScore > 0;
+            if (!bothPlayed)
+            {
+                mineEntry.State = DuelState.WaitingOpponent;
+                if (theirEntry != null)
+                {
+                    theirEntry.State = DuelState.Invited;
+                }
+                return DuelOutcome.None;
+            }
+
+            DuelOutcome mineOutcome = score > theirEntry.MyScore ? DuelOutcome.Won : score < theirEntry.MyScore ? DuelOutcome.Lost : DuelOutcome.Draw;
+            mineEntry.State = DuelState.Finished;
+            mineEntry.Outcome = mineOutcome;
+            mineEntry.OpponentScore = theirEntry.MyScore;
+            theirEntry.State = DuelState.Finished;
+            theirEntry.Outcome = mineOutcome == DuelOutcome.Won ? DuelOutcome.Lost : mineOutcome == DuelOutcome.Lost ? DuelOutcome.Won : DuelOutcome.Draw;
+            return mineOutcome;
+        }
+
+        /// <summary>Turns down an invitation: the challenger is told instead of waiting forever.</summary>
+        public OperationResult DeclineDuel(FriendsState mine, FriendsState theirs, string duelId, long nowMs)
+        {
+            FriendDuel mineEntry = Find(mine, duelId);
+            if (mineEntry == null || mineEntry.State == DuelState.Finished)
+            {
+                return OperationResult.Fail(ErrorCode.NotFound);
+            }
+            mineEntry.State = DuelState.Finished;
+            mineEntry.Outcome = DuelOutcome.Declined;
+            mineEntry.UpdatedUnixMs = nowMs;
+            FriendDuel theirEntry = Find(theirs, duelId);
+            if (theirEntry != null)
+            {
+                theirEntry.State = DuelState.Finished;
+                theirEntry.Outcome = DuelOutcome.Declined;
+                theirEntry.UpdatedUnixMs = nowMs;
+            }
+            return OperationResult.Ok();
+        }
+
+        /// <summary>Removes a finished duel the player has seen.</summary>
+        public bool DismissDuel(FriendsState mine, string duelId)
+        {
+            FriendDuel entry = Find(mine, duelId);
+            return entry != null && entry.State == DuelState.Finished && mine.Duels.Remove(entry);
+        }
+
+        public static FriendDuel Find(FriendsState state, string duelId) =>
+            state?.Duels.Find(d => d.Id == duelId);
+
+        private static void Add(FriendsState state, FriendDuel duel)
+        {
+            state.Duels.Insert(0, duel);
+            while (state.Duels.Count > MaxDuels)
+            {
+                int last = state.Duels.FindLastIndex(d => d.State == DuelState.Finished);
+                if (last < 0)
+                {
+                    break;
+                }
+                state.Duels.RemoveAt(last);
+            }
+        }
     }
 }

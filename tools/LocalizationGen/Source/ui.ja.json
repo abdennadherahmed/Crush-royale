@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "今日はすでにライフを受け取りました。",
   "friends.giftTaken2": "ライフを受け取りました！",
   "friends.suggestions": "招待できるプレイヤー",
-  "friends.suggestionsHelp": "まだフレンドではないアクティブなプレイヤー。"
+  "friends.suggestionsHelp": "まだフレンドではないアクティブなプレイヤー。",
+  "friends.duels": "デュエル",
+  "friends.duelInvite": "{0}からの挑戦！",
+  "friends.duelWith": "{0}とのデュエル",
+  "friends.duelBeat": "同じ盤面で{0}点を超えろ。",
+  "friends.duelWaiting": "{0}はまだプレイしていません。あなたのスコア：{1}。",
+  "friends.duelYourTurn": "自分のプレイを終えると挑戦が送られます。",
+  "friends.duelScores": "あなた{0}・相手{1}",
+  "friends.duelWon": "勝利",
+  "friends.duelLost": "敗北",
+  "friends.duelDraw": "引き分け",
+  "friends.duelDeclined": "デュエルは辞退されました。",
+  "friends.duelAccept": "デュエルを受ける",
+  "friends.duelDecline": "辞退する",
+  "friends.duelPlay": "自分のプレイをする",
+  "friends.duelStarted": "自分のプレイをすると、友達に挑戦が届きます。"
 }
 

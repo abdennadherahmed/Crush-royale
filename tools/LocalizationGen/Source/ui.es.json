@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "Ya recibiste una vida hoy.",
   "friends.giftTaken2": "¡Vida recibida!",
   "friends.suggestions": "Jugadores para invitar",
-  "friends.suggestionsHelp": "Jugadores activos que aún no son tus amigos."
+  "friends.suggestionsHelp": "Jugadores activos que aún no son tus amigos.",
+  "friends.duels": "Duelos",
+  "friends.duelInvite": "¡{0} te reta!",
+  "friends.duelWith": "Duelo con {0}",
+  "friends.duelBeat": "El mismo tablero, supera {0} puntos.",
+  "friends.duelWaiting": "{0} aún debe jugar. Tu puntuación: {1}.",
+  "friends.duelYourTurn": "Juega tu partida para enviar el reto.",
+  "friends.duelScores": "Tú {0} · él {1}",
+  "friends.duelWon": "GANADO",
+  "friends.duelLost": "PERDIDO",
+  "friends.duelDraw": "EMPATE",
+  "friends.duelDeclined": "Duelo rechazado.",
+  "friends.duelAccept": "Aceptar el duelo",
+  "friends.duelDecline": "Rechazar",
+  "friends.duelPlay": "Jugar mi partida",
+  "friends.duelStarted": "Juega tu partida: tu amigo recibirá el reto después."
 }
 

@@ -35,6 +35,9 @@ namespace CrushRoyale.Core.Config
 
         public int StartingOrbes { get; set; } = 20;
 
+        /// <summary>Coins for winning a friendly duel (no trophies at stake, just bragging rights and a little gold).</summary>
+        public int FriendlyDuelWinCoins { get; set; } = 250;
+
         /// <summary>
         /// Orbe packs from the GDD. Fix: pack 3 bonus raised from 35 to 70, otherwise the 12.99€ pack gives
         /// FEWER orbes per euro (77.0) than the 4.99€ pack (79.2). Value per euro now strictly increases.

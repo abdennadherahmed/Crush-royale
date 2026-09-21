@@ -67,13 +67,16 @@ public sealed class PvpService
     private readonly ConcurrentDictionary<Guid, PendingRequest> _pending = new();
     private readonly ConcurrentDictionary<Guid, StartedMatch> _started = new();
 
-    public PvpService(PlayerOperations ops, MatchmakingEngine engine, GhostPoolCache ghosts, GameServerOptions options)
+    public PvpService(PlayerOperations ops, MatchmakingEngine engine, GhostPoolCache ghosts, GameServerOptions options, SocialService social)
     {
         _ops = ops;
         _engine = engine;
         _ghosts = ghosts;
         _options = options;
+        _social = social;
     }
+
+    private readonly SocialService _social;
 
     private TimeSpan Expiry => TimeSpan.FromMinutes(_options.MatchExpiryMinutes);
 
@@ -264,12 +267,17 @@ public sealed class PvpService
             GhostCandidate? ghost = ranked
                 ? new GhostCandidate { ReplayId = replayId.ToString(System.Globalization.CultureInfo.InvariantCulture), PlayerId = ws.IdString, Trophies = match.Config.PlayerTrophies, RecordedAtMs = ws.NowMs, Region = ws.State.Region, Seed = match.Seed }
                 : null;
-            return new Submission(match.Id, null, ghost);
+            return new Submission(match.Id, null, ghost, match.Config.DuelId, result.FinalScore, replayId);
         }, ct).ConfigureAwait(false);
 
         if (submission.Rejection != null)
         {
             return submission.Rejection;
+        }
+        if (!string.IsNullOrEmpty(submission.DuelId))
+        {
+            // Friend duel: both entries get the score, and the duel settles as soon as the second player is done.
+            await _social.SettleDuelAsync(userId, submission.DuelId!, submission.Score, submission.ReplayId, ct).ConfigureAwait(false);
         }
         if (submission.Ghost != null)
         {
@@ -575,5 +583,5 @@ public sealed class PvpService
 
     private sealed record StartedMatch(MatchStartResponse Response, DateTime At);
 
-    private sealed record Submission(string MatchId, PvpResultDto? Rejection, GhostCandidate? Ghost);
+    private sealed record Submission(string MatchId, PvpResultDto? Rejection, GhostCandidate? Ghost, string? DuelId = null, long Score = 0, long ReplayId = 0);
 }

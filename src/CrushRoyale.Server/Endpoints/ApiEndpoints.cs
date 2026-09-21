@@ -100,6 +100,10 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.FriendRemove, (FriendTargetRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.ActAsync(Me(user), "remove", body, ct));
         api.MapPost(ApiRoutes.FriendBlock, (FriendTargetRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.ActAsync(Me(user), "block", body, ct));
         api.MapPost(ApiRoutes.FriendChallenge, (string friendId, StartStageRequest? body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.ChallengeAsync(Me(user), friendId, body, ct));
+        api.MapPost(ApiRoutes.FriendDuelStart, (string friendId, StartStageRequest? body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.StartDuelAsync(Me(user), friendId, body, ct));
+        api.MapPost(ApiRoutes.FriendDuelAccept, (DuelRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.AcceptDuelAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.FriendDuelDecline, (DuelRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.DeclineDuelAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.FriendDuelDismiss, (DuelRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.DismissDuelAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.FriendSendLife, (FriendTargetRequest body, ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.SendLifeAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.FriendAcceptLife, (ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.AcceptLifeAsync(Me(user), ct));
         api.MapGet(ApiRoutes.WorldMap, (ClaimsPrincipal user, SocialService s, CancellationToken ct) => s.WorldMapAsync(Me(user), ct));

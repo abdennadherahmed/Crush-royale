@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "你今天已经领过生命了。",
   "friends.giftTaken2": "已领取生命！",
   "friends.suggestions": "可邀请的玩家",
-  "friends.suggestionsHelp": "还不是你好友的活跃玩家。"
+  "friends.suggestionsHelp": "还不是你好友的活跃玩家。",
+  "friends.duels": "对决",
+  "friends.duelInvite": "{0} 向你发起挑战！",
+  "friends.duelWith": "与 {0} 的对决",
+  "friends.duelBeat": "同一棋盘，超过 {0} 分。",
+  "friends.duelWaiting": "{0} 还没开始。你的分数：{1}。",
+  "friends.duelYourTurn": "先完成你的一局才能发出挑战。",
+  "friends.duelScores": "你 {0} · 对手 {1}",
+  "friends.duelWon": "获胜",
+  "friends.duelLost": "失败",
+  "friends.duelDraw": "平局",
+  "friends.duelDeclined": "对决已被拒绝。",
+  "friends.duelAccept": "接受对决",
+  "friends.duelDecline": "拒绝",
+  "friends.duelPlay": "开始我的一局",
+  "friends.duelStarted": "先玩你的一局，随后好友会收到挑战。"
 }
 

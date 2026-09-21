@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "You already received a life today.",
   "friends.giftTaken2": "Life received!",
   "friends.suggestions": "Players to invite",
-  "friends.suggestionsHelp": "Active players who are not your friends yet."
+  "friends.suggestionsHelp": "Active players who are not your friends yet.",
+  "friends.duels": "Duels",
+  "friends.duelInvite": "{0} challenges you!",
+  "friends.duelWith": "Duel with {0}",
+  "friends.duelBeat": "Same board, beat {0} points.",
+  "friends.duelWaiting": "{0} still has to play. Your score: {1}.",
+  "friends.duelYourTurn": "Play your run to send the challenge.",
+  "friends.duelScores": "You {0} · them {1}",
+  "friends.duelWon": "WON",
+  "friends.duelLost": "LOST",
+  "friends.duelDraw": "DRAW",
+  "friends.duelDeclined": "Duel declined.",
+  "friends.duelAccept": "Accept the duel",
+  "friends.duelDecline": "Decline",
+  "friends.duelPlay": "Play my run",
+  "friends.duelStarted": "Play your run: your friend will then get the challenge."
 }
 

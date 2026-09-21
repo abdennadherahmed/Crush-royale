@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "لقد استلمت حياة اليوم بالفعل.",
   "friends.giftTaken2": "تم استلام الحياة!",
   "friends.suggestions": "لاعبون لدعوتهم",
-  "friends.suggestionsHelp": "لاعبون نشطون ليسوا أصدقاءك بعد."
+  "friends.suggestionsHelp": "لاعبون نشطون ليسوا أصدقاءك بعد.",
+  "friends.duels": "المبارزات",
+  "friends.duelInvite": "{0} يتحداك!",
+  "friends.duelWith": "مبارزة مع {0}",
+  "friends.duelBeat": "اللوح نفسه، تجاوز {0} نقطة.",
+  "friends.duelWaiting": "لا يزال على {0} اللعب. نتيجتك: {1}.",
+  "friends.duelYourTurn": "العب جولتك لإرسال التحدي.",
+  "friends.duelScores": "أنت {0} · هو {1}",
+  "friends.duelWon": "فوز",
+  "friends.duelLost": "خسارة",
+  "friends.duelDraw": "تعادل",
+  "friends.duelDeclined": "تم رفض المبارزة.",
+  "friends.duelAccept": "قبول المبارزة",
+  "friends.duelDecline": "رفض",
+  "friends.duelPlay": "العب جولتي",
+  "friends.duelStarted": "العب جولتك: سيتلقى صديقك التحدي بعدها."
 }
 

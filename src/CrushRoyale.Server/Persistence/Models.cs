@@ -142,6 +142,9 @@ public sealed class MatchConfigSnapshot
 
     public long? GuildId { get; set; }
 
+    /// <summary>Set on a friendly match that settles a duel (see FriendsManager.FriendDuel).</summary>
+    public string? DuelId { get; set; }
+
     public int GuildWeek { get; set; }
 
     /// <summary>Pet equipped when the match started and the level it plays at (capped in PvP).</summary>

@@ -475,6 +475,36 @@ namespace CrushRoyale.Contracts
 
         /// <summary>Lives after accepting a gift, so the hub can refresh without another call.</summary>
         public LivesDto Lives { get; set; }
+
+        /// <summary>Duels waiting, running or just finished.</summary>
+        public List<FriendDuelDto> Duels { get; set; } = new List<FriendDuelDto>();
+    }
+
+    /// <summary>A duel between two friends on the same board, seen from the player asking for it.</summary>
+    public sealed class FriendDuelDto
+    {
+        public string Id { get; set; }
+
+        public string OpponentId { get; set; }
+
+        public string OpponentName { get; set; }
+
+        /// <summary>ChallengerPlaying, Invited, WaitingOpponent or Finished.</summary>
+        public string State { get; set; }
+
+        /// <summary>None, Won, Lost, Draw or Declined.</summary>
+        public string Outcome { get; set; }
+
+        public long MyScore { get; set; }
+
+        public long OpponentScore { get; set; }
+
+        public bool IamChallenger { get; set; }
+    }
+
+    public sealed class DuelRequest
+    {
+        public string DuelId { get; set; }
     }
 
     public sealed class WorldMapFriendDto

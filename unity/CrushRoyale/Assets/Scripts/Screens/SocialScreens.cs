@@ -59,6 +59,15 @@ namespace CrushRoyale.Game.Screens
                 }
             }
 
+            if (_friends.Duels.Count > 0)
+            {
+                Widgets.SectionTitle(list, Loc.T("friends.duels"));
+                foreach (FriendDuelDto duel in _friends.Duels)
+                {
+                    DuelCard(list, duel);
+                }
+            }
+
             if (_friends.LifeGifts.Count > 0)
             {
                 Widgets.SectionTitle(list, Loc.T("friends.giftsTitle"));
@@ -89,7 +98,7 @@ namespace CrushRoyale.Game.Screens
                 HorizontalLayoutGroup actions = UIFactory.Row(card, 80, 12);
                 string id = friend.Id;
                 long cooldown = _friends.ChallengeCooldownMs.TryGetValue(id, out long ms) ? ms : 0;
-                Button challenge = UIFactory.Button(actions.transform, cooldown > 0 ? Loc.T("friends.cooldown", Mathf.CeilToInt(cooldown / 60000f)) : Loc.T("friends.challenge"), () => _ = ChallengeAsync(id), Theme.Gold, Theme.SmallSize);
+                Button challenge = UIFactory.Button(actions.transform, cooldown > 0 ? Loc.T("friends.cooldown", Mathf.CeilToInt(cooldown / 60000f)) : Loc.T("friends.challenge"), () => _ = DuelAsync(id), Theme.Gold, Theme.SmallSize);
                 challenge.interactable = cooldown <= 0;
                 UIFactory.Button(actions.transform, Loc.T("profile.view"), () => UI.Show<ProfileScreen>(id), Theme.Hex("5BA8FF"), Theme.SmallSize);
                 UIFactory.Button(actions.transform, Loc.T("friends.remove"), () => _ = RemoveAsync(id), Theme.PanelLight, Theme.SmallSize, Theme.Text);
@@ -213,12 +222,107 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
-        private async Task ChallengeAsync(string friendId)
+        /// <summary>One duel entry: invitation, run in progress, or the final score sheet.</summary>
+        private void DuelCard(Transform list, FriendDuelDto duel)
         {
-            MatchStartResponse ticket = await Api(api => api.ChallengeFriendAsync(friendId, new StartStageRequest()));
+            bool finished = duel.State == "Finished";
+            bool invited = duel.State == "Invited";
+            Image card = UIFactory.Panel("Duel", list, Theme.Panel);
+            UIFactory.Height(card, 230);
+            UiKit.CardFrame(card);
+
+            Text title = UIFactory.Label(card.transform, Loc.T(invited ? "friends.duelInvite" : "friends.duelWith", duel.OpponentName),
+                Theme.BodySize - 2, invited ? Theme.Gold : Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.05f, 0.62f, 0.95f, 0.92f);
+            Widgets.TitleOutline(title);
+
+            string detail;
+            if (invited)
+            {
+                detail = Loc.T("friends.duelBeat", Loc.Number(duel.OpponentScore));
+            }
+            else if (finished)
+            {
+                detail = duel.Outcome == "Declined"
+                    ? Loc.T("friends.duelDeclined")
+                    : Loc.T("friends.duelScores", Loc.Number(duel.MyScore), Loc.Number(duel.OpponentScore));
+            }
+            else if (duel.State == "WaitingOpponent")
+            {
+                detail = Loc.T("friends.duelWaiting", duel.OpponentName, Loc.Number(duel.MyScore));
+            }
+            else
+            {
+                detail = Loc.T("friends.duelYourTurn");
+            }
+            Text body = UIFactory.Label(card.transform, detail, Theme.SmallSize, Theme.Text, TextAnchor.MiddleLeft);
+            UIFactory.Anchor(body.rectTransform, 0.05f, 0.34f, 0.95f, 0.6f);
+
+            if (finished && duel.Outcome != "Declined")
+            {
+                Text verdict = UIFactory.Label(card.transform, Loc.T(duel.Outcome == "Won" ? "friends.duelWon" : duel.Outcome == "Lost" ? "friends.duelLost" : "friends.duelDraw"),
+                    Theme.HeaderSize - 6, duel.Outcome == "Won" ? Theme.Success : duel.Outcome == "Lost" ? Theme.Danger : Theme.TextMuted, TextAnchor.MiddleRight, FontStyle.Bold);
+                UIFactory.Anchor(verdict.rectTransform, 0.5f, 0.62f, 0.95f, 0.92f);
+                Widgets.TitleOutline(verdict);
+            }
+
+            string id = duel.Id;
+            if (invited)
+            {
+                Button play = UIFactory.Button(card.transform, Loc.T("friends.duelAccept"), () => _ = AcceptDuelAsync(id), Theme.Success, Theme.SmallSize);
+                UIFactory.Anchor(play.GetComponent<RectTransform>(), 0.05f, 0.06f, 0.5f, 0.3f);
+                play.gameObject.AddComponent<Breathe>().Amount = 0.03f;
+                Button refuse = UIFactory.Button(card.transform, Loc.T("friends.duelDecline"), () => _ = DeclineDuelAsync(id), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                UIFactory.Anchor(refuse.GetComponent<RectTransform>(), 0.53f, 0.06f, 0.95f, 0.3f);
+            }
+            else if (finished)
+            {
+                Button ok = UIFactory.Button(card.transform, Loc.T("common.ok"), () => _ = DismissDuelAsync(id), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                UIFactory.Anchor(ok.GetComponent<RectTransform>(), 0.6f, 0.06f, 0.95f, 0.3f);
+            }
+            else if (duel.State == "ChallengerPlaying" && duel.IamChallenger)
+            {
+                Button play = UIFactory.Button(card.transform, Loc.T("friends.duelPlay"), () => _ = AcceptDuelAsync(id), Theme.Gold, Theme.SmallSize);
+                UIFactory.Anchor(play.GetComponent<RectTransform>(), 0.6f, 0.06f, 0.95f, 0.3f);
+            }
+        }
+
+        private async Task DuelAsync(string friendId)
+        {
+            MatchStartResponse ticket = await Api(api => api.StartDuelAsync(friendId, new StartStageRequest()));
+            if (ticket != null)
+            {
+                UI.Toast(Loc.T("friends.duelStarted"), 3f);
+                UI.Show<GameplayScreen>(MatchLaunch.Online(ticket), addToHistory: false);
+            }
+        }
+
+        private async Task AcceptDuelAsync(string duelId)
+        {
+            MatchStartResponse ticket = await Api(api => api.AcceptDuelAsync(duelId));
             if (ticket != null)
             {
                 UI.Show<GameplayScreen>(MatchLaunch.Online(ticket), addToHistory: false);
+            }
+        }
+
+        private async Task DeclineDuelAsync(string duelId)
+        {
+            FriendsResponse response = await Api(api => api.DeclineDuelAsync(duelId));
+            if (response != null)
+            {
+                _friends = response;
+                Rebuild();
+            }
+        }
+
+        private async Task DismissDuelAsync(string duelId)
+        {
+            FriendsResponse response = await Api(api => api.DismissDuelAsync(duelId));
+            if (response != null)
+            {
+                _friends = response;
+                Rebuild();
             }
         }
     }

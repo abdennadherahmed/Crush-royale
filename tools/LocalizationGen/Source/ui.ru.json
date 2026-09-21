@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "Вы уже получили жизнь сегодня.",
   "friends.giftTaken2": "Жизнь получена!",
   "friends.suggestions": "Игроки для приглашения",
-  "friends.suggestionsHelp": "Активные игроки, которые ещё не в друзьях."
+  "friends.suggestionsHelp": "Активные игроки, которые ещё не в друзьях.",
+  "friends.duels": "Дуэли",
+  "friends.duelInvite": "{0} бросает вам вызов!",
+  "friends.duelWith": "Дуэль с {0}",
+  "friends.duelBeat": "То же поле, побейте {0} очков.",
+  "friends.duelWaiting": "{0} ещё не сыграл. Ваш счёт: {1}.",
+  "friends.duelYourTurn": "Сыграйте свой раунд, чтобы отправить вызов.",
+  "friends.duelScores": "Вы {0} · соперник {1}",
+  "friends.duelWon": "ПОБЕДА",
+  "friends.duelLost": "ПОРАЖЕНИЕ",
+  "friends.duelDraw": "НИЧЬЯ",
+  "friends.duelDeclined": "Дуэль отклонена.",
+  "friends.duelAccept": "Принять дуэль",
+  "friends.duelDecline": "Отклонить",
+  "friends.duelPlay": "Сыграть свой раунд",
+  "friends.duelStarted": "Сыграйте свой раунд: друг получит вызов после этого."
 }
 

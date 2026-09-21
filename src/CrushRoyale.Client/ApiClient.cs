@@ -258,6 +258,19 @@ namespace CrushRoyale.Client
         public Task<FriendsResponse> RemoveFriendAsync(string playerId, CancellationToken ct = default) => Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendRemove, new FriendTargetRequest { PlayerId = playerId }, ct);
         public Task<FriendsResponse> BlockPlayerAsync(string playerId, CancellationToken ct = default) => Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendBlock, new FriendTargetRequest { PlayerId = playerId }, ct);
         public Task<MatchStartResponse> ChallengeFriendAsync(string friendId, StartStageRequest request, CancellationToken ct = default) => Transport.PostAsync<MatchStartResponse>(ApiRoutes.Fill(ApiRoutes.FriendChallenge, "friendId", friendId), request, ct);
+
+        /// <summary>Opens a real duel: the challenger plays first, the friend is then invited on the same board.</summary>
+        public Task<MatchStartResponse> StartDuelAsync(string friendId, StartStageRequest request, CancellationToken ct = default) =>
+            Transport.PostAsync<MatchStartResponse>(ApiRoutes.Fill(ApiRoutes.FriendDuelStart, "friendId", friendId), request, ct);
+
+        public Task<MatchStartResponse> AcceptDuelAsync(string duelId, CancellationToken ct = default) =>
+            Transport.PostAsync<MatchStartResponse>(ApiRoutes.FriendDuelAccept, new DuelRequest { DuelId = duelId }, ct);
+
+        public Task<FriendsResponse> DeclineDuelAsync(string duelId, CancellationToken ct = default) =>
+            Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendDuelDecline, new DuelRequest { DuelId = duelId }, ct);
+
+        public Task<FriendsResponse> DismissDuelAsync(string duelId, CancellationToken ct = default) =>
+            Transport.PostAsync<FriendsResponse>(ApiRoutes.FriendDuelDismiss, new DuelRequest { DuelId = duelId }, ct);
         public Task<WorldMapResponse> GetWorldMapAsync(CancellationToken ct = default) => Transport.GetAsync<WorldMapResponse>(ApiRoutes.WorldMap, ct);
 
         // Guild

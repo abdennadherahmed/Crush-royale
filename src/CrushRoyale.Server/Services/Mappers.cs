@@ -6,6 +6,7 @@ using CrushRoyale.Core.Economy;
 using CrushRoyale.Core.Gameplay;
 using CrushRoyale.Core.Pets;
 using CrushRoyale.Core.Progression;
+using CrushRoyale.Core.Social;
 using CrushRoyale.Core.Pvp;
 using CrushRoyale.Core.Replay;
 using CrushRoyale.Core.Story;
@@ -215,6 +216,19 @@ public static class Mappers
         }
         return dto;
     }
+
+    /// <summary>Duel entry as the owner of the entry sees it.</summary>
+    public static FriendDuelDto Duel(FriendDuel duel) => new FriendDuelDto
+    {
+        Id = duel.Id,
+        OpponentId = duel.OpponentId,
+        OpponentName = duel.OpponentName,
+        State = duel.State.ToString(),
+        Outcome = duel.Outcome.ToString(),
+        MyScore = duel.MyScore,
+        OpponentScore = duel.OpponentScore,
+        IamChallenger = duel.IamChallenger
+    };
 
     public static PublicProfileDto Public(PlayerSummary p) => new()
     {

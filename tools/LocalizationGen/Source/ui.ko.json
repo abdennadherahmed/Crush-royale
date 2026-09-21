@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "오늘은 이미 하트를 받았어요.",
   "friends.giftTaken2": "하트를 받았어요!",
   "friends.suggestions": "초대할 플레이어",
-  "friends.suggestionsHelp": "아직 친구가 아닌 활동적인 플레이어."
+  "friends.suggestionsHelp": "아직 친구가 아닌 활동적인 플레이어.",
+  "friends.duels": "듀얼",
+  "friends.duelInvite": "{0}님이 도전했어요!",
+  "friends.duelWith": "{0}님과의 듀얼",
+  "friends.duelBeat": "같은 보드에서 {0}점을 넘어보세요.",
+  "friends.duelWaiting": "{0}님이 아직 플레이하지 않았어요. 내 점수: {1}.",
+  "friends.duelYourTurn": "내 판을 마치면 도전장이 전송돼요.",
+  "friends.duelScores": "나 {0} · 상대 {1}",
+  "friends.duelWon": "승리",
+  "friends.duelLost": "패배",
+  "friends.duelDraw": "무승부",
+  "friends.duelDeclined": "듀얼을 거절했어요.",
+  "friends.duelAccept": "듀얼 수락",
+  "friends.duelDecline": "거절",
+  "friends.duelPlay": "내 판 플레이",
+  "friends.duelStarted": "내 판을 플레이하면 친구에게 도전장이 갑니다."
 }
 

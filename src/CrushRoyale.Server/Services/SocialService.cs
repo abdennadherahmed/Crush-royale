@@ -1,6 +1,7 @@
 using CrushRoyale.Contracts;
 using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
+using CrushRoyale.Core.Economy;
 using CrushRoyale.Core.Gameplay;
 using CrushRoyale.Core.PowerUps;
 using CrushRoyale.Core.Progression;
@@ -49,6 +50,7 @@ public sealed class SocialService
                 Outgoing = Resolve(f.Outgoing),
                 Suggestions = await SuggestionsAsync(ws, f, ct).ConfigureAwait(false),
                 LifeGifts = giftSummaries.Select(Mappers.Public).ToList(),
+                Duels = f.Duels.Select(Mappers.Duel).ToList(),
                 CanSendLife = FriendsManager.CanSendLife(f, today),
                 CanAcceptLife = FriendsManager.CanAcceptLife(f, today, ws.Stamina.Lives, ws.Balance.Stamina.MaxRegenLives),
                 Lives = Mappers.Lives(ws),
@@ -77,6 +79,158 @@ public sealed class SocialService
         List<Guid> ids = pool.Take(8).Select(r => r.PlayerId).ToList();
         IReadOnlyList<PlayerSummary> summaries = await _ops.Store.GetPlayerSummariesAsync(ids, ct).ConfigureAwait(false);
         return summaries.Select(Mappers.Public).ToList();
+    }
+
+    // ------------------------------------------------------------------ duels
+
+    /// <summary>
+    /// Opens a real duel: both friends play the SAME board and the scores decide. The challenger plays first; the
+    /// friend then gets an invitation with the score to beat and the challenger's run as a live ghost.
+    /// </summary>
+    public Task<MatchStartResponse> StartDuelAsync(Guid userId, string friendId, StartStageRequest? request, CancellationToken ct)
+    {
+        Guid friend = ParsePlayer(friendId);
+        return _ops.RunPairAsync(userId, friend, async (me, them) =>
+        {
+            PlayerWorkspace ws = me.Player;
+            RequireFriendsUnlocked(ws);
+            var manager = new FriendsManager(ws.Balance, ws.Clock);
+            ErrorCode canChallenge = manager.CanChallenge(ws.State.Friends, friend.ToString());
+            if (canChallenge != ErrorCode.None)
+            {
+                throw new ApiException(canChallenge);
+            }
+            manager.RecordChallenge(ws.State.Friends, friend.ToString()).ThrowIfFailed();
+
+            string duelId = Mappers.NewId("duel");
+            ulong seed = StableHash.Mix(StableHash.Fnv1a(duelId), (ulong)ws.NowMs);
+            manager.StartDuel(ws.State.Friends, ws.State.DisplayName, them.Player.State.Friends, them.Player.State.DisplayName,
+                ws.IdString, them.Player.IdString, duelId, seed, ws.NowMs).ThrowIfFailed();
+
+            MatchRow match = await CreateDuelMatchAsync(me, seed, friend, duelId, request, null).ConfigureAwait(false);
+            return Mappers.MatchStart(match, ws, _ops.Balance.HashHex, null);
+        }, ct);
+    }
+
+    /// <summary>Accepts an invitation: same seed, and the challenger's run plays as the ghost bar.</summary>
+    public Task<MatchStartResponse> AcceptDuelAsync(Guid userId, DuelRequest request, CancellationToken ct)
+    {
+        string duelId = request?.DuelId ?? throw new ApiException(ErrorCode.InvalidArgument, "Duel id missing.");
+        return _ops.RunAsync(userId, async ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            RequireFriendsUnlocked(ws);
+            FriendDuel duel = FriendsManager.Find(ws.State.Friends, duelId)
+                ?? throw new ApiException(ErrorCode.NotFound, "Duel not found.");
+            if (duel.State != DuelState.Invited)
+            {
+                throw new ApiException(ErrorCode.SessionOver, "This duel is not waiting for you.");
+            }
+
+            ReplayRow? ghost = duel.OpponentReplayId > 0 ? await ctx.Tx.GetReplayAsync(duel.OpponentReplayId).ConfigureAwait(false) : null;
+            MatchRow match = await CreateDuelMatchAsync(ctx, duel.Seed, ParsePlayer(duel.OpponentId), duelId, null, ghost).ConfigureAwait(false);
+            GhostDto? ghostDto = ghost != null ? await PvpService.BuildGhostAsync(_ops.Store, ws.Balance, ghost, ct).ConfigureAwait(false) : null;
+            return Mappers.MatchStart(match, ws, _ops.Balance.HashHex, ghostDto);
+        }, ct);
+    }
+
+    /// <summary>Turns down an invitation; the challenger sees "declined" instead of waiting.</summary>
+    public async Task<FriendsResponse> DeclineDuelAsync(Guid userId, DuelRequest request, CancellationToken ct)
+    {
+        string duelId = request?.DuelId ?? throw new ApiException(ErrorCode.InvalidArgument, "Duel id missing.");
+        Guid opponent = await _ops.ReadAsync(userId, (ws, _) =>
+        {
+            FriendDuel duel = FriendsManager.Find(ws.State.Friends, duelId) ?? throw new ApiException(ErrorCode.NotFound, "Duel not found.");
+            return Task.FromResult(ParsePlayer(duel.OpponentId));
+        }, ct).ConfigureAwait(false);
+
+        await _ops.RunPairAsync(userId, opponent, (me, them) =>
+        {
+            var manager = new FriendsManager(me.Player.Balance, me.Player.Clock);
+            manager.DeclineDuel(me.Player.State.Friends, them.Player.State.Friends, duelId, me.Player.NowMs).ThrowIfFailed();
+            return Task.FromResult(true);
+        }, ct).ConfigureAwait(false);
+        return await GetFriendsAsync(userId, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Clears a finished duel from the list once the player has read the result.</summary>
+    public async Task<FriendsResponse> DismissDuelAsync(Guid userId, DuelRequest request, CancellationToken ct)
+    {
+        string duelId = request?.DuelId ?? throw new ApiException(ErrorCode.InvalidArgument, "Duel id missing.");
+        await _ops.RunAsync(userId, ctx =>
+        {
+            var manager = new FriendsManager(ctx.Player.Balance, ctx.Player.Clock);
+            if (!manager.DismissDuel(ctx.Player.State.Friends, duelId))
+            {
+                throw new ApiException(ErrorCode.NotFound, "Duel not found.");
+            }
+            return Task.FromResult(true);
+        }, ct).ConfigureAwait(false);
+        return await GetFriendsAsync(userId, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>The duel match itself: friendly mode, fixed seed, the duel id carried in the match config.</summary>
+    private async Task<MatchRow> CreateDuelMatchAsync(OperationContext ctx, ulong seed, Guid opponent, string duelId, StartStageRequest? request, ReplayRow? ghost)
+    {
+        PlayerWorkspace ws = ctx.Player;
+        League league = ws.State.Pvp.HighestLeague;
+        List<LoadoutEntry> loadout = ws.Inventory.BuildLoadout(Mappers.ParseLoadout(request?.Loadout, ws.Balance), ws.Balance, league).ValueOrThrow();
+        ws.Achievements.IncrementStat(StatKey.FriendlyChallenges, 1);
+        var match = new MatchRow
+        {
+            Id = Mappers.NewId("duel"),
+            PlayerId = ws.Id,
+            Mode = GameMode.FriendlyChallenge,
+            Seed = seed,
+            Status = MatchStatus.Started,
+            StartedAt = ws.Now,
+            OpponentId = opponent,
+            GhostReplayId = ghost?.Id,
+            Config = new MatchConfigSnapshot
+            {
+                Loadout = loadout,
+                HighestLeague = league,
+                PlayerTrophies = ws.State.Pvp.Trophies,
+                OpponentTrophies = ghost?.Trophies ?? ws.State.Pvp.Trophies,
+                Ranked = false,
+                DuelId = duelId
+            }
+        };
+        ws.SnapshotPet(match.Config, GameMode.FriendlyChallenge);
+        await ctx.Tx.InsertMatchAsync(match).ConfigureAwait(false);
+        return match;
+    }
+
+    /// <summary>
+    /// Called after a duel run was validated: stores the score on both sides and settles the duel when both have
+    /// played. Runs in its own pair transaction, after the replay transaction has committed.
+    /// </summary>
+    public async Task SettleDuelAsync(Guid userId, string duelId, long score, long replayId, CancellationToken ct)
+    {
+        Guid opponent = await _ops.ReadAsync(userId, (ws, _) =>
+        {
+            FriendDuel duel = FriendsManager.Find(ws.State.Friends, duelId);
+            return Task.FromResult(duel == null ? Guid.Empty : ParsePlayer(duel.OpponentId));
+        }, ct).ConfigureAwait(false);
+        if (opponent == Guid.Empty)
+        {
+            return;
+        }
+
+        await _ops.RunPairAsync(userId, opponent, (me, them) =>
+        {
+            var manager = new FriendsManager(me.Player.Balance, me.Player.Clock);
+            DuelOutcome outcome = manager.RecordDuelRun(me.Player.State.Friends, them.Player.State.Friends, duelId, score, replayId, me.Player.NowMs);
+            if (outcome == DuelOutcome.Won)
+            {
+                me.Player.Wallet.Credit(Currency.Coins, me.Player.Balance.Economy.FriendlyDuelWinCoins, TransactionReason.PvpReward, duelId);
+            }
+            else if (outcome == DuelOutcome.Lost)
+            {
+                them.Player.Wallet.Credit(Currency.Coins, me.Player.Balance.Economy.FriendlyDuelWinCoins, TransactionReason.PvpReward, duelId);
+            }
+            return Task.FromResult(true);
+        }, ct).ConfigureAwait(false);
     }
 
     /// <summary>Offers one of your lives to a friend (once per day, and only one waiting gift per friend).</summary>

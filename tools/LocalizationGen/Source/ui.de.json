@@ -2060,6 +2060,21 @@
   "friends.giftTaken": "Du hast heute schon ein Leben erhalten.",
   "friends.giftTaken2": "Leben erhalten!",
   "friends.suggestions": "Spieler zum Einladen",
-  "friends.suggestionsHelp": "Aktive Spieler, die noch nicht deine Freunde sind."
+  "friends.suggestionsHelp": "Aktive Spieler, die noch nicht deine Freunde sind.",
+  "friends.duels": "Duelle",
+  "friends.duelInvite": "{0} fordert dich heraus!",
+  "friends.duelWith": "Duell mit {0}",
+  "friends.duelBeat": "Gleiches Feld, schlage {0} Punkte.",
+  "friends.duelWaiting": "{0} muss noch spielen. Dein Ergebnis: {1}.",
+  "friends.duelYourTurn": "Spiele deine Runde, um die Herausforderung zu senden.",
+  "friends.duelScores": "Du {0} · er {1}",
+  "friends.duelWon": "GEWONNEN",
+  "friends.duelLost": "VERLOREN",
+  "friends.duelDraw": "UNENTSCHIEDEN",
+  "friends.duelDeclined": "Duell abgelehnt.",
+  "friends.duelAccept": "Duell annehmen",
+  "friends.duelDecline": "Ablehnen",
+  "friends.duelPlay": "Meine Runde spielen",
+  "friends.duelStarted": "Spiele deine Runde: dein Freund bekommt danach die Herausforderung."
 }
 
