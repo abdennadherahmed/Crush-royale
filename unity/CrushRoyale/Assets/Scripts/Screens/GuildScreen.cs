@@ -649,7 +649,7 @@ namespace CrushRoyale.Game.Screens
             long hp = Math.Max(0, boss.MaxHp - boss.Damage);
 
             Image panel = UIFactory.Panel("Boss", list, Theme.Panel);
-            UIFactory.Height(panel, 940);
+            UIFactory.Height(panel, 1040);
             UiKit.FramePanel(panel);
             RectTransform scene = UIFactory.Stretch(UIFactory.Rect("Scene", panel.rectTransform), 26, 26, 26, 26);
             scene.gameObject.AddComponent<RectMask2D>();
@@ -657,7 +657,7 @@ namespace CrushRoyale.Game.Screens
             Widgets.Fade(scene, top: false, 0.35f, 0.9f);
 
             Image aura = UIFactory.Icon(scene, ProceduralSprites.Glow(128), boss.Defeated ? new Color(0.5f, 0.5f, 0.5f, 0.3f) : new Color(1f, 0.2f, 0.25f, 0.6f), 0);
-            UIFactory.Anchor(aura.rectTransform, 0.05f, 0.22f, 0.95f, 0.95f);
+            UIFactory.Anchor(aura.rectTransform, 0.05f, 0.18f, 0.95f, 0.8f);
             aura.raycastTarget = false;
             if (!boss.Defeated)
             {
@@ -666,10 +666,22 @@ namespace CrushRoyale.Game.Screens
             Sprite art = ArtLibrary.GuildBoss(boss.BossIndex);
             if (art != null)
             {
-                Image portrait = UIFactory.Icon(scene, art, boss.Defeated ? new Color(0.4f, 0.4f, 0.45f, 1f) : Color.white, 0);
-                portrait.preserveAspect = true;
-                portrait.rectTransform.pivot = new Vector2(0.5f, 0f);
-                UIFactory.Anchor(portrait.rectTransform, 0.12f, 0.26f, 0.88f, 0.88f);
+                // The art is far taller than the card is wide, so a plain anchored box letterboxed it and the boss
+                // looked like a photo pasted in the middle. The window takes the aspect of the art itself, and a
+                // fade at its foot dissolves the hard bottom edge into the scene.
+                RectTransform stage = UIFactory.Anchor(UIFactory.Rect("BossStage", scene), 0.04f, 0.2f, 0.96f, 0.75f);
+                RectTransform window = UIFactory.Rect("Portrait", stage);
+                window.anchorMin = new Vector2(0.5f, 0.5f);
+                window.anchorMax = new Vector2(0.5f, 0.5f);
+                window.pivot = new Vector2(0.5f, 0.5f);
+                window.anchoredPosition = Vector2.zero;
+                AspectRatioFitter fitter = window.gameObject.AddComponent<AspectRatioFitter>();
+                fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+                fitter.aspectRatio = art.rect.height > 0 ? art.rect.width / art.rect.height : 0.5f;
+
+                Image portrait = UIFactory.Icon(window, art, boss.Defeated ? new Color(0.4f, 0.4f, 0.45f, 1f) : Color.white, 0);
+                UIFactory.Stretch(portrait.rectTransform);
+                Widgets.Fade(window, top: false, 0.22f, 0.85f);
                 if (!boss.Defeated)
                 {
                     Breathe breathe = portrait.gameObject.AddComponent<Breathe>();
@@ -678,19 +690,19 @@ namespace CrushRoyale.Game.Screens
                 }
             }
 
-            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", scene), 0.04f, 0.87f, 0.96f, 1f);
+            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", scene), 0.04f, 0.885f, 0.96f, 1f);
             UiKit.Ribbon(ribbon);
             Text title = Outlined(ribbon, GuildBossName(Loc, boss.BossIndex), Theme.BodySize, Theme.Text, TextAnchor.MiddleCenter);
             UIFactory.Anchor(title.rectTransform, 0.18f, 0.34f, 0.82f, 0.92f);
             Text epithet = Outlined(scene, GuildBossTitle(Loc, boss.BossIndex), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter);
-            UIFactory.Anchor(epithet.rectTransform, 0.06f, 0.82f, 0.94f, 0.87f);
-            Chip(scene, "item_medal", Loc.T("guild.bossWeek", boss.BossIndex), 0.03f, 0.3f, 0.79f, 0.86f);
+            UIFactory.Anchor(epithet.rectTransform, 0.06f, 0.833f, 0.94f, 0.879f);
+            Chip(scene, "item_medal", Loc.T("guild.bossWeek", boss.BossIndex), 0.03f, 0.34f, 0.755f, 0.825f);
             TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(boss.ResetAtUnixMs) - DateTimeOffset.UtcNow;
             if (left < TimeSpan.Zero)
             {
                 left = TimeSpan.Zero;
             }
-            Chip(scene, "item_hourglass", Loc.T("guild.bossReset", left.Days, left.Hours), 0.55f, 0.97f, 0.79f, 0.86f);
+            Chip(scene, "item_hourglass", Loc.T("guild.bossReset", left.Days, left.Hours), 0.5f, 0.97f, 0.755f, 0.825f);
 
             if (boss.Defeated)
             {
@@ -702,7 +714,7 @@ namespace CrushRoyale.Game.Screens
 
             // HP bar.
             UiKit.Bar(scene, boss.MaxHp > 0 ? hp / (float)boss.MaxHp : 0f, Theme.Danger, out RectTransform bar);
-            UIFactory.Anchor(bar, 0.05f, 0.15f, 0.95f, 0.24f);
+            UIFactory.Anchor(bar, 0.05f, 0.125f, 0.95f, 0.19f);
             Text hpText = Outlined(bar, Loc.T("guild.bossHp", Loc.Number(hp), Loc.Number(boss.MaxHp)), Theme.SmallSize - 2, Theme.Text, TextAnchor.MiddleCenter);
             UIFactory.Stretch(hpText.rectTransform);
             Sprite heart = UiKit.Art("item_heart");
@@ -717,14 +729,14 @@ namespace CrushRoyale.Game.Screens
             if (boss.Defeated)
             {
                 Text won = Outlined(scene, Loc.T("guild.bossDefeated"), Theme.BodySize, Theme.Success, TextAnchor.MiddleCenter);
-                UIFactory.Anchor(won.rectTransform, 0.04f, 0.02f, 0.96f, 0.13f);
+                UIFactory.Anchor(won.rectTransform, 0.04f, 0.015f, 0.96f, 0.115f);
             }
             else
             {
                 Button attack = UIFactory.Button(scene, Loc.T("guild.attack", attacks), () => _ = AttackAsync(), attacks > 0 ? Theme.Danger : Theme.PanelLight, Theme.BodySize);
-                UIFactory.Anchor(attack.GetComponent<RectTransform>(), 0.15f, 0.02f, 0.85f, 0.135f);
+                UIFactory.Anchor(attack.GetComponent<RectTransform>(), 0.15f, 0.01f, 0.85f, 0.07f);
                 Text daily = Outlined(scene, Loc.T("guild.bossDaily"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleCenter);
-                UIFactory.Anchor(daily.rectTransform, 0.04f, 0.14f, 0.96f, 0.19f);
+                UIFactory.Anchor(daily.rectTransform, 0.04f, 0.075f, 0.96f, 0.12f);
                 attack.interactable = attacks > 0;
                 if (attacks > 0)
                 {
