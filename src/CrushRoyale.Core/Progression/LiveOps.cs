@@ -31,10 +31,10 @@ namespace CrushRoyale.Core.Progression
     /// <summary>4-week seasons, 50 tiers, free + premium tracks (GDD "Battle Pass").</summary>
     public static class BattlePass
     {
-        public static int SeasonIndex(DateTime utc, LiveOpsBalance balance) => TimeUtil.DayIndex(utc) / Math.Max(1, balance.BattlePassSeasonDays);
+        /// <summary>Authored schedule (SeasonCatalog), not days-since-epoch: index 0 is the beta season, then 1, 2, 3...</summary>
+        public static int SeasonIndex(DateTime utc, LiveOpsBalance balance) => SeasonCatalog.IndexAt(utc);
 
-        public static DateTime SeasonEndUtc(int seasonIndex, LiveOpsBalance balance) =>
-            new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddDays((seasonIndex + 1L) * balance.BattlePassSeasonDays);
+        public static DateTime SeasonEndUtc(int seasonIndex, LiveOpsBalance balance) => SeasonCatalog.EndUtc(seasonIndex);
 
         public static int TierForXp(long xp, LiveOpsBalance balance) =>
             (int)Math.Min(balance.BattlePassTiers, Math.Max(0, xp) / Math.Max(1, balance.BattlePassXpPerTier));
@@ -128,6 +128,8 @@ namespace CrushRoyale.Core.Progression
             if (tier == 50)
             {
                 premium.Cosmetics.Add(CosmeticCatalog.BattlePassPrefix + season + ".board");
+                // Capstone of the paid track: the outfit that only this season ever grants.
+                premium.Cosmetics.Add(SeasonCatalog.ByIndex(season).ExclusiveCosmeticId);
             }
             return new BattlePassTierReward { Tier = tier, Free = free, Premium = premium };
         }
