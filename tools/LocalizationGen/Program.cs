@@ -32,7 +32,7 @@ namespace CrushRoyale.Tools.LocalizationGen
         private static readonly string[] BattlePassParts = { "frame", "board", "pieces" };
         private const int GeneratedSeasons = 12;
 
-        private static readonly Regex CodeKey = new Regex("\"((?:chapter|hud|pause|continue|boss|splash|privacy|hero|menu|login|settings|map|stage|result|pvp|lives|shop|guild|friends|leaderboard|achievements|battlepass|quests|common|error|choice|notif|currency|pets|pet|chest|challenge|vip|get|reveal|profile|kingdom|streak|wheel|update|mechanic)\\.[A-Za-z0-9_.]*[A-Za-z0-9_])\"");
+        private static readonly Regex CodeKey = new Regex("\"((?:chapter|hud|pause|continue|boss|splash|privacy|hero|menu|login|settings|map|stage|result|pvp|lives|shop|guild|friends|leaderboard|achievements|battlepass|quests|common|error|choice|notif|currency|pets|pet|chest|challenge|vip|get|reveal|profile|kingdom|streak|wheel|update|mechanic|bag)\\.[A-Za-z0-9_.]*[A-Za-z0-9_])\"");
         private static readonly Regex Placeholder = new Regex("\\{(\\d+)(?:[,:][^}]*)?\\}");
         private static readonly Regex DialogueLine = new Regex("^dlg\\..+\\.\\d+$");
 

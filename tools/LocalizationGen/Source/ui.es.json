@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Puntuación doble durante 4 movimientos.",
   "powerup.CascadeInfinity.descMoves": "Las cascadas mantienen su multiplicador durante 4 movimientos.",
   "result.stageWon": "Nivel {0} superado - {1}",
-  "result.stageLost": "Nivel {0} fallido - {1}"
+  "result.stageLost": "Nivel {0} fallido - {1}",
+  "wheel.oddsButton": "Ver las probabilidades",
+  "menu.bag": "Bolsa",
+  "bag.title": "Mi bolsa",
+  "bag.wallet": "Monedero",
+  "bag.boosts": "Potenciadores",
+  "bag.fragments": "Fragmentos de mascotas",
+  "bag.fragmentsHelp": "Cambia {0} fragmentos de una mascota por 1 de otra.",
+  "bag.fragmentCount": "{0} fragmentos (siguiente: {1})",
+  "bag.noFragments": "Aún no tienes fragmentos. Las invocaciones y los cofres los dan.",
+  "bag.goSummon": "Ir a invocaciones",
+  "bag.continues": "Continuaciones gratis",
+  "bag.livesFull": "Vidas al máximo",
+  "bag.livesIn": "Próxima vida en {0} min {1} s",
+  "bag.cosmetics": "Cosméticos",
+  "bag.cosmeticsOwned": "{0} en tu poder",
+  "bag.openCollection": "Ver colección"
 }

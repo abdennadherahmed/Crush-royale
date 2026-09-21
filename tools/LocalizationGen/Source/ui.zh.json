@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "接下来 4 步得分翻倍。",
   "powerup.CascadeInfinity.descMoves": "接下来 4 步连锁倍率不衰减。",
   "result.stageWon": "第 {0} 关通过 - {1}",
-  "result.stageLost": "第 {0} 关失败 - {1}"
+  "result.stageLost": "第 {0} 关失败 - {1}",
+  "wheel.oddsButton": "查看概率",
+  "menu.bag": "背包",
+  "bag.title": "我的背包",
+  "bag.wallet": "钱包",
+  "bag.boosts": "助力道具",
+  "bag.fragments": "宠物碎片",
+  "bag.fragmentsHelp": "{0} 个宠物碎片可兑换另一只宠物的 1 个碎片。",
+  "bag.fragmentCount": "{0} 个碎片（下一阶段：{1}）",
+  "bag.noFragments": "还没有碎片。召唤和宝箱会掉落。",
+  "bag.goSummon": "前往召唤",
+  "bag.continues": "免费继续次数",
+  "bag.livesFull": "体力已满",
+  "bag.livesIn": "下一条生命还需 {0} 分 {1} 秒",
+  "bag.cosmetics": "装扮",
+  "bag.cosmeticsOwned": "已拥有 {0} 件",
+  "bag.openCollection": "查看收藏"
 }

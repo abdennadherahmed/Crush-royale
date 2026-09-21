@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Punteggio doppio per 4 mosse.",
   "powerup.CascadeInfinity.descMoves": "Le cascate mantengono il moltiplicatore per 4 mosse.",
   "result.stageWon": "Livello {0} completato - {1}",
-  "result.stageLost": "Livello {0} fallito - {1}"
+  "result.stageLost": "Livello {0} fallito - {1}",
+  "wheel.oddsButton": "Vedi le probabilità",
+  "menu.bag": "Zaino",
+  "bag.title": "Il mio zaino",
+  "bag.wallet": "Portamonete",
+  "bag.boosts": "Potenziamenti",
+  "bag.fragments": "Frammenti dei famigli",
+  "bag.fragmentsHelp": "Scambia {0} frammenti di un famiglio con 1 di un altro.",
+  "bag.fragmentCount": "{0} frammenti (prossima soglia: {1})",
+  "bag.noFragments": "Nessun frammento per ora. Evocazioni e forzieri ne danno.",
+  "bag.goSummon": "Vai alle evocazioni",
+  "bag.continues": "Continua gratis",
+  "bag.livesFull": "Vite al massimo",
+  "bag.livesIn": "Prossima vita tra {0} min {1} s",
+  "bag.cosmetics": "Cosmetici",
+  "bag.cosmeticsOwned": "{0} posseduti",
+  "bag.openCollection": "Apri collezione"
 }

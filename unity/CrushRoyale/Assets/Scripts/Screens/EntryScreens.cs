@@ -453,6 +453,7 @@ namespace CrushRoyale.Game.Screens
             SideButton(safe, "friends", "menu.friends", typeof(FriendsScreen), "Friends", 0.815f, 0.815f, 0);
             SideButton(safe, "map", "menu.map", typeof(WorldMapScreen), "Story", 0.815f, 0.815f - SideStep, 0);
             SideButton(safe, "pets", "menu.pets", typeof(PetsScreen), null, 0.815f, 0.815f - 2 * SideStep, 0);
+            SideButton(safe, "bag", "menu.bag", typeof(BagScreen), null, 0.815f, 0.815f - 3 * SideStep, 0);
             WheelButton(safe, profile);
 
             // Bottom: shop (left), play buttons (center), guild (right).

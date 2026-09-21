@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Score doublé pendant 4 coups.",
   "powerup.CascadeInfinity.descMoves": "Les cascades gardent leur multiplicateur pendant 4 coups.",
   "result.stageWon": "Niveau {0} terminé - {1}",
-  "result.stageLost": "Niveau {0} échoué - {1}"
+  "result.stageLost": "Niveau {0} échoué - {1}",
+  "wheel.oddsButton": "Voir les chances",
+  "menu.bag": "Sac",
+  "bag.title": "Mon sac",
+  "bag.wallet": "Porte-monnaie",
+  "bag.boosts": "Boosters",
+  "bag.fragments": "Fragments de familiers",
+  "bag.fragmentsHelp": "Échange {0} fragments d'un familier contre 1 fragment d'un autre.",
+  "bag.fragmentCount": "{0} fragments (palier : {1})",
+  "bag.noFragments": "Aucun fragment pour l'instant. Les invocations et les coffres en donnent.",
+  "bag.goSummon": "Aller aux invocations",
+  "bag.continues": "Reprises gratuites",
+  "bag.livesFull": "Vies au maximum",
+  "bag.livesIn": "Prochaine vie dans {0} min {1} s",
+  "bag.cosmetics": "Cosmétiques",
+  "bag.cosmeticsOwned": "{0} en ta possession",
+  "bag.openCollection": "Voir la collection"
 }

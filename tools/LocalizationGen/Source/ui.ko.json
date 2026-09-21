@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "4회 이동 동안 점수 2배.",
   "powerup.CascadeInfinity.descMoves": "4회 이동 동안 연쇄 배율 유지.",
   "result.stageWon": "스테이지 {0} 클리어 - {1}",
-  "result.stageLost": "스테이지 {0} 실패 - {1}"
+  "result.stageLost": "스테이지 {0} 실패 - {1}",
+  "wheel.oddsButton": "확률 보기",
+  "menu.bag": "가방",
+  "bag.title": "내 가방",
+  "bag.wallet": "지갑",
+  "bag.boosts": "부스터",
+  "bag.fragments": "펫 조각",
+  "bag.fragmentsHelp": "펫 조각 {0}개를 다른 펫 조각 1개로 교환.",
+  "bag.fragmentCount": "조각 {0}개 (다음 단계: {1})",
+  "bag.noFragments": "아직 조각이 없어요. 소환과 상자에서 얻을 수 있어요.",
+  "bag.goSummon": "소환으로 가기",
+  "bag.continues": "무료 이어하기",
+  "bag.livesFull": "하트 가득",
+  "bag.livesIn": "다음 하트까지 {0}분 {1}초",
+  "bag.cosmetics": "코스메틱",
+  "bag.cosmeticsOwned": "보유 {0}개",
+  "bag.openCollection": "컬렉션 열기"
 }

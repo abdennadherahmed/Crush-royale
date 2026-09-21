@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Pontuação dobrada por 4 jogadas.",
   "powerup.CascadeInfinity.descMoves": "As cascatas mantêm o multiplicador por 4 jogadas.",
   "result.stageWon": "Fase {0} concluída - {1}",
-  "result.stageLost": "Fase {0} perdida - {1}"
+  "result.stageLost": "Fase {0} perdida - {1}",
+  "wheel.oddsButton": "Ver as chances",
+  "menu.bag": "Mochila",
+  "bag.title": "Minha mochila",
+  "bag.wallet": "Carteira",
+  "bag.boosts": "Impulsos",
+  "bag.fragments": "Fragmentos de mascotes",
+  "bag.fragmentsHelp": "Troque {0} fragmentos de um mascote por 1 de outro.",
+  "bag.fragmentCount": "{0} fragmentos (próximo: {1})",
+  "bag.noFragments": "Ainda sem fragmentos. Invocações e baús dão.",
+  "bag.goSummon": "Ir às invocações",
+  "bag.continues": "Continuações grátis",
+  "bag.livesFull": "Vidas no máximo",
+  "bag.livesIn": "Próxima vida em {0} min {1} s",
+  "bag.cosmetics": "Cosméticos",
+  "bag.cosmeticsOwned": "{0} na sua coleção",
+  "bag.openCollection": "Ver coleção"
 }

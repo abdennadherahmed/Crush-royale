@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "مضاعفة النقاط لمدة 4 حركات.",
   "powerup.CascadeInfinity.descMoves": "تحتفظ السلاسل بمضاعفها لمدة 4 حركات.",
   "result.stageWon": "اكتملت المرحلة {0} - {1}",
-  "result.stageLost": "فشلت المرحلة {0} - {1}"
+  "result.stageLost": "فشلت المرحلة {0} - {1}",
+  "wheel.oddsButton": "عرض الاحتمالات",
+  "menu.bag": "الحقيبة",
+  "bag.title": "حقيبتي",
+  "bag.wallet": "المحفظة",
+  "bag.boosts": "المعززات",
+  "bag.fragments": "شظايا الرفاق",
+  "bag.fragmentsHelp": "بدّل {0} شظايا من رفيق مقابل شظية من آخر.",
+  "bag.fragmentCount": "{0} شظية (المرحلة: {1})",
+  "bag.noFragments": "لا توجد شظايا بعد. الاستدعاءات والصناديق تمنحها.",
+  "bag.goSummon": "اذهب إلى الاستدعاء",
+  "bag.continues": "استئنافات مجانية",
+  "bag.livesFull": "الأرواح ممتلئة",
+  "bag.livesIn": "الحياة التالية خلال {0} د {1} ث",
+  "bag.cosmetics": "التجميليات",
+  "bag.cosmeticsOwned": "{0} في حوزتك",
+  "bag.openCollection": "افتح المجموعة"
 }

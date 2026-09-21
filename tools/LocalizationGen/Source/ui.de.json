@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Doppelte Punkte für 4 Züge.",
   "powerup.CascadeInfinity.descMoves": "Kaskaden behalten ihren Multiplikator 4 Züge lang.",
   "result.stageWon": "Level {0} geschafft - {1}",
-  "result.stageLost": "Level {0} gescheitert - {1}"
+  "result.stageLost": "Level {0} gescheitert - {1}",
+  "wheel.oddsButton": "Chancen ansehen",
+  "menu.bag": "Beutel",
+  "bag.title": "Mein Beutel",
+  "bag.wallet": "Geldbeutel",
+  "bag.boosts": "Booster",
+  "bag.fragments": "Begleiter-Fragmente",
+  "bag.fragmentsHelp": "Tausche {0} Fragmente eines Begleiters gegen 1 eines anderen.",
+  "bag.fragmentCount": "{0} Fragmente (nächste Stufe: {1})",
+  "bag.noFragments": "Noch keine Fragmente. Beschwörungen und Truhen geben welche.",
+  "bag.goSummon": "Zu den Beschwörungen",
+  "bag.continues": "Gratis-Fortsetzungen",
+  "bag.livesFull": "Leben voll",
+  "bag.livesIn": "Nächstes Leben in {0} Min {1} s",
+  "bag.cosmetics": "Kosmetik",
+  "bag.cosmeticsOwned": "{0} im Besitz",
+  "bag.openCollection": "Sammlung öffnen"
 }

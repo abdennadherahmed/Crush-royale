@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Двойной счёт на 4 хода.",
   "powerup.CascadeInfinity.descMoves": "Каскады сохраняют множитель 4 хода.",
   "result.stageWon": "Уровень {0} пройден - {1}",
-  "result.stageLost": "Уровень {0} не пройден - {1}"
+  "result.stageLost": "Уровень {0} не пройден - {1}",
+  "wheel.oddsButton": "Посмотреть шансы",
+  "menu.bag": "Сумка",
+  "bag.title": "Моя сумка",
+  "bag.wallet": "Кошелёк",
+  "bag.boosts": "Бустеры",
+  "bag.fragments": "Осколки питомцев",
+  "bag.fragmentsHelp": "Обменяйте {0} осколка питомца на 1 осколок другого.",
+  "bag.fragmentCount": "{0} осколков (следующий порог: {1})",
+  "bag.noFragments": "Осколков пока нет. Их дают призывы и сундуки.",
+  "bag.goSummon": "К призывам",
+  "bag.continues": "Бесплатные продолжения",
+  "bag.livesFull": "Жизни заполнены",
+  "bag.livesIn": "Следующая жизнь через {0} мин {1} с",
+  "bag.cosmetics": "Косметика",
+  "bag.cosmeticsOwned": "{0} в коллекции",
+  "bag.openCollection": "Открыть коллекцию"
 }

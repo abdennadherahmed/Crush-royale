@@ -92,26 +92,24 @@ namespace CrushRoyale.Game.UI
                 Widgets.TitleOutline(amount);
             }
 
-            // Pointer at the top.
-            Image pointer = UIFactory.Icon(stage, ProceduralSprites.Gem(ProceduralSprites.GemShape.Triangle), Theme.Gold, 0);
+            // Pointer biting into the top of the wheel. The sprite is rendered already pointing down (tools/art/
+            // blender_pointer.py): the old procedural triangle needed a 180 degree flip and ended up upside down.
+            Sprite pointerArt = UiKit.Art("wheel_pointer");
+            Image pointer = UIFactory.Icon(stage, pointerArt ?? ProceduralSprites.Gem(ProceduralSprites.GemShape.Triangle), Color.white, 0);
             pointer.raycastTarget = false;
+            pointer.preserveAspect = true;
             pointer.rectTransform.anchorMin = pointer.rectTransform.anchorMax = new Vector2(0.5f, 1f);
-            pointer.rectTransform.sizeDelta = new Vector2(110, 110);
-            pointer.rectTransform.anchoredPosition = new Vector2(0, 10);
-            pointer.rectTransform.localRotation = Quaternion.Euler(0, 0, 180f);
-            Outline outline = pointer.gameObject.AddComponent<Outline>();
-            outline.effectColor = new Color(0.3f, 0.15f, 0f, 1f);
-            outline.effectDistance = new Vector2(4, -4);
-
-            // Odds (Google Play: random rewards show their probabilities).
-            int total = DailyWheel.TotalWeight;
-            var odds = new List<string>();
-            foreach (WheelSlice slice in slices)
+            pointer.rectTransform.sizeDelta = new Vector2(120, 160);
+            pointer.rectTransform.anchoredPosition = new Vector2(0, -40);
+            if (pointerArt == null)
             {
-                odds.Add(SliceLabel(loc, slice) + " " + Mathf.RoundToInt(slice.Weight * 100f / total) + "%");
+                pointer.color = Theme.Gold;
+                pointer.rectTransform.localRotation = Quaternion.Euler(0, 0, 180f);
             }
-            Text oddsText = UIFactory.Label(box, loc.T("wheel.odds") + "  " + string.Join(" · ", odds), Theme.SmallSize - 10, Theme.TextMuted, TextAnchor.MiddleCenter);
-            UIFactory.Anchor(oddsText.rectTransform, 0.05f, 0.22f, 0.95f, 0.31f);
+
+            // The odds used to sit on top of the wheel and ruined it: they now live behind a small "chances" button.
+            Button oddsButton = UIFactory.Button(box, loc.T("wheel.oddsButton"), () => ShowOdds(loc), Theme.PanelLight, Theme.SmallSize, Theme.TextMuted);
+            UIFactory.Anchor(oddsButton.GetComponent<RectTransform>(), 0.3f, 0.235f, 0.7f, 0.305f);
 
             bool available = game.Backend.Profile?.WheelAvailable ?? false;
             _spin = UIFactory.Button(box, loc.T(available ? "wheel.spin" : "wheel.tomorrow"), () => _ = SpinAsync(), available ? Theme.Success : Theme.PanelLight, Theme.HeaderSize);
@@ -123,6 +121,18 @@ namespace CrushRoyale.Game.UI
             }
             Button close = UIFactory.Button(box, loc.T("common.close"), Close, Theme.PanelLight, Theme.BodySize);
             UIFactory.Anchor(close.GetComponent<RectTransform>(), 0.3f, 0.015f, 0.7f, 0.085f);
+        }
+
+        /// <summary>Chances of every slice, listed in a plain dialog (Google Play requires showing them somewhere).</summary>
+        private static void ShowOdds(Localization loc)
+        {
+            int total = DailyWheel.TotalWeight;
+            var lines = new List<string>();
+            foreach (WheelSlice slice in DailyWheel.Slices)
+            {
+                lines.Add(SliceLabel(loc, slice) + "   " + (slice.Weight * 100f / total).ToString("0.#") + " %");
+            }
+            _ = GameRoot.Instance.UI.Alert(loc.T("wheel.odds"), string.Join(System.Environment.NewLine, lines));
         }
 
         private static string SliceLabel(Localization loc, WheelSlice slice)

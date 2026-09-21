@@ -20,6 +20,11 @@ namespace CrushRoyale.Game.Screens
     {
         private static readonly string[] TabKeys = { "shop.tab.powerups", "shop.tab.orbes", "shop.tab.coins", "shop.tab.cosmetics" };
 
+        /// <summary>Tab indices, so other screens can open the shop where the player expects it.</summary>
+        public const int OrbesTab = 1;
+
+        public const int CoinsTab = 2;
+
         private int _tab;
         private ShopResponse _shop;
         private RectTransform _list;

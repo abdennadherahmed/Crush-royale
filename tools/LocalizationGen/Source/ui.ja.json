@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "4手の間スコア2倍。",
   "powerup.CascadeInfinity.descMoves": "4手の間、連鎖倍率が下がらない。",
   "result.stageWon": "ステージ{0}クリア - {1}",
-  "result.stageLost": "ステージ{0}失敗 - {1}"
+  "result.stageLost": "ステージ{0}失敗 - {1}",
+  "wheel.oddsButton": "確率を見る",
+  "menu.bag": "バッグ",
+  "bag.title": "マイバッグ",
+  "bag.wallet": "財布",
+  "bag.boosts": "ブースト",
+  "bag.fragments": "ペットのかけら",
+  "bag.fragmentsHelp": "ペットのかけら{0}個を別のペットのかけら1個と交換。",
+  "bag.fragmentCount": "かけら{0}個（次の目安: {1}）",
+  "bag.noFragments": "かけらはまだありません。召喚や宝箱で手に入ります。",
+  "bag.goSummon": "召喚へ",
+  "bag.continues": "無料コンティニュー",
+  "bag.livesFull": "ライフ満タン",
+  "bag.livesIn": "次のライフまで{0}分{1}秒",
+  "bag.cosmetics": "コスメ",
+  "bag.cosmeticsOwned": "所持 {0} 点",
+  "bag.openCollection": "コレクションを見る"
 }

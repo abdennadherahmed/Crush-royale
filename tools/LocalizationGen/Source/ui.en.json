@@ -968,5 +968,21 @@
   "powerup.Multiplier2x.descMoves": "Double score for the next 4 moves.",
   "powerup.CascadeInfinity.descMoves": "Cascades keep their multiplier for 4 moves.",
   "result.stageWon": "Stage {0} cleared - {1}",
-  "result.stageLost": "Stage {0} failed - {1}"
+  "result.stageLost": "Stage {0} failed - {1}",
+  "wheel.oddsButton": "See the chances",
+  "menu.bag": "Bag",
+  "bag.title": "My bag",
+  "bag.wallet": "Wallet",
+  "bag.boosts": "Boosts",
+  "bag.fragments": "Pet fragments",
+  "bag.fragmentsHelp": "Trade {0} fragments of a pet for 1 fragment of another one.",
+  "bag.fragmentCount": "{0} fragments (next step: {1})",
+  "bag.noFragments": "No pet fragments yet. Summons and chests drop them.",
+  "bag.goSummon": "Go to summons",
+  "bag.continues": "Free continues",
+  "bag.livesFull": "Lives full",
+  "bag.livesIn": "Next life in {0} min {1} s",
+  "bag.cosmetics": "Cosmetics",
+  "bag.cosmeticsOwned": "{0} owned",
+  "bag.openCollection": "Open collection"
 }
