@@ -13,12 +13,18 @@ using UnityEngine.UI;
 namespace CrushRoyale.EditorTools
 {
     /// <summary>
-    /// Renders every screen of the game to a PNG without opening the project, so a broken screen is visible in CI.
-    /// Runs in the editor (batchmode WITHOUT -nographics, a graphics device is required): the UI is built from code,
-    /// so the screens only need the service hub plus a canvas pointed at a render texture.
+    /// Renders every screen of the game to a PNG without opening the project, so a broken screen is visible in CI,
+    /// and audits every label against the box it was given. The pictures need a graphics device (batchmode WITHOUT
+    /// -nographics); the audit does not, so a runner with no GPU still reports the overflows and the overlaps.
     /// </summary>
     public static class ScreenshotTool
     {
+        /// <summary>Below this a caption is unreadable on a phone at arm length.</summary>
+        private const int MinReadableFontSize = 18;
+
+        /// <summary>Labels may share a few pixels; a third of the smaller one covered is a bug.</summary>
+        private const float OverlapTolerance = 0.33f;
+
         private const int Width = 1080;
         private const int Height = 1920;
 
@@ -28,20 +34,26 @@ namespace CrushRoyale.EditorTools
             string output = Path.GetFullPath(GetArgument("-screenshotOutput") ?? "screenshots");
             Directory.CreateDirectory(output);
 
-            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
+            // A GitHub runner has no GPU. When the device is missing the PNGs are impossible, but the layout audit
+            // below (text that overflows its box, texts that sit on top of each other) still works and is the part
+            // that actually finds the bugs, so the job degrades instead of failing with nothing to show.
+            bool canRender = SystemInfo.graphicsDeviceType != GraphicsDeviceType.Null;
+            if (!canRender)
             {
-                // -nographics gives a null device: nothing can be rendered, and every PNG would be empty.
-                Debug.LogError("ScreenshotTool: no graphics device. Unity must run WITHOUT -nographics.");
-                EditorApplication.Exit(1);
-                return;
+                Debug.LogWarning("ScreenshotTool: no graphics device, writing the layout audit only.");
             }
 
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             GameRoot game = OfflineHarness.BootGame();
-            Camera camera = CreateCamera();
-            var target = new RenderTexture(Width, Height, 24, RenderTextureFormat.ARGB32) { antiAliasing = 1 };
-            camera.targetTexture = target;
+            Camera camera = canRender ? CreateCamera() : null;
+            RenderTexture target = null;
+            if (canRender)
+            {
+                target = new RenderTexture(Width, Height, 24, RenderTextureFormat.ARGB32) { antiAliasing = 1 };
+                camera.targetTexture = target;
+            }
             PrepareCanvas(game.UI.Canvas, camera);
+            var audit = new List<string>();
 
             var written = new List<string>();
             int failed = 0;
@@ -52,7 +64,7 @@ namespace CrushRoyale.EditorTools
                 bool uniform = false;
                 try
                 {
-                    error = Capture(game, camera, target, test, output, out uniform);
+                    error = Capture(game, camera, target, test, output, audit, out uniform);
                 }
                 catch (Exception ex)
                 {
@@ -74,14 +86,19 @@ namespace CrushRoyale.EditorTools
                 }
             }
 
-            camera.targetTexture = null;
-            RenderTexture.active = null;
-            target.Release();
+            if (canRender)
+            {
+                camera.targetTexture = null;
+                RenderTexture.active = null;
+                target.Release();
+            }
+            WriteLayoutReport(output, audit);
+            Debug.Log("ScreenshotTool: layout audit found " + audit.Count + " issue(s).");
             WriteIndex(output, written);
             Debug.Log("ScreenshotTool: " + written.Count + " screenshot(s) in " + output + ", " + failed + " screen(s) failed, " + blank + " blank.");
 
             // A screen that throws is exactly what this job is for, so it must fail the build; so must a dead renderer.
-            if (failed > 0 || written.Count == 0 || blank == written.Count)
+            if (failed > 0 || written.Count == 0 || (canRender && blank == written.Count))
             {
                 EditorApplication.Exit(1);
             }
@@ -107,22 +124,35 @@ namespace CrushRoyale.EditorTools
         /// </summary>
         private static void PrepareCanvas(Canvas canvas, Camera camera)
         {
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = camera;
-            canvas.planeDistance = 10f;
             CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
             {
                 scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
                 scaler.scaleFactor = 1f;
             }
+            if (camera != null)
+            {
+                canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                canvas.worldCamera = camera;
+                canvas.planeDistance = 10f;
+                return;
+            }
+
+            // No camera: an overlay canvas would be sized by a batchmode "screen" of whatever resolution, and every
+            // measurement would be taken on the wrong aspect. A world-space canvas takes the size it is given.
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = null;
+            var rect = (RectTransform)canvas.transform;
+            rect.sizeDelta = new Vector2(Width, Height);
+            rect.localScale = Vector3.one;
+            rect.position = Vector3.zero;
         }
 
         /// <summary>
         /// Builds one screen, renders it and always writes the PNG, even when the build threw: a picture of the
         /// broken screen is the whole point of this job. Returns the build error, or null.
         /// </summary>
-        private static Exception Capture(GameRoot game, Camera camera, RenderTexture target, ScreenCase test, string output, out bool uniform)
+        private static Exception Capture(GameRoot game, Camera camera, RenderTexture target, ScreenCase test, string output, List<string> audit, out bool uniform)
         {
             OfflineHarness.SetProfile(game, test.WithProfile);
             Canvas canvas = game.UI.Canvas;
@@ -148,10 +178,14 @@ namespace CrushRoyale.EditorTools
                 // Twice: layout groups and content-size fitters settle on the second pass, and the first render is
                 // what makes the dynamic font build the glyphs the second one actually draws.
                 Canvas.ForceUpdateCanvases();
-                camera.Render();
-                Canvas.ForceUpdateCanvases();
-                camera.Render();
-                uniform = WritePng(target, Path.Combine(output, test.Name + ".png"));
+                if (camera != null)
+                {
+                    camera.Render();
+                    Canvas.ForceUpdateCanvases();
+                    camera.Render();
+                }
+                AuditLayout(test.Name, host, audit);
+                uniform = camera != null && WritePng(target, Path.Combine(output, test.Name + ".png"));
                 return error;
             }
             finally
@@ -221,6 +255,142 @@ namespace CrushRoyale.EditorTools
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// The part of this job that finds bugs without anyone looking: every label is measured against the box it
+        /// was given. A chip whose text wraps to two lines, an epithet sitting under a chip, a caption too small
+        /// to read on a phone: all of those shipped before, because nobody could see the screens.
+        /// </summary>
+        private static void AuditLayout(string screen, RectTransform host, List<string> audit)
+        {
+            Text[] labels = host.GetComponentsInChildren<Text>(true);
+            var boxes = new List<KeyValuePair<Text, Rect>>();
+            foreach (Text label in labels)
+            {
+                if (label == null || !label.gameObject.activeInHierarchy || string.IsNullOrEmpty(label.text))
+                {
+                    continue;
+                }
+                RectTransform rect = label.rectTransform;
+                float width = rect.rect.width;
+                float height = rect.rect.height;
+                if (width <= 1f || height <= 1f)
+                {
+                    audit.Add(screen + " | zero-sized label | " + Shorten(label.text));
+                    continue;
+                }
+
+                float preferredWidth = 0f;
+                float preferredHeight = 0f;
+                try
+                {
+                    preferredWidth = label.preferredWidth;
+                    preferredHeight = label.preferredHeight;
+                }
+                catch (Exception)
+                {
+                    // Font metrics can be unavailable headless; the geometry checks below still run.
+                }
+
+                bool wraps = label.horizontalOverflow == HorizontalWrapMode.Wrap;
+                if (!label.resizeTextForBestFit)
+                {
+                    if (!wraps && preferredWidth > width + 2f)
+                    {
+                        audit.Add(screen + " | text wider than its box (" + Mathf.RoundToInt(preferredWidth) + " > "
+                            + Mathf.RoundToInt(width) + ") | " + Shorten(label.text));
+                    }
+                    else if (wraps && preferredHeight > height + 2f)
+                    {
+                        audit.Add(screen + " | wrapped text taller than its box (" + Mathf.RoundToInt(preferredHeight)
+                            + " > " + Mathf.RoundToInt(height) + ") | " + Shorten(label.text));
+                    }
+                }
+
+                int smallest = label.resizeTextForBestFit ? label.resizeTextMinSize : label.fontSize;
+                if (smallest > 0 && smallest < MinReadableFontSize)
+                {
+                    audit.Add(screen + " | font size " + smallest + " below " + MinReadableFontSize + " | " + Shorten(label.text));
+                }
+                boxes.Add(new KeyValuePair<Text, Rect>(label, WorldRect(rect)));
+            }
+
+            for (int i = 0; i < boxes.Count; i++)
+            {
+                for (int j = i + 1; j < boxes.Count; j++)
+                {
+                    Text a = boxes[i].Key;
+                    Text b = boxes[j].Key;
+                    if (a.transform.IsChildOf(b.transform) || b.transform.IsChildOf(a.transform))
+                    {
+                        continue;
+                    }
+                    float overlap = Intersection(boxes[i].Value, boxes[j].Value);
+                    if (overlap <= 0f)
+                    {
+                        continue;
+                    }
+                    float smaller = Mathf.Min(Area(boxes[i].Value), Area(boxes[j].Value));
+                    if (smaller > 0f && overlap / smaller > OverlapTolerance)
+                    {
+                        audit.Add(screen + " | two labels overlap (" + Mathf.RoundToInt(overlap / smaller * 100f)
+                            + "%) | " + Shorten(a.text) + " + " + Shorten(b.text));
+                    }
+                }
+            }
+        }
+
+        private static Rect WorldRect(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            float minX = Mathf.Min(corners[0].x, corners[2].x);
+            float maxX = Mathf.Max(corners[0].x, corners[2].x);
+            float minY = Mathf.Min(corners[0].y, corners[2].y);
+            float maxY = Mathf.Max(corners[0].y, corners[2].y);
+            return new Rect(minX, minY, maxX - minX, maxY - minY);
+        }
+
+        private static float Area(Rect rect)
+        {
+            return Mathf.Max(0f, rect.width) * Mathf.Max(0f, rect.height);
+        }
+
+        private static float Intersection(Rect a, Rect b)
+        {
+            float width = Mathf.Min(a.xMax, b.xMax) - Mathf.Max(a.xMin, b.xMin);
+            float height = Mathf.Min(a.yMax, b.yMax) - Mathf.Max(a.yMin, b.yMin);
+            return width <= 0f || height <= 0f ? 0f : width * height;
+        }
+
+        private static string Shorten(string text)
+        {
+            string flat = text.Replace("\r", " ").Replace("\n", " ").Trim();
+            return flat.Length <= 42 ? flat : flat.Substring(0, 40) + "...";
+        }
+
+        /// <summary>The audit as a file anyone can read.</summary>
+        private static void WriteLayoutReport(string output, List<string> audit)
+        {
+            var report = new StringBuilder();
+            report.AppendLine("# Layout audit");
+            report.AppendLine();
+            if (audit.Count == 0)
+            {
+                report.AppendLine("No label overflows its box, sits on another label, or is too small to read.");
+            }
+            else
+            {
+                report.AppendLine(audit.Count + " issue(s). Columns: screen | problem | text.");
+                report.AppendLine();
+                audit.Sort(StringComparer.Ordinal);
+                foreach (string line in audit)
+                {
+                    report.AppendLine("- " + line);
+                }
+            }
+            File.WriteAllText(Path.Combine(output, "layout-audit.md"), report.ToString());
         }
 
         /// <summary>Contact sheet so the artifact can be read by opening one file.</summary>

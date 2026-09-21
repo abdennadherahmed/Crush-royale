@@ -234,10 +234,11 @@ public sealed class SocialService
                 return Task.FromResult(true);
             }, ct).ConfigureAwait(false);
         }
-        catch (ApiException)
+        catch (Exception)
         {
-            // The opponent deleted their account, was banned, or dismissed the duel first. Bookkeeping for a friendly
-            // duel must never cost the player the run they just finished: the match result is submitted either way.
+            // Whatever went wrong on the other side of a friendly duel - a deleted or banned account, a row that
+            // could not be locked - it must never cost the player the run they just finished. The duel stays open
+            // and settles on the next run; the match result is submitted either way.
         }
     }
 

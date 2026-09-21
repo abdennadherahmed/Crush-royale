@@ -115,15 +115,15 @@ jobs:
       - name: Capture screenshots of every screen
         id: capture
         continue-on-error: true
-        # No -nographics: batchmode can only render with a graphics device, and the screens are rendered through a
-        # camera into a 1080x1920 render texture.
+        # unity-action adds -nographics on its own, which leaves Unity without a graphics device and makes every
+        # capture impossible (build 32 failed exactly there). -force-graphics is the documented way to cancel it.
         uses: RageAgainstThePixel/unity-action@v3
         with:
           project-path: ${{ env.PROJECT_PATH }}
           build-target: Android
           log-name: screenshots
           args: >-
-            -quit -batchmode
+            -quit -batchmode -force-graphics
             -executeMethod CrushRoyale.EditorTools.ScreenshotTool.CaptureAll
             -screenshotOutput ${{ github.workspace }}/screenshots
 
