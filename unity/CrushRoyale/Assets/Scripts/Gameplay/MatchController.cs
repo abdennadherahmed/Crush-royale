@@ -126,7 +126,8 @@ namespace CrushRoyale.Game.Gameplay
             }
             // The board was locked when the stage ended: give the player back the controls (paid continues were dead).
             _finished = false;
-            Input.Interactable = true;
+// Finish() disabled the board when the stage was lost: without this the continued stage was unplayable.
+            Input.Interactable = !_animating;
             Board.ClearHint();
             _hintShown = false;
             _lastActivityMs = Clock.NowMs;
