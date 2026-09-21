@@ -52,6 +52,13 @@ namespace CrushRoyale.Core.Story
 
         private const int TunedObstacleHardPermille = 950;
 
+        /// <summary>
+        /// Relief on "collect N of a colour" goals. The audit bots always play the highest-scoring move and cannot
+        /// steer a colour at all, so those stages were twice as likely as any other to turn into a wall: 257, 277,
+        /// 297, 907 and 917 were unwinnable for an average run even with the difficulty assist.
+        /// </summary>
+        private const int TunedCollectReliefPermille = 220;
+
         /// <summary>Share of the ice layers / stones an obstacle goal asks for.</summary>
         private const int GoalObstaclePermille = 750;
 
@@ -482,7 +489,8 @@ namespace CrushRoyale.Core.Story
                         objective.Target = raise ? stoneGoal : Math.Min(objective.Target, stoneGoal);
                         break;
                     case ObjectiveType.CollectColor when StageTuning.Collect[id] > 0:
-                        int collect = Math.Max(4, StageTuning.Collect[id] * obstacleShare / 1000);
+                        int collectShare = Math.Max(400, obstacleShare - TunedCollectReliefPermille);
+                        int collect = Math.Max(4, StageTuning.Collect[id] * collectShare / 1000);
                         objective.Target = raise ? collect : Math.Min(objective.Target, collect);
                         break;
                 }

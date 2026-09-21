@@ -209,7 +209,5 @@ namespace CrushRoyale.Game.Screens
             Text sub = UIFactory.Label(card.transform, caption, Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleLeft);
             UIFactory.Anchor(sub.rectTransform, 0.4f, 0.1f, 0.96f, 0.44f);
         }
-
-        private void Rebuild() => UI.ShowRoot<BagScreen>();
     }
 }

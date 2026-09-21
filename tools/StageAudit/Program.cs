@@ -119,11 +119,16 @@ namespace CrushRoyale.Tools.StageAudit
             Profile expert = Profiles[2];
             // Timed stages are measured at a human pace: an expert still needs time to spot moves against the clock.
             var timedExpert = new Profile { Name = "timed-expert", BestMovePermille = 1000, ThinkMinMs = 1500, ThinkMaxMs = 2000 };
-            const int runs = 4;
+            // Median of an odd number of runs, not the mean: one lucky cascade used to set the bar for a whole stage,
+            // which is where the "unwinnable" levels came from (the expert cleared them, nobody else could).
+            const int runs = 7;
             Parallel.For(1, total + 1, id =>
             {
                 StageData stage = catalog.Get(id);
-                long s = 0, i = 0, st = 0, co = 0;
+                var s = new int[runs];
+                var i = new int[runs];
+                var st = new int[runs];
+                var co = new int[runs];
                 StageObjective collectGoal = stage.Objectives.FirstOrDefault(o => o.Type == ObjectiveType.CollectColor);
                 for (int r = 0; r < runs; r++)
                 {
@@ -132,18 +137,15 @@ namespace CrushRoyale.Tools.StageAudit
                     var session = new GameSession(config, balance, "bake");
                     int iceBefore = session.Board.TotalIceLayers;
                     StageResult result = HeadlessRunner.Run(session, new ObjectiveBot((ulong)(id * 31 + r * 977), stage.Timed ? timedExpert : expert, stage));
-                    s += result.FinalScore;
-                    i += iceBefore - session.Board.TotalIceLayers;
-                    st += result.StonesDestroyed;
-                    if (collectGoal != null)
-                    {
-                        co += result.ClearedByColor[(int)collectGoal.Color];
-                    }
+                    s[r] = (int)result.FinalScore;
+                    i[r] = iceBefore - session.Board.TotalIceLayers;
+                    st[r] = result.StonesDestroyed;
+                    co[r] = collectGoal != null ? result.ClearedByColor[(int)collectGoal.Color] : 0;
                 }
-                score[id] = (int)(s / runs);
-                ice[id] = (int)(i / runs);
-                stones[id] = (int)(st / runs);
-                collect[id] = (int)(co / runs);
+                score[id] = Median(s);
+                ice[id] = Median(i);
+                stones[id] = Median(st);
+                collect[id] = Median(co);
             });
 
             var sb = new StringBuilder();
@@ -165,6 +167,14 @@ namespace CrushRoyale.Tools.StageAudit
             File.WriteAllText(output, sb.ToString());
             Console.WriteLine("Baked " + total + " stages into " + output);
             return 0;
+        }
+
+        /// <summary>Middle value of the runs: immune to the one run where a cascade went wild.</summary>
+        private static int Median(int[] values)
+        {
+            var sorted = (int[])values.Clone();
+            Array.Sort(sorted);
+            return sorted[sorted.Length / 2];
         }
 
         private static void AppendArray(StringBuilder sb, string name, int[] values)

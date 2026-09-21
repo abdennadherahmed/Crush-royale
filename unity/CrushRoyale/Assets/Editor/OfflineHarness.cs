@@ -215,7 +215,9 @@ namespace CrushRoyale.EditorTools
                 new ScreenCase("22-Kingdom", typeof(KingdomScreen)),
                 new ScreenCase("23-Profile", typeof(ProfileScreen)),
                 new ScreenCase("24-Vip", typeof(VipScreen)),
-                new ScreenCase("25-Settings", typeof(SettingsScreen))
+                new ScreenCase("25-Settings", typeof(SettingsScreen)),
+                new ScreenCase("26-Bag", typeof(BagScreen)),
+                new ScreenCase("27-Bag-Offline", typeof(BagScreen), withProfile: false)
             };
         }
 

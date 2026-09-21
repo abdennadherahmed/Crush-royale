@@ -124,11 +124,17 @@ namespace CrushRoyale.Game.Gameplay
             {
                 return false;
             }
-            // The board was locked when the stage ended: give the player back the controls (paid continues were dead).
+            // Finish() locked the board when the stage ended and nothing gave it back: the paid continue was dead.
             _finished = false;
-// Finish() disabled the board when the stage was lost: without this the continued stage was unplayable.
-            Input.Interactable = !_animating;
-            Board.ClearHint();
+            if (Input != null)
+            {
+                Input.Interactable = !_animating;
+                Input.TargetingMode = false;
+            }
+            if (Board != null)
+            {
+                Board.ClearHint();
+            }
             _hintShown = false;
             _lastActivityMs = Clock.NowMs;
             Clock.Resume();
@@ -164,6 +170,14 @@ namespace CrushRoyale.Game.Gameplay
             {
                 Finish();
                 return;
+            }
+
+            // Invariant checked every frame instead of being trusted to every path that locks the board: a running
+            // match that is neither animating nor paused MUST accept input. A board left locked is unplayable and
+            // the player can only quit, which is exactly how the paid continue felt on device.
+            if (!_animating && !Clock.IsPaused && Input != null && !Input.Interactable)
+            {
+                Input.Interactable = true;
             }
 
             if (_animating || Clock.IsPaused || _inputs.Count == 0)
