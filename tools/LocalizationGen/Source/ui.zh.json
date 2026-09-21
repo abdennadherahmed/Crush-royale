@@ -2081,6 +2081,8 @@
   "battlepass.buyTier": "{0} 魔珠",
   "battlepass.buyTierTitle": "跳过一阶",
   "battlepass.buyTierBody": "花费 {0} 魔珠直接升到第 {1} 阶。每多买一阶，价格都会略微上涨。",
-  "battlepass.buyTierConfirm": "购买该阶"
+  "battlepass.buyTierConfirm": "购买该阶",
+  "pvp.yourScore": "你的分数：{0}",
+  "pvp.waitingFriend": "你的好友还没有打这场对决。他一打完就会通知你。"
 }
 

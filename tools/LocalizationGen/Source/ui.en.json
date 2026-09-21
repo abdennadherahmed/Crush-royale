@@ -2081,6 +2081,8 @@
   "battlepass.buyTier": "{0} orbes",
   "battlepass.buyTierTitle": "Skip a tier",
   "battlepass.buyTierBody": "Spend {0} orbes to jump straight to tier {1}. Each tier you buy costs a little more.",
-  "battlepass.buyTierConfirm": "Buy the tier"
+  "battlepass.buyTierConfirm": "Buy the tier",
+  "pvp.yourScore": "Your score: {0}",
+  "pvp.waitingFriend": "Your friend has not played this duel yet. You will be told as soon as they do."
 }
 

@@ -2081,6 +2081,8 @@
   "battlepass.buyTier": "{0} orbes",
   "battlepass.buyTierTitle": "Pular um nível",
   "battlepass.buyTierBody": "Gaste {0} orbes para pular direto para o nível {1}. Cada nível comprado custa um pouco mais.",
-  "battlepass.buyTierConfirm": "Comprar o nível"
+  "battlepass.buyTierConfirm": "Comprar o nível",
+  "pvp.yourScore": "Sua pontuação: {0}",
+  "pvp.waitingFriend": "Seu amigo ainda não jogou este duelo. Avisaremos assim que ele jogar."
 }
 

@@ -2081,6 +2081,8 @@
   "battlepass.buyTier": "오브 {0}개",
   "battlepass.buyTierTitle": "티어 건너뛰기",
   "battlepass.buyTierBody": "오브 {0}개로 티어 {1}(으)로 바로 이동합니다. 구매할 때마다 가격이 조금씩 오릅니다.",
-  "battlepass.buyTierConfirm": "티어 구매"
+  "battlepass.buyTierConfirm": "티어 구매",
+  "pvp.yourScore": "내 점수: {0}",
+  "pvp.waitingFriend": "친구가 아직 이 대결을 하지 않았습니다. 하는 즉시 알려 드립니다."
 }
 

@@ -2081,6 +2081,8 @@
   "battlepass.buyTier": "{0} オーブ",
   "battlepass.buyTierTitle": "ティアをスキップ",
   "battlepass.buyTierBody": "{0} オーブでティア {1} に進みます。購入するたびに価格が少し上がります。",
-  "battlepass.buyTierConfirm": "ティアを購入"
+  "battlepass.buyTierConfirm": "ティアを購入",
+  "pvp.yourScore": "あなたのスコア: {0}",
+  "pvp.waitingFriend": "友達はまだこのデュエルをプレイしていません。プレイしたらお知らせします。"
 }
 

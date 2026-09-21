@@ -314,7 +314,18 @@ namespace CrushRoyale.Game.Screens
 
             Color color = outcome == "Win" ? Theme.Success : outcome == "Loss" || outcome == "Rejected" ? Theme.Danger : Theme.Gold;
             UIFactory.Height(UIFactory.Label(_list, Loc.T("pvp." + outcome.ToLowerInvariant()), 90, color, TextAnchor.MiddleCenter, FontStyle.Bold), 150);
-            UIFactory.Height(UIFactory.Label(_list, Loc.T("pvp.scores", Loc.Number(myScore), Loc.Number(theirScore)), Theme.HeaderSize), 90);
+
+            // A duel the friend has not taken yet has no opponent score, and printing a 0 read as "he scored nothing"
+            // - which is exactly what the fake-opponent version of this screen used to do. Say what is actually true.
+            if (outcome == "Pending")
+            {
+                UIFactory.Height(UIFactory.Label(_list, Loc.T("pvp.yourScore", Loc.Number(myScore)), Theme.HeaderSize), 90);
+                UIFactory.Height(UIFactory.Label(_list, Loc.T("pvp.waitingFriend"), Theme.SmallSize, Theme.TextMuted, TextAnchor.MiddleCenter), 80);
+            }
+            else
+            {
+                UIFactory.Height(UIFactory.Label(_list, Loc.T("pvp.scores", Loc.Number(myScore), Loc.Number(theirScore)), Theme.HeaderSize), 90);
+            }
 
             if (s != null && (s.FrozenPoints > 0 || s.OpponentFrozenPoints > 0))
             {

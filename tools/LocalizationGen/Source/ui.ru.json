@@ -2081,6 +2081,8 @@
   "battlepass.buyTier": "{0} сфер",
   "battlepass.buyTierTitle": "Пропустить уровень",
   "battlepass.buyTierBody": "Потратьте {0} сфер, чтобы сразу перейти на уровень {1}. Каждый купленный уровень стоит немного дороже.",
-  "battlepass.buyTierConfirm": "Купить уровень"
+  "battlepass.buyTierConfirm": "Купить уровень",
+  "pvp.yourScore": "Ваш счёт: {0}",
+  "pvp.waitingFriend": "Ваш друг ещё не сыграл этот дуэль. Мы сообщим, как только он сыграет."
 }
 
