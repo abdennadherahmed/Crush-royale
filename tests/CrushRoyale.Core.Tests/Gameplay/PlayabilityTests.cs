@@ -153,4 +153,22 @@ public sealed class PlayabilityTests
         }
         Assert.Empty(problems);
     }
+
+    /// <summary>
+    /// Boosts bought before a stage felt useless because a timed effect does nothing on a stage counted in moves.
+    /// Anything that lasts must therefore last in moves too, unless it only exists in PvP (which is always timed).
+    /// </summary>
+    [Fact]
+    public void EveryTimedBoost_AlsoLastsInMoves()
+    {
+        var useless = new List<string>();
+        foreach (PowerUpDefinition def in Balance.PowerUps.Definitions)
+        {
+            if (def.DurationMs > 0 && def.DurationMoves <= 0 && !def.PvpOnly)
+            {
+                useless.Add($"{def.Type} lasts {def.DurationMs} ms and 0 moves");
+            }
+        }
+        Assert.Empty(useless);
+    }
 }
