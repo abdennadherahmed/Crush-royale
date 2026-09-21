@@ -131,6 +131,9 @@ namespace CrushRoyale.Game.UI
         private int _loadingCount;
         private bool _transitioning;
 
+        /// <summary>Set by Back() and consumed by the next transition, which then plays in the other direction.</summary>
+        private bool _back;
+
         public UIScreen Current { get; private set; }
 
         public Canvas Canvas { get; private set; }
@@ -208,12 +211,14 @@ namespace CrushRoyale.Game.UI
             }
             if (Current?.BackTarget != null)
             {
+                _back = true;
                 Show(Current.BackTarget, null, addToHistory: false);
                 return;
             }
             if (_history.Count > 0)
             {
                 (Type type, object args) = _history.Pop();
+                _back = true;
                 Show(type, args, addToHistory: false);
             }
         }
@@ -252,8 +257,8 @@ namespace CrushRoyale.Game.UI
         public Task<bool> Dialog(string title, string message, string primary, string secondary)
         {
             var tcs = new TaskCompletionSource<bool>();
-            Image shade = UIFactory.Panel("Dialog", _dialogs, Theme.Overlay, rounded: false);
-            UIFactory.Stretch(shade.rectTransform);
+            // Fading dim with a vignette, and the page behind pushed back: a modal arrives, it does not just appear.
+            Image shade = ModalShade.Create(_dialogs, _screens, Theme.Overlay);
 
             Image box = UIFactory.Panel("Box", shade.transform, Theme.Panel);
             UIFactory.Anchor(box.rectTransform, 0.08f, 0.32f, 0.92f, 0.68f);
@@ -301,8 +306,7 @@ namespace CrushRoyale.Game.UI
         /// <summary>Overlay panel inside the dialog layer (reward popups, pickers). Destroy the returned object to close.</summary>
         public RectTransform Popup(float minY = 0.2f, float maxY = 0.8f)
         {
-            Image shade = UIFactory.Panel("Popup", _dialogs, Theme.Overlay, rounded: false);
-            UIFactory.Stretch(shade.rectTransform);
+            Image shade = ModalShade.Create(_dialogs, _screens, Theme.Overlay);
             Image box = UIFactory.Panel("Box", shade.transform, Theme.Panel);
             UIFactory.Anchor(box.rectTransform, 0.05f, minY, 0.95f, maxY);
             UiKit.FramePanel(box);
@@ -335,23 +339,10 @@ namespace CrushRoyale.Game.UI
                 outgoing.interactable = false;
             }
 
-            // Fade plus a slight zoom-in of the new screen (0.96 -> 1) so page changes feel less abrupt.
-            const float duration = 0.22f;
-            Transform incomingTransform = incoming.transform;
-            for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
-            {
-                float k = t / duration;
-                incoming.alpha = k;
-                float zoom = 0.96f + 0.04f * (1f - (1f - k) * (1f - k));
-                incomingTransform.localScale = new Vector3(zoom, zoom, 1f);
-                if (outgoing != null)
-                {
-                    outgoing.alpha = 1 - k;
-                }
-                yield return null;
-            }
-            incoming.alpha = 1f;
-            incomingTransform.localScale = Vector3.one;
+            // Directional slide plus fade and a slight zoom; back is quicker and comes from the other side.
+            bool back = _back;
+            _back = false;
+            yield return Transitions.Page(incoming, outgoing, back);
             if (previous != null)
             {
                 previous.OnHidden();
