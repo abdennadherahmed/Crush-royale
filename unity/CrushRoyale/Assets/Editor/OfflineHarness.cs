@@ -87,10 +87,44 @@ namespace CrushRoyale.EditorTools
             typeof(GameRoot).GetProperty("Instance").GetSetMethod(true).Invoke(null, new object[] { null });
         }
 
+        /// <summary>Where tools/ProfileSnapshot drops a real account, when a build was given one.</summary>
+        private const string SnapshotPath = "Assets/Editor/Fixtures/profile.json";
+
         public static void SetProfile(GameRoot game, bool withProfile)
         {
-            game.Backend.OfflineProfile = withProfile ? DemoProfile() : null;
+            game.Backend.OfflineProfile = withProfile ? (Snapshot() ?? DemoProfile()) : null;
             game.Backend.OfflineShop = withProfile ? DemoShop() : null;
+        }
+
+        /// <summary>
+        /// A real account, when the build was handed one.
+        ///
+        /// The invented demo player can only ever be in the states somebody thought to invent, and the defects that
+        /// matter live in the states nobody thought of: the bag's Convert button broke precisely because its owner
+        /// had collected every pet. When tools/ProfileSnapshot has written a profile, the captures are taken against
+        /// that account instead; when it has not, nothing changes and the demo player is used.
+        /// </summary>
+        private static ProfileDto Snapshot()
+        {
+            try
+            {
+                if (!System.IO.File.Exists(SnapshotPath))
+                {
+                    return null;
+                }
+                ProfileDto profile = CrushRoyale.Client.JsonSettings.Deserialize<ProfileDto>(System.IO.File.ReadAllText(SnapshotPath));
+                if (profile != null)
+                {
+                    Debug.Log("Screens captured against the account of " + profile.DisplayName + ".");
+                }
+                return profile;
+            }
+            catch (Exception ex)
+            {
+                // A bad snapshot must never cost the captures: fall back to the demo player and say why.
+                Debug.LogWarning("Could not read " + SnapshotPath + ", using the demo profile: " + ex.Message);
+                return null;
+            }
         }
 
         /// <summary>

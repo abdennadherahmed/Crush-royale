@@ -148,6 +148,17 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: ./tools/publish-update.ps1 -Apk build/Android/CrushRoyale.apk -VersionCode ${{ github.run_number }}
 
+      # The captures are taken against a real account rather than an invented one. The states that break screens are
+      # the ones nobody thinks to invent: the bag's Convert button broke precisely because its owner owned every pet.
+      # The file this writes is gitignored and never leaves the runner. Without the secret it writes nothing at all
+      # and the demo player is used, so a fork still builds.
+      - name: Snapshot a real player for the captures
+        continue-on-error: true
+        env:
+          SUPABASE_URL: https://gzivxtzugewlvygnxkhn.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: dotnet run --project tools/ProfileSnapshot -- "Escobaros"
+
       # Tests and screenshots run here rather than in a job of their own: a second job meant installing Unity a
       # second time, and that install timed out on builds 32 and 33, so the screens were never captured once.
       # They run after the APK is uploaded and published, so a broken screen can never cost the build itself.

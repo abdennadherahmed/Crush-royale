@@ -403,8 +403,14 @@ namespace CrushRoyale.Game.Screens
             int rows = (items.Count + columns - 1) / columns;
             UIFactory.Height(gridRect, rows * cellHeight + (rows - 1) * 22);
             GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
-            float width = (1080f - 64f - (columns - 1) * 22f) / columns;
-            grid.cellSize = new Vector2(width, cellHeight);
+            // Deliberately narrow, and never computed from the canvas width.
+            //
+            // This used to read (1080 - 64 - spacing) / columns: the canvas width, minus the list padding, as if the
+            // list were the whole screen. It is not -- the screen frame takes its own margins -- so the grid asked
+            // for more room than it had, overflowed, and the scroll mask ate the right-hand column. GridFit measures
+            // the rect that actually exists and sets the real width a frame later; this value only has to be small
+            // enough to fit anything in the meantime.
+            grid.cellSize = new Vector2(420f, cellHeight);
             grid.spacing = new Vector2(22, 22);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = columns;
@@ -413,8 +419,9 @@ namespace CrushRoyale.Game.Screens
             GridFit.On(grid);
             foreach (ShopItemDto item in items)
             {
+                // No size set here: the grid owns the cell's size. Setting it from a second place meant the card was
+                // built against one width while the layout gave it another.
                 RectTransform cell = UIFactory.Rect("Cell", gridRect);
-                cell.sizeDelta = new Vector2(width, cellHeight);
                 fill(cell, item);
             }
         }

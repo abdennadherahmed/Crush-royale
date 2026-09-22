@@ -1,3 +1,7 @@
+## A real player's profile, written by tools/ProfileSnapshot so the captures are taken against a real account.
+## It carries a name and a progress record that belong to a person, and this repository is public.
+unity/CrushRoyale/Assets/Editor/Fixtures/
+
 ## Crush Royale: Unity project (unity/CrushRoyale)
 unity/CrushRoyale/[Ll]ibrary/
 unity/CrushRoyale/[Tt]emp/
