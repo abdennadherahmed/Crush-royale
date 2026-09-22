@@ -88,6 +88,47 @@ public sealed class SeasonJobService
                 await tx.UpdateGuildAsync(record).ConfigureAwait(false);
             }
 
+            // The weekly race closes here: rank what is left of the week, pay every member of the guilds that
+            // placed, and record the standing so the guild can see where it finished. Only guilds big enough to be
+            // ranked take anything, which is the rule the screen promised all week.
+            GuildTournamentBalance raceBalance = balance.Guild.Tournament;
+            List<Guild> racers = guilds
+                .Select(g => g.Guild)
+                .Where(g => GuildTournament.IsRanked(g, raceBalance) && g.Tournament != null && g.Tournament.Points > 0)
+                .OrderByDescending(g => g.Tournament.Points)
+                .ThenBy(g => g.Id, StringComparer.Ordinal)
+                .ToList();
+            for (int i = 0; i < racers.Count; i++)
+            {
+                Guild guild = racers[i];
+                int rank = i + 1;
+                guild.Tournament.LastRank = rank;
+                guild.Tournament.LastPoints = guild.Tournament.Points;
+                (int raceCoins, int raceOrbes) = GuildTournament.RewardFor(rank, raceBalance);
+                if (raceCoins <= 0 && raceOrbes <= 0)
+                {
+                    continue;
+                }
+                foreach (GuildMember member in guild.Members)
+                {
+                    if (!Guid.TryParse(member.PlayerId, out Guid memberId))
+                    {
+                        continue;
+                    }
+                    if (!rewards.TryGetValue(memberId, out RewardData? owed))
+                    {
+                        owed = new RewardData();
+                        rewards[memberId] = owed;
+                    }
+                    owed.Coins += raceCoins;
+                    owed.Orbes += raceOrbes;
+                }
+            }
+            foreach (GuildRecord record in guilds)
+            {
+                await tx.UpdateGuildAsync(record).ConfigureAwait(false);
+            }
+
             List<GuildRankingEntry> ranking = GuildManager.CalculateGuildRanking(guilds.Select(g => g.Guild));
             List<GuildMemberReward> memberRewards = new GuildManager(balance, _ops.Clock).DistributeRankingRewards(ranking, guilds.ToDictionary(g => g.Guild.Id, g => g.Guild));
             foreach (GuildMemberReward reward in memberRewards)
