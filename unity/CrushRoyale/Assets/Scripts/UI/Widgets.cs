@@ -401,6 +401,9 @@ namespace CrushRoyale.Game.UI
     [RequireComponent(typeof(GridLayoutGroup))]
     public sealed class GridFit : MonoBehaviour
     {
+        /// <summary>Narrower than this and the rect is simply not laid out yet, whatever the number says.</summary>
+        private const float MinCellWidth = 40f;
+
         private GridLayoutGroup _grid;
 
         public static GridFit On(GridLayoutGroup grid)
@@ -427,10 +430,19 @@ namespace CrushRoyale.Game.UI
             {
                 return;
             }
-            float cell = (width - _grid.padding.left - _grid.padding.right - _grid.spacing.x * (columns - 1)) / columns;
+            float usable = width - _grid.padding.left - _grid.padding.right - _grid.spacing.x * (columns - 1);
+            if (usable < columns * MinCellWidth)
+            {
+                // The rect is not laid out yet: padding and spacing alone are wider than it. Computing from that gave
+                // a negative cell, which was clamped to 10 px and never revisited, and the PvP boosts came out as
+                // one-pixel columns with their names running vertically. Keep the authored size until a real width
+                // arrives; OnRectTransformDimensionsChange brings us back.
+                return;
+            }
+            float cell = usable / columns;
             if (Mathf.Abs(cell - _grid.cellSize.x) > 0.5f)
             {
-                _grid.cellSize = new Vector2(Mathf.Max(10f, cell), _grid.cellSize.y);
+                _grid.cellSize = new Vector2(cell, _grid.cellSize.y);
             }
         }
     }

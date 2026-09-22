@@ -45,7 +45,6 @@ namespace CrushRoyale.Game.Screens
             new[] { new Vector2(0.14f, 0.55f), new Vector2(0.84f, 0.45f), new Vector2(0.3f, 0.86f), new Vector2(0.5f, 0.62f) }
         };
 
-        private static readonly string[] TaskIcons = { "item_gift", "item_pouch", "item_hourglass", "item_stars", "item_medal", "item_crown" };
 
         /// <summary>The scene is laid out at roughly this many units, used to size the feathering and the decorations.</summary>
         private const float SceneWidth = 1000f;
@@ -429,19 +428,21 @@ namespace CrushRoyale.Game.Screens
                     card.gameObject.AddComponent<PopIn>().Delay = i * 0.03f;
                 }
 
-                Sprite art = UiKit.Art(TaskIcons[i % TaskIcons.Length]);
-                if (art != null)
-                {
-                    Image icon = UIFactory.Icon(card.transform, art, done ? Color.white : new Color(0.85f, 0.85f, 0.95f, 1f), 0);
-                    icon.preserveAspect = true;
-                    UIFactory.Anchor(icon.rectTransform, 0.02f, 0.12f, 0.14f, 0.88f);
-                }
+                RectTransform badge = UIFactory.Anchor(UIFactory.Rect("Step", card.transform), 0.02f, 0.14f, 0.14f, 0.86f);
+                badge.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
+                UiKit.RoundBadge(badge, crystal: !done);
+                Text step = UIFactory.Label(badge, (i + 1).ToString(), Theme.SmallSize, done ? Theme.Success : Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                UIFactory.Stretch(step.rectTransform);
+                Widgets.TitleOutline(step);
                 Text name = UIFactory.Label(card.transform, TaskName(zone.Number, i + 1), Theme.SmallSize - 4, done ? Theme.Success : Theme.Text, TextAnchor.LowerLeft, FontStyle.Bold);
                 UIFactory.Anchor(name.rectTransform, 0.16f, 0.5f, 0.68f, 0.92f);
                 Widgets.TitleOutline(name);
 
                 // Exactly what this build unlocks: the visible change it makes to the scene.
-                Text promise = UIFactory.Label(card.transform, EffectText(task.Effect), Theme.SmallSize - 10, done ? Theme.Text : Theme.TextMuted, TextAnchor.UpperLeft);
+                string promiseText = task.Effect == RestorationEffect.Structure
+                    ? Loc.T("kingdom.fx.step", i + 1, StructureSteps(zone))
+                    : EffectText(task.Effect);
+                Text promise = UIFactory.Label(card.transform, promiseText, Theme.SmallSize - 10, done ? Theme.Text : Theme.TextMuted, TextAnchor.UpperLeft);
                 UIFactory.Anchor(promise.rectTransform, 0.16f, 0.1f, 0.68f, 0.5f);
 
                 if (done)
@@ -463,6 +464,20 @@ namespace CrushRoyale.Game.Screens
                     UIFactory.Anchor(missing.rectTransform, 0.7f, 0.12f, 0.98f, 0.4f);
                 }
             }
+        }
+
+        /// <summary>How many of the zone's tasks rebuild its structures (the rest bring the picture to life).</summary>
+        private static int StructureSteps(RestorationZone zone)
+        {
+            int count = 0;
+            foreach (RestorationTask task in zone.Tasks)
+            {
+                if (task.Effect == RestorationEffect.Structure)
+                {
+                    count++;
+                }
+            }
+            return Math.Max(1, count);
         }
 
         /// <summary>Literal keys so the localization validator sees every promise line.</summary>

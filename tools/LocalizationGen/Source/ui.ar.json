@@ -2083,6 +2083,9 @@
   "battlepass.buyTierBody": "أنفق {0} كرة للانتقال مباشرة إلى المستوى {1}. كل مستوى تشتريه يكلف أكثر قليلاً.",
   "battlepass.buyTierConfirm": "اشترِ المستوى",
   "pvp.yourScore": "نتيجتك: {0}",
-  "pvp.waitingFriend": "لم يلعب صديقك هذه المبارزة بعد. سنخبرك فور أن يفعل."
+  "pvp.waitingFriend": "لم يلعب صديقك هذه المبارزة بعد. سنخبرك فور أن يفعل.",
+  "kingdom.fx.step": "إعادة البناء {0} من {1} في هذه المنطقة",
+  "currency.coinsName": "عملات",
+  "currency.orbesName": "كرات"
 }
 

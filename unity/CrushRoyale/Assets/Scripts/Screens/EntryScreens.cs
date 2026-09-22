@@ -478,7 +478,9 @@ namespace CrushRoyale.Game.Screens
         private void OfflineBanner(RectTransform safe)
         {
             Image pill = UIFactory.Panel("Offline", safe, new Color(0.35f, 0.06f, 0.12f, 0.92f));
-            UIFactory.Anchor(pill.rectTransform, 0.2f, 0.835f, 0.8f, 0.885f);
+            // Strictly below the VIP and streak plates (0.872 - 0.914) and wide enough for the two lines the banner
+            // actually takes: it used to be laid over both of them and the "x3" plate was half covered.
+            UIFactory.Anchor(pill.rectTransform, 0.08f, 0.8f, 0.92f, 0.866f);
             Outline border = pill.gameObject.AddComponent<Outline>();
             border.effectColor = new Color(1f, 0.4f, 0.45f, 0.9f);
             border.effectDistance = new Vector2(3, -3);
@@ -763,7 +765,11 @@ namespace CrushRoyale.Game.Screens
         private static void Caption(RectTransform rect, string text, bool unlocked)
         {
             Text caption = UIFactory.Label(rect, text, Theme.SmallSize - 6, unlocked ? Theme.Text : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(caption.rectTransform, -0.15f, -0.02f, 1.15f, 0.24f);
+            caption.resizeTextForBestFit = true;
+            caption.resizeTextMinSize = Theme.SmallSize - 9;
+            caption.resizeTextMaxSize = Theme.SmallSize - 6;
+            caption.horizontalOverflow = HorizontalWrapMode.Wrap;
+            UIFactory.Anchor(caption.rectTransform, 0.01f, -0.04f, 0.99f, 0.26f);
             Outline outline = caption.gameObject.AddComponent<Outline>();
             outline.effectColor = new Color(0.03f, 0.01f, 0.08f, 0.95f);
             outline.effectDistance = new Vector2(2, -2);

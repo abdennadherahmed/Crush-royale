@@ -2083,6 +2083,9 @@
   "battlepass.buyTierBody": "Spendi {0} orbi per saltare al livello {1}. Ogni livello acquistato costa un po' di più.",
   "battlepass.buyTierConfirm": "Acquista il livello",
   "pvp.yourScore": "Il tuo punteggio: {0}",
-  "pvp.waitingFriend": "Il tuo amico non ha ancora giocato questo duello. Te lo diremo appena lo farà."
+  "pvp.waitingFriend": "Il tuo amico non ha ancora giocato questo duello. Te lo diremo appena lo farà.",
+  "kingdom.fx.step": "Ricostruzione {0} di {1} di questa zona",
+  "currency.coinsName": "Monete",
+  "currency.orbesName": "Orbi"
 }
 

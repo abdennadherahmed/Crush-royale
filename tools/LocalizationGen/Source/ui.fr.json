@@ -2083,6 +2083,9 @@
   "battlepass.buyTierBody": "Dépense {0} orbes pour passer directement au palier {1}. Chaque palier acheté coûte un peu plus cher.",
   "battlepass.buyTierConfirm": "Acheter le palier",
   "pvp.yourScore": "Ton score : {0}",
-  "pvp.waitingFriend": "Ton ami n'a pas encore joué ce duel. Tu seras prévenu dès qu'il l'aura fait."
+  "pvp.waitingFriend": "Ton ami n'a pas encore joué ce duel. Tu seras prévenu dès qu'il l'aura fait.",
+  "kingdom.fx.step": "Reconstruction {0} sur {1} de cette zone",
+  "currency.coinsName": "Pièces",
+  "currency.orbesName": "Orbes"
 }
 

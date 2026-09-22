@@ -52,8 +52,8 @@ namespace CrushRoyale.Game.Screens
         {
             Widgets.SectionTitle(_list, Loc.T("bag.wallet"));
             RectTransform grid = Grid(2, 190);
-            Tile(grid, "item_coins", Loc.Number(profile.Wallet?.Coins ?? 0), Loc.T("currency.coins"), Theme.Gold, () => UI.Show<ShopScreen>(ShopScreen.CoinsTab));
-            Tile(grid, "item_orbs", Loc.Number(profile.Wallet?.Orbes ?? 0), Loc.T("currency.orbes"), Theme.Orbe, () => UI.Show<ShopScreen>(ShopScreen.OrbesTab));
+            Tile(grid, "item_coins", Loc.Number(profile.Wallet?.Coins ?? 0), Loc.T("currency.coinsName"), Theme.Gold, () => UI.Show<ShopScreen>(ShopScreen.CoinsTab));
+            Tile(grid, "item_orbs", Loc.Number(profile.Wallet?.Orbes ?? 0), Loc.T("currency.orbesName"), Theme.Orbe, () => UI.Show<ShopScreen>(ShopScreen.OrbesTab));
 
             LivesDto lives = profile.Lives;
             int max = Math.Max(1, Game.Backend.Balance?.Stamina?.MaxRegenLives ?? 5);

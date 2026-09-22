@@ -25,6 +25,9 @@ namespace CrushRoyale.EditorTools
         /// <summary>Labels may share a few pixels; a third of the smaller one covered is a bug.</summary>
         private const float OverlapTolerance = 0.33f;
 
+        /// <summary>A label less than half inside its scroll viewport is off-screen and is not audited.</summary>
+        private const float VisibleShare = 0.5f;
+
         private const int Width = 1080;
         private const int Height = 1920;
 
@@ -272,6 +275,13 @@ namespace CrushRoyale.EditorTools
                 {
                     continue;
                 }
+                if (!MostlyVisible(label.rectTransform))
+                {
+                    // Scrolled out of its list: its box still has world coordinates and used to be reported as
+                    // overlapping whatever sits over the viewport, which is how a perfectly fine VIP page came back
+                    // with "two labels overlap (100%)".
+                    continue;
+                }
                 RectTransform rect = label.rectTransform;
                 float width = rect.rect.width;
                 float height = rect.rect.height;
@@ -308,6 +318,12 @@ namespace CrushRoyale.EditorTools
                     }
                 }
 
+                // A format string used as a plain caption printed "{0} coins" verbatim under every wallet tile.
+                if (label.text.Contains("{0}") || label.text.Contains("{1}") || label.text.Contains("{2}"))
+                {
+                    audit.Add(screen + " | unformatted placeholder on screen | " + Shorten(label.text));
+                }
+
                 int smallest = label.resizeTextForBestFit ? label.resizeTextMinSize : label.fontSize;
                 if (smallest > 0 && smallest < MinReadableFontSize)
                 {
@@ -339,6 +355,30 @@ namespace CrushRoyale.EditorTools
                     }
                 }
             }
+        }
+
+        /// <summary>False for a label scrolled out of the list it lives in: only what a player can see is audited.</summary>
+        private static bool MostlyVisible(RectTransform rect)
+        {
+            Rect box = WorldRect(rect);
+            float area = Area(box);
+            if (area <= 0f)
+            {
+                return true;
+            }
+            for (Transform parent = rect.parent; parent != null; parent = parent.parent)
+            {
+                var mask = parent.GetComponent<RectMask2D>();
+                if (mask == null || !mask.enabled)
+                {
+                    continue;
+                }
+                if (Intersection(box, WorldRect((RectTransform)parent)) / area < VisibleShare)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private static Rect WorldRect(RectTransform rect)

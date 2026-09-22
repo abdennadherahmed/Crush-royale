@@ -2083,6 +2083,9 @@
   "battlepass.buyTierBody": "Gib {0} Kugeln aus, um direkt auf Stufe {1} zu springen. Jede gekaufte Stufe kostet etwas mehr.",
   "battlepass.buyTierConfirm": "Stufe kaufen",
   "pvp.yourScore": "Dein Ergebnis: {0}",
-  "pvp.waitingFriend": "Dein Freund hat dieses Duell noch nicht gespielt. Du erfährst es, sobald er es tut."
+  "pvp.waitingFriend": "Dein Freund hat dieses Duell noch nicht gespielt. Du erfährst es, sobald er es tut.",
+  "kingdom.fx.step": "Wiederaufbau {0} von {1} dieser Zone",
+  "currency.coinsName": "Münzen",
+  "currency.orbesName": "Kugeln"
 }
 
