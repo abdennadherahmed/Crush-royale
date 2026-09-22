@@ -113,10 +113,15 @@ namespace CrushRoyale.Tools.StageAudit
                 catalog.Get(id);
             }
             var score = new int[total + 1];
+            // What a mid-skill player actually reaches. The expert's reach alone cannot say whether a target is fair:
+            // a board the expert exploits can be a wall for everyone else, which is where the unwinnable stages came
+            // from. Targets are capped against this second number.
+            var average = new int[total + 1];
             var ice = new int[total + 1];
             var stones = new int[total + 1];
             var collect = new int[total + 1];
             Profile expert = Profiles[2];
+            Profile mid = Profiles[1];
             // Timed stages are measured at a human pace: an expert still needs time to spot moves against the clock.
             var timedExpert = new Profile { Name = "timed-expert", BestMovePermille = 1000, ThinkMinMs = 1500, ThinkMaxMs = 2000 };
             // Median of an odd number of runs, not the mean: one lucky cascade used to set the bar for a whole stage,
@@ -126,6 +131,7 @@ namespace CrushRoyale.Tools.StageAudit
             {
                 StageData stage = catalog.Get(id);
                 var s = new int[runs];
+                var avg = new int[runs];
                 var i = new int[runs];
                 var st = new int[runs];
                 var co = new int[runs];
@@ -138,11 +144,18 @@ namespace CrushRoyale.Tools.StageAudit
                     int iceBefore = session.Board.TotalIceLayers;
                     StageResult result = HeadlessRunner.Run(session, new ObjectiveBot((ulong)(id * 31 + r * 977), stage.Timed ? timedExpert : expert, stage));
                     s[r] = (int)result.FinalScore;
+
+                    SessionConfig midConfig = SessionConfig.ForStage(stage, balance, null, League.Bronze);
+                    midConfig.Objectives = new List<StageObjective> { new StageObjective { Type = ObjectiveType.ReachScore, Target = int.MaxValue } };
+                    var midSession = new GameSession(midConfig, balance, "bake-mid");
+                    StageResult midResult = HeadlessRunner.Run(midSession, new ObjectiveBot((ulong)(id * 57 + r * 613), mid, stage));
+                    avg[r] = (int)midResult.FinalScore;
                     i[r] = iceBefore - session.Board.TotalIceLayers;
                     st[r] = result.StonesDestroyed;
                     co[r] = collectGoal != null ? result.ClearedByColor[(int)collectGoal.Color] : 0;
                 }
                 score[id] = Median(s);
+                average[id] = Median(avg);
                 ice[id] = Median(i);
                 stones[id] = Median(st);
                 collect[id] = Median(co);
@@ -156,6 +169,8 @@ namespace CrushRoyale.Tools.StageAudit
             sb.AppendLine("    internal static class StageTuning");
             sb.AppendLine("    {");
             AppendArray(sb, "Score", score);
+            sb.AppendLine();
+            AppendArray(sb, "Average", average);
             sb.AppendLine();
             AppendArray(sb, "Ice", ice);
             sb.AppendLine();

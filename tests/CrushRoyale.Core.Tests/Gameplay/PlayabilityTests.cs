@@ -171,4 +171,33 @@ public sealed class PlayabilityTests
         }
         Assert.Empty(useless);
     }
+
+    /// <summary>
+    /// No score target may ask for more than a mid-skill run actually reaches on that board. Before this rule the
+    /// campaign had 22 stages an average run never cleared even with the difficulty assist; a board the expert bot
+    /// exploits is a wall for everyone else, and no global difficulty curve can see that.
+    /// </summary>
+    [Fact]
+    public void NoStageAsksForMoreThanAMidRunReaches()
+    {
+        var catalog = new StageCatalog(Balance);
+        var problems = new List<string>();
+        for (int id = 1; id <= catalog.TotalCampaignStages; id++)
+        {
+            StageData stage = catalog.Get(id);
+            foreach (StageObjective objective in stage.Objectives)
+            {
+                if (objective.Type != ObjectiveType.ReachScore)
+                {
+                    continue;
+                }
+                int reach = StageCatalog.MidReach(id);
+                if (reach > 0 && objective.Target > reach)
+                {
+                    problems.Add($"stage {id}: asks {objective.Target}, a mid run reaches {reach}");
+                }
+            }
+        }
+        Assert.Empty(problems);
+    }
 }

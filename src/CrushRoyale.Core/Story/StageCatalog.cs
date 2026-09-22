@@ -33,24 +33,32 @@ namespace CrushRoyale.Core.Story
         private const int BossHpPermille = 1100;
 
         /// <summary>Goals are capped to these shares of the expert bot's reach (StageTuning.g.cs).</summary>
-        private const int TunedScoreEasyPermille = 600;
+        /// <summary>Stages 1 to 40 ease in; the first asks 46% of what its difficulty would otherwise demand.</summary>
+        /// <summary>A stage may ask for this much of what a mid run reaches: above 100% it is a coin toss, below it is free.</summary>
+        private const int MidReachCeilingPermille = 1000;
 
-        private const int TunedScoreHardPermille = 900;
+        private const int OnboardingEase = 41;
+
+        private const int OnboardingFloorPermille = 460;
+
+        private const int TunedScoreEasyPermille = 780;
+
+        private const int TunedScoreHardPermille = 800;
 
         private const int TunedBossReliefPermille = 130;
 
         /// <summary>Sawtooth: extra share of the expert's reach on Hard / Super hard stages, relief on the stage after.</summary>
         private const int TunedHardExtraPermille = 90;
 
-        private const int TunedSuperHardExtraPermille = 150;
+        private const int TunedSuperHardExtraPermille = 110;
 
         private const int TunedBreatherPermille = 80;
 
-        private const int TunedMaxSharePermille = 980;
+        private const int TunedMaxSharePermille = 870;
 
-        private const int TunedObstacleEasyPermille = 700;
+        private const int TunedObstacleEasyPermille = 760;
 
-        private const int TunedObstacleHardPermille = 950;
+        private const int TunedObstacleHardPermille = 850;
 
         /// <summary>
         /// Relief on "collect N of a colour" goals. The audit bots always play the highest-scoring move and cannot
@@ -444,6 +452,24 @@ namespace CrushRoyale.Core.Story
             return stage.Id >= 14 && (index == 8 || index == 15 || index == 18) ? -TunedBreatherPermille : 0;
         }
 
+        /// <summary>
+        /// Ceiling a target may never pass: what a mid-skill run reaches on a median board, with a little room on top
+        /// so the stage still has to be earned. Without it a board the expert exploits becomes a wall for everyone.
+        /// </summary>
+        /// <summary>What a mid-skill run reaches on this stage, as measured by the bake (0 when unknown).</summary>
+        public static int MidReach(int stageId) =>
+            stageId > 0 && stageId < StageTuning.Average.Length ? StageTuning.Average[stageId] : 0;
+
+        private static int Reachable(int id, int onboarding)
+        {
+            if (id >= StageTuning.Average.Length || StageTuning.Average[id] <= 0)
+            {
+                return int.MaxValue;
+            }
+            long ceiling = (long)StageTuning.Average[id] * MidReachCeilingPermille / 1000;
+            return (int)Math.Max(200, ceiling * onboarding / 1000);
+        }
+
         private static void ApplyTuning(StageData stage, int id)
         {
             if (id >= StageTuning.Score.Length)
@@ -456,20 +482,27 @@ namespace CrushRoyale.Core.Story
             // then the sawtooth: hard stages ask more, the stage after them less.
             int tierShare = TierShare(stage);
             bool raise = stage.Tier != StageTier.Normal;
-            int scoreShare = Math.Min(TunedMaxSharePermille, TunedScoreEasyPermille + (TunedScoreHardPermille - TunedScoreEasyPermille) * d / 1000 + tierShare);
+            // The opening has to be won. Driving every target from the measured reach made the whole campaign tense,
+            // including the first twenty stages, where a new player must feel good rather than tested: the share
+            // eases in from 62% of its value and reaches full strength at stage 26.
+            int onboarding = id < OnboardingEase
+                ? OnboardingFloorPermille + (1000 - OnboardingFloorPermille) * (id - 1) / (OnboardingEase - 1)
+                : 1000;
+            int scoreShare = Math.Min(TunedMaxSharePermille, TunedScoreEasyPermille + (TunedScoreHardPermille - TunedScoreEasyPermille) * d / 1000 + tierShare) * onboarding / 1000;
             int bossShare = scoreShare - TunedBossReliefPermille;
-            int obstacleShare = Math.Min(1000, TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000 + tierShare);
+            int obstacleShare = Math.Min(1000, TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000 + tierShare) * onboarding / 1000;
             foreach (StageObjective objective in stage.Objectives)
             {
                 switch (objective.Type)
                 {
                     case ObjectiveType.ReachScore when score > 0:
-                        int cappedScore = Math.Max(200, RoundTo((int)((long)score * scoreShare / 1000), 50));
-                        if (objective.Target > cappedScore || raise)
-                        {
-                            objective.Target = cappedScore;
-                            stage.TargetScore = cappedScore;
-                        }
+                        // Always the measured share, never "the smaller of the two". Capping only downwards left 541
+                        // stages asking for barely half of what a player actually scores, which is why more than half
+                        // the campaign could not be lost and had no tension in it at all.
+                        int tunedScore = Math.Max(200, RoundTo((int)((long)score * scoreShare / 1000), 50));
+                        tunedScore = Math.Min(tunedScore, Reachable(id, onboarding));
+                        objective.Target = tunedScore;
+                        stage.TargetScore = tunedScore;
                         break;
                     case ObjectiveType.DefeatBoss when score > 0:
                         int cappedHp = Math.Max(200, RoundTo((int)((long)score * bossShare / 1000), 50));
@@ -481,17 +514,14 @@ namespace CrushRoyale.Core.Story
                         }
                         break;
                     case ObjectiveType.ClearIce when StageTuning.Ice[id] > 0:
-                        int ice = Math.Max(1, StageTuning.Ice[id] * obstacleShare / 1000);
-                        objective.Target = raise ? ice : Math.Min(objective.Target, ice);
+                        objective.Target = Math.Max(1, StageTuning.Ice[id] * obstacleShare / 1000);
                         break;
                     case ObjectiveType.BreakStones when StageTuning.Stones[id] > 0:
-                        int stoneGoal = Math.Max(1, StageTuning.Stones[id] * obstacleShare / 1000);
-                        objective.Target = raise ? stoneGoal : Math.Min(objective.Target, stoneGoal);
+                        objective.Target = Math.Max(1, StageTuning.Stones[id] * obstacleShare / 1000);
                         break;
                     case ObjectiveType.CollectColor when StageTuning.Collect[id] > 0:
                         int collectShare = Math.Max(400, obstacleShare - TunedCollectReliefPermille);
-                        int collect = Math.Max(4, StageTuning.Collect[id] * collectShare / 1000);
-                        objective.Target = raise ? collect : Math.Min(objective.Target, collect);
+                        objective.Target = Math.Max(4, StageTuning.Collect[id] * collectShare / 1000);
                         break;
                 }
             }
