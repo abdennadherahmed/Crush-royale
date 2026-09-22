@@ -823,6 +823,25 @@ namespace CrushRoyale.Game.Screens
 
             if (Game.Backend.IsOnline)
             {
+                // A stage that cannot be won bare-handed has to say so before the life is spent. A gate the player
+                // only discovers by losing is not difficulty, it is a trick.
+                if (CrushRoyale.Core.Story.StageCatalog.NeedsBoosts(stage))
+                {
+                    Image warning = UIFactory.Panel("NeedsBoosts", list, new Color(0.42f, 0.09f, 0.16f, 0.94f));
+                    UIFactory.Height(warning, 130);
+                    UiKit.CardFrame(warning);
+                    Sprite bolt = UiKit.Art("item_bolt");
+                    if (bolt != null)
+                    {
+                        Image icon = UIFactory.Icon(warning.transform, bolt, Color.white, 0);
+                        icon.preserveAspect = true;
+                        UIFactory.Anchor(icon.rectTransform, 0.03f, 0.12f, 0.16f, 0.88f);
+                    }
+                    Text text = UIFactory.Label(warning.transform, Loc.T("stage.needsBoosts"), Theme.SmallSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
+                    UIFactory.Anchor(text.rectTransform, 0.18f, 0.08f, 0.97f, 0.92f);
+                    Widgets.TitleOutline(text);
+                    warning.gameObject.AddComponent<Breathe>().Amount = 0.02f;
+                }
                 Widgets.SectionTitle(list, Loc.T("stage.boostsTitle"));
                 LoadoutPicker.Build(list, _selected, pvp: false, rebuild: Rebuild, movesStage: stage.MoveLimit > 0);
                 RewardRow(list, stage.RewardCoins, stage.RewardOrbes);

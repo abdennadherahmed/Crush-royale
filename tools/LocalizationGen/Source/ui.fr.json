@@ -2105,6 +2105,7 @@
   "pvp.nextLeagueBonus": "Première fois : +{0} orbes",
   "wheel.spinPaid": "Retourner  {0} orbes",
   "bag.convertAllOwned": "Tu possèdes tous les familiers : il n'y a rien à échanger contre ces fragments. Garde-les, ils servent à éveiller ceux que tu as déjà.",
-  "bag.convertNeedsOwned": "Seul un familier que tu possèdes déjà peut céder ses fragments en trop. Débloque-le d'abord."
+  "bag.convertNeedsOwned": "Seul un familier que tu possèdes déjà peut céder ses fragments en trop. Débloque-le d'abord.",
+  "stage.needsBoosts": "Niveau fortifié : le talent seul ne suffira pas. Équipe des boosts."
 }
 

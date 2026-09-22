@@ -130,7 +130,7 @@ public class TrophySystemTests
         Assert.Equal(League.Gold, b.FinalLeague);
         Assert.Equal(1, b.RankInLeague);
         Assert.Equal(1000, b.Coins);
-        Assert.Equal(10 + 100, b.Orbes);
+        Assert.Equal(6 + 100, b.Orbes);
 
         var idle = result.Rewards.Single(r => r.PlayerId == "idle");
         Assert.Equal(0, idle.Coins);

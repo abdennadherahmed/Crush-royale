@@ -20,7 +20,8 @@ public class StageCatalogTests
         Assert.Equal(50, stages.Count(s => s.BossKind == BossKind.MiniBoss));
         Assert.Equal(50, stages.Count(s => s.BossKind >= BossKind.ChapterBoss));
         Assert.Equal(5, stages.Count(s => s.BossKind >= BossKind.ActBoss));
-        Assert.Equal(20, stages.Count(s => s.RewardOrbes == 10));
+        int milestone = Fixtures.Balance.Story.OrbeMilestoneReward;
+        Assert.Equal(20, stages.Count(s => s.RewardOrbes == milestone));
         Assert.Equal(1000, stages.Select(s => s.Seed).Distinct().Count());
         Assert.True(stages.Select(s => s.Objectives[0].Type).Distinct().Count() >= 5);
     }

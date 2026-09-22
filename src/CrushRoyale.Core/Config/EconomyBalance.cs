@@ -33,7 +33,7 @@ namespace CrushRoyale.Core.Config
     {
         public int StartingCoins { get; set; } = 500;
 
-        public int StartingOrbes { get; set; } = 20;
+        public int StartingOrbes { get; set; } = 15;
 
         /// <summary>Coins for winning a friendly duel (no trophies at stake, just bragging rights and a little gold).</summary>
         public int FriendlyDuelWinCoins { get; set; } = 250;

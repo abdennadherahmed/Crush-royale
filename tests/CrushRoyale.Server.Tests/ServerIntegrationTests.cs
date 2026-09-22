@@ -177,7 +177,7 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         Assert.True(login.IsNewPlayer);
         Assert.False(login.ConfigOutdated);
         Assert.Equal(500, login.Profile.Wallet.Coins);
-        Assert.Equal(20, login.Profile.Wallet.Orbes);
+        Assert.Equal(15, login.Profile.Wallet.Orbes);
         Assert.Equal(2, login.Profile.Lives.Lives);
         Assert.Equal(3, login.Profile.Inventory.PowerUps["ChronoBomb"]);
 
@@ -439,12 +439,12 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         var validate = new IapValidateRequest { Sku = "crushroyale.orbes.pack2", PurchaseToken = "fake:GPA.1234" };
         IapValidateResponse granted = await http.PostOk<IapValidateResponse>(ApiRoutes.IapValidate, validate);
         Assert.False(granted.AlreadyGranted);
-        Assert.Equal(20 + 395, granted.Wallet.Orbes);
+        Assert.Equal(15 + 395, granted.Wallet.Orbes);
         Assert.Equal(1, granted.Vip.Tier);
 
         IapValidateResponse again = await http.PostOk<IapValidateResponse>(ApiRoutes.IapValidate, validate);
         Assert.True(again.AlreadyGranted);
-        Assert.Equal(20 + 395, again.Wallet.Orbes);
+        Assert.Equal(15 + 395, again.Wallet.Orbes);
 
         await http.PostError(ApiRoutes.IapValidate, new IapValidateRequest { Sku = "crushroyale.orbes.pack2", PurchaseToken = "forged" }, HttpStatusCode.Forbidden);
         Assert.Contains(((InMemoryGameStore)_app.Store).PurchaseSnapshot(), p => p.PlayerId == id && p.Record.CentsCharged == 499);
@@ -599,7 +599,7 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         Assert.True((await _app.StateAsync(target)).Integrity.SuspendedUntilUnixMs > TimeUtil.ToUnixMs(_app.Clock.UtcNow));
 
         WalletDto wallet = await admin.PostOk<WalletDto>(ApiRoutes.AdminGrant, new AdminGrantRequest { PlayerId = target.ToString(), Orbes = 50, Note = "support ticket #42" });
-        Assert.Equal(70, wallet.Orbes);
+        Assert.Equal(65, wallet.Orbes);
 
         await _app.MutateAsync(target, s => s.Pvp.Trophies = 1000);
         var result = await admin.PostOk<System.Text.Json.JsonElement>(ApiRoutes.AdminSeasonReset, null);

@@ -40,7 +40,7 @@ namespace CrushRoyale.Core.Config
 
         public int SuperHardCoinMultiplierPermille { get; set; } = 2000;
 
-        public int SuperHardOrbes { get; set; } = 5;
+        public int SuperHardOrbes { get; set; } = 2;
 
         /// <summary>Win streak (first wins in a row on new stages) needed for 1, 2 and 3 starting bonuses on the board.</summary>
         public int[] StreakBoosterWins { get; set; } = { 3, 5, 7 };
@@ -70,7 +70,7 @@ namespace CrushRoyale.Core.Config
         /// <summary>GDD "every 50 story stages +10 orbes".</summary>
         public int OrbeMilestoneInterval { get; set; } = 50;
 
-        public int OrbeMilestoneReward { get; set; } = 10;
+        public int OrbeMilestoneReward { get; set; } = 6;
 
         public int UnlockDailyQuestsStage { get; set; } = 5;
 

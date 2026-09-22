@@ -2105,6 +2105,7 @@
   "pvp.nextLeagueBonus": "La primera vez: +{0} orbes",
   "wheel.spinPaid": "Girar otra vez  {0} orbes",
   "bag.convertAllOwned": "Ya tienes todas las mascotas, así que no hay nada por lo que cambiar estos fragmentos. Guárdalos: sirven para despertar a las que ya tienes.",
-  "bag.convertNeedsOwned": "Solo una mascota que ya tengas puede ceder sus fragmentos sobrantes. Desbloquéala primero."
+  "bag.convertNeedsOwned": "Solo una mascota que ya tengas puede ceder sus fragmentos sobrantes. Desbloquéala primero.",
+  "stage.needsBoosts": "Fase fortificada: la habilidad sola no bastará. Equipa potenciadores."
 }
 

@@ -81,6 +81,15 @@ namespace CrushRoyale.Game.Networking
         /// </summary>
         internal ProfileDto OfflineProfile { get; set; }
 
+        /// <summary>
+        /// A shop catalogue to show when there is no server, set by the screenshot harness.
+        ///
+        /// The shop asks the server for its items, so every capture ever taken showed the word "Loading" and nothing
+        /// else. Two reported defects in the shop grid were invisible to me for that reason alone. The game itself
+        /// never sets this, so a real player offline still sees the offline notice.
+        /// </summary>
+        internal ShopResponse OfflineShop { get; set; }
+
         public ProfileDto Profile => IsOnline ? Client.Profile : OfflineProfile;
 
         public string PlayerId => Client?.Auth.UserId ?? "offline-player";

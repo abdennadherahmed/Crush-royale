@@ -37,6 +37,38 @@ namespace CrushRoyale.Core.Story
         /// <summary>A stage may ask for this much of what a mid run reaches: above 100% it is a coin toss, below it is free.</summary>
         private const int MidReachCeilingPermille = 1000;
 
+        /// <summary>
+        /// What a super hard stage may ask for, as a share of what a mid player reaches with no boosts equipped.
+        ///
+        /// Above 1000 the stage cannot be won on skill alone at mid level: the missing fifth has to come from the
+        /// loadout. Three boosts are worth roughly a quarter to a third of a run, so 1200 is a stage you lose once,
+        /// come back to with a Chrono Bomb and a Multiplier, and win -- which is the point. It is deliberately not
+        /// higher: a wall nobody can climb is not difficulty, it is a dead end.
+        /// </summary>
+        private const int BoostGateCeilingPermille = 1850;
+
+        /// <summary>
+        /// First stage allowed to be boost-gated.
+        ///
+        /// The opening chapter has to be winnable with nothing, by someone who has never played a match-3. The gates
+        /// start at the second super hard stage, so the first one (17) still teaches what "super hard" means without
+        /// demanding an inventory.
+        /// </summary>
+        private const int BoostGateFromStage = 30;
+
+        /// <summary>
+        /// How far above a perfect bare-handed run a gated target may sit.
+        ///
+        /// Above 1000 the stage cannot be won without a loadout at all -- which is the whole point of the gate, and
+        /// the reason the audit stops treating these stages as broken. The margin is small on purpose: a single
+        /// Chrono Bomb or Multiplier closes it, so the stage falls on the second attempt with the right boost, not
+        /// on the tenth with luck.
+        /// </summary>
+        private const int BoostGatePerfectCapPermille = 1100;
+
+        /// <summary>Share of a perfect run's gems, ice or stones a gated stage demands. Over 1000 by design.</summary>
+        private const int BoostGateObstaclePermille = 1150;
+
         private const int OnboardingEase = 41;
 
         private const int OnboardingFloorPermille = 460;
@@ -56,19 +88,19 @@ namespace CrushRoyale.Core.Story
 
         private const int TunedMaxSharePermille = 870;
 
-        private const int TunedObstacleEasyPermille = 760;
+        private const int TunedObstacleEasyPermille = 820;
 
-        private const int TunedObstacleHardPermille = 850;
+        private const int TunedObstacleHardPermille = 880;
 
         /// <summary>
         /// Relief on "collect N of a colour" goals. The audit bots always play the highest-scoring move and cannot
         /// steer a colour at all, so those stages were twice as likely as any other to turn into a wall: 257, 277,
         /// 297, 907 and 917 were unwinnable for an average run even with the difficulty assist.
         /// </summary>
-        private const int TunedCollectReliefPermille = 220;
+        private const int TunedCollectReliefPermille = 260;
 
         /// <summary>Share of the ice layers / stones an obstacle goal asks for.</summary>
-        private const int GoalObstaclePermille = 750;
+        private const int GoalObstaclePermille = 900;
 
         private readonly GameBalance _balance;
         private readonly Dictionary<int, StageData> _cache = new Dictionary<int, StageData>();
@@ -256,14 +288,15 @@ namespace CrushRoyale.Core.Story
                         stage.Objectives.Add(CollectObjective(stage, rng));
                         break;
                     case 3 when campaignId >= 41:
-                        // Ice goals: at most 2 layers, and 75% of the layers must break (corners stay reachable).
-                        iceCells = Math.Max(iceCells, 6 + d * 10 / 1000);
+                        // Ice goals: at most 2 layers, and most of the layers must break (corners stay reachable).
+                        iceCells = Math.Max(iceCells, 9 + d * 14 / 1000);
                         iceLayers = Math.Min(iceLayers, 2);
                         stage.TargetScore = RoundTo(target / 2, 50);
                         stage.Objectives.Add(new StageObjective { Type = ObjectiveType.ClearIce, Target = Math.Max(1, (Math.Min(iceCells, 24) * iceLayers * GoalObstaclePermille + 999) / 1000) });
                         break;
                     case 4 when campaignId >= 21:
-                        stones = Math.Max(stones, 3 + d * 5 / 1000);
+                        // Six to fourteen stones, not three: "break 2 stones" was a goal the board cleared by itself.
+                        stones = Math.Max(stones, 6 + d * 8 / 1000);
                         stage.TargetScore = RoundTo(target / 2, 50);
                         stage.Objectives.Add(new StageObjective { Type = ObjectiveType.BreakStones, Target = Math.Max(1, (Math.Min(stones, 12) * GoalObstaclePermille + 999) / 1000) });
                         break;
@@ -460,15 +493,20 @@ namespace CrushRoyale.Core.Story
         public static int MidReach(int stageId) =>
             stageId > 0 && stageId < StageTuning.Average.Length ? StageTuning.Average[stageId] : 0;
 
-        private static int Reachable(int id, int onboarding)
+        private static int Reachable(int id, int onboarding, StageTier tier)
         {
             if (id >= StageTuning.Average.Length || StageTuning.Average[id] <= 0)
             {
                 return int.MaxValue;
             }
-            long ceiling = (long)StageTuning.Average[id] * MidReachCeilingPermille / 1000;
+            bool gated = tier == StageTier.SuperHard && id >= BoostGateFromStage;
+            long ceiling = (long)StageTuning.Average[id] * (gated ? BoostGateCeilingPermille : MidReachCeilingPermille) / 1000;
             return (int)Math.Max(200, ceiling * onboarding / 1000);
         }
+
+        /// <summary>True when this stage is meant to need a loadout: the map marks it so nobody walks in unprepared.</summary>
+        public static bool NeedsBoosts(StageData stage) =>
+            stage != null && !stage.IsBoss && stage.Tier == StageTier.SuperHard && stage.Id >= BoostGateFromStage;
 
         private static void ApplyTuning(StageData stage, int id)
         {
@@ -491,6 +529,13 @@ namespace CrushRoyale.Core.Story
             int scoreShare = Math.Min(TunedMaxSharePermille, TunedScoreEasyPermille + (TunedScoreHardPermille - TunedScoreEasyPermille) * d / 1000 + tierShare) * onboarding / 1000;
             int bossShare = scoreShare - TunedBossReliefPermille;
             int obstacleShare = Math.Min(1000, TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000 + tierShare) * onboarding / 1000;
+            if (NeedsBoosts(stage))
+            {
+                // A gated stage asks for slightly more than a perfect bare-handed run collects, which is exactly
+                // what makes it a gate: the missing slice has to come from the loadout. Every one of these stages is
+                // won on gems rather than on score, so this -- not the score -- is the number that decides the match.
+                obstacleShare = BoostGateObstaclePermille;
+            }
             foreach (StageObjective objective in stage.Objectives)
             {
                 switch (objective.Type)
@@ -500,7 +545,16 @@ namespace CrushRoyale.Core.Story
                         // stages asking for barely half of what a player actually scores, which is why more than half
                         // the campaign could not be lost and had no tension in it at all.
                         int tunedScore = Math.Max(200, RoundTo((int)((long)score * scoreShare / 1000), 50));
-                        tunedScore = Math.Min(tunedScore, Reachable(id, onboarding));
+                        tunedScore = Math.Min(tunedScore, Reachable(id, onboarding, stage.Tier));
+                        if (NeedsBoosts(stage) && MidReach(id) > 0)
+                        {
+                            // The cap above only permits a higher target; this is what actually asks for it. Held
+                            // under a perfect run so the stage stays theoretically winnable bare-handed, and well
+                            // over a mid run so in practice it is the loadout that carries it.
+                            int gate = RoundTo((int)((long)MidReach(id) * BoostGateCeilingPermille / 1000), 50);
+                            int perfect = RoundTo((int)((long)score * BoostGatePerfectCapPermille / 1000), 50);
+                            tunedScore = Math.Max(tunedScore, Math.Min(gate, perfect));
+                        }
                         objective.Target = tunedScore;
                         stage.TargetScore = tunedScore;
                         break;
@@ -513,18 +567,34 @@ namespace CrushRoyale.Core.Story
                             stage.TargetScore = cappedHp;
                         }
                         break;
+                    // Floors, capped by what the bake says is actually breakable: a goal is either a real ask or
+                    // everything the board has. "Break 2 stones" cleared itself in the first cascade and taught the
+                    // player that objectives are decoration.
                     case ObjectiveType.ClearIce when StageTuning.Ice[id] > 0:
-                        objective.Target = Math.Max(1, StageTuning.Ice[id] * obstacleShare / 1000);
+                        objective.Target = Floor(StageTuning.Ice[id], obstacleShare, 6);
                         break;
                     case ObjectiveType.BreakStones when StageTuning.Stones[id] > 0:
-                        objective.Target = Math.Max(1, StageTuning.Stones[id] * obstacleShare / 1000);
+                        objective.Target = Floor(StageTuning.Stones[id], obstacleShare, 5);
                         break;
                     case ObjectiveType.CollectColor when StageTuning.Collect[id] > 0:
                         int collectShare = Math.Max(400, obstacleShare - TunedCollectReliefPermille);
-                        objective.Target = Math.Max(4, StageTuning.Collect[id] * collectShare / 1000);
+                        objective.Target = Floor(StageTuning.Collect[id], collectShare, 8);
                         break;
                 }
             }
+        }
+
+        /// <summary>
+        /// A share of what the bake measured, never under <paramref name="floor"/>.
+        ///
+        /// Normally the measurement is also the ceiling: a goal may not ask for more gems than a perfect run gets.
+        /// A share above 1000 lifts that ceiling on purpose, and only the boost-gated stages do it.
+        /// </summary>
+        private static int Floor(int measured, int share, int floor)
+        {
+            int scaled = (int)((long)measured * share / 1000);
+            int cap = share > 1000 ? scaled : measured;
+            return Math.Max(1, Math.Min(cap, Math.Max(floor, scaled)));
         }
 
         private static StageObjective CollectObjective(StageData stage, DeterministicRandom rng, int scalePermille = 1000)

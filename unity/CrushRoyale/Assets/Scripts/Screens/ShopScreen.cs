@@ -73,6 +73,16 @@ namespace CrushRoyale.Game.Screens
 
         private async Task ReloadAsync()
         {
+            if (!Game.Backend.IsOnline)
+            {
+                if (Game.Backend.OfflineShop == null)
+                {
+                    return;
+                }
+                _shop = Game.Backend.OfflineShop;
+                Rebuild();
+                return;
+            }
             ShopResponse shop = await Api(api => api.GetShopAsync());
             if (shop == null || this == null)
             {

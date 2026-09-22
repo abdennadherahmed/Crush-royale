@@ -90,6 +90,81 @@ namespace CrushRoyale.EditorTools
         public static void SetProfile(GameRoot game, bool withProfile)
         {
             game.Backend.OfflineProfile = withProfile ? DemoProfile() : null;
+            game.Backend.OfflineShop = withProfile ? DemoShop() : null;
+        }
+
+        /// <summary>
+        /// A full shop catalogue: the four tabs with the kind of item each one holds.
+        ///
+        /// The shop asks the server for its items, so it stayed on "Loading" in every capture and its grid was never
+        /// once looked at. Two defects reported there were invisible to me for that single reason.
+        /// </summary>
+        public static ShopResponse DemoShop()
+        {
+            var items = new List<ShopItemDto>();
+            string[] powerUps = { "ChronoBomb", "CoinBooster", "BrightSpark", "Multiplier2x", "GoldenChain", "FreezingGel" };
+            for (int i = 0; i < powerUps.Length; i++)
+            {
+                items.Add(new ShopItemDto
+                {
+                    Id = "powerup." + powerUps[i],
+                    Kind = "PowerUp",
+                    PowerUp = powerUps[i],
+                    Quantity = 1 + i % 3,
+                    PriceCoins = 900 + i * 350,
+                    PriceOrbes = i % 2 == 0 ? 0 : 20 + i * 6,
+                    IsDeal = i == 1,
+                    DiscountPermille = i == 1 ? 300 : 0,
+                    SoldOut = i == powerUps.Length - 1
+                });
+            }
+
+            int[] orbes = { 74, 395, 1035, 2200, 5500, 12000 };
+            int[] cents = { 99, 499, 1299, 2499, 4999, 9999 };
+            for (int i = 0; i < orbes.Length; i++)
+            {
+                items.Add(new ShopItemDto
+                {
+                    Id = "orbes.pack" + (i + 1),
+                    Kind = "OrbePack",
+                    OrbesGranted = orbes[i],
+                    PriceCents = cents[i],
+                    Sku = "crushroyale.orbes.pack" + (i + 1),
+                    OrbesPerEuro = (decimal)orbes[i] / (cents[i] / 100m)
+                });
+            }
+
+            int[] coins = { 2500, 9000, 30000, 100000 };
+            for (int i = 0; i < coins.Length; i++)
+            {
+                items.Add(new ShopItemDto
+                {
+                    Id = "coins.pack" + (i + 1),
+                    Kind = "CoinPack",
+                    CoinsGranted = coins[i],
+                    PriceOrbes = 30 + i * 70
+                });
+            }
+
+            string[] cosmetics = { "frame_gold", "board_frost", "pieces_runes", "title_crusher", "outfit_royal", "frame_ember" };
+            for (int i = 0; i < cosmetics.Length; i++)
+            {
+                items.Add(new ShopItemDto
+                {
+                    Id = "cosmetic." + cosmetics[i],
+                    Kind = "Cosmetic",
+                    CosmeticId = cosmetics[i],
+                    PriceOrbes = 180 + i * 90
+                });
+            }
+
+            return new ShopResponse
+            {
+                Items = items,
+                NextRefreshUnixMs = DateTimeOffset.UtcNow.AddHours(6).ToUnixTimeMilliseconds(),
+                RefreshCostOrbes = 40,
+                Wallet = new WalletDto { Coins = 12450, Orbes = 320 }
+            };
         }
 
         /// <summary>A mid-game player: everything the hub, the shop and the map read is filled in.</summary>

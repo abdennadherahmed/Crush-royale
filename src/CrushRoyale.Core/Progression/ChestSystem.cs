@@ -73,9 +73,9 @@ namespace CrushRoyale.Core.Progression
         public List<ChestDefinition> Chests { get; set; } = new List<ChestDefinition>
         {
             new ChestDefinition { Type = ChestType.Wood, UnlockSeconds = 3 * 3600, DropWeight = 60, CoinsMin = 40, CoinsMax = 80, PowerUps = 1, PetFragmentsMin = 2, PetFragmentsMax = 4 },
-            new ChestDefinition { Type = ChestType.Silver, UnlockSeconds = 8 * 3600, DropWeight = 28, CoinsMin = 100, CoinsMax = 180, PowerUps = 2, PetFragmentsMin = 5, PetFragmentsMax = 10, OrbesChancePermille = 50, Orbes = 5 },
-            new ChestDefinition { Type = ChestType.Gold, UnlockSeconds = 12 * 3600, DropWeight = 10, CoinsMin = 250, CoinsMax = 400, PowerUps = 3, PetFragmentsMin = 12, PetFragmentsMax = 20, OrbesChancePermille = 200, Orbes = 10 },
-            new ChestDefinition { Type = ChestType.Crystal, UnlockSeconds = 24 * 3600, DropWeight = 2, CoinsMin = 600, CoinsMax = 900, PowerUps = 5, PetFragmentsMin = 30, PetFragmentsMax = 50, OrbesChancePermille = 1000, Orbes = 20 }
+            new ChestDefinition { Type = ChestType.Silver, UnlockSeconds = 8 * 3600, DropWeight = 28, CoinsMin = 100, CoinsMax = 180, PowerUps = 2, PetFragmentsMin = 5, PetFragmentsMax = 10, OrbesChancePermille = 30, Orbes = 3 },
+            new ChestDefinition { Type = ChestType.Gold, UnlockSeconds = 12 * 3600, DropWeight = 10, CoinsMin = 250, CoinsMax = 400, PowerUps = 3, PetFragmentsMin = 12, PetFragmentsMax = 20, OrbesChancePermille = 120, Orbes = 6 },
+            new ChestDefinition { Type = ChestType.Crystal, UnlockSeconds = 24 * 3600, DropWeight = 2, CoinsMin = 600, CoinsMax = 900, PowerUps = 5, PetFragmentsMin = 30, PetFragmentsMax = 50, OrbesChancePermille = 1000, Orbes = 12 }
         };
 
         public ChestDefinition Get(ChestType type) => Chests.Find(c => c.Type == type) ?? Chests[0];

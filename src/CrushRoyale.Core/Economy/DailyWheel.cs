@@ -49,11 +49,11 @@ namespace CrushRoyale.Core.Economy
         {
             new WheelSlice { Prize = WheelPrize.Coins, Amount = 300, Weight = 24 },
             new WheelSlice { Prize = WheelPrize.Boost, Amount = 1, Weight = 16 },
-            new WheelSlice { Prize = WheelPrize.Orbes, Amount = 5, Weight = 14 },
+            new WheelSlice { Prize = WheelPrize.Orbes, Amount = 3, Weight = 14 },
             new WheelSlice { Prize = WheelPrize.Lives, Amount = 2, Weight = 12 },
             new WheelSlice { Prize = WheelPrize.Coins, Amount = 1000, Weight = 12 },
             new WheelSlice { Prize = WheelPrize.PetFragments, Amount = 5, Weight = 10 },
-            new WheelSlice { Prize = WheelPrize.Orbes, Amount = 25, Weight = 9 },
+            new WheelSlice { Prize = WheelPrize.Orbes, Amount = 12, Weight = 9 },
             new WheelSlice { Prize = WheelPrize.Jackpot, Amount = 100, Weight = 3 }
         };
 

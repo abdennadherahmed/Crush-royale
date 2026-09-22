@@ -57,10 +57,10 @@ namespace CrushRoyale.Core.Config
         public int[] SeasonCoinsByLeague { get; set; } = { 200, 500, 1000, 2000, 3500, 6000 };
 
         /// <summary>End-of-week reward per final league (orbes).</summary>
-        public int[] SeasonOrbesByLeague { get; set; } = { 0, 5, 10, 20, 35, 60 };
+        public int[] SeasonOrbesByLeague { get; set; } = { 0, 3, 6, 12, 20, 35 };
 
         /// <summary>Extra orbes for top-100 of a league: rank 1, ranks 2-10, ranks 11-100.</summary>
-        public int[] TopRankOrbes { get; set; } = { 100, 50, 20 };
+        public int[] TopRankOrbes { get; set; } = { 100, 40, 12 };
 
         /// <summary>One-time orbes the first time a league is reached (GDD "PvP rank-up bonus").</summary>
         public int[] FirstReachOrbesByLeague { get; set; } = { 0, 10, 20, 30, 50, 100 };

@@ -2105,6 +2105,7 @@
   "pvp.nextLeagueBonus": "首次抵达：+{0} 魔珠",
   "wheel.spinPaid": "再转一次  {0} 魔珠",
   "bag.convertAllOwned": "你已拥有全部伙伴，这些碎片没有可兑换的对象。留着吧：它们可用来觉醒现有伙伴。",
-  "bag.convertNeedsOwned": "只有你已拥有的伙伴才能让出多余碎片。请先解锁它。"
+  "bag.convertNeedsOwned": "只有你已拥有的伙伴才能让出多余碎片。请先解锁它。",
+  "stage.needsBoosts": "要塞关卡：光靠技术不够，请装备道具。"
 }
 
