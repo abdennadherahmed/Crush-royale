@@ -214,6 +214,9 @@ namespace CrushRoyale.Client
 
         public Task<ChestOpenResponse> OpenChestAsync(int slot, bool useOrbes, CancellationToken ct = default) => Transport.PostAsync<ChestOpenResponse>(ApiRoutes.Fill(ApiRoutes.ChestOpen, "slot", slot), new ChestOpenRequest { UseOrbes = useOrbes }, ct);
 
+        /// <summary>Takes the chest that fills on its own clock, no win and no payment needed.</summary>
+        public Task<ChestsDto> TakeFreeChestAsync(CancellationToken ct = default) => Transport.PostAsync<ChestsDto>(ApiRoutes.ChestFree, null, ct);
+
         public Task<object> SendTelemetryAsync(TelemetryRequest request, CancellationToken ct = default) => Transport.PostAsync<object>(ApiRoutes.Telemetry, request, ct);
 
         public Task<PetSummonResponse> SummonPetsAsync(int count, CancellationToken ct = default) => Transport.PostAsync<PetSummonResponse>(ApiRoutes.PetSummon, new PetSummonRequest { Count = count }, ct);

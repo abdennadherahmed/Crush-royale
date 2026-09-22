@@ -45,6 +45,23 @@ namespace CrushRoyale.Core.Progression
     {
         public int Slots { get; set; } = 4;
 
+        /// <summary>
+        /// A gold chest is guaranteed at the latest on this many victory chests, and a crystal one on this many.
+        /// Zero turns the guarantee off and leaves the raw weights, which is a worse game: the players who quit are
+        /// the ones who hit a long streak of nothing, not the ones who get an average run.
+        /// </summary>
+        public int GoldAtLatest { get; set; } = 10;
+
+        public int CrystalAtLatest { get; set; } = 40;
+
+        /// <summary>
+        /// A chest that fills by itself every few hours and asks nothing in return. It is the appointment for the
+        /// player who has run out of lives or lost three in a row: a reason to open the game that is not "play more".
+        /// </summary>
+        public int FreeChestSeconds { get; set; } = 4 * 3600;
+
+        public ChestType FreeChestType { get; set; } = ChestType.Wood;
+
         /// <summary>Orbes to open a chest immediately: 1 per started 10 minutes left.</summary>
         public int SkipSecondsPerOrbe { get; set; } = 600;
 
@@ -82,6 +99,14 @@ namespace CrushRoyale.Core.Progression
         public List<ChestSlot> Slots { get; set; } = new List<ChestSlot>();
 
         public long ChestsOpened { get; set; }
+
+        /// <summary>Victory chests rolled since the last gold one, and since the last crystal one (see the cycle).</summary>
+        public int SinceGold { get; set; }
+
+        public int SinceCrystal { get; set; }
+
+        /// <summary>When the free chest was last taken; it comes back on its own clock, whether or not you play.</summary>
+        public long FreeTakenUnixMs { get; set; }
     }
 
     public enum ChestSlotStatus
@@ -160,14 +185,88 @@ namespace CrushRoyale.Core.Progression
         }
 
         /// <summary>Random rarity of a PvP victory chest.</summary>
+        /// <summary>
+        /// A victory chest, with a floor under bad luck. Pure weights mean a player can win twenty matches and see
+        /// twenty wooden chests, and that is the run where they stop playing. A counter guarantees a gold chest at
+        /// least every <see cref="ChestBalance.GoldAtLatest"/> wins and a crystal one every
+        /// <see cref="ChestBalance.CrystalAtLatest"/>, so the worst streak anybody can have is a known one.
+        ///
+        /// The counters are only ever moved by <see cref="GrantVictoryChest"/>: rolling is left free of side effects
+        /// so the server can preview a chest without changing what the player will get.
+        /// </summary>
         public ChestType RollVictoryChest(DeterministicRandom rng)
         {
+            if (_balance.CrystalAtLatest > 0 && State.SinceCrystal + 1 >= _balance.CrystalAtLatest)
+            {
+                return ChestType.Crystal;
+            }
+            if (_balance.GoldAtLatest > 0 && State.SinceGold + 1 >= _balance.GoldAtLatest)
+            {
+                return ChestType.Gold;
+            }
+
             var weights = new List<int>();
             foreach (ChestDefinition def in _balance.Chests)
             {
                 weights.Add(def.DropWeight);
             }
             return _balance.Chests[rng.NextWeightedIndex(weights)].Type;
+        }
+
+        /// <summary>Rolls a victory chest and moves the cycle counters on: the one call a match result should use.</summary>
+        public ChestType GrantVictoryChest(DeterministicRandom rng)
+        {
+            ChestType type = RollVictoryChest(rng);
+            State.SinceCrystal = type == ChestType.Crystal ? 0 : State.SinceCrystal + 1;
+            State.SinceGold = type == ChestType.Crystal || type == ChestType.Gold ? 0 : State.SinceGold + 1;
+            return type;
+        }
+
+        /// <summary>Wins left before the cycle guarantees a gold chest (0 when the next one is already it).</summary>
+        public int WinsToGold() =>
+            _balance.GoldAtLatest <= 0 ? -1 : Math.Max(0, _balance.GoldAtLatest - 1 - State.SinceGold);
+
+        /// <summary>Wins left before the cycle guarantees a crystal chest (0 when the next one is already it).</summary>
+        public int WinsToCrystal() =>
+            _balance.CrystalAtLatest <= 0 ? -1 : Math.Max(0, _balance.CrystalAtLatest - 1 - State.SinceCrystal);
+
+        // ------------------------------------------------------------------ the free chest
+
+        /// <summary>Seconds before the free chest is ready; 0 when it is waiting to be taken.</summary>
+        public int FreeChestSecondsLeft(long nowUnixMs)
+        {
+            if (_balance.FreeChestSeconds <= 0)
+            {
+                return int.MaxValue;
+            }
+            if (State.FreeTakenUnixMs <= 0)
+            {
+                // Never taken: it is ready, so the very first session has something to open.
+                return 0;
+            }
+            long readyAt = State.FreeTakenUnixMs + (long)_balance.FreeChestSeconds * 1000;
+            return (int)Math.Max(0, (readyAt - nowUnixMs + 999) / 1000);
+        }
+
+        public bool FreeChestReady(long nowUnixMs) => FreeChestSecondsLeft(nowUnixMs) == 0;
+
+        /// <summary>
+        /// Takes the free chest into a slot. It fails when the timer is still running or when every slot is full,
+        /// and in the second case the timer is left alone so nothing is lost by tapping too early.
+        /// </summary>
+        public OperationResult<int> TakeFreeChest(long nowUnixMs)
+        {
+            if (!FreeChestReady(nowUnixMs))
+            {
+                return OperationResult<int>.Fail(ErrorCode.CooldownActive, "The free chest is not ready yet.");
+            }
+            int slot = Grant(_balance.FreeChestType, "free");
+            if (slot < 0)
+            {
+                return OperationResult<int>.Fail(ErrorCode.LimitReached, "Every chest slot is full.");
+            }
+            State.FreeTakenUnixMs = nowUnixMs;
+            return OperationResult<int>.Ok(slot);
         }
 
         /// <summary>Puts a chest in the first free slot. Returns the slot, or -1 when all slots are full (chest lost).</summary>

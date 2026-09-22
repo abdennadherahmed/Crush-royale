@@ -2092,6 +2092,9 @@
   "guild.racePrize": "1°: {0} monete + {1} orbi",
   "guild.raceMine": "Hai portato {0} su {1}",
   "guild.raceEntered": "La tua gilda è in gara",
-  "guild.raceNeedMembers": "Ancora {0} membri e la tua gilda entra in gara. Ne servono {1} per essere classificata, e i punti sopra contano già."
+  "guild.raceNeedMembers": "Ancora {0} membri e la tua gilda entra in gara. Ne servono {1} per essere classificata, e i punti sopra contano già.",
+  "chest.free": "GRATIS!",
+  "chest.freeSoon": "Qui si riempie da solo uno scrigno gratis. Non serve vincere.",
+  "chest.freeTaken": "Scrigno gratis preso. Il prossimo si sta già riempiendo."
 }
 

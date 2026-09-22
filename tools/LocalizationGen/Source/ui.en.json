@@ -2092,6 +2092,9 @@
   "guild.racePrize": "1st: {0} coins + {1} orbes",
   "guild.raceMine": "You brought {0} of {1}",
   "guild.raceEntered": "Your guild is in the race",
-  "guild.raceNeedMembers": "{0} more members and your guild enters the race. It needs {1} to be ranked, and the points below already count."
+  "guild.raceNeedMembers": "{0} more members and your guild enters the race. It needs {1} to be ranked, and the points below already count.",
+  "chest.free": "FREE!",
+  "chest.freeSoon": "A free chest fills here on its own. No win needed.",
+  "chest.freeTaken": "Free chest taken. The next one is already filling."
 }
 

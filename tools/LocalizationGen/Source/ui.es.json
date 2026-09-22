@@ -2092,6 +2092,9 @@
   "guild.racePrize": "1.º: {0} monedas + {1} orbes",
   "guild.raceMine": "Has aportado {0} de {1}",
   "guild.raceEntered": "Tu gremio está en la carrera",
-  "guild.raceNeedMembers": "{0} miembros más y tu gremio entra en la carrera. Necesita {1} para ser clasificado, y los puntos de arriba ya cuentan."
+  "guild.raceNeedMembers": "{0} miembros más y tu gremio entra en la carrera. Necesita {1} para ser clasificado, y los puntos de arriba ya cuentan.",
+  "chest.free": "¡GRATIS!",
+  "chest.freeSoon": "Un cofre gratis se llena aquí solo. No hace falta ganar.",
+  "chest.freeTaken": "Cofre gratis recogido. El siguiente ya se está llenando."
 }
 

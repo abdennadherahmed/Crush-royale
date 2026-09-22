@@ -2092,6 +2092,9 @@
   "guild.racePrize": "1.: {0} Münzen + {1} Kugeln",
   "guild.raceMine": "Du hast {0} von {1} beigetragen",
   "guild.raceEntered": "Deine Gilde ist im Rennen",
-  "guild.raceNeedMembers": "Noch {0} Mitglieder und deine Gilde ist im Rennen. Für eine Wertung braucht sie {1}, und die Punkte oben zählen bereits."
+  "guild.raceNeedMembers": "Noch {0} Mitglieder und deine Gilde ist im Rennen. Für eine Wertung braucht sie {1}, und die Punkte oben zählen bereits.",
+  "chest.free": "GRATIS!",
+  "chest.freeSoon": "Hier füllt sich von selbst eine Gratis-Truhe. Kein Sieg nötig.",
+  "chest.freeTaken": "Gratis-Truhe genommen. Die nächste füllt sich schon."
 }
 

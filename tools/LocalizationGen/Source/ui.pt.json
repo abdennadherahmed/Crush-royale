@@ -2092,6 +2092,9 @@
   "guild.racePrize": "1º: {0} moedas + {1} orbes",
   "guild.raceMine": "Você trouxe {0} de {1}",
   "guild.raceEntered": "Sua guilda está na corrida",
-  "guild.raceNeedMembers": "Mais {0} membros e sua guilda entra na corrida. Precisa de {1} para ser classificada, e os pontos acima já contam."
+  "guild.raceNeedMembers": "Mais {0} membros e sua guilda entra na corrida. Precisa de {1} para ser classificada, e os pontos acima já contam.",
+  "chest.free": "GRÁTIS!",
+  "chest.freeSoon": "Um baú grátis se enche aqui sozinho. Não precisa vencer.",
+  "chest.freeTaken": "Baú grátis recolhido. O próximo já está enchendo."
 }
 

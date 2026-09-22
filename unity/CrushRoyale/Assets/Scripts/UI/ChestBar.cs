@@ -75,6 +75,22 @@ namespace CrushRoyale.Game.UI
 
         private ChestSlotDto Slot(int i) => _data != null && i < _data.Slots.Count ? _data.Slots[i] : null;
 
+        /// <summary>Index of the first empty slot, or -1: where the free chest is shown.</summary>
+        private int FirstEmptySlot()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                if (Slot(i) == null)
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private int FreeSecondsLeft() =>
+            _data == null ? int.MaxValue : Mathf.Max(0, _data.FreeChestSecondsLeft - (int)(Time.realtimeSinceStartup - _receivedAt));
+
         private void Refresh()
         {
             Localization loc = Game.Loc;
@@ -85,12 +101,37 @@ namespace CrushRoyale.Game.UI
                 Text label = _labels[i];
                 if (slot == null)
                 {
+                    // The free chest lives on the first empty slot: ready it is a gift to tap, otherwise it shows the
+                    // one countdown that does not need a win. Only the first, so it reads as a single appointment.
+                    bool firstEmpty = FirstEmptySlot() == i;
+                    if (firstEmpty && _data != null && FreeSecondsLeft() <= 0)
+                    {
+                        chest.enabled = true;
+                        chest.sprite = ChestArt("wood");
+                        label.text = loc.T("chest.free");
+                        label.color = Theme.Success;
+                        float beat = 1f + 0.08f * Mathf.Sin(Time.unscaledTime * 6f);
+                        chest.transform.localScale = new Vector3(beat, beat, 1f);
+                        continue;
+                    }
+                    if (firstEmpty && _data != null)
+                    {
+                        chest.enabled = true;
+                        chest.sprite = ChestArt("wood");
+                        chest.color = new Color(1f, 1f, 1f, 0.35f);
+                        label.text = Duration(FreeSecondsLeft());
+                        label.color = Theme.TextMuted;
+                        chest.transform.localScale = Vector3.one;
+                        continue;
+                    }
                     chest.enabled = false;
+                    chest.color = Color.white;
                     label.text = loc.T("chest.empty");
                     label.color = Theme.TextMuted;
                     chest.transform.localScale = Vector3.one;
                     continue;
                 }
+                chest.color = Color.white;
                 chest.enabled = true;
                 chest.sprite = ChestArt(slot.Type);
                 int left = SecondsLeft(slot);
@@ -126,6 +167,28 @@ namespace CrushRoyale.Game.UI
             return (seconds / 60) + ":" + (seconds % 60).ToString("00");
         }
 
+        /// <summary>Takes the chest that filled on its own clock: no win, no payment, just a reason to come back.</summary>
+        private async Task TakeFreeAsync()
+        {
+            _busy = true;
+            try
+            {
+                ChestsDto chests = await Game.Backend.Client.Api.TakeFreeChestAsync();
+                if (chests == null)
+                {
+                    return;
+                }
+                Store(chests);
+                Apply(chests);
+                Game.Audio.PlaySFX(SoundIds.Coins);
+                _ui.Toast(Game.Loc.T("chest.freeTaken"), 3f);
+            }
+            finally
+            {
+                _busy = false;
+            }
+        }
+
         private async Task OnTapAsync(int index)
         {
             ChestSlotDto slot = Slot(index);
@@ -135,8 +198,13 @@ namespace CrushRoyale.Game.UI
             }
             if (slot == null)
             {
+                if (index == FirstEmptySlot() && FreeSecondsLeft() <= 0 && Game.Backend.IsOnline)
+                {
+                    await TakeFreeAsync();
+                    return;
+                }
                 // Empty slot: explain where timed chests come from.
-                _ui.Toast(Game.Loc.T("chest.howTo"), 4f);
+                _ui.Toast(Game.Loc.T(index == FirstEmptySlot() ? "chest.freeSoon" : "chest.howTo"), 4f);
                 return;
             }
             if (!Game.Backend.IsOnline)

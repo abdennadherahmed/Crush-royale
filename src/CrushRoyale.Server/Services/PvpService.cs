@@ -536,7 +536,7 @@ public sealed class PvpService
         if (ranked && outcome == MatchOutcome.Win)
         {
             var chestRng = new DeterministicRandom(StableHash.Fnv1a(match.Id));
-            dto.ChestEarned = ws.GrantChest(ws.Chests.RollVictoryChest(chestRng), "pvp:" + match.Id);
+            dto.ChestEarned = ws.GrantChest(ws.Chests.GrantVictoryChest(chestRng), "pvp:" + match.Id);
         }
 
         long baseCoins = PvpRewardCalculator.BaseCoins(balance.Pvp, outcome);

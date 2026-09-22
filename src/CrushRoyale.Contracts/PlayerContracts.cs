@@ -312,6 +312,14 @@ namespace CrushRoyale.Contracts
         /// <summary>One entry per slot; null for an empty slot.</summary>
         public List<ChestSlotDto> Slots { get; set; } = new List<ChestSlotDto>();
 
+        /// <summary>Seconds before the free chest can be taken; 0 when it is waiting.</summary>
+        public int FreeChestSecondsLeft { get; set; }
+
+        /// <summary>Victory chests left before the cycle guarantees a gold one, then a crystal one.</summary>
+        public int WinsToGold { get; set; }
+
+        public int WinsToCrystal { get; set; }
+
         /// <summary>Server time used for the countdowns (the client adds the time elapsed since it received this).</summary>
         public long ServerNowUnixMs { get; set; }
     }

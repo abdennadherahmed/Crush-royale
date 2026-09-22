@@ -160,7 +160,13 @@ public static class Mappers
     {
         ChestSystem chests = ws.Chests;
         long now = ws.NowMs;
-        var dto = new ChestsDto { ServerNowUnixMs = now };
+        var dto = new ChestsDto
+        {
+            ServerNowUnixMs = now,
+            FreeChestSecondsLeft = chests.FreeChestSecondsLeft(now),
+            WinsToGold = chests.WinsToGold(),
+            WinsToCrystal = chests.WinsToCrystal()
+        };
         for (int i = 0; i < chests.State.Slots.Count; i++)
         {
             ChestSlot slot = chests.State.Slots[i];

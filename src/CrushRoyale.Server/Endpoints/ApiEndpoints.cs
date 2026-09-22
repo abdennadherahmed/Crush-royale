@@ -62,6 +62,7 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.WheelSpin, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.SpinWheelAsync(Me(user), ct));
         api.MapPost(ApiRoutes.LivesVipClaim, (ClaimsPrincipal user, EconomyService s, CancellationToken ct) => s.ClaimVipLifeAsync(Me(user), ct));
         api.MapPost(ApiRoutes.ChestUnlock, (int slot, ClaimsPrincipal user, ChestService s, CancellationToken ct) => s.UnlockAsync(Me(user), slot, ct));
+        api.MapPost(ApiRoutes.ChestFree, (ClaimsPrincipal user, ChestService s, CancellationToken ct) => s.TakeFreeAsync(Me(user), ct));
         api.MapPost(ApiRoutes.ChestOpen, (int slot, ChestOpenRequest body, ClaimsPrincipal user, ChestService s, CancellationToken ct) => s.OpenAsync(Me(user), slot, body, ct));
         api.MapPost(ApiRoutes.ChallengeCreate, (ClaimsPrincipal user, ChallengeService s, CancellationToken ct) => s.CreateAsync(Me(user), ct));
         api.MapPost(ApiRoutes.ChallengeStart, (string code, StartStageRequest body, ClaimsPrincipal user, ChallengeService s, CancellationToken ct) => s.StartAsync(Me(user), code, body, ct));

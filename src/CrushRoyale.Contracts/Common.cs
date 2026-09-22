@@ -44,6 +44,7 @@ namespace CrushRoyale.Contracts
         public const string ChallengeStart = Prefix + "/challenges/{code}/start";
         public const string ChestUnlock = Prefix + "/chests/{slot}/unlock";
         public const string ChestOpen = Prefix + "/chests/{slot}/open";
+        public const string ChestFree = Prefix + "/chests/free";
         public const string PetEquip = Prefix + "/pets/equip";
         public const string PetAwaken = Prefix + "/pets/awaken";
         public const string PetUnlock = Prefix + "/pets/unlock";

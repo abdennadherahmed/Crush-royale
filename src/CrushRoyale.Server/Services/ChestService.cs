@@ -30,6 +30,15 @@ public sealed class ChestService
             return Mappers.Chests(ws);
         }, ct);
 
+    /// <summary>Takes the free chest into a slot. It is on its own clock, so it needs no win and no payment.</summary>
+    public Task<ChestsDto> TakeFreeAsync(Guid userId, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            ws.Chests.TakeFreeChest(ws.NowMs).ValueOrThrow();
+            return Mappers.Chests(ws);
+        }, ct);
+
     public Task<ChestOpenResponse> OpenAsync(Guid userId, int slot, ChestOpenRequest? request, CancellationToken ct) =>
         _ops.RunAsync(userId, ctx =>
         {
