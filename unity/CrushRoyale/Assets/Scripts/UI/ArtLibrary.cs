@@ -56,6 +56,9 @@ namespace CrushRoyale.Game.UI
         /// <summary>Corrupted crystal (stage 201+).</summary>
         public static Sprite Blight() => Load("Art/Gems/blight");
 
+        /// <summary>Corruption forge (stage 401+): the block that keeps making blight until it is destroyed.</summary>
+        public static Sprite Forge() => Load("Art/Gems/forge");
+
         /// <summary>Dragon egg; cracked and glowing when one hit is left (stage 301+).</summary>
         public static Sprite Egg(int hp) => Load(hp <= 1 ? "Art/Gems/egg_cracked" : "Art/Gems/egg");
 

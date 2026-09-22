@@ -2109,6 +2109,9 @@
   "stage.needsBoosts": "Livello fortificato: la bravura da sola non basterà. Equipaggia potenziamenti.",
   "guildboss.7kou.rule": "La corruzione si diffonde a ogni mossa che non ne distrugge. Se prende metà del tabellone, l'attacco finisce.",
   "guildboss.escobaros.rule": "Una cella ghiacciata richiede due mosse. Una mossa che non rompe nulla ne ghiaccia altre tre, e a tre quarti l'attacco finisce.",
-  "guildboss.majors_blue.rule": "Le bombe ricompaiono con una miccia corta. Se una arriva a zero, l'attacco finisce subito, qualunque sia il punteggio."
+  "guildboss.majors_blue.rule": "Le bombe ricompaiono con una miccia corta. Se una arriva a zero, l'attacco finisce subito, qualunque sia il punteggio.",
+  "objective.DestroyBlight": "Corruzione",
+  "mechanic.forge.title": "Fucina della corruzione",
+  "mechanic.forge.body": "Corrompe una gemma vicina a ogni mossa, e quella corruzione poi si diffonde da sola. Tre colpi la distruggono. Rompila presto o il tabellone si chiude."
 }
 

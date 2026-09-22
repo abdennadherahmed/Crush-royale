@@ -77,6 +77,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Cells frozen by a move that breaks nothing at all. 0 = ice never grows on its own.</summary>
         public int IcePerWastedMove { get; set; }
 
+        /// <summary>Corruption forges on the board (story, from stage 401): each corrupts a neighbour every move.</summary>
+        public int ForgeCount { get; set; }
+
         public int TwoStarScore { get; set; }
 
         public int ThreeStarScore { get; set; }
@@ -152,6 +155,7 @@ namespace CrushRoyale.Core.Gameplay
                     IceLayers = stage.IceLayers,
                     BlightCount = stage.BlightCount,
                     EggCount = stage.EggCount,
+                    ForgeCount = stage.ForgeCount,
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },
@@ -160,6 +164,7 @@ namespace CrushRoyale.Core.Gameplay
                 BossPhases = stage.BossPhases,
                 BossStonesPerPhase = stage.BossStonesPerPhase,
                 TimeBombCount = stage.TimeBombCount,
+                ForgeCount = stage.ForgeCount,
                 TimeBombMoves = stage.TimeBombMoves,
                 TwoStarScore = stage.TwoStarScore,
                 ThreeStarScore = stage.ThreeStarScore,

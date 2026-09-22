@@ -2109,6 +2109,9 @@
   "stage.needsBoosts": "요새 스테이지: 실력만으로는 부족합니다. 부스트를 장착하세요.",
   "guildboss.7kou.rule": "오염을 파괴하지 않는 수를 둘 때마다 퍼집니다. 보드의 절반을 덮으면 공격이 끝납니다.",
   "guildboss.escobaros.rule": "얼어붙은 칸은 여는 데 두 수가 필요합니다. 아무것도 부수지 못한 수는 세 칸을 더 얼리고, 4분의 3이 얼면 공격이 끝납니다.",
-  "guildboss.majors_blue.rule": "짧은 도화선의 폭탄이 계속 나타납니다. 하나라도 0이 되면 점수와 상관없이 공격이 즉시 끝납니다."
+  "guildboss.majors_blue.rule": "짧은 도화선의 폭탄이 계속 나타납니다. 하나라도 0이 되면 점수와 상관없이 공격이 즉시 끝납니다.",
+  "objective.DestroyBlight": "오염",
+  "mechanic.forge.title": "오염의 용광로",
+  "mechanic.forge.body": "매 수마다 인접한 젬을 오염시키고, 그 오염은 스스로 퍼집니다. 세 번 때리면 파괴됩니다. 일찍 부수지 않으면 보드가 막힙니다."
 }
 

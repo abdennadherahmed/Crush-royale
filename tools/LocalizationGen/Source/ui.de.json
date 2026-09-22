@@ -2109,6 +2109,9 @@
   "stage.needsBoosts": "Befestigte Stufe: Können allein reicht nicht. Rüste Boosts aus.",
   "guildboss.7kou.rule": "Die Verderbnis wächst bei jedem Zug, der keine zerstört. Nimmt sie das halbe Feld ein, ist der Angriff vorbei.",
   "guildboss.escobaros.rule": "Ein vereistes Feld braucht zwei Züge. Ein Zug, der nichts zerbricht, vereist drei weitere, und bei drei Vierteln ist der Angriff vorbei.",
-  "guildboss.majors_blue.rule": "Bomben erscheinen immer wieder mit kurzer Zündschnur. Erreicht eine die Null, endet der Angriff sofort, egal wie hoch dein Punktestand ist."
+  "guildboss.majors_blue.rule": "Bomben erscheinen immer wieder mit kurzer Zündschnur. Erreicht eine die Null, endet der Angriff sofort, egal wie hoch dein Punktestand ist.",
+  "objective.DestroyBlight": "Verderbnis",
+  "mechanic.forge.title": "Schmiede der Verderbnis",
+  "mechanic.forge.body": "Sie verdirbt bei jedem Zug einen benachbarten Edelstein, und diese Verderbnis breitet sich dann von selbst aus. Drei Treffer zerstören sie. Zerschlage sie früh, sonst schließt sich das Feld."
 }
 

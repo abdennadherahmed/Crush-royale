@@ -2109,6 +2109,9 @@
   "stage.needsBoosts": "Fase fortificada: la habilidad sola no bastará. Equipa potenciadores.",
   "guildboss.7kou.rule": "La corrupción se extiende con cada movimiento que no destruye ninguna. Si toma la mitad del tablero, el ataque acaba.",
   "guildboss.escobaros.rule": "Una casilla helada necesita dos movimientos para abrirse. Un movimiento que no rompe nada hiela tres más, y con tres cuartos helados el ataque acaba.",
-  "guildboss.majors_blue.rule": "Las bombas reaparecen con una mecha corta. Si una llega a cero, el ataque termina al instante, sea cual sea tu puntuación."
+  "guildboss.majors_blue.rule": "Las bombas reaparecen con una mecha corta. Si una llega a cero, el ataque termina al instante, sea cual sea tu puntuación.",
+  "objective.DestroyBlight": "Corrupción",
+  "mechanic.forge.title": "Forja de corrupción",
+  "mechanic.forge.body": "Corrompe una gema vecina en cada movimiento, y esa corrupción luego se extiende sola. Tres golpes la destruyen. Rómpela pronto o el tablero se cerrará."
 }
 

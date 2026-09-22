@@ -19,7 +19,10 @@ namespace CrushRoyale.Core.Story
         ClearIce = 1,
         CollectColor = 2,
         BreakStones = 3,
-        DefeatBoss = 4
+        DefeatBoss = 4,
+
+        /// <summary>Destroy a number of corrupted crystals (from stage 401, where forges keep making them).</summary>
+        DestroyBlight = 5
     }
 
     /// <summary>Difficulty label shown on the map: a sawtooth of easy stages, a hard one, now and then a super hard one.</summary>
@@ -122,6 +125,9 @@ namespace CrushRoyale.Core.Story
 
         /// <summary>Dragon eggs (from stage 301).</summary>
         public int EggCount { get; set; }
+
+        /// <summary>Corruption forges (from stage 401): each corrupts a neighbouring gem after every move.</summary>
+        public int ForgeCount { get; set; }
 
         public List<StageObjective> Objectives { get; set; } = new List<StageObjective>();
 

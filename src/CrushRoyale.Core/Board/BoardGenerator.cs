@@ -30,6 +30,9 @@ namespace CrushRoyale.Core.Board
         /// <summary>Dragon eggs (2 hits, hatch into a bonus gem).</summary>
         public int EggCount { get; set; }
 
+        /// <summary>Corruption forges (3 hits): each one corrupts a neighbouring gem after every move.</summary>
+        public int ForgeCount { get; set; }
+
         public int MaxAttempts { get; set; } = 400;
 
         public int LowDifficultyBiasPermille { get; set; } = 350;
@@ -57,7 +60,7 @@ namespace CrushRoyale.Core.Board
             {
                 throw new ArgumentException("StoneHp must be 1-3.");
             }
-            if (BlightCount < 0 || EggCount < 0 || StoneCount + BlightCount + EggCount > cells / 4)
+            if (ForgeCount < 0 || BlightCount < 0 || EggCount < 0 || StoneCount + BlightCount + EggCount + ForgeCount > cells / 4)
             {
                 throw new ArgumentException("Too many blocks (stones, blight, eggs).");
             }
@@ -154,6 +157,8 @@ namespace CrushRoyale.Core.Board
             // Blight and eggs sit in the upper half: they fall onto the board as the player clears below.
             PlaceBlocks(board, o, rng, stoneSet, o.BlightCount, PieceType.Blight, 1);
             PlaceBlocks(board, o, rng, stoneSet, o.EggCount, PieceType.Egg, 2);
+            // Three hits: a forge has to be a decision, not a nuisance you clear on the way past.
+            PlaceBlocks(board, o, rng, stoneSet, o.ForgeCount, PieceType.Forge, 3);
 
             int biasPermille = o.LowDifficultyBiasPermille * (1000 - Clamp(o.DifficultyPermille)) / 1000;
             var candidates = new List<PieceColor>(o.ColorCount);

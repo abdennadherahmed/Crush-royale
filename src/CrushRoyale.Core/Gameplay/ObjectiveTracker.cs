@@ -104,6 +104,9 @@ namespace CrushRoyale.Core.Gameplay
                     case ObjectiveType.BreakStones:
                         p.Current += step.StonesDestroyed;
                         break;
+                    case ObjectiveType.DestroyBlight:
+                        p.Current += step.BlightCleared;
+                        break;
                 }
             }
         }

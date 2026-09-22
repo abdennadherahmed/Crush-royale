@@ -812,6 +812,10 @@ namespace CrushRoyale.Game.Screens
             {
                 mechanics.Add(Loc.T("mechanic.egg.title"));
             }
+            if (stage.ForgeCount > 0)
+            {
+                mechanics.Add(Loc.T("mechanic.forge.title"));
+            }
             if (mechanics.Count > 0)
             {
                 UIFactory.Height(UIFactory.Label(list, string.Join("  ·  ", mechanics), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold), 60);
@@ -888,6 +892,7 @@ namespace CrushRoyale.Game.Screens
                 case ObjectiveType.CollectColor: art = ArtLibrary.Gem(objective.Color); break;
                 case ObjectiveType.ClearIce: art = ArtLibrary.Ice(); break;
                 case ObjectiveType.BreakStones: art = ArtLibrary.Stone(); break;
+                case ObjectiveType.DestroyBlight: art = ArtLibrary.Blight(); break;
                 case ObjectiveType.DefeatBoss: art = ArtLibrary.Boss(stage); break;
                 default: art = UiKit.Art("item_stars") ?? ArtLibrary.Icon("star"); break;
             }

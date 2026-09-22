@@ -156,6 +156,19 @@ namespace CrushRoyale.Game.Gameplay
                 _eyes.gameObject.SetActive(!piece.IsBlock);
             }
             ShowCountdown(piece);
+            if (piece.IsForge)
+            {
+                // A forge has to look alive, because it is: it takes a gem every move. A still block would read as
+                // one more stone and the player would clear it last instead of first.
+                _body.sprite = ArtLibrary.Forge() ?? ArtLibrary.Blight() ?? ArtLibrary.Stone() ?? ProceduralSprites.Stone();
+                _body.color = Color.white;
+                _overlay.enabled = false;
+                if (GetComponent<Pulse>() == null)
+                {
+                    gameObject.AddComponent<Pulse>().Scale = true;
+                }
+                return;
+            }
             if (piece.IsBlight || piece.IsEgg)
             {
                 Sprite block = piece.IsBlight ? ArtLibrary.Blight() : ArtLibrary.Egg(piece.Hp);

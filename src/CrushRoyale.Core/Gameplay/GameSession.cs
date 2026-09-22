@@ -132,6 +132,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Gem turned into blight after this action.</summary>
         public Pos? BlightSpread { get; internal set; }
 
+        /// <summary>Gems the corruption forges took this action, one per forge still standing.</summary>
+        public List<Pos> ForgeCorrupted { get; } = new List<Pos>();
+
         /// <summary>Cells frozen by this action because it broke nothing (the freezing guild boss).</summary>
         public int CellsFrozen { get; internal set; }
 
@@ -188,6 +191,9 @@ namespace CrushRoyale.Core.Gameplay
 
         public int IceBroken { get; internal set; }
 
+        /// <summary>Corrupted crystals destroyed during the match (the goal of the forge stages).</summary>
+        public int BlightDestroyed { get; internal set; }
+
         public int ContinuesUsed { get; internal set; }
 
         /// <summary>The stage was lost because a countdown bomb exploded.</summary>
@@ -229,6 +235,8 @@ namespace CrushRoyale.Core.Gameplay
         private int _line5Matches;
         private readonly DeterministicRandom _petRng;
         private readonly DeterministicRandom _hazardRng;
+        private int _blightDestroyed;
+
         private bool _bombExploded;
 
         /// <summary>Set when corruption or ice has taken enough of the board to end the match.</summary>
@@ -643,6 +651,7 @@ namespace CrushRoyale.Core.Gameplay
                 Line5Matches = _line5Matches,
                 ClearedByColor = (int[])_clearedByColor.Clone(),
                 StonesDestroyed = _stonesDestroyed,
+                BlightDestroyed = _blightDestroyed,
                 IceBroken = _iceBroken,
                 ContinuesUsed = ContinuesUsed,
                 LostToBomb = _bombExploded && State == SessionState.Lost,
@@ -737,6 +746,7 @@ namespace CrushRoyale.Core.Gameplay
                     _clearedByColor[c] += step.ClearedByColor[c];
                 }
                 _stonesDestroyed += step.StonesDestroyed;
+                _blightDestroyed += step.BlightCleared;
                 _iceBroken += step.IceBroken.Count;
                 _specialsCreated += step.SpecialsCreated.Count;
                 _specialsActivated += step.SpecialsActivated;
@@ -777,7 +787,14 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>After each player move: blight spreads when none was destroyed, bombs count down, new bombs arrive.</summary>
         private void ApplyHazards(ActionOutcome outcome)
         {
-            if (Config.Board.BlightCount > 0)
+            // Forges work every move, whatever the player did. A stone sits there; a forge costs a gem per move,
+            // and the blight it makes then spreads on its own, so the board does not decay in a straight line.
+            if (Config.ForgeCount > 0)
+            {
+                outcome.ForgeCorrupted.AddRange(_boardManager.FeedForges(_hazardRng));
+            }
+
+            if (Config.Board.BlightCount > 0 || Config.ForgeCount > 0)
             {
                 int cleared = BlightClearedIn(outcome.Resolution) + BlightClearedIn(outcome.PetResolution);
                 if (cleared == 0)

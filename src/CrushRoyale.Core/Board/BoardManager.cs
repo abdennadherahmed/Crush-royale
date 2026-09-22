@@ -296,6 +296,49 @@ namespace CrushRoyale.Core.Board
         }
 
         /// <summary>
+        /// Every forge on the board corrupts one plain gem next to it, and returns the cells it took.
+        ///
+        /// This is what makes a forge different from an obstacle: a stone sits there, a forge works. Leaving one
+        /// standing costs a gem every single move, and the blight it produces then spreads on its own, so the board
+        /// does not decay in a straight line -- it accelerates.
+        /// </summary>
+        public List<Pos> FeedForges(DeterministicRandom rng)
+        {
+            var taken = new List<Pos>();
+            var forges = new List<Pos>();
+            foreach (Pos p in Board.AllPositions())
+            {
+                if (Board[p].IsForge)
+                {
+                    forges.Add(p);
+                }
+            }
+            foreach (Pos forge in forges)
+            {
+                var candidates = new List<Pos>();
+                foreach (Pos n in new[] { forge.Offset(1, 0), forge.Offset(-1, 0), forge.Offset(0, 1), forge.Offset(0, -1) })
+                {
+                    if (Board.InBounds(n) && Board[n].IsPlainGem && Board.IceAt(n) == 0)
+                    {
+                        candidates.Add(n);
+                    }
+                }
+                if (candidates.Count == 0)
+                {
+                    continue;
+                }
+                Pos target = candidates[rng.NextInt(candidates.Count)];
+                Board[target] = Board.CreatePiece(PieceColor.None, PieceType.Blight, 1);
+                taken.Add(target);
+            }
+            if (taken.Count > 0)
+            {
+                BoardShuffler.EnsurePlayable(Board, _shuffleRng, _colorCount);
+            }
+            return taken;
+        }
+
+        /// <summary>
         /// Corruption grows: a random plain gem next to a blight crystal becomes blight. The board is then kept playable.
         /// Returns the converted cell, or null when nothing can spread.
         /// </summary>

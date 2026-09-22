@@ -48,7 +48,14 @@ namespace CrushRoyale.Core.Board
         TimeBomb = 7,
 
         /// <summary>Cross bomb from a 2x2 match: clears its whole row AND column.</summary>
-        Cross = 8
+        Cross = 8,
+
+        /// <summary>
+        /// Corruption forge (from stage 401): a colorless block, tougher than a stone, that turns one neighbouring
+        /// gem into blight after every move until it is destroyed. The blight it makes still spreads on its own, so
+        /// a forge left standing does not merely add work, it compounds.
+        /// </summary>
+        Forge = 9
     }
 
     /// <summary>
@@ -88,8 +95,9 @@ namespace CrushRoyale.Core.Board
             Hp = block || type == PieceType.TimeBomb ? (byte)Math.Max(1, (int)hp) : (byte)0;
         }
 
-        /// <summary>Colorless obstacles hit by neighbouring matches: stones, blight, eggs.</summary>
-        public static bool IsBlockType(PieceType type) => type == PieceType.Stone || type == PieceType.Blight || type == PieceType.Egg;
+        /// <summary>Colorless obstacles hit by neighbouring matches: stones, blight, eggs, forges.</summary>
+        public static bool IsBlockType(PieceType type) =>
+            type == PieceType.Stone || type == PieceType.Blight || type == PieceType.Egg || type == PieceType.Forge;
 
         public bool IsEmpty => Id == 0;
 
@@ -101,6 +109,8 @@ namespace CrushRoyale.Core.Board
         public bool IsBlight => !IsEmpty && Type == PieceType.Blight;
 
         public bool IsEgg => !IsEmpty && Type == PieceType.Egg;
+
+        public bool IsForge => !IsEmpty && Type == PieceType.Forge;
 
         public bool IsTimeBomb => !IsEmpty && Type == PieceType.TimeBomb;
 

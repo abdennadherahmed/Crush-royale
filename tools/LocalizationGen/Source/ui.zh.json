@@ -2109,6 +2109,9 @@
   "stage.needsBoosts": "要塞关卡：光靠技术不够，请装备道具。",
   "guildboss.7kou.rule": "每走一步若未摧毁腐化，它就会蔓延。占据半个棋盘，攻击即告结束。",
   "guildboss.escobaros.rule": "冰封格need两步才能打开。没有击碎任何东西的一步会再冻结三格，四分之三被冻结则攻击结束。",
-  "guildboss.majors_blue.rule": "炸弹会不断出现，引信很短。只要有一颗归零，无论得分多少，攻击立刻结束。"
+  "guildboss.majors_blue.rule": "炸弹会不断出现，引信很短。只要有一颗归零，无论得分多少，攻击立刻结束。",
+  "objective.DestroyBlight": "腐化",
+  "mechanic.forge.title": "腐化熔炉",
+  "mechanic.forge.body": "它每走一步就腐化一颗相邻宝石，而这腐化还会自行蔓延。三次打击可摧毁它。尽早打碎，否则棋盘会被封死。"
 }
 

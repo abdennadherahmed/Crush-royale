@@ -322,6 +322,13 @@ namespace CrushRoyale.Core.Story
             stage.IceCells = Math.Min(iceCells, 24);
             stage.IceLayers = iceLayers;
             AddMechanics(stage, campaignId, index, d);
+            if (!endless && _applyTuning)
+            {
+                // The forge goal is created by AddMechanics, which runs after ApplyTuning because it has to cap the
+                // stones against the finished board. So it gets its own tuning pass here; without it the goal kept
+                // the placeholder number it was born with and stage 401 was unwinnable for the expert bot itself.
+                TuneForgeGoal(stage, id, d);
+            }
 
             int starBase = Math.Max(stage.TargetScore, 200);
             stage.TwoStarScore = RoundTo((int)((long)starBase * s.TwoStarPermille / 1000), 50);
@@ -380,6 +387,12 @@ namespace CrushRoyale.Core.Story
         public const int EggIntroStage = 301;
 
         /// <summary>
+        /// Corruption forges. Unlike every hazard before them, a forge acts on its own every single move: it takes a
+        /// neighbouring gem and the blight it makes then spreads. Ignoring it is not a delay, it is a spiral.
+        /// </summary>
+        public const int ForgeIntroStage = 401;
+
+        /// <summary>
         /// A new mechanic every 100 stages: countdown bombs (101), spreading blight (201), dragon eggs (301). Each one
         /// then returns on about one stage in five, and they mix as the campaign goes on. Never on boss stages.
         /// </summary>
@@ -402,8 +415,21 @@ namespace CrushRoyale.Core.Story
             {
                 stage.EggCount = campaignId == EggIntroStage ? 3 : 2 + d * 2 / 1000;
             }
+            if (campaignId == ForgeIntroStage || (campaignId > ForgeIntroStage && index % 5 == 0))
+            {
+                // One forge to learn it, two once the campaign is past halfway. Three would corrupt faster than
+                // any board can be cleared.
+                stage.ForgeCount = campaignId == ForgeIntroStage ? 1 : 1 + (d >= 700 ? 1 : 0);
+                if (stage.ForgeCount > 0)
+                {
+                    // The stage this mechanic exists for: clear what the forge keeps making. The number is a
+                    // placeholder; ApplyTuning replaces it with a share of what a perfect run actually destroys.
+                    // Writing a formula here instead put five stages beyond even the expert bot.
+                    stage.Objectives.Add(new StageObjective { Type = ObjectiveType.DestroyBlight, Target = 6 });
+                }
+            }
             // At most a quarter of the board is blocks.
-            int spare = 16 - stage.BlightCount - stage.EggCount;
+            int spare = 16 - stage.BlightCount - stage.EggCount - stage.ForgeCount;
             stage.StoneCount = Math.Max(0, Math.Min(stage.StoneCount, spare));
             foreach (StageObjective objective in stage.Objectives)
             {
@@ -576,11 +602,50 @@ namespace CrushRoyale.Core.Story
                     case ObjectiveType.BreakStones when StageTuning.Stones[id] > 0:
                         objective.Target = Floor(StageTuning.Stones[id], obstacleShare, 5);
                         break;
+                    case ObjectiveType.DestroyBlight when StageTuning.Blight[id] > 0:
+                        // Floor of two, not five. The bake's bot plays for score and never goes looking for
+                        // corruption, so what it destroys in passing is a low bar by construction; asking for more
+                        // than the median it measured made stage 401 -- the stage that introduces the mechanic --
+                        // unwinnable for the expert bot itself.
+                        objective.Target = Floor(StageTuning.Blight[id], obstacleShare, 2);
+                        break;
                     case ObjectiveType.CollectColor when StageTuning.Collect[id] > 0:
                         int collectShare = Math.Max(400, obstacleShare - TunedCollectReliefPermille);
                         objective.Target = Floor(StageTuning.Collect[id], collectShare, 8);
                         break;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sets the "destroy corruption" goal from what the bake actually measured on this stage.
+        ///
+        /// The bake's bot plays for score and never goes looking for corruption, so what it destroys in passing is a
+        /// low bar by construction. Where it destroyed none at all the goal is dropped rather than invented: a stage
+        /// asking for something nobody has been shown to be able to do is not a hard stage, it is a broken one.
+        /// </summary>
+        private static void TuneForgeGoal(StageData stage, int id, int d)
+        {
+            if (id >= StageTuning.Blight.Length)
+            {
+                return;
+            }
+            int measured = StageTuning.Blight[id];
+            // Same relief as the colour goals, and for the same reason: the bot cannot steer towards a target it
+            // is not scored on, so its median understates a real player and the raw share turns into a wall.
+            int share = Math.Max(400, Math.Min(1000, TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000) - TunedCollectReliefPermille);
+            for (int i = stage.Objectives.Count - 1; i >= 0; i--)
+            {
+                if (stage.Objectives[i].Type != ObjectiveType.DestroyBlight)
+                {
+                    continue;
+                }
+                if (measured <= 0)
+                {
+                    stage.Objectives.RemoveAt(i);
+                    continue;
+                }
+                stage.Objectives[i].Target = Floor(measured, share, 2);
             }
         }
 

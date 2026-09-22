@@ -2109,6 +2109,9 @@
   "stage.needsBoosts": "Fase fortificada: só habilidade não vai bastar. Equipe power-ups.",
   "guildboss.7kou.rule": "A corrupção se espalha a cada jogada que não destrói nenhuma. Se tomar metade do tabuleiro, o ataque acaba.",
   "guildboss.escobaros.rule": "Uma célula congelada exige duas jogadas. Uma jogada que não quebra nada congela mais três, e a três quartos o ataque acaba.",
-  "guildboss.majors_blue.rule": "As bombas reaparecem com pavio curto. Se uma chegar a zero, o ataque termina na hora, seja qual for sua pontuação."
+  "guildboss.majors_blue.rule": "As bombas reaparecem com pavio curto. Se uma chegar a zero, o ataque termina na hora, seja qual for sua pontuação.",
+  "objective.DestroyBlight": "Corrupção",
+  "mechanic.forge.title": "Forja da corrupção",
+  "mechanic.forge.body": "Ela corrompe uma gema vizinha a cada jogada, e essa corrupção depois se espalha sozinha. Três golpes a destroem. Quebre-a cedo ou o tabuleiro se fecha."
 }
 

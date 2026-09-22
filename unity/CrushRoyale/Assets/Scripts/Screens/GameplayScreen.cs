@@ -456,6 +456,7 @@ namespace CrushRoyale.Game.Screens
                 case ObjectiveType.CollectColor: return ArtLibrary.Gem(objective.Color);
                 case ObjectiveType.ClearIce: return ArtLibrary.Ice();
                 case ObjectiveType.BreakStones: return ArtLibrary.Stone();
+                case ObjectiveType.DestroyBlight: return ArtLibrary.Blight();
                 case ObjectiveType.DefeatBoss:
                     return (_launch.Mode == GameMode.Story && _launch.StageId > 0 ? ArtLibrary.Boss(Game.Backend.Catalog.Get(_launch.StageId)) : null)
                         ?? (_launch.Mode == GameMode.GuildBoss ? ArtLibrary.GuildBoss(_launch.StageId) : ArtLibrary.GuildBoss());
