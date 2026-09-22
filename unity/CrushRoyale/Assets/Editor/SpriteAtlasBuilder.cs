@@ -31,8 +31,16 @@ namespace CrushRoyale.EditorTools
     {
         public const string AtlasFolder = "Assets/Resources/Atlases";
 
-        /// <summary>Roots under Resources/Art whose sprites are small, numerous and drawn together.</summary>
-        public static readonly string[] Roots = { "Icons", "Gems", "PowerUps", "Chests", "Pets", "Frames" };
+        /// <summary>
+        /// Roots under Resources/Art whose sprites are small, numerous and drawn together.
+        ///
+        /// Pets are deliberately not in this list. Two of the five came out upside down on the device while being
+        /// perfectly upright in the editor, in the source file, and in every capture -- because atlases are packed
+        /// when the APK is built and never in the editor, so the editor cannot even reproduce the fault. Five
+        /// sprites of 384 px, drawn one at a time on a card, were the worst candidates for packing in the first
+        /// place: they save almost no draw calls and they were the only place the damage showed.
+        /// </summary>
+        public static readonly string[] Roots = { "Icons", "Gems", "PowerUps", "Chests", "Frames" };
 
         [MenuItem("Crush Royale/6. Build Sprite Atlases", priority = 22)]
         public static void BuildAll()
