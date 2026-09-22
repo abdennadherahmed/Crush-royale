@@ -13,7 +13,13 @@ namespace CrushRoyale.Core.Config
     public sealed class GameBalance
     {
         /// <summary>Bump when a gameplay rule changes in code (not just numbers).</summary>
-        public const int RulesVersion = 5;
+        /// <remarks>
+        /// 6: guild bosses fight with rules of their own. A bomb reaching zero, corruption taking half the board or
+        /// ice taking three quarters of it now ends a guild boss attack, and a move that breaks nothing freezes
+        /// cells. The server re-simulates every attack, so a client still on version 5 would compute a different
+        /// result from the same moves.
+        /// </remarks>
+        public const int RulesVersion = 6;
 
         public BoardBalance Board { get; set; } = new BoardBalance();
 

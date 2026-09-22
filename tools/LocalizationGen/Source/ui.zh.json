@@ -2106,6 +2106,9 @@
   "wheel.spinPaid": "再转一次  {0} 魔珠",
   "bag.convertAllOwned": "你已拥有全部伙伴，这些碎片没有可兑换的对象。留着吧：它们可用来觉醒现有伙伴。",
   "bag.convertNeedsOwned": "只有你已拥有的伙伴才能让出多余碎片。请先解锁它。",
-  "stage.needsBoosts": "要塞关卡：光靠技术不够，请装备道具。"
+  "stage.needsBoosts": "要塞关卡：光靠技术不够，请装备道具。",
+  "guildboss.7kou.rule": "每走一步若未摧毁腐化，它就会蔓延。占据半个棋盘，攻击即告结束。",
+  "guildboss.escobaros.rule": "冰封格need两步才能打开。没有击碎任何东西的一步会再冻结三格，四分之三被冻结则攻击结束。",
+  "guildboss.majors_blue.rule": "炸弹会不断出现，引信很短。只要有一颗归零，无论得分多少，攻击立刻结束。"
 }
 

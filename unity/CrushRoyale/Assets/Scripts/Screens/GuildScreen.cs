@@ -714,6 +714,22 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
+        /// <summary>
+        /// What this boss does to the board, in one line.
+        ///
+        /// Each of the three fights differently and each has a way to end an attack outright. A player who learns
+        /// that by losing a life to it learns the wrong lesson, so the rule is written next to the portrait.
+        /// </summary>
+        public static string GuildBossRule(Localization loc, int index)
+        {
+            switch (CrushRoyale.Core.Social.GuildBossRoster.For(index).Id)
+            {
+                case "7kou": return loc.T("guildboss.7kou.rule");
+                case "escobaros": return loc.T("guildboss.escobaros.rule");
+                default: return loc.T("guildboss.majors_blue.rule");
+            }
+        }
+
         private static CrushRoyale.Core.Story.Kingdom BossKingdom(int index) => CrushRoyale.Core.Social.GuildBossRoster.For(index).Kingdom;
 
         private void BuildBoss()
@@ -775,6 +791,14 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Anchor(title.rectTransform, 0.18f, 0.34f, 0.82f, 0.92f);
             Text epithet = Outlined(scene, GuildBossTitle(Loc, boss.BossIndex), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter);
             UIFactory.Anchor(epithet.rectTransform, 0.06f, 0.833f, 0.94f, 0.879f);
+
+            // What this one does to the board. Each boss has a way to end an attack outright, and finding that out
+            // by losing a life to it is the wrong way to learn it.
+            Image ruleBar = UIFactory.Panel("BossRule", scene, new Color(0.06f, 0.02f, 0.13f, 0.88f));
+            UIFactory.Anchor(ruleBar.rectTransform, 0.04f, 0.755f, 0.96f, 0.828f);
+            ruleBar.raycastTarget = false;
+            Text rule = Outlined(ruleBar.transform, GuildBossRule(Loc, boss.BossIndex), Theme.SmallSize - 6, Theme.Warning, TextAnchor.MiddleCenter);
+            UIFactory.Stretch(rule.rectTransform, 12, 12, 4, 4);
             Chip(scene, "item_medal", Loc.T("guild.bossWeek", boss.BossIndex), 0.03f, 0.34f, 0.755f, 0.825f);
             TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(boss.ResetAtUnixMs) - DateTimeOffset.UtcNow;
             if (left < TimeSpan.Zero)

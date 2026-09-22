@@ -66,6 +66,17 @@ namespace CrushRoyale.Core.Gameplay
 
         public int TimeBombMoves { get; set; }
 
+        /// <summary>
+        /// Corruption covering this share of the board ends the match, in permille of cells. 0 = no such rule.
+        /// </summary>
+        public int BlightLossPermille { get; set; }
+
+        /// <summary>Ice covering this share of the board ends the match, in permille of cells. 0 = no such rule.</summary>
+        public int IceLossPermille { get; set; }
+
+        /// <summary>Cells frozen by a move that breaks nothing at all. 0 = ice never grows on its own.</summary>
+        public int IcePerWastedMove { get; set; }
+
         public int TwoStarScore { get; set; }
 
         public int ThreeStarScore { get; set; }
@@ -208,6 +219,18 @@ namespace CrushRoyale.Core.Gameplay
                 throw new ArgumentOutOfRangeException(nameof(bossIndex));
             }
 
+            // Each boss of the roster fights differently: bombs, corruption or ice. The rules live with the boss so
+            // the week's opponent is a different problem rather than a different portrait.
+            Social.GuildBossRules rules = Social.GuildBossRoster.For(bossIndex).Rules;
+            int cells = Math.Max(1, balance.Board.Width * balance.Board.Height);
+
+            // The generator will not block more than a quarter of the board, counting stones, blight and eggs
+            // together. A boss that brings its own corruption spends the whole allowance on it, so the filler stones
+            // step aside: its threat is the blight, and stones on top would only make the board unplayable.
+            int blight = cells * rules.StartBlightPermille / 1000;
+            int stones = blight > 0 ? 0 : GuildBossStones;
+            blight = Math.Min(blight, cells / 4 - stones);
+
             return new SessionConfig
             {
                 Mode = GameMode.GuildBoss,
@@ -221,10 +244,18 @@ namespace CrushRoyale.Core.Gameplay
                     Height = balance.Board.Height,
                     ColorCount = balance.Board.ColorCount,
                     DifficultyPermille = GuildBossDifficultyPermille,
-                    StoneCount = GuildBossStones,
+                    StoneCount = stones,
+                    BlightCount = blight,
+                    IceCells = cells * rules.StartIcePermille / 1000,
+                    IceLayers = Math.Max(1, rules.IceLayers),
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },
+                TimeBombCount = rules.Bombs,
+                TimeBombMoves = rules.BombFuse,
+                BlightLossPermille = rules.BlightLossPermille,
+                IceLossPermille = rules.IceLossPermille,
+                IcePerWastedMove = rules.IcePerWastedMove,
                 Loadout = CopyLoadout(loadout),
                 HighestLeague = highestLeague
             };

@@ -132,6 +132,18 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Gem turned into blight after this action.</summary>
         public Pos? BlightSpread { get; internal set; }
 
+        /// <summary>Cells frozen by this action because it broke nothing (the freezing guild boss).</summary>
+        public int CellsFrozen { get; internal set; }
+
+        /// <summary>Share of the board corrupted after this action, in permille. Only tracked when a boss says so.</summary>
+        public int BlightPermille { get; internal set; }
+
+        /// <summary>Share of the board frozen after this action, in permille. Only tracked when a boss says so.</summary>
+        public int IcePermille { get; internal set; }
+
+        /// <summary>Corruption or ice has taken enough of the board to end the match.</summary>
+        public bool LostToHazard { get; internal set; }
+
         public SessionState StateAfter { get; internal set; }
     }
 
@@ -218,6 +230,9 @@ namespace CrushRoyale.Core.Gameplay
         private readonly DeterministicRandom _petRng;
         private readonly DeterministicRandom _hazardRng;
         private bool _bombExploded;
+
+        /// <summary>Set when corruption or ice has taken enough of the board to end the match.</summary>
+        private bool _hazardOverwhelmed;
 
         /// <summary>Moves between two countdown bomb spawns, and moves given back to bombs by a continue.</summary>
         public const int BombRespawnMoves = 4;
@@ -540,6 +555,13 @@ namespace CrushRoyale.Core.Gameplay
                     End(SessionState.Lost, t);
                 }
             }
+            else if (Config.Mode == GameMode.GuildBoss && (_bombExploded || _hazardOverwhelmed))
+            {
+                // A guild boss now has ways to win. The attack ends on the spot: the damage already dealt counts,
+                // the rest of the clock does not. Without this branch the bombs ticked down and the corruption
+                // spread with no consequence at all, because only the story mode ever read them.
+                End(SessionState.Lost, t);
+            }
 
             outcome.StateAfter = State;
             return outcome;
@@ -764,6 +786,19 @@ namespace CrushRoyale.Core.Gameplay
                 }
             }
 
+            // The freezing boss: a move that destroys nothing at all closes part of the board instead. Standing
+            // still has to cost something, otherwise the ice is a decoration the player waits out.
+            if (Config.IcePerWastedMove > 0 && ClearedNothing(outcome))
+            {
+                outcome.CellsFrozen = _boardManager.FreezeCells(_hazardRng, Config.IcePerWastedMove, Config.Board.IceLayers);
+            }
+
+            CheckHazardCoverage(outcome);
+            if (_hazardOverwhelmed)
+            {
+                return;
+            }
+
             if (Config.TimeBombCount <= 0)
             {
                 return;
@@ -778,6 +813,61 @@ namespace CrushRoyale.Core.Gameplay
             if (MovesUsed % BombRespawnMoves == 0 && _boardManager.Count(PieceType.TimeBomb) < Config.TimeBombCount)
             {
                 outcome.BombSpawned = _boardManager.SpawnTimeBomb(_hazardRng, Config.TimeBombMoves);
+            }
+        }
+
+        /// <summary>True when the move destroyed no piece at all: no match, no ice broken, no stone chipped.</summary>
+        private static bool ClearedNothing(ActionOutcome outcome) =>
+            Cleared(outcome.Resolution) == 0 && Cleared(outcome.PetResolution) == 0;
+
+        private static int Cleared(ResolutionResult resolution)
+        {
+            if (resolution == null)
+            {
+                return 0;
+            }
+            int n = 0;
+            foreach (ResolutionStep step in resolution.Steps)
+            {
+                n += step.Cleared.Count + step.IceBroken.Count + step.StoneHits.Count + step.BlightCleared;
+            }
+            return n;
+        }
+
+        /// <summary>
+        /// Ends the match when a hazard has taken over the board.
+        ///
+        /// A boss that merely slows the player down is a boss you outlast. A boss whose corruption or ice wins the
+        /// match if it reaches half or three quarters of the board is a race, and the player has to decide every
+        /// single move whether to score or to hold the line.
+        /// </summary>
+        private void CheckHazardCoverage(ActionOutcome outcome)
+        {
+            int cells = Config.Board.Width * Config.Board.Height;
+            if (cells <= 0)
+            {
+                return;
+            }
+            if (Config.BlightLossPermille > 0)
+            {
+                int blight = _boardManager.Count(PieceType.Blight);
+                outcome.BlightPermille = blight * 1000 / cells;
+                if (outcome.BlightPermille >= Config.BlightLossPermille)
+                {
+                    _hazardOverwhelmed = true;
+                    outcome.LostToHazard = true;
+                    return;
+                }
+            }
+            if (Config.IceLossPermille > 0)
+            {
+                int iced = _boardManager.IcedCells();
+                outcome.IcePermille = iced * 1000 / cells;
+                if (outcome.IcePermille >= Config.IceLossPermille)
+                {
+                    _hazardOverwhelmed = true;
+                    outcome.LostToHazard = true;
+                }
             }
         }
 

@@ -2106,6 +2106,9 @@
   "wheel.spinPaid": "Spin again  {0} orbes",
   "bag.convertAllOwned": "You own every pet, so there is nothing to trade these fragments for. Keep them: they awaken the pets you already have.",
   "bag.convertNeedsOwned": "Only a pet you already own can give its spare fragments away. Unlock this one first.",
-  "stage.needsBoosts": "Fortified stage: skill alone will not be enough. Bring boosts."
+  "stage.needsBoosts": "Fortified stage: skill alone will not be enough. Bring boosts.",
+  "guildboss.7kou.rule": "Corruption spreads on every move that destroys none of it. Let it take half the board and the attack is over.",
+  "guildboss.escobaros.rule": "Frozen cells take two moves to open. A move that breaks nothing freezes three more, and three quarters frozen ends the attack.",
+  "guildboss.majors_blue.rule": "Bombs keep appearing on a short fuse. One of them reaching zero ends the attack at once, whatever your score."
 }
 

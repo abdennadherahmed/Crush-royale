@@ -2106,6 +2106,9 @@
   "wheel.spinPaid": "Retourner  {0} orbes",
   "bag.convertAllOwned": "Tu possèdes tous les familiers : il n'y a rien à échanger contre ces fragments. Garde-les, ils servent à éveiller ceux que tu as déjà.",
   "bag.convertNeedsOwned": "Seul un familier que tu possèdes déjà peut céder ses fragments en trop. Débloque-le d'abord.",
-  "stage.needsBoosts": "Niveau fortifié : le talent seul ne suffira pas. Équipe des boosts."
+  "stage.needsBoosts": "Niveau fortifié : le talent seul ne suffira pas. Équipe des boosts.",
+  "guildboss.7kou.rule": "La corruption s'étend à chaque coup qui n'en détruit aucune. Si elle prend la moitié du plateau, l'attaque est finie.",
+  "guildboss.escobaros.rule": "Une case gelée demande deux coups pour s'ouvrir. Un coup qui ne casse rien en gèle trois de plus, et aux trois quarts gelés l'attaque est finie.",
+  "guildboss.majors_blue.rule": "Des bombes réapparaissent avec une mèche courte. Si l'une atteint zéro, l'attaque s'arrête aussitôt, quel que soit ton score."
 }
 

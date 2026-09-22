@@ -2106,6 +2106,9 @@
   "wheel.spinPaid": "Gira ancora  {0} orbi",
   "bag.convertAllOwned": "Possiedi già tutti i famigli, quindi non c'è nulla per cui scambiare questi frammenti. Tienili: servono a risvegliare quelli che hai.",
   "bag.convertNeedsOwned": "Solo un famiglio che possiedi già può cedere i frammenti in eccesso. Sbloccalo prima.",
-  "stage.needsBoosts": "Livello fortificato: la bravura da sola non basterà. Equipaggia potenziamenti."
+  "stage.needsBoosts": "Livello fortificato: la bravura da sola non basterà. Equipaggia potenziamenti.",
+  "guildboss.7kou.rule": "La corruzione si diffonde a ogni mossa che non ne distrugge. Se prende metà del tabellone, l'attacco finisce.",
+  "guildboss.escobaros.rule": "Una cella ghiacciata richiede due mosse. Una mossa che non rompe nulla ne ghiaccia altre tre, e a tre quarti l'attacco finisce.",
+  "guildboss.majors_blue.rule": "Le bombe ricompaiono con una miccia corta. Se una arriva a zero, l'attacco finisce subito, qualunque sia il punteggio."
 }
 

@@ -192,6 +192,52 @@ namespace CrushRoyale.Core.Board
             return n;
         }
 
+        /// <summary>
+        /// Freezes up to <paramref name="count"/> plain cells that are not frozen yet, and returns how many took ice.
+        ///
+        /// Used by the boss that punishes a move breaking nothing: the board closes a little more every time the
+        /// player stalls, which is what turns hesitation into a losing line rather than a free look.
+        /// </summary>
+        public int FreezeCells(DeterministicRandom rng, int count, int layers)
+        {
+            if (count <= 0)
+            {
+                return 0;
+            }
+            var candidates = new List<Pos>();
+            foreach (Pos p in Board.AllPositions())
+            {
+                if (Board[p].IsPlainGem && Board.IceAt(p) == 0)
+                {
+                    candidates.Add(p);
+                }
+            }
+            int frozen = 0;
+            int clamped = Math.Max(1, Math.Min(3, layers));
+            while (frozen < count && candidates.Count > 0)
+            {
+                int index = rng.NextInt(candidates.Count);
+                Board.SetIce(candidates[index], clamped);
+                candidates.RemoveAt(index);
+                frozen++;
+            }
+            return frozen;
+        }
+
+        /// <summary>Cells carrying at least one layer of ice.</summary>
+        public int IcedCells()
+        {
+            int n = 0;
+            foreach (Pos p in Board.AllPositions())
+            {
+                if (Board.IceAt(p) > 0)
+                {
+                    n++;
+                }
+            }
+            return n;
+        }
+
         /// <summary>Turns a random plain gem (no ice) into a countdown bomb of the same color. Returns its cell.</summary>
         public Pos? SpawnTimeBomb(DeterministicRandom rng, int moves)
         {
