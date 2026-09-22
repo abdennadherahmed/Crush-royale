@@ -32,7 +32,16 @@ def argv():
         clip = float(args[args.index("--clip") + 1])
     # A bust and a full body need very different distances, and the model decides which one it is, not the script.
     zoom = float(args[args.index("--zoom") + 1]) if "--zoom" in args else 1.0
-    return args[0], args[1], args[2], "--preview" in args, yaw, clip, zoom, "--bust" in args
+    # "r,g,b[,saturation]" white balance. The generator bakes the lighting of the reference image into the texture,
+    # so a boss cut out of an illustration lit in violet comes back violet: green skin and brown leather are gone.
+    balance = None
+    if "--balance" in args:
+        numbers = [float(n) for n in args[args.index("--balance") + 1].split(",")]
+        balance = (numbers + [1.0])[:4] if len(numbers) >= 3 else None
+    # Positive values move the subject to the right in frame: a wing or a staff can pull the measured centre off
+    # the face, and no automatic rule beats stating it once per boss after looking at the render.
+    shift = float(args[args.index("--shift") + 1]) if "--shift" in args else 0.0
+    return args[0], args[1], args[2], "--preview" in args, yaw, clip, zoom, "--bust" in args, balance, shift
 
 
 def clear():
@@ -80,6 +89,36 @@ def normalise(objects):
     return (hi - lo).z
 
 
+def colour_correct(material, balance):
+    """Multiplies a material's base colour by a gain per channel, then lifts the saturation.
+
+    Nodes are found by type, never by name: a localized Blender names them in its own language.
+    """
+    if not material.use_nodes or material.node_tree is None:
+        return
+    tree = material.node_tree
+    shader = next((n for n in tree.nodes if n.type == "BSDF_PRINCIPLED"), None)
+    if shader is None:
+        return
+    base = shader.inputs.get("Base Color")
+    if base is None or not base.links:
+        return
+
+    source = base.links[0].from_socket
+    tree.links.remove(base.links[0])
+
+    multiply = tree.nodes.new("ShaderNodeMixRGB")
+    multiply.blend_type = "MULTIPLY"
+    multiply.inputs[0].default_value = 1.0
+    multiply.inputs[2].default_value = (balance[0], balance[1], balance[2], 1.0)
+    tree.links.new(source, multiply.inputs[1])
+
+    saturate = tree.nodes.new("ShaderNodeHueSaturation")
+    saturate.inputs["Saturation"].default_value = balance[3]
+    tree.links.new(multiply.outputs[0], saturate.inputs["Color"])
+    tree.links.new(saturate.outputs[0], base)
+
+
 def light(name, kind, location, energy, colour, size=2.0):
     data = bpy.data.lights.new(name=name, type=kind)
     data.energy = energy
@@ -97,7 +136,30 @@ def aim(obj, target):
     obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
 
 
-def build_camera(height, yaw_degrees, preview, clip=0.0, zoom=1.0, bust=False):
+def head_centre(objects, height):
+    """Horizontal centre of the geometry in the top third, i.e. of the head and shoulders.
+
+    Framing on the whole bounding box put a hooded mage off to one side, because his outstretched wings decide where
+    that box sits. A portrait is centred on the face, not on the widest thing the character is wearing.
+    """
+    lo = Vector((1e9, 1e9, 0))
+    hi = Vector((-1e9, -1e9, 0))
+    found = False
+    for obj in objects:
+        corners = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+        top = max(c.z for c in corners)
+        if top < height * 0.66:
+            continue
+        found = True
+        for c in corners:
+            lo.x, lo.y = min(lo.x, c.x), min(lo.y, c.y)
+            hi.x, hi.y = max(hi.x, c.x), max(hi.y, c.y)
+    if not found:
+        return 0.0, 0.0
+    return (lo.x + hi.x) * 0.5, (lo.y + hi.y) * 0.5
+
+
+def build_camera(height, yaw_degrees, preview, clip=0.0, zoom=1.0, bust=False, centre=(0.0, 0.0)):
     data = bpy.data.cameras.new("BossCam")
     data.lens = 85 if not preview else 70
     camera = bpy.data.objects.new("BossCam", data)
@@ -108,8 +170,10 @@ def build_camera(height, yaw_degrees, preview, clip=0.0, zoom=1.0, bust=False):
     # A card shows a boss the way a portrait does: head, shoulders and the top of the chest. Framing every model
     # that way is what makes three bosses generated from three different references look like one set.
     distance = height * (0.95 if bust else (2.1 if not preview else 2.4)) * max(0.2, zoom)
-    focus = Vector((0.0, 0.0, height * (0.82 if bust else 0.58)))
-    camera.location = Vector((math.sin(yaw) * distance, -math.cos(yaw) * distance, height * (0.86 if bust else 0.66)))
+    focus = Vector((centre[0], centre[1], height * (0.82 if bust else 0.58)))
+    camera.location = Vector((centre[0] + math.sin(yaw) * distance,
+                              centre[1] - math.cos(yaw) * distance,
+                              height * (0.86 if bust else 0.66)))
     aim(camera, focus)
     if clip > 0:
         # These references are illustrations, so the generator also modelled the cathedral standing behind the boss.
@@ -169,26 +233,34 @@ def render_to(path):
 
 
 def main():
-    glb, outdir, name, preview, yaw, clip, zoom, bust = argv()
+    glb, outdir, name, preview, yaw, clip, zoom, bust, balance, shift = argv()
     clear()
     bpy.ops.import_scene.gltf(filepath=glb)
     meshes = imported_meshes()
     if not meshes:
         raise SystemExit("no mesh in " + glb)
     height = normalise(meshes)
+    if balance:
+        for material in bpy.data.materials:
+            colour_correct(material, balance)
     build_lights(height)
+
+    centre = head_centre(meshes, height) if bust else (0.0, 0.0)
+    if shift:
+        right = (math.cos(math.radians(yaw)), math.sin(math.radians(yaw)))
+        centre = (centre[0] - right[0] * shift, centre[1] - right[1] * shift)
 
     if preview:
         # Contact sheet for a human decision: three angles, cheap samples, nothing shipped from here.
         configure(PREVIEW_WIDTH, PREVIEW_HEIGHT, 24)
         for angle in (0, 90, 180, 270):
-            build_camera(height, angle, True, clip, zoom, bust)
+            build_camera(height, angle, True, clip, zoom, bust, centre)
             render_to(outdir.rstrip("/\\") + "/" + name + "_yaw%03d.png" % angle)
         return
 
     configure(WIDTH, HEIGHT, 128)
     # Slightly off the front: a dead-on hero shot reads flat, a few degrees of turn gives the armour a lit edge.
-    build_camera(height, yaw + 14.0, False, clip, zoom, bust)
+    build_camera(height, yaw + 14.0, False, clip, zoom, bust, centre)
     render_to(outdir.rstrip("/\\") + "/" + name + ".png")
 
 
