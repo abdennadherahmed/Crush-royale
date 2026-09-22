@@ -18,6 +18,16 @@ namespace CrushRoyale.Game.Screens
     {
         private RectTransform _list;
 
+        /// <summary>
+        /// A pet whose conversion popup should open as soon as this screen is built.
+        ///
+        /// The bag lists the fragments and offers "Convert" next to each one, but the trade window lives here. The
+        /// bag used to merely open this screen, which left the player on a list with nothing happening -- they had
+        /// pressed a button and the game answered with a different page. The bag now names the pet and the popup
+        /// opens on arrival.
+        /// </summary>
+        public static string PendingConvert;
+
         protected override string BackdropScene => "pets";
 
         protected override CrushRoyale.Core.Story.Kingdom BackdropKingdom => CrushRoyale.Core.Story.Kingdom.West;
@@ -64,7 +74,23 @@ namespace CrushRoyale.Game.Screens
             {
                 PetCard(pet, pets);
             }
+
+            string pending = PendingConvert;
+            PendingConvert = null;
+            if (string.IsNullOrEmpty(pending))
+            {
+                return;
+            }
+            PetDto asked = pets.Pets.Find(p => p.Type == pending);
+            if (asked != null && CanConvert(asked, pets))
+            {
+                ShowConvert(asked, pets);
+            }
         }
+
+        /// <summary>Surplus fragments of an owned pet can be traded, but only while some pet is still locked.</summary>
+        private bool CanConvert(PetDto pet, PetsDto pets) =>
+            pet.Owned && pet.Fragments >= ConvertRatio && pets.Pets.Exists(p => !p.Owned);
 
         private void BuildSummon(Transform list, PetsDto pets)
         {
@@ -248,7 +274,7 @@ namespace CrushRoyale.Game.Screens
                 return;
             }
             // Surplus fragments of an owned pet can be traded for fragments of a pet still locked.
-            bool canConvert = pet.Fragments >= ConvertRatio && pets.Pets.Exists(p => !p.Owned);
+            bool canConvert = CanConvert(pet, pets);
             float convertMax = pet.CanAwaken ? 0.54f : 0.64f;
             if (pet.CanAwaken)
             {

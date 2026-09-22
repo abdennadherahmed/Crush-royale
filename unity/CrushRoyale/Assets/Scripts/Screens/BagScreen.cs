@@ -122,6 +122,7 @@ namespace CrushRoyale.Game.Screens
             int ratio = Math.Max(1, Game.Backend.Balance?.Pets?.ConvertRatio ?? 3);
             UIFactory.Height(UIFactory.Label(_list, Loc.T("bag.fragmentsHelp", ratio), Theme.SmallSize, Theme.TextMuted), 60);
 
+            bool anyLocked = pets.Pets.Any(p => !p.Owned);
             List<PetDto> withFragments = pets.Pets.Where(p => p.Fragments > 0).OrderByDescending(p => p.Fragments).ToList();
             if (withFragments.Count == 0)
             {
@@ -147,10 +148,22 @@ namespace CrushRoyale.Game.Screens
                     Theme.SmallSize, pet.Owned ? Theme.Crystal : Theme.Gold, TextAnchor.MiddleLeft);
                 UIFactory.Anchor(amount.rectTransform, 0.23f, 0.12f, 0.66f, 0.5f);
 
-                // The pet screen owns the conversion popup: the bag just points at the pet that has the fragments.
-                Button convert = UIFactory.Button(row.transform, Loc.T("pets.convert"), () => UI.Show<PetsScreen>(), Theme.Crystal, Theme.SmallSize);
+                // The pet screen owns the conversion popup, so the bag names the pet and lets that screen open it.
+                // A trade needs an owned pet as the source and at least one pet still locked as the target: offering
+                // the button outside those two cases sent the player to the pet list where nothing happened.
+                PetDto source = pet;
+                bool tradable = pet.Owned && pet.Fragments >= ratio && anyLocked;
+                Button convert = UIFactory.Button(row.transform, Loc.T("pets.convert"), () =>
+                {
+                    if (!tradable)
+                    {
+                        UI.Toast(Loc.T(anyLocked ? "bag.convertNeedsOwned" : "bag.convertAllOwned"), 3.5f);
+                        return;
+                    }
+                    PetsScreen.PendingConvert = source.Type;
+                    UI.Show<PetsScreen>();
+                }, tradable ? Theme.Crystal : Theme.PanelLight, Theme.SmallSize);
                 UIFactory.Anchor(convert.GetComponent<RectTransform>(), 0.68f, 0.2f, 0.96f, 0.8f);
-                convert.interactable = pet.Fragments >= Math.Max(1, Game.Backend.Balance?.Pets?.ConvertRatio ?? 3);
             }
         }
 

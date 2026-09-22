@@ -2103,6 +2103,8 @@
   "pvp.nextLeague": "Nächste Liga: {0}",
   "pvp.nextLeagueTrophies": "noch {0} Trophäen",
   "pvp.nextLeagueBonus": "Beim ersten Mal: +{0} Kugeln",
-  "wheel.spinPaid": "Nochmal drehen  {0} Kugeln"
+  "wheel.spinPaid": "Nochmal drehen  {0} Kugeln",
+  "bag.convertAllOwned": "Du besitzt bereits alle Gefährten, es gibt also nichts, wogegen du diese Splitter tauschen könntest. Behalte sie: Sie erwecken deine vorhandenen Gefährten.",
+  "bag.convertNeedsOwned": "Nur ein Gefährte, den du bereits besitzt, kann überzählige Splitter abgeben. Schalte ihn zuerst frei."
 }
 

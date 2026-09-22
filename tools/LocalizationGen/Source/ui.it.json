@@ -2103,6 +2103,8 @@
   "pvp.nextLeague": "Prossima lega: {0}",
   "pvp.nextLeagueTrophies": "mancano {0} trofei",
   "pvp.nextLeagueBonus": "La prima volta: +{0} orbi",
-  "wheel.spinPaid": "Gira ancora  {0} orbi"
+  "wheel.spinPaid": "Gira ancora  {0} orbi",
+  "bag.convertAllOwned": "Possiedi già tutti i famigli, quindi non c'è nulla per cui scambiare questi frammenti. Tienili: servono a risvegliare quelli che hai.",
+  "bag.convertNeedsOwned": "Solo un famiglio che possiedi già può cedere i frammenti in eccesso. Sbloccalo prima."
 }
 

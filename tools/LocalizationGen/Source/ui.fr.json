@@ -2103,6 +2103,8 @@
   "pvp.nextLeague": "Ligue suivante : {0}",
   "pvp.nextLeagueTrophies": "encore {0} trophées",
   "pvp.nextLeagueBonus": "Première fois : +{0} orbes",
-  "wheel.spinPaid": "Retourner  {0} orbes"
+  "wheel.spinPaid": "Retourner  {0} orbes",
+  "bag.convertAllOwned": "Tu possèdes tous les familiers : il n'y a rien à échanger contre ces fragments. Garde-les, ils servent à éveiller ceux que tu as déjà.",
+  "bag.convertNeedsOwned": "Seul un familier que tu possèdes déjà peut céder ses fragments en trop. Débloque-le d'abord."
 }
 

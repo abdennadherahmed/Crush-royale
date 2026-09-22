@@ -2103,6 +2103,8 @@
   "pvp.nextLeague": "次のリーグ: {0}",
   "pvp.nextLeagueTrophies": "あと {0} トロフィー",
   "pvp.nextLeagueBonus": "初到達で +{0} オーブ",
-  "wheel.spinPaid": "もう一度回す  {0} オーブ"
+  "wheel.spinPaid": "もう一度回す  {0} オーブ",
+  "bag.convertAllOwned": "すべてのペットを所持しているため、この結晶と交換できるものはありません。手持ちのペットの覚醒に使えるので取っておきましょう。",
+  "bag.convertNeedsOwned": "余った結晶を譲れるのは、すでに入手済みのペットだけです。まずこのペットを解放してください。"
 }
 

@@ -406,17 +406,46 @@ namespace CrushRoyale.Game.UI
 
         private GridLayoutGroup _grid;
 
+        /// <summary>True once a real width has been measured, so the per-frame retry can stop.</summary>
+        private bool _settled;
+
         public static GridFit On(GridLayoutGroup grid)
         {
             GridFit fit = grid.GetComponent<GridFit>() ?? grid.gameObject.AddComponent<GridFit>();
             fit._grid = grid;
+            fit._settled = false;
             fit.Refresh();
             return fit;
         }
 
-        private void OnEnable() => Refresh();
+        private void OnEnable()
+        {
+            _settled = false;
+            Refresh();
+        }
 
-        private void OnRectTransformDimensionsChange() => Refresh();
+        private void OnRectTransformDimensionsChange()
+        {
+            _settled = false;
+            Refresh();
+        }
+
+        /// <summary>
+        /// The safety net.
+        ///
+        /// At Build time the rect still carries its authored 100 px, so the first measurement is worthless, and
+        /// OnRectTransformDimensionsChange did not reliably fire once the layout pass finally gave the grid its real
+        /// width. The boost grid therefore kept the cell size written in code, ran wider than the list, and the
+        /// right-hand column -- with the owned count in its corner -- was cut off by the scroll mask. Retrying every
+        /// frame until one honest measurement lands costs nothing and removes the whole class of bug.
+        /// </summary>
+        private void LateUpdate()
+        {
+            if (!_settled)
+            {
+                Refresh();
+            }
+        }
 
         private void Refresh()
         {
@@ -431,6 +460,10 @@ namespace CrushRoyale.Game.UI
                 return;
             }
             float usable = width - _grid.padding.left - _grid.padding.right - _grid.spacing.x * (columns - 1);
+            if (usable >= columns * MinCellWidth)
+            {
+                _settled = true;
+            }
             if (usable < columns * MinCellWidth)
             {
                 // The rect is not laid out yet: padding and spacing alone are wider than it. Computing from that gave

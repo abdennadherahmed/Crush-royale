@@ -102,7 +102,10 @@ namespace CrushRoyale.Game.UI
             const int cellHeight = 390;
             UIFactory.Height(gridRect, rows * cellHeight + (rows - 1) * 18);
             GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(312, cellHeight);
+            // Authored to fit a 1080-wide canvas on its own (3 x 290 + spacing + padding = 922), so even the frame
+            // before GridFit measures the real width, the three columns are inside the list instead of hanging over
+            // its right edge where the scroll mask eats them.
+            grid.cellSize = new Vector2(290, cellHeight);
             grid.spacing = new Vector2(18, 18);
             grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
             grid.constraintCount = 3;
@@ -146,8 +149,10 @@ namespace CrushRoyale.Game.UI
             effect.resizeTextMaxSize = Theme.SmallSize - 4;
             UIFactory.Anchor(effect.rectTransform, 0.06f, 0.24f, 0.94f, 0.4f);
 
-            // Owned count in a gold coin at the top-right corner.
-            RectTransform badge = UIFactory.Anchor(UIFactory.Rect("Count", frame.transform), 0.7f, 0.76f, 0.98f, 1.02f);
+            // Owned count in a gold coin at the top-right corner, entirely inside the card: it used to be anchored
+            // past the card's top and right edges, so it was the first thing clipped and the player could not see how
+            // many of a boost they owned.
+            RectTransform badge = UIFactory.Anchor(UIFactory.Rect("Count", frame.transform), 0.62f, 0.76f, 0.96f, 0.98f);
             badge.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
             if (UiKit.RoundBadge(badge, crystal: false) == null)
             {

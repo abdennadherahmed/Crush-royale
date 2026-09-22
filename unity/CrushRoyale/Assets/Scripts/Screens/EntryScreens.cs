@@ -762,17 +762,18 @@ namespace CrushRoyale.Game.Screens
             return button;
         }
 
+        /// <summary>
+        /// The label under a hub tile.
+        ///
+        /// It used to be bare text laid across the bottom of the tile art. The tile is square and the words are not,
+        /// so "Achievements" and "Battle Pass" ran past the tile on both sides and the whole column read as if the
+        /// buttons were misaligned. The label now sits on its own dark plate, centred on the tile and wider than it,
+        /// which is what every game in this genre does: the plate is the shape the eye lines up, and the text is
+        /// legible over the illustration instead of fighting it.
+        /// </summary>
         private static void Caption(RectTransform rect, string text, bool unlocked)
         {
-            Text caption = UIFactory.Label(rect, text, Theme.SmallSize - 6, unlocked ? Theme.Text : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
-            caption.resizeTextForBestFit = true;
-            caption.resizeTextMinSize = Theme.SmallSize - 9;
-            caption.resizeTextMaxSize = Theme.SmallSize - 6;
-            caption.horizontalOverflow = HorizontalWrapMode.Wrap;
-            UIFactory.Anchor(caption.rectTransform, 0.01f, -0.04f, 0.99f, 0.26f);
-            Outline outline = caption.gameObject.AddComponent<Outline>();
-            outline.effectColor = new Color(0.03f, 0.01f, 0.08f, 0.95f);
-            outline.effectDistance = new Vector2(2, -2);
+            // Grey the artwork first: the plate added below is chrome, not art, and must keep its own colour.
             if (!unlocked)
             {
                 foreach (Image image in rect.GetComponentsInChildren<Image>())
@@ -783,6 +784,21 @@ namespace CrushRoyale.Game.Screens
                     }
                 }
             }
+
+            Image plate = UIFactory.Panel("CaptionPlate", rect, new Color(0.05f, 0.02f, 0.11f, 0.86f));
+            plate.raycastTarget = false;
+            UIFactory.Anchor(plate.rectTransform, -0.05f, -0.03f, 1.05f, 0.24f);
+
+            Text caption = UIFactory.Label(plate.transform, text, Theme.SmallSize - 6, unlocked ? Theme.Text : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
+            caption.raycastTarget = false;
+            caption.resizeTextForBestFit = true;
+            caption.resizeTextMinSize = Theme.SmallSize - 10;
+            caption.resizeTextMaxSize = Theme.SmallSize - 6;
+            caption.horizontalOverflow = HorizontalWrapMode.Wrap;
+            UIFactory.Stretch(caption.rectTransform, 8, 8, 3, 3);
+            Outline outline = caption.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.03f, 0.01f, 0.08f, 0.95f);
+            outline.effectDistance = new Vector2(2, -2);
         }
 
         private static void LockBadge(RectTransform rect)

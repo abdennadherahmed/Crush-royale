@@ -2103,6 +2103,8 @@
   "pvp.nextLeague": "Próxima liga: {0}",
   "pvp.nextLeagueTrophies": "faltam {0} troféus",
   "pvp.nextLeagueBonus": "Na primeira vez: +{0} orbes",
-  "wheel.spinPaid": "Girar de novo  {0} orbes"
+  "wheel.spinPaid": "Girar de novo  {0} orbes",
+  "bag.convertAllOwned": "Você já tem todos os mascotes, então não há nada para trocar por estes fragmentos. Guarde-os: eles despertam os que você já tem.",
+  "bag.convertNeedsOwned": "Só um mascote que você já tem pode ceder os fragmentos sobrando. Desbloqueie-o primeiro."
 }
 

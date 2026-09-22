@@ -2103,6 +2103,8 @@
   "pvp.nextLeague": "Next league: {0}",
   "pvp.nextLeagueTrophies": "{0} trophies to go",
   "pvp.nextLeagueBonus": "First time there: +{0} orbes",
-  "wheel.spinPaid": "Spin again  {0} orbes"
+  "wheel.spinPaid": "Spin again  {0} orbes",
+  "bag.convertAllOwned": "You own every pet, so there is nothing to trade these fragments for. Keep them: they awaken the pets you already have.",
+  "bag.convertNeedsOwned": "Only a pet you already own can give its spare fragments away. Unlock this one first."
 }
 
