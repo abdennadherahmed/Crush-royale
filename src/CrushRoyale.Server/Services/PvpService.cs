@@ -81,10 +81,16 @@ public sealed class PvpService
     private readonly GuildService _guilds;
 
     /// <summary>An arena win counts for the guild's weekly race, the same way a cleared stage does.</summary>
-    private Task AwardGuildAsync(OperationContext ctx, PvpResultDto dto) =>
-        dto.Outcome == nameof(MatchOutcome.Win)
-            ? _guilds.AwardTournamentPointsAsync(ctx, GuildTournament.ForArenaWin(ctx.Player.Balance.Guild.Tournament))
-            : Task.CompletedTask;
+    private Task AwardGuildAsync(OperationContext ctx, PvpResultDto dto)
+    {
+        if (dto.Outcome != nameof(MatchOutcome.Win))
+        {
+            return Task.CompletedTask;
+        }
+        PlayerWorkspace ws = ctx.Player;
+        PiggyBank.Fill(ws.State.PiggyBank, ws.Balance.Economy.PiggyBank.OrbesPerArenaWin, ws.Balance.Economy.PiggyBank);
+        return _guilds.AwardTournamentPointsAsync(ctx, GuildTournament.ForArenaWin(ws.Balance.Guild.Tournament));
+    }
 
     private readonly SocialService _social;
 
