@@ -25,6 +25,10 @@ namespace CrushRoyale.EditorTools
             }
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output)));
 
+            // Pack the small UI sprites before building. Guarded inside: if it fails the game still renders, it just
+            // costs more draw calls, so a packing problem can never cost the APK.
+            SpriteAtlasBuilder.BuildAll();
+
             CrushRoyaleSetup.ConfigureAndroid();
             EditorUserBuildSettings.buildAppBundle = appBundle;
             if (!File.Exists(BootScenePath))

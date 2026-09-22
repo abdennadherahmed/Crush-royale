@@ -3,6 +3,7 @@ using CrushRoyale.Core.Board;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Story;
 using UnityEngine;
+using UnityEngine.U2D;
 
 namespace CrushRoyale.Game.UI
 {
@@ -13,6 +14,9 @@ namespace CrushRoyale.Game.UI
     public static class ArtLibrary
     {
         private static readonly Dictionary<string, Sprite> Cache = new Dictionary<string, Sprite>();
+
+        /// <summary>Atlases already looked up, including the misses (a null entry means "this family has none").</summary>
+        private static readonly Dictionary<string, SpriteAtlas> Atlases = new Dictionary<string, SpriteAtlas>();
 
         /// <summary>Equipped gem skin folder used by the board ("runes", "jewels", "season"), null for the classic gems.</summary>
         public static string GemSkin { get; set; }
@@ -144,7 +148,10 @@ namespace CrushRoyale.Game.UI
                 return cached;
             }
 
-            Sprite sprite = Resources.Load<Sprite>(path);
+            // The atlas first, so the six gems of a board and the dozen icons of the hub come from one texture and
+            // cost one draw call instead of a dozen. Anything not packed - the backdrops, the boss portraits, the
+            // nine-sliced kit - simply is not there, and falls through to the file it always came from.
+            Sprite sprite = FromAtlas(path) ?? Resources.Load<Sprite>(path);
             if (sprite == null)
             {
                 Texture2D texture = Resources.Load<Texture2D>(path);
@@ -155,6 +162,33 @@ namespace CrushRoyale.Game.UI
             }
             Cache[path] = sprite;
             return sprite;
+        }
+
+        /// <summary>
+        /// "Art/Gems/runes/red" is looked for as the sprite "red" of the atlas "gems.runes" (see SpriteAtlasBuilder,
+        /// which packs one atlas per folder). Returns null whenever that family was not packed, which is the normal
+        /// case for everything large.
+        /// </summary>
+        private static Sprite FromAtlas(string path)
+        {
+            const string root = "Art/";
+            int slash = path.LastIndexOf('/');
+            if (slash <= 0 || !path.StartsWith(root, System.StringComparison.Ordinal))
+            {
+                return null;
+            }
+            string folder = path.Substring(root.Length, slash - root.Length);
+            if (folder.Length == 0)
+            {
+                return null;
+            }
+            string key = folder.Replace('/', '.').ToLowerInvariant();
+            if (!Atlases.TryGetValue(key, out SpriteAtlas atlas))
+            {
+                atlas = Resources.Load<SpriteAtlas>("Atlases/" + key);
+                Atlases[key] = atlas;
+            }
+            return atlas == null ? null : atlas.GetSprite(path.Substring(slash + 1));
         }
     }
 }

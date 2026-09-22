@@ -517,3 +517,6 @@ $RECYCLE.BIN/
 
 ## Claude Code worktrees and session files
 .claude/
+
+# Sprite atlases are packed during the build by Assets/Editor/SpriteAtlasBuilder.cs.
+unity/CrushRoyale/Assets/Resources/Atlases/
