@@ -549,6 +549,9 @@ namespace CrushRoyale.Contracts
 
     public sealed class GuildMemberDto
     {
+        /// <summary>What this member has brought to the guild's weekly race.</summary>
+        public long TournamentPoints { get; set; }
+
         public string PlayerId { get; set; }
 
         public string DisplayName { get; set; }
@@ -586,6 +589,34 @@ namespace CrushRoyale.Contracts
         public long ResetAtUnixMs { get; set; }
     }
 
+    /// <summary>Where the guild stands in this week's race, and whether it is even entered.</summary>
+    public sealed class GuildTournamentDto
+    {
+        public long Points { get; set; }
+
+        /// <summary>What the player asking has personally brought this week.</summary>
+        public long MyPoints { get; set; }
+
+        /// <summary>Most a single member can bring in a week.</summary>
+        public long MemberCap { get; set; }
+
+        /// <summary>False while the guild has fewer than <see cref="MinMembers"/> members: it scores but is not ranked.</summary>
+        public bool Ranked { get; set; }
+
+        public int MinMembers { get; set; }
+
+        public int MembersMissing { get; set; }
+
+        public long LastPoints { get; set; }
+
+        public int LastRank { get; set; }
+
+        /// <summary>Coins and orbes the first place pays, shown as the prize on the card.</summary>
+        public int FirstPrizeCoins { get; set; }
+
+        public int FirstPrizeOrbes { get; set; }
+    }
+
     public sealed class GuildDto
     {
         public long Id { get; set; }
@@ -613,6 +644,9 @@ namespace CrushRoyale.Contracts
         public Dictionary<string, int> Tech { get; set; } = new Dictionary<string, int>();
 
         public List<GuildMemberDto> Members { get; set; } = new List<GuildMemberDto>();
+
+        /// <summary>The weekly race against the other guilds.</summary>
+        public GuildTournamentDto Tournament { get; set; }
 
         public bool IsOpen { get; set; }
 

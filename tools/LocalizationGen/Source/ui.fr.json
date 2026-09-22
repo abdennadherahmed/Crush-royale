@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "Ton ami n'a pas encore joué ce duel. Tu seras prévenu dès qu'il l'aura fait.",
   "kingdom.fx.step": "Reconstruction {0} sur {1} de cette zone",
   "currency.coinsName": "Pièces",
-  "currency.orbesName": "Orbes"
+  "currency.orbesName": "Orbes",
+  "guild.race": "Course hebdomadaire des guildes",
+  "guild.racePoints": "points cette semaine",
+  "guild.racePrize": "1er : {0} pièces + {1} orbes",
+  "guild.raceMine": "Tu as apporté {0} sur {1}",
+  "guild.raceEntered": "Ta guilde est dans la course",
+  "guild.raceNeedMembers": "Encore {0} membres et ta guilde entre dans la course. Il en faut {1} pour être classé, et les points ci-dessus comptent déjà."
 }
 

@@ -5,6 +5,7 @@ using CrushRoyale.Core.Economy;
 using CrushRoyale.Core.Gameplay;
 using CrushRoyale.Core.Progression;
 using CrushRoyale.Core.Replay;
+using CrushRoyale.Core.Social;
 using CrushRoyale.Core.Story;
 using CrushRoyale.Server.Infrastructure;
 using CrushRoyale.Server.Persistence;
@@ -19,9 +20,12 @@ public sealed class StoryService
 {
     private readonly PlayerOperations _ops;
 
-    public StoryService(PlayerOperations ops)
+    private readonly GuildService _guilds;
+
+    public StoryService(PlayerOperations ops, GuildService guilds)
     {
         _ops = ops;
+        _guilds = guilds;
     }
 
     public Task<StageData> GetStageAsync(Guid userId, int stageId, CancellationToken ct) =>
@@ -166,6 +170,9 @@ public sealed class StoryService
             {
                 ws.TrackQuest(QuestType.WinStages, 1);
                 ws.TrackQuest(QuestType.EarnStars, result.Stars);
+                // Everything a member clears feeds the guild's weekly race against the other guilds.
+                await _guilds.AwardTournamentPointsAsync(ctx,
+                    GuildTournament.ForStage(result.Stars, ws.Balance.Guild.Tournament)).ConfigureAwait(false);
             }
             ws.TrackQuest(QuestType.TriggerCascades, result.TotalCascades);
             ws.TrackQuest(QuestType.CreateSpecials, result.SpecialsCreated);

@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "لم يلعب صديقك هذه المبارزة بعد. سنخبرك فور أن يفعل.",
   "kingdom.fx.step": "إعادة البناء {0} من {1} في هذه المنطقة",
   "currency.coinsName": "عملات",
-  "currency.orbesName": "كرات"
+  "currency.orbesName": "كرات",
+  "guild.race": "سباق النقابات الأسبوعي",
+  "guild.racePoints": "نقاط هذا الأسبوع",
+  "guild.racePrize": "الأول: {0} عملة + {1} كرة",
+  "guild.raceMine": "ساهمت بـ {0} من {1}",
+  "guild.raceEntered": "نقابتك في السباق",
+  "guild.raceNeedMembers": "{0} أعضاء آخرون وتدخل نقابتك السباق. تحتاج {1} لتُصنَّف، والنقاط أعلاه محسوبة بالفعل."
 }
 

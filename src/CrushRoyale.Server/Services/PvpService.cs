@@ -8,6 +8,7 @@ using CrushRoyale.Core.Gameplay;
 using CrushRoyale.Core.Progression;
 using CrushRoyale.Core.Pvp;
 using CrushRoyale.Core.Replay;
+using CrushRoyale.Core.Social;
 using CrushRoyale.Core.Story;
 using CrushRoyale.Server.Infrastructure;
 using CrushRoyale.Server.Persistence;
@@ -67,14 +68,23 @@ public sealed class PvpService
     private readonly ConcurrentDictionary<Guid, PendingRequest> _pending = new();
     private readonly ConcurrentDictionary<Guid, StartedMatch> _started = new();
 
-    public PvpService(PlayerOperations ops, MatchmakingEngine engine, GhostPoolCache ghosts, GameServerOptions options, SocialService social)
+    public PvpService(PlayerOperations ops, MatchmakingEngine engine, GhostPoolCache ghosts, GameServerOptions options, SocialService social, GuildService guilds)
     {
         _ops = ops;
         _engine = engine;
         _ghosts = ghosts;
         _options = options;
         _social = social;
+        _guilds = guilds;
     }
+
+    private readonly GuildService _guilds;
+
+    /// <summary>An arena win counts for the guild's weekly race, the same way a cleared stage does.</summary>
+    private Task AwardGuildAsync(OperationContext ctx, PvpResultDto dto) =>
+        dto.Outcome == nameof(MatchOutcome.Win)
+            ? _guilds.AwardTournamentPointsAsync(ctx, GuildTournament.ForArenaWin(ctx.Player.Balance.Guild.Tournament))
+            : Task.CompletedTask;
 
     private readonly SocialService _social;
 
@@ -424,6 +434,7 @@ public sealed class PvpService
         PvpMatchResult result = PvpGhostPlay.ComputeResult(mine, ReplaySerializer.Deserialize(ghostRow.Data), me.Player.Balance);
         bool ranked = match.Mode == GameMode.PvpRanked && match.Config.Ranked;
         PvpResultDto dto = ApplyOutcome(me, match, result.ChallengerOutcome, result.ChallengerScore, result.OpponentScore, result.ChallengerFrozenPoints, result.OpponentFrozenPoints, ranked);
+        await AwardGuildAsync(me, dto).ConfigureAwait(false);
 
         if (owner != null && ranked && result.ChallengerOutcome == MatchOutcome.Loss)
         {
@@ -449,6 +460,7 @@ public sealed class PvpService
         PvpMatchResult result = PvpGhostPlay.ComputeResult(myReplay, theirReplay, me.Player.Balance);
 
         PvpResultDto dto = ApplyOutcome(me, mine, result.ChallengerOutcome, result.ChallengerScore, result.OpponentScore, result.ChallengerFrozenPoints, result.OpponentFrozenPoints, mine.Config.Ranked);
+        await AwardGuildAsync(me, dto).ConfigureAwait(false);
         mine.ResultJson = Json.Serialize(dto);
         await me.Tx.UpdateMatchAsync(mine).ConfigureAwait(false);
 
@@ -461,6 +473,7 @@ public sealed class PvpService
                 _ => MatchOutcome.Draw
             };
             PvpResultDto theirDto = ApplyOutcome(them, theirs, flipped, result.OpponentScore, result.ChallengerScore, result.OpponentFrozenPoints, result.ChallengerFrozenPoints, theirs.Config.Ranked);
+            await AwardGuildAsync(them, theirDto).ConfigureAwait(false);
             theirs.ResultJson = Json.Serialize(theirDto);
             await me.Tx.UpdateMatchAsync(theirs).ConfigureAwait(false);
         }
@@ -476,6 +489,7 @@ public sealed class PvpService
         }
         ReplayData mine = ReplaySerializer.Deserialize((await me.Tx.GetReplayAsync(match.ReplayId!.Value).ConfigureAwait(false))!.Data);
         PvpResultDto dto = ApplyOutcome(me, match, MatchOutcome.Win, mine.FinalScore, 0, 0, 0, match.Config.Ranked);
+        await AwardGuildAsync(me, dto).ConfigureAwait(false);
         match.ResultJson = Json.Serialize(dto);
         await me.Tx.UpdateMatchAsync(match).ConfigureAwait(false);
         return dto;

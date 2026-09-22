@@ -287,6 +287,55 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
+        /// <summary>
+        /// The weekly race against the other guilds. A guild under the member floor still scores and still sees its
+        /// score, but is not ranked: showing the points it is already piling up is what makes recruiting feel urgent
+        /// rather than a chore.
+        /// </summary>
+        private void BuildTournament(Transform list)
+        {
+            GuildTournamentDto race = _guild?.Tournament;
+            if (race == null)
+            {
+                return;
+            }
+            Widgets.SectionTitle(list, Loc.T("guild.race"));
+
+            Image card = UIFactory.Panel("Race", list, Theme.Panel);
+            UIFactory.Height(card, race.Ranked ? 250 : 300);
+            UiKit.CardFrame(card);
+
+            Text score = Outlined(card.transform, Loc.Number(race.Points), Theme.TitleSize, Theme.Gold, TextAnchor.MiddleLeft);
+            UIFactory.Anchor(score.rectTransform, 0.05f, race.Ranked ? 0.52f : 0.6f, 0.55f, 0.92f);
+            Text caption = Outlined(card.transform, Loc.T("guild.racePoints"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleLeft);
+            UIFactory.Anchor(caption.rectTransform, 0.05f, race.Ranked ? 0.34f : 0.46f, 0.55f, 0.52f);
+
+            Chip(card.transform, "item_trophy", Loc.T("guild.racePrize", Loc.Number(race.FirstPrizeCoins), Loc.Number(race.FirstPrizeOrbes)),
+                0.56f, 0.97f, race.Ranked ? 0.62f : 0.7f, 0.9f);
+
+            // What the player personally brought, against the cap: a member who has hit it should go help elsewhere.
+            float mine = race.MemberCap > 0 ? Mathf.Clamp01(race.MyPoints / (float)race.MemberCap) : 0f;
+            UIFactory.ProgressBar(card.transform, mine, Theme.Crystal, out RectTransform bar);
+            UIFactory.Anchor(bar, 0.05f, race.Ranked ? 0.12f : 0.3f, 0.95f, race.Ranked ? 0.3f : 0.46f);
+            Text mineText = Outlined(bar, Loc.T("guild.raceMine", Loc.Number(race.MyPoints), Loc.Number(race.MemberCap)),
+                Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter);
+            UIFactory.Stretch(mineText.rectTransform);
+
+            if (race.Ranked)
+            {
+                Text ok = Outlined(card.transform, Loc.T("guild.raceEntered"), Theme.SmallSize - 4, Theme.Success, TextAnchor.MiddleCenter);
+                UIFactory.Anchor(ok.rectTransform, 0.05f, 0.02f, 0.95f, 0.11f);
+                return;
+            }
+
+            Image warn = UIFactory.Panel("Missing", card.transform, new Color(0.35f, 0.06f, 0.12f, 0.85f));
+            UIFactory.Anchor(warn.rectTransform, 0.04f, 0.04f, 0.96f, 0.28f);
+            Text need = Outlined(warn.transform, Loc.T("guild.raceNeedMembers", race.MembersMissing, race.MinMembers),
+                Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter);
+            UIFactory.Stretch(need.rectTransform, 12, 6, 12, 6);
+            need.horizontalOverflow = HorizontalWrapMode.Wrap;
+        }
+
         private void BuildBanner(RectTransform body)
         {
             Image banner = UIFactory.Panel("Banner", body, Theme.Panel);
@@ -325,6 +374,7 @@ namespace CrushRoyale.Game.Screens
         private void BuildMembers()
         {
             RectTransform list = UIFactory.ScrollList(_content, 14, 24);
+            BuildTournament(list);
             string myRole = Me?.Role ?? "Member";
             int index = 0;
             foreach (GuildMemberDto member in _guild.Members)

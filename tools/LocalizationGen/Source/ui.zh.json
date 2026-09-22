@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "你的好友还没有打这场对决。他一打完就会通知你。",
   "kingdom.fx.step": "本区域第 {0}/{1} 项重建",
   "currency.coinsName": "金币",
-  "currency.orbesName": "魔珠"
+  "currency.orbesName": "魔珠",
+  "guild.race": "公会周赛",
+  "guild.racePoints": "本周积分",
+  "guild.racePrize": "第一名：{0} 金币 + {1} 魔珠",
+  "guild.raceMine": "你贡献了 {0}/{1}",
+  "guild.raceEntered": "你的公会已参赛",
+  "guild.raceNeedMembers": "再招募 {0} 名成员即可参赛。上榜需要 {1} 人，上面的积分已经在累积。"
 }
 

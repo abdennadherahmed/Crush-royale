@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "친구가 아직 이 대결을 하지 않았습니다. 하는 즉시 알려 드립니다.",
   "kingdom.fx.step": "이 지역의 재건 {0}/{1}",
   "currency.coinsName": "코인",
-  "currency.orbesName": "오브"
+  "currency.orbesName": "오브",
+  "guild.race": "주간 길드 레이스",
+  "guild.racePoints": "이번 주 점수",
+  "guild.racePrize": "1위: 코인 {0} + 오브 {1}",
+  "guild.raceMine": "내 기여 {0} / {1}",
+  "guild.raceEntered": "길드가 레이스에 참가 중",
+  "guild.raceNeedMembers": "{0}명만 더 모으면 레이스에 참가합니다. 순위에 오르려면 {1}명이 필요하며, 위 점수는 이미 쌓이고 있습니다."
 }
 

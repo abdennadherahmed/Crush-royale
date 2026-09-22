@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "友達はまだこのデュエルをプレイしていません。プレイしたらお知らせします。",
   "kingdom.fx.step": "このゾーンの再建 {0}/{1}",
   "currency.coinsName": "コイン",
-  "currency.orbesName": "オーブ"
+  "currency.orbesName": "オーブ",
+  "guild.race": "週間ギルドレース",
+  "guild.racePoints": "今週のポイント",
+  "guild.racePrize": "1位: {0} コイン + {1} オーブ",
+  "guild.raceMine": "あなたの貢献 {0} / {1}",
+  "guild.raceEntered": "ギルドはレースに参加中",
+  "guild.raceNeedMembers": "あと {0} 人でレースに参加できます。ランキングには {1} 人必要で、上のポイントはすでに加算されています。"
 }
 

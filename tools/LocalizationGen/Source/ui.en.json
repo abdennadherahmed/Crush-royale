@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "Your friend has not played this duel yet. You will be told as soon as they do.",
   "kingdom.fx.step": "Rebuild {0} of {1} in this zone",
   "currency.coinsName": "Coins",
-  "currency.orbesName": "Orbes"
+  "currency.orbesName": "Orbes",
+  "guild.race": "Weekly guild race",
+  "guild.racePoints": "points this week",
+  "guild.racePrize": "1st: {0} coins + {1} orbes",
+  "guild.raceMine": "You brought {0} of {1}",
+  "guild.raceEntered": "Your guild is in the race",
+  "guild.raceNeedMembers": "{0} more members and your guild enters the race. It needs {1} to be ranked, and the points below already count."
 }
 

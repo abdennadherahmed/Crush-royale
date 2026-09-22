@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "Il tuo amico non ha ancora giocato questo duello. Te lo diremo appena lo farà.",
   "kingdom.fx.step": "Ricostruzione {0} di {1} di questa zona",
   "currency.coinsName": "Monete",
-  "currency.orbesName": "Orbi"
+  "currency.orbesName": "Orbi",
+  "guild.race": "Corsa settimanale delle gilde",
+  "guild.racePoints": "punti questa settimana",
+  "guild.racePrize": "1°: {0} monete + {1} orbi",
+  "guild.raceMine": "Hai portato {0} su {1}",
+  "guild.raceEntered": "La tua gilda è in gara",
+  "guild.raceNeedMembers": "Ancora {0} membri e la tua gilda entra in gara. Ne servono {1} per essere classificata, e i punti sopra contano già."
 }
 

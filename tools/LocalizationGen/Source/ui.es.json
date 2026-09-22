@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "Tu amigo aún no ha jugado este duelo. Te avisaremos en cuanto lo haga.",
   "kingdom.fx.step": "Reconstrucción {0} de {1} de esta zona",
   "currency.coinsName": "Monedas",
-  "currency.orbesName": "Orbes"
+  "currency.orbesName": "Orbes",
+  "guild.race": "Carrera semanal de gremios",
+  "guild.racePoints": "puntos esta semana",
+  "guild.racePrize": "1.º: {0} monedas + {1} orbes",
+  "guild.raceMine": "Has aportado {0} de {1}",
+  "guild.raceEntered": "Tu gremio está en la carrera",
+  "guild.raceNeedMembers": "{0} miembros más y tu gremio entra en la carrera. Necesita {1} para ser clasificado, y los puntos de arriba ya cuentan."
 }
 

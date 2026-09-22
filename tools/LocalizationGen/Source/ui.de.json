@@ -2086,6 +2086,12 @@
   "pvp.waitingFriend": "Dein Freund hat dieses Duell noch nicht gespielt. Du erfährst es, sobald er es tut.",
   "kingdom.fx.step": "Wiederaufbau {0} von {1} dieser Zone",
   "currency.coinsName": "Münzen",
-  "currency.orbesName": "Kugeln"
+  "currency.orbesName": "Kugeln",
+  "guild.race": "Wöchentliches Gildenrennen",
+  "guild.racePoints": "Punkte diese Woche",
+  "guild.racePrize": "1.: {0} Münzen + {1} Kugeln",
+  "guild.raceMine": "Du hast {0} von {1} beigetragen",
+  "guild.raceEntered": "Deine Gilde ist im Rennen",
+  "guild.raceNeedMembers": "Noch {0} Mitglieder und deine Gilde ist im Rennen. Für eine Wertung braucht sie {1}, und die Punkte oben zählen bereits."
 }
 

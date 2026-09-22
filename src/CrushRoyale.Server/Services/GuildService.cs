@@ -47,11 +47,33 @@ public sealed class GuildService
         {
             GuildRecord record = await LockMyGuildAsync(ctx).ConfigureAwait(false);
             new GuildManager(ctx.Player.Balance, ctx.Player.Clock).EnsureBossWeek(record.Guild, Week);
+            GuildTournament.EnsureWeek(record.Guild, Week);
             ClaimPendingRewards(ctx.Player, record);
             await RefreshMembersAsync(record, ct).ConfigureAwait(false);
             await ctx.Tx.UpdateGuildAsync(record).ConfigureAwait(false);
             return await ToDtoAsync(record, ctx.Player, ct).ConfigureAwait(false);
         }, ct);
+
+    /// <summary>
+    /// Adds what a player just earned to their guild's weekly score. Called from the match services, inside the
+    /// transaction that already holds the player: the guild is locked after the player, in the same order as every
+    /// other guild write here, so two of these can never deadlock against each other.
+    /// </summary>
+    public async Task AwardTournamentPointsAsync(OperationContext ctx, long points)
+    {
+        PlayerWorkspace ws = ctx.Player;
+        if (points <= 0 || ws.State.GuildId is not long guildId)
+        {
+            return;
+        }
+        GuildRecord? record = await ctx.Tx.GetGuildAsync(guildId).ConfigureAwait(false);
+        if (record == null)
+        {
+            return;
+        }
+        GuildTournament.AddPoints(record.Guild, ws.IdString, points, Week, ws.Balance.Guild.Tournament);
+        await ctx.Tx.UpdateGuildAsync(record).ConfigureAwait(false);
+    }
 
     public async Task<GuildDto> GetAsync(Guid userId, long guildId, CancellationToken ct)
     {
@@ -500,6 +522,7 @@ public sealed class GuildService
                     DonatedOrbes = m.DonatedOrbes,
                     BossAttacksLeft = manager.BossAttacksLeftToday(m),
                     BossDamage = m.BossWeek == week ? m.BossDamageThisWeek : 0,
+                    TournamentPoints = m.TournamentWeek == week ? m.TournamentPoints : 0,
                     CoinsDonatedToday = m.CoinDonationDay == today ? m.CoinsDonatedToday : 0,
                     JoinedAtUnixMs = m.JoinedAtUnixMs
                 }).ToList(),
@@ -507,7 +530,30 @@ public sealed class GuildService
             MinTrophies = g.MinTrophies,
             TotalTrophies = g.TotalTrophies,
             Boss = BossDto(g.Boss),
+            Tournament = TournamentDto(g, ws, week),
             Rank = top.FirstOrDefault(t => t.GuildId == record.Id)?.Rank ?? 0
+        };
+    }
+
+    /// <summary>This week's race as the asking member sees it, including how many members are still missing.</summary>
+    private static GuildTournamentDto TournamentDto(Guild guild, PlayerWorkspace ws, int week)
+    {
+        GuildTournamentBalance balance = ws.Balance.Guild.Tournament;
+        GuildTournamentState state = guild.Tournament ?? new GuildTournamentState();
+        GuildMember? me = guild.Members.Find(m => m.PlayerId == ws.IdString);
+        (int coins, int orbes) = GuildTournament.RewardFor(1, balance);
+        return new GuildTournamentDto
+        {
+            Points = state.Week == week ? state.Points : 0,
+            MyPoints = me != null && me.TournamentWeek == week ? me.TournamentPoints : 0,
+            MemberCap = balance.MaxPointsPerMemberPerWeek,
+            Ranked = GuildTournament.IsRanked(guild, balance),
+            MinMembers = balance.MinMembers,
+            MembersMissing = GuildTournament.MembersMissing(guild, balance),
+            LastPoints = state.LastPoints,
+            LastRank = state.LastRank,
+            FirstPrizeCoins = coins,
+            FirstPrizeOrbes = orbes
         };
     }
 

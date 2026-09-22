@@ -88,6 +88,12 @@ namespace CrushRoyale.Core.Social
         public int BossAttacksToday { get; set; }
 
         public long BossDamageThisWeek { get; set; }
+
+        /// <summary>Week the tournament points below belong to (see <see cref="GuildTournament"/>).</summary>
+        public int TournamentWeek { get; set; } = -1;
+
+        /// <summary>What this member has brought to the guild's weekly score.</summary>
+        public long TournamentPoints { get; set; }
     }
 
     public sealed class GuildBossState
@@ -133,6 +139,9 @@ namespace CrushRoyale.Core.Social
         public int MinTrophies { get; set; }
 
         public GuildBossState Boss { get; set; }
+
+        /// <summary>The weekly race against the other guilds (see <see cref="GuildTournament"/>).</summary>
+        public GuildTournamentState Tournament { get; set; }
 
         public long TotalTrophies => Members.Sum(m => (long)m.Trophies);
 

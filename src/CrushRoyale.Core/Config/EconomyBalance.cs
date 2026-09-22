@@ -190,6 +190,9 @@ namespace CrushRoyale.Core.Config
     /// <summary>Guilds (Task 11).</summary>
     public sealed class GuildBalance
     {
+        /// <summary>The weekly race between guilds (see CrushRoyale.Core.Social.GuildTournament).</summary>
+        public Social.GuildTournamentBalance Tournament { get; set; } = new Social.GuildTournamentBalance();
+
         public int MaxMembers { get; set; } = 20;
 
         public int MaxLevel { get; set; } = 50;
@@ -253,6 +256,7 @@ namespace CrushRoyale.Core.Config
             GameBalance.Require(OrbeLevelEscalationPermille >= 1000, "Guild.OrbeLevelEscalationPermille");
             GameBalance.Require(CoinsPerPoint >= 1 && DailyCoinDonationCap >= CoinsPerPoint && Level2CostPoints >= 1, "Guild donation settings");
             GameBalance.Require(RankingPoolOrbes.Length == 5 && RankingPoolCoins.Length == 5, "Guild ranking pools need 5 values");
+            Tournament.Validate();
         }
     }
 
