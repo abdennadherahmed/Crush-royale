@@ -172,17 +172,20 @@ namespace CrushRoyale.Game.UI
         private static Sprite FromAtlas(string path)
         {
             const string root = "Art/";
+            if (!path.StartsWith(root, System.StringComparison.Ordinal))
+            {
+                return null;
+            }
+            // The last slash must come after "Art/", otherwise there is no folder to name an atlas after. "Art/logo"
+            // lives at the top of the folder and its only slash is the one inside the prefix: asking for the text
+            // between them asked for a negative length, and the splash screen -- the first thing the game draws --
+            // threw before anything appeared. A file with no folder is simply not packed; fall through to Resources.
             int slash = path.LastIndexOf('/');
-            if (slash <= 0 || !path.StartsWith(root, System.StringComparison.Ordinal))
+            if (slash < root.Length)
             {
                 return null;
             }
-            string folder = path.Substring(root.Length, slash - root.Length);
-            if (folder.Length == 0)
-            {
-                return null;
-            }
-            string key = folder.Replace('/', '.').ToLowerInvariant();
+            string key = path.Substring(root.Length, slash - root.Length).Replace('/', '.').ToLowerInvariant();
             if (!Atlases.TryGetValue(key, out SpriteAtlas atlas))
             {
                 atlas = Resources.Load<SpriteAtlas>("Atlases/" + key);
