@@ -175,14 +175,31 @@ namespace CrushRoyale.Game.UI
                 events.transform.SetParent(parent, false);
             }
 
-            root._screens = UIFactory.Stretch(UIFactory.Rect("Screens", go.transform));
-            root._dialogs = UIFactory.Stretch(UIFactory.Rect("Dialogs", go.transform));
-            root._toasts = UIFactory.Stretch(UIFactory.Rect("Toasts", go.transform));
-            root._loading = UIFactory.Stretch(UIFactory.Rect("Loading", go.transform));
+            // One canvas for the whole interface meant that a single ticking chest timer, or one pulsing button,
+            // dirtied every widget on screen and forced Unity to rebuild the lot each frame. Each layer gets a nested
+            // canvas of its own, so a toast redraws a toast and nothing else.
+            root._screens = Layer(go.transform, "Screens", 0);
+            root._dialogs = Layer(go.transform, "Dialogs", 10);
+            root._toasts = Layer(go.transform, "Toasts", 20);
+            root._loading = Layer(go.transform, "Loading", 30);
             root.BuildLoading();
 
             game.Loc.LanguageChanged += () => root.Current?.Rebuild();
             return root;
+        }
+
+        /// <summary>
+        /// A full-screen layer with its own canvas. A nested canvas keeps its rebuilds to itself; it also needs its
+        /// own raycaster, because a canvas stops the one above it from reaching the widgets inside.
+        /// </summary>
+        private static RectTransform Layer(Transform parent, string name, int order)
+        {
+            RectTransform rect = UIFactory.Stretch(UIFactory.Rect(name, parent));
+            Canvas canvas = rect.gameObject.AddComponent<Canvas>();
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = order;
+            rect.gameObject.AddComponent<GraphicRaycaster>();
+            return rect;
         }
 
         public void Boot() => Show<SplashScreen>(addToHistory: false);
