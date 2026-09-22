@@ -17,9 +17,9 @@ on:
         type: choice
         options: [apk, aab]
         default: apk
-  # No automatic build on push. A private repository gets 2000 free Actions minutes a month and one Unity build
-  # costs 25 to 60 of them, so building on every commit burned the whole allowance. Builds are now asked for
-  # deliberately: Actions > Android build > Run workflow.
+  # The repository is public, so Actions minutes are free and unmetered again and a build on push costs nothing.
+  push:
+    branches: [master, main, crush-royale-v1]
 
 concurrency:
   group: android-${{ github.ref }}
