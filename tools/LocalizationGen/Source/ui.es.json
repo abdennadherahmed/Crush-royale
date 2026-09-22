@@ -2112,6 +2112,9 @@
   "guildboss.majors_blue.rule": "Las bombas reaparecen con una mecha corta. Si una llega a cero, el ataque termina al instante, sea cual sea tu puntuación.",
   "objective.DestroyBlight": "Corrupción",
   "mechanic.forge.title": "Forja de corrupción",
-  "mechanic.forge.body": "Corrompe una gema vecina en cada movimiento, y esa corrupción luego se extiende sola. Tres golpes la destruyen. Rómpela pronto o el tablero se cerrará."
+  "mechanic.forge.body": "Corrompe una gema vecina en cada movimiento, y esa corrupción luego se extiende sola. Tres golpes la destruyen. Rómpela pronto o el tablero se cerrará.",
+  "objective.BreakChains": "Cadenas",
+  "mechanic.chain.title": "Gemas encadenadas",
+  "mechanic.chain.body": "Una gema encadenada no se puede mover. Nada de lo que le hagas sirve: haz una combinación justo al lado y la cadena se rompe."
 }
 

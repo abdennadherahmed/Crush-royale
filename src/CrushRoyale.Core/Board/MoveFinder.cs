@@ -28,6 +28,16 @@ namespace CrushRoyale.Core.Board
     /// <summary>Finds swaps that produce at least one match.</summary>
     public static class MoveFinder
     {
+        /// <summary>
+        /// Whether this cell can take part in a swap at all.
+        ///
+        /// Both the validator and the move finder ask this. They used to answer the question separately, and the
+        /// finder only checked the first cell of a pair: it offered swaps the validator then rejected, so on a
+        /// chained board every bot and every hint proposed a move that could not be played, and the match froze on
+        /// its first turn. One predicate, one answer.
+        /// </summary>
+        public static bool CanTakePart(GameBoard board, Pos p) => board[p].CanSwap && board.ChainAt(p) == 0;
+
         /// <summary>Why a swap is (in)valid, without mutating the board.</summary>
         public static ErrorCode CheckSwap(GameBoard board, Pos a, Pos b)
         {
@@ -39,7 +49,9 @@ namespace CrushRoyale.Core.Board
             {
                 return ErrorCode.NotAdjacent;
             }
-            if (!board[a].CanSwap || !board[b].CanSwap)
+            // A chained gem is held where it stands. It can still be matched if the board brings its colour to it,
+            // but the player cannot move it: the chain is broken by clearing next to it, never by touching it.
+            if (!CanTakePart(board, a) || !CanTakePart(board, b))
             {
                 return ErrorCode.NotSwappable;
             }
@@ -79,7 +91,7 @@ namespace CrushRoyale.Core.Board
                 for (int x = 0; x < board.Width; x++)
                 {
                     var a = new Pos(x, y);
-                    if (!board[a].CanSwap)
+                    if (!CanTakePart(board, a))
                     {
                         continue;
                     }
@@ -107,7 +119,7 @@ namespace CrushRoyale.Core.Board
         private static bool TryPair(GameBoard board, Pos a, Pos b, List<Move> output)
         {
             Piece pb = board[b];
-            if (!pb.CanSwap)
+            if (!CanTakePart(board, b))
             {
                 return false;
             }

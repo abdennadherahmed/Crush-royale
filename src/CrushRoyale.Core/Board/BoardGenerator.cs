@@ -33,6 +33,12 @@ namespace CrushRoyale.Core.Board
         /// <summary>Corruption forges (3 hits): each one corrupts a neighbouring gem after every move.</summary>
         public int ForgeCount { get; set; }
 
+        /// <summary>Chained cells (stage 501+): held in place until a match is cleared next to them.</summary>
+        public int ChainCells { get; set; }
+
+        /// <summary>Links on each chained cell: two means two neighbouring clears are needed to free it.</summary>
+        public int ChainLinks { get; set; } = 1;
+
         public int MaxAttempts { get; set; } = 400;
 
         public int LowDifficultyBiasPermille { get; set; } = 350;
@@ -67,6 +73,15 @@ namespace CrushRoyale.Core.Board
             if (IceCells < 0 || IceCells + StoneCount > cells)
             {
                 throw new ArgumentException("Too many ice cells.");
+            }
+            // A board where most gems are pinned has no moves at all, so chains are capped well under half of it.
+            if (ChainCells < 0 || ChainCells > cells / 4)
+            {
+                throw new ArgumentException("Too many chained cells.");
+            }
+            if (ChainLinks < 1 || ChainLinks > 3)
+            {
+                throw new ArgumentException("ChainLinks must be 1-3.");
             }
             if (IceLayers < 1 || IceLayers > 3)
             {
@@ -210,6 +225,19 @@ namespace CrushRoyale.Core.Board
                 {
                     board.SetIce(p, o.IceLayers);
                 }
+            }
+
+            if (o.ChainCells > 0)
+            {
+                foreach (Pos p in PickDistinctCells(o.Width, o.Height, o.ChainCells, rng, stoneSet))
+                {
+                    if (board[p].IsPlainGem)
+                    {
+                        board.SetChain(p, o.ChainLinks);
+                    }
+                }
+                // Pinning gems can leave a board with no legal swap at all: put one back if that happened.
+                BoardShuffler.EnsurePlayable(board, rng, o.ColorCount);
             }
 
             return board;

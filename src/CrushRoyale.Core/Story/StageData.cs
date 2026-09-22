@@ -22,7 +22,10 @@ namespace CrushRoyale.Core.Story
         DefeatBoss = 4,
 
         /// <summary>Destroy a number of corrupted crystals (from stage 401, where forges keep making them).</summary>
-        DestroyBlight = 5
+        DestroyBlight = 5,
+
+        /// <summary>Snap a number of chains (from stage 501), by clearing next to the gems they hold.</summary>
+        BreakChains = 6
     }
 
     /// <summary>Difficulty label shown on the map: a sawtooth of easy stages, a hard one, now and then a super hard one.</summary>
@@ -128,6 +131,11 @@ namespace CrushRoyale.Core.Story
 
         /// <summary>Corruption forges (from stage 401): each corrupts a neighbouring gem after every move.</summary>
         public int ForgeCount { get; set; }
+
+        /// <summary>Chained cells (from stage 501): gems held in place until a clear happens beside them.</summary>
+        public int ChainCells { get; set; }
+
+        public int ChainLinks { get; set; } = 1;
 
         public List<StageObjective> Objectives { get; set; } = new List<StageObjective>();
 

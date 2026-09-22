@@ -121,6 +121,7 @@ namespace CrushRoyale.Tools.StageAudit
             var stones = new int[total + 1];
             var collect = new int[total + 1];
             var blight = new int[total + 1];
+            var chains = new int[total + 1];
             Profile expert = Profiles[2];
             Profile mid = Profiles[1];
             // Timed stages are measured at a human pace: an expert still needs time to spot moves against the clock.
@@ -137,6 +138,7 @@ namespace CrushRoyale.Tools.StageAudit
                 var st = new int[runs];
                 var co = new int[runs];
                 var bl = new int[runs];
+                var ch = new int[runs];
                 StageObjective collectGoal = stage.Objectives.FirstOrDefault(o => o.Type == ObjectiveType.CollectColor);
                 for (int r = 0; r < runs; r++)
                 {
@@ -156,6 +158,7 @@ namespace CrushRoyale.Tools.StageAudit
                     st[r] = result.StonesDestroyed;
                     co[r] = collectGoal != null ? result.ClearedByColor[(int)collectGoal.Color] : 0;
                     bl[r] = result.BlightDestroyed;
+                    ch[r] = result.ChainsBroken;
                 }
                 score[id] = Median(s);
                 average[id] = Median(avg);
@@ -163,6 +166,7 @@ namespace CrushRoyale.Tools.StageAudit
                 stones[id] = Median(st);
                 collect[id] = Median(co);
                 blight[id] = Median(bl);
+                chains[id] = Median(ch);
             });
 
             var sb = new StringBuilder();
@@ -183,6 +187,8 @@ namespace CrushRoyale.Tools.StageAudit
             AppendArray(sb, "Collect", collect);
             sb.AppendLine();
             AppendArray(sb, "Blight", blight);
+            sb.AppendLine();
+            AppendArray(sb, "Chains", chains);
             sb.AppendLine("    }");
             sb.AppendLine("}");
             File.WriteAllText(output, sb.ToString());

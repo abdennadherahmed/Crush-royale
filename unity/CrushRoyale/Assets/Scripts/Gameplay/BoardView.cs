@@ -23,10 +23,15 @@ namespace CrushRoyale.Game.Gameplay
         private readonly Dictionary<int, PieceView> _pieces = new Dictionary<int, PieceView>();
         private RectTransform _cellsLayer;
         private RectTransform _iceLayer;
+
+        /// <summary>Chains are drawn over the pieces, unlike ice which sits behind them: they hold the gem, not cover it.</summary>
+        private RectTransform _chainLayer;
         private RectTransform _piecesLayer;
         private RectTransform _fxLayer;
         private Image[] _ice;
         private int[] _iceLayers;
+        private Image[] _chains;
+        private int[] _chainLinks;
         private Image _hintA;
         private Image _hintB;
         private TimingBalance _timing;
@@ -76,6 +81,7 @@ namespace CrushRoyale.Game.Gameplay
             view._cellsLayer = UIFactory.Stretch(UIFactory.Rect("Cells", rect));
             view._iceLayer = UIFactory.Stretch(UIFactory.Rect("Ice", rect));
             view._piecesLayer = UIFactory.Stretch(UIFactory.Rect("Pieces", rect));
+            view._chainLayer = UIFactory.Stretch(UIFactory.Rect("Chains", rect));
             view._fxLayer = UIFactory.Stretch(UIFactory.Rect("Fx", rect));
             return view;
         }
@@ -95,6 +101,8 @@ namespace CrushRoyale.Game.Gameplay
 
             _ice = new Image[Width * Height];
             _iceLayers = new int[Width * Height];
+            _chains = new Image[Width * Height];
+            _chainLinks = new int[Width * Height];
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
@@ -108,6 +116,15 @@ namespace CrushRoyale.Game.Gameplay
                     bg.type = Image.Type.Sliced;
                     bg.color = (x + y) % 2 == 0 ? new Color(1, 1, 1, 0.06f) : new Color(1, 1, 1, 0.03f);
                     bg.raycastTarget = false;
+
+                    RectTransform chain = UIFactory.Rect("Chain", _chainLayer);
+                    chain.sizeDelta = cell.sizeDelta;
+                    chain.anchoredPosition = cell.anchoredPosition;
+                    Image chainImage = chain.gameObject.AddComponent<Image>();
+                    chainImage.sprite = ArtLibrary.Chain();
+                    chainImage.raycastTarget = false;
+                    chainImage.enabled = false;
+                    _chains[y * Width + x] = chainImage;
 
                     RectTransform ice = UIFactory.Rect("Ice", _iceLayer);
                     ice.sizeDelta = cell.sizeDelta;
@@ -197,6 +214,8 @@ namespace CrushRoyale.Game.Gameplay
                 {
                     _iceLayers[y * Width + x] = board.IceAt(new Pos(x, y));
                     RefreshIce(x, y);
+                    _chainLinks[y * Width + x] = board.ChainAt(new Pos(x, y));
+                    RefreshChain(x, y);
                 }
             }
         }
@@ -514,6 +533,10 @@ namespace CrushRoyale.Game.Gameplay
                 _iceLayers[index] = Mathf.Max(0, _iceLayers[index] - 1);
                 RefreshIce(ice.X, ice.Y);
             }
+            foreach (Pos chain in step.ChainsBroken)
+            {
+                OnChainBroken(chain);
+            }
 
             foreach (PieceView v in vanishing)
             {
@@ -790,6 +813,37 @@ namespace CrushRoyale.Game.Gameplay
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Shows the chain holding a gem, and how tight it still is.
+        ///
+        /// Drawn over the piece rather than behind it, because a chain does not cover a gem, it holds it: the player
+        /// has to read at a glance which gems they cannot move.
+        /// </summary>
+        private void RefreshChain(int x, int y)
+        {
+            Image chain = _chains[y * Width + x];
+            if (chain == null)
+            {
+                return;
+            }
+            int links = _chainLinks[y * Width + x];
+            chain.enabled = links > 0 && chain.sprite != null;
+            chain.color = links >= 2 ? Color.white : new Color(1f, 1f, 1f, 0.72f);
+        }
+
+        /// <summary>Called when a clear next to a chained cell snapped one of its links.</summary>
+        public void OnChainBroken(Pos p)
+        {
+            int i = p.Y * Width + p.X;
+            if (i < 0 || i >= _chainLinks.Length)
+            {
+                return;
+            }
+            _chainLinks[i] = Mathf.Max(0, _chainLinks[i] - 1);
+            RefreshChain(p.X, p.Y);
+            StartCoroutine(Burst(CellPosition(p), new Color(0.85f, 0.78f, 0.6f)));
         }
 
         private void RefreshIce(int x, int y)

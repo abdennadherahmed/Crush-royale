@@ -107,6 +107,9 @@ namespace CrushRoyale.Core.Gameplay
                     case ObjectiveType.DestroyBlight:
                         p.Current += step.BlightCleared;
                         break;
+                    case ObjectiveType.BreakChains:
+                        p.Current += step.ChainsBroken.Count;
+                        break;
                 }
             }
         }

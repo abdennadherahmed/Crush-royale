@@ -156,6 +156,8 @@ namespace CrushRoyale.Core.Gameplay
                     BlightCount = stage.BlightCount,
                     EggCount = stage.EggCount,
                     ForgeCount = stage.ForgeCount,
+                    ChainCells = stage.ChainCells,
+                    ChainLinks = Math.Max(1, stage.ChainLinks),
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },

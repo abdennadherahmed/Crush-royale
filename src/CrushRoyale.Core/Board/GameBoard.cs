@@ -17,6 +17,15 @@ namespace CrushRoyale.Core.Board
         private readonly Piece[] _cells;
         private readonly byte[] _ice;
 
+        /// <summary>
+        /// Chains (stage 501+): a chained gem cannot be moved, though it can still be matched where it stands.
+        ///
+        /// This is the opposite of ice. Ice stops a gem being destroyed and is broken by clearing the gem under it;
+        /// a chain stops a gem being swapped and is broken by clearing next to it. Nothing the player does to the
+        /// gem itself frees it -- the answer is always somewhere else on the board.
+        /// </summary>
+        private readonly byte[] _chains;
+
         public GameBoard(int width = 8, int height = 8)
         {
             if (width < MinSize || width > MaxSize)
@@ -32,6 +41,7 @@ namespace CrushRoyale.Core.Board
             Height = height;
             _cells = new Piece[width * height];
             _ice = new byte[width * height];
+            _chains = new byte[width * height];
             NextPieceId = 1;
         }
 
@@ -87,6 +97,42 @@ namespace CrushRoyale.Core.Board
             }
             _ice[i]--;
             return true;
+        }
+
+        public int ChainAt(Pos p) => _chains[Index(p)];
+
+        public void SetChain(Pos p, int links)
+        {
+            if (links < 0 || links > 3)
+            {
+                throw new ArgumentOutOfRangeException(nameof(links), "Chain links must be 0-3.");
+            }
+            _chains[Index(p)] = (byte)links;
+        }
+
+        /// <summary>Removes one link. Returns true if a link was actually broken.</summary>
+        public bool BreakChain(Pos p)
+        {
+            int i = Index(p);
+            if (_chains[i] == 0)
+            {
+                return false;
+            }
+            _chains[i]--;
+            return true;
+        }
+
+        public int ChainedCells
+        {
+            get
+            {
+                int total = 0;
+                for (int i = 0; i < _chains.Length; i++)
+                {
+                    total += _chains[i] > 0 ? 1 : 0;
+                }
+                return total;
+            }
         }
 
         public int TotalIceLayers
@@ -168,6 +214,7 @@ namespace CrushRoyale.Core.Board
             var copy = new GameBoard(Width, Height);
             Array.Copy(_cells, copy._cells, _cells.Length);
             Array.Copy(_ice, copy._ice, _ice.Length);
+            Array.Copy(_chains, copy._chains, _chains.Length);
             copy.NextPieceId = NextPieceId;
             return copy;
         }
@@ -183,7 +230,7 @@ namespace CrushRoyale.Core.Board
             for (int i = 0; i < _cells.Length; i++)
             {
                 Piece p = _cells[i];
-                h.Add(p.Id).Add((byte)p.Color).Add((byte)p.Type).Add(p.Hp).Add(_ice[i]);
+                h.Add(p.Id).Add((byte)p.Color).Add((byte)p.Type).Add(p.Hp).Add(_ice[i]).Add(_chains[i]);
             }
             return h.Value;
         }

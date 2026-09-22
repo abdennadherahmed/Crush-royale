@@ -90,6 +90,9 @@ namespace CrushRoyale.Core.Board
 
         public List<Pos> IceBroken { get; } = new List<Pos>();
 
+        /// <summary>Chains snapped by a clear next to them (stage 501+).</summary>
+        public List<Pos> ChainsBroken { get; } = new List<Pos>();
+
         public List<StoneHit> StoneHits { get; } = new List<StoneHit>();
 
         public List<PieceFall> Falls { get; } = new List<PieceFall>();
@@ -524,6 +527,17 @@ namespace CrushRoyale.Core.Board
                 {
                     step.IceBroken.Add(p);
                     points += _scoring.IceLayerPoints;
+                }
+                // A chain is never broken by touching the gem it holds -- the player cannot even move that gem.
+                // It is broken by clearing beside it, which is what makes a chained cell a problem to be solved
+                // somewhere else on the board rather than an obstacle to be hit.
+                foreach (Pos n in new[] { p.Offset(1, 0), p.Offset(-1, 0), p.Offset(0, 1), p.Offset(0, -1) })
+                {
+                    if (board.InBounds(n) && board.BreakChain(n))
+                    {
+                        step.ChainsBroken.Add(n);
+                        points += _scoring.IceLayerPoints;
+                    }
                 }
                 board[p] = Piece.Empty;
             }

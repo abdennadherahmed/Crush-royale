@@ -194,6 +194,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Corrupted crystals destroyed during the match (the goal of the forge stages).</summary>
         public int BlightDestroyed { get; internal set; }
 
+        /// <summary>Chains snapped during the match (the goal of the chain stages).</summary>
+        public int ChainsBroken { get; internal set; }
+
         public int ContinuesUsed { get; internal set; }
 
         /// <summary>The stage was lost because a countdown bomb exploded.</summary>
@@ -236,6 +239,8 @@ namespace CrushRoyale.Core.Gameplay
         private readonly DeterministicRandom _petRng;
         private readonly DeterministicRandom _hazardRng;
         private int _blightDestroyed;
+
+        private int _chainsBroken;
 
         private bool _bombExploded;
 
@@ -652,6 +657,7 @@ namespace CrushRoyale.Core.Gameplay
                 ClearedByColor = (int[])_clearedByColor.Clone(),
                 StonesDestroyed = _stonesDestroyed,
                 BlightDestroyed = _blightDestroyed,
+                ChainsBroken = _chainsBroken,
                 IceBroken = _iceBroken,
                 ContinuesUsed = ContinuesUsed,
                 LostToBomb = _bombExploded && State == SessionState.Lost,
@@ -747,6 +753,7 @@ namespace CrushRoyale.Core.Gameplay
                 }
                 _stonesDestroyed += step.StonesDestroyed;
                 _blightDestroyed += step.BlightCleared;
+                _chainsBroken += step.ChainsBroken.Count;
                 _iceBroken += step.IceBroken.Count;
                 _specialsCreated += step.SpecialsCreated.Count;
                 _specialsActivated += step.SpecialsActivated;

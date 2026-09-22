@@ -2112,6 +2112,9 @@
   "guildboss.majors_blue.rule": "炸弹会不断出现，引信很短。只要有一颗归零，无论得分多少，攻击立刻结束。",
   "objective.DestroyBlight": "腐化",
   "mechanic.forge.title": "腐化熔炉",
-  "mechanic.forge.body": "它每走一步就腐化一颗相邻宝石，而这腐化还会自行蔓延。三次打击可摧毁它。尽早打碎，否则棋盘会被封死。"
+  "mechanic.forge.body": "它每走一步就腐化一颗相邻宝石，而这腐化还会自行蔓延。三次打击可摧毁它。尽早打碎，否则棋盘会被封死。",
+  "objective.BreakChains": "锁链",
+  "mechanic.chain.title": "被锁住的宝石",
+  "mechanic.chain.body": "被锁住的宝石完全无法移动。对它本身做什么都没用：在它紧邻处消除一次即可挣断锁链。"
 }
 

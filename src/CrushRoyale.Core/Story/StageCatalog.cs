@@ -393,6 +393,12 @@ namespace CrushRoyale.Core.Story
         public const int ForgeIntroStage = 401;
 
         /// <summary>
+        /// Chains. Every obstacle so far stopped a gem being destroyed; a chain stops one being moved, and nothing
+        /// done to that gem frees it. The answer is always a match somewhere beside it.
+        /// </summary>
+        public const int ChainIntroStage = 501;
+
+        /// <summary>
         /// A new mechanic every 100 stages: countdown bombs (101), spreading blight (201), dragon eggs (301). Each one
         /// then returns on about one stage in five, and they mix as the campaign goes on. Never on boss stages.
         /// </summary>
@@ -414,6 +420,15 @@ namespace CrushRoyale.Core.Story
             if (campaignId == EggIntroStage || (campaignId > EggIntroStage && index % 5 == 2))
             {
                 stage.EggCount = campaignId == EggIntroStage ? 3 : 2 + d * 2 / 1000;
+            }
+            if (campaignId == ChainIntroStage || (campaignId > ChainIntroStage && index % 5 == 4))
+            {
+                // Six pinned gems to learn it, ten later; two links once the board is crowded enough that a single
+                // clear beside a chain is easy to come by.
+                stage.ChainCells = campaignId == ChainIntroStage ? 6 : 6 + d * 6 / 1000;
+                stage.ChainLinks = d >= 800 ? 2 : 1;
+                // Placeholder: TuneForgeGoal replaces it with a share of what a perfect run actually snaps.
+                stage.Objectives.Add(new StageObjective { Type = ObjectiveType.BreakChains, Target = 3 });
             }
             if (campaignId == ForgeIntroStage || (campaignId > ForgeIntroStage && index % 5 == 0))
             {
@@ -630,6 +645,7 @@ namespace CrushRoyale.Core.Story
             {
                 return;
             }
+            TuneMeasuredGoal(stage, id, d, ObjectiveType.BreakChains, StageTuning.Chains);
             int measured = StageTuning.Blight[id];
             // Same relief as the colour goals, and for the same reason: the bot cannot steer towards a target it
             // is not scored on, so its median understates a real player and the raw share turns into a wall.
@@ -637,6 +653,31 @@ namespace CrushRoyale.Core.Story
             for (int i = stage.Objectives.Count - 1; i >= 0; i--)
             {
                 if (stage.Objectives[i].Type != ObjectiveType.DestroyBlight)
+                {
+                    continue;
+                }
+                if (measured <= 0)
+                {
+                    stage.Objectives.RemoveAt(i);
+                    continue;
+                }
+                stage.Objectives[i].Target = Floor(measured, share, 2);
+            }
+        }
+
+        /// <summary>Same treatment as the forge goal, for any objective whose reach the bake measures.</summary>
+        private static void TuneMeasuredGoal(StageData stage, int id, int d, ObjectiveType type, int[] measurements)
+        {
+            if (id >= measurements.Length)
+            {
+                return;
+            }
+            int measured = measurements[id];
+            int share = Math.Max(400, Math.Min(1000, TunedObstacleEasyPermille
+                + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000) - TunedCollectReliefPermille);
+            for (int i = stage.Objectives.Count - 1; i >= 0; i--)
+            {
+                if (stage.Objectives[i].Type != type)
                 {
                     continue;
                 }

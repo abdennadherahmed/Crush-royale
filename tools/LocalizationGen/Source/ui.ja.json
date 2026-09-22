@@ -2112,6 +2112,9 @@
   "guildboss.majors_blue.rule": "短い導火線の爆弾が次々と現れます。ひとつでもゼロになれば、得点に関係なく攻撃は即終了です。",
   "objective.DestroyBlight": "腐敗",
   "mechanic.forge.title": "腐敗の炉",
-  "mechanic.forge.body": "1手ごとに隣のジェムを腐敗させ、その腐敗はさらに自分で広がります。3回の打撃で破壊できます。早めに壊さないと盤面が塞がります。"
+  "mechanic.forge.body": "1手ごとに隣のジェムを腐敗させ、その腐敗はさらに自分で広がります。3回の打撃で破壊できます。早めに壊さないと盤面が塞がります。",
+  "objective.BreakChains": "鎖",
+  "mechanic.chain.title": "鎖に繋がれたジェム",
+  "mechanic.chain.body": "鎖に繋がれたジェムはまったく動かせません。そのジェム自体に何をしても無駄です。すぐ隣でマッチを消せば鎖が切れます。"
 }
 

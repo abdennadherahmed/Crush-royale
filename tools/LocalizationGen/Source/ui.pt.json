@@ -2112,6 +2112,9 @@
   "guildboss.majors_blue.rule": "As bombas reaparecem com pavio curto. Se uma chegar a zero, o ataque termina na hora, seja qual for sua pontuação.",
   "objective.DestroyBlight": "Corrupção",
   "mechanic.forge.title": "Forja da corrupção",
-  "mechanic.forge.body": "Ela corrompe uma gema vizinha a cada jogada, e essa corrupção depois se espalha sozinha. Três golpes a destroem. Quebre-a cedo ou o tabuleiro se fecha."
+  "mechanic.forge.body": "Ela corrompe uma gema vizinha a cada jogada, e essa corrupção depois se espalha sozinha. Três golpes a destroem. Quebre-a cedo ou o tabuleiro se fecha.",
+  "objective.BreakChains": "Correntes",
+  "mechanic.chain.title": "Gemas acorrentadas",
+  "mechanic.chain.body": "Uma gema acorrentada não pode ser movida. Nada do que você fizer com ela adianta: faça uma combinação bem ao lado e a corrente arrebenta."
 }
 

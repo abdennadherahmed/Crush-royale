@@ -2112,6 +2112,9 @@
   "guildboss.majors_blue.rule": "Des bombes réapparaissent avec une mèche courte. Si l'une atteint zéro, l'attaque s'arrête aussitôt, quel que soit ton score.",
   "objective.DestroyBlight": "Corruption",
   "mechanic.forge.title": "Forge de corruption",
-  "mechanic.forge.body": "Elle corrompt une gemme voisine à chaque coup, et cette corruption s'étend ensuite toute seule. Trois coups la détruisent. Casse-la tôt, sinon le plateau se referme."
+  "mechanic.forge.body": "Elle corrompt une gemme voisine à chaque coup, et cette corruption s'étend ensuite toute seule. Trois coups la détruisent. Casse-la tôt, sinon le plateau se referme.",
+  "objective.BreakChains": "Chaînes",
+  "mechanic.chain.title": "Gemmes enchaînées",
+  "mechanic.chain.body": "Une gemme enchaînée ne peut pas être déplacée. Rien de ce que tu lui fais n'y change quoi que ce soit : réalise un alignement juste à côté et la chaîne cède."
 }
 

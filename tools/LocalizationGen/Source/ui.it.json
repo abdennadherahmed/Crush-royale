@@ -2112,6 +2112,9 @@
   "guildboss.majors_blue.rule": "Le bombe ricompaiono con una miccia corta. Se una arriva a zero, l'attacco finisce subito, qualunque sia il punteggio.",
   "objective.DestroyBlight": "Corruzione",
   "mechanic.forge.title": "Fucina della corruzione",
-  "mechanic.forge.body": "Corrompe una gemma vicina a ogni mossa, e quella corruzione poi si diffonde da sola. Tre colpi la distruggono. Rompila presto o il tabellone si chiude."
+  "mechanic.forge.body": "Corrompe una gemma vicina a ogni mossa, e quella corruzione poi si diffonde da sola. Tre colpi la distruggono. Rompila presto o il tabellone si chiude.",
+  "objective.BreakChains": "Catene",
+  "mechanic.chain.title": "Gemme incatenate",
+  "mechanic.chain.body": "Una gemma incatenata non può essere mossa. Nulla di ciò che le fai serve: crea una combinazione proprio accanto e la catena si spezza."
 }
 
