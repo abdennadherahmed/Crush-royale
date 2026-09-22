@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "無料の宝箱を受け取りました。次はもう貯まり始めています。",
   "currency.unlimitedLives": "∞ ライフ  {0}",
   "shop.item.PiggyBank": "貯金箱",
-  "shop.item.PiggyBank.desc": "あなたの勝利で貯まった {0} オーブ。割ってすべて受け取ります。"
+  "shop.item.PiggyBank.desc": "あなたの勝利で貯まった {0} オーブ。割ってすべて受け取ります。",
+  "guild.raceRank": "今週のギルド順位は #{0} 位"
 }
 

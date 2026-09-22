@@ -110,6 +110,23 @@ public sealed class InMemoryGameStore : IGameStore
         }
     }
 
+    public Task<IReadOnlyList<GuildRaceRow>> TopRaceGuildsAsync(int week, int minMembers, int limit, CancellationToken cancellationToken)
+    {
+        lock (_lock)
+        {
+            IReadOnlyList<GuildRaceRow> rows = _guilds.Values
+                .Select(d => Json.Deserialize<GuildRecord>(d.Json))
+                .Where(g => g.Guild.Members.Count >= minMembers)
+                .Where(g => g.Guild.Tournament != null && g.Guild.Tournament.Week == week && g.Guild.Tournament.Points > 0)
+                .OrderByDescending(g => g.Guild.Tournament.Points)
+                .ThenBy(g => g.Id)
+                .Take(limit)
+                .Select((g, i) => new GuildRaceRow(i + 1, g.Id, g.Guild.Name, g.Guild.Tournament.Points, g.Guild.Members.Count))
+                .ToList();
+            return Task.FromResult(rows);
+        }
+    }
+
     public Task<IReadOnlyList<GhostRow>> FindGhostsAsync(int minTrophies, int maxTrophies, DateTime recordedAfter, int limit, CancellationToken cancellationToken)
     {
         lock (_lock)

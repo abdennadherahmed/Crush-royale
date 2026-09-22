@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "تم أخذ الصندوق المجاني. التالي يمتلئ بالفعل.",
   "currency.unlimitedLives": "∞ أرواح  {0}",
   "shop.item.PiggyBank": "حصّالة",
-  "shop.item.PiggyBank.desc": "{0} كرة ادّخرتها من انتصاراتك. اكسرها وخذها كلها."
+  "shop.item.PiggyBank.desc": "{0} كرة ادّخرتها من انتصاراتك. اكسرها وخذها كلها.",
+  "guild.raceRank": "نقابتك في المركز #{0} هذا الأسبوع"
 }
 

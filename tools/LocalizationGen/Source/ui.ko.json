@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "무료 상자를 받았습니다. 다음 상자가 벌써 차고 있습니다.",
   "currency.unlimitedLives": "∞ 하트  {0}",
   "shop.item.PiggyBank": "돼지 저금통",
-  "shop.item.PiggyBank.desc": "내 승리로 모은 오브 {0}개. 깨뜨려 전부 가져가세요."
+  "shop.item.PiggyBank.desc": "내 승리로 모은 오브 {0}개. 깨뜨려 전부 가져가세요.",
+  "guild.raceRank": "이번 주 길드 순위 #{0}"
 }
 

@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "Gratis-Truhe genommen. Die nächste füllt sich schon.",
   "currency.unlimitedLives": "∞ Leben  {0}",
   "shop.item.PiggyBank": "Sparschwein",
-  "shop.item.PiggyBank.desc": "{0} Kugeln, von deinen eigenen Siegen gespart. Schlag es auf und nimm alles."
+  "shop.item.PiggyBank.desc": "{0} Kugeln, von deinen eigenen Siegen gespart. Schlag es auf und nimm alles.",
+  "guild.raceRank": "Deine Gilde ist diese Woche #{0}"
 }
 

@@ -20,6 +20,9 @@ public interface IGameStore
 
     Task<IReadOnlyList<GuildRankingRow>> TopGuildsAsync(int limit, CancellationToken cancellationToken);
 
+    /// <summary>Weekly race leaderboard: guilds with at least <paramref name="minMembers"/> members, best score first.</summary>
+    Task<IReadOnlyList<GuildRaceRow>> TopRaceGuildsAsync(int week, int minMembers, int limit, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<GhostRow>> FindGhostsAsync(int minTrophies, int maxTrophies, DateTime recordedAfter, int limit, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<PlayerSummary>> SearchPlayersAsync(string namePrefix, int limit, CancellationToken cancellationToken);

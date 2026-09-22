@@ -323,8 +323,10 @@ namespace CrushRoyale.Game.Screens
 
             if (race.Ranked)
             {
-                Text ok = Outlined(card.transform, Loc.T("guild.raceEntered"), Theme.SmallSize - 4, Theme.Success, TextAnchor.MiddleCenter);
+                string standing = race.Rank > 0 ? Loc.T("guild.raceRank", race.Rank) : Loc.T("guild.raceEntered");
+                Text ok = Outlined(card.transform, standing, Theme.SmallSize - 4, Theme.Success, TextAnchor.MiddleCenter);
                 UIFactory.Anchor(ok.rectTransform, 0.05f, 0.02f, 0.95f, 0.11f);
+                BuildRaceBoard(list, race);
                 return;
             }
 
@@ -334,6 +336,33 @@ namespace CrushRoyale.Game.Screens
                 Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter);
             UIFactory.Stretch(need.rectTransform, 12, 6, 12, 6);
             need.horizontalOverflow = HorizontalWrapMode.Wrap;
+        }
+
+        /// <summary>The guilds ahead of us, so the race has faces and not just a number.</summary>
+        private void BuildRaceBoard(Transform list, GuildTournamentDto race)
+        {
+            if (race.Board == null || race.Board.Count == 0)
+            {
+                return;
+            }
+            Color[] medals = { Theme.Gold, new Color(0.78f, 0.82f, 0.9f), new Color(0.8f, 0.52f, 0.28f) };
+            int shown = Mathf.Min(race.Board.Count, 10);
+            for (int i = 0; i < shown; i++)
+            {
+                GuildRaceEntryDto entry = race.Board[i];
+                Image row = UIFactory.Panel("Race" + entry.Rank, list, entry.Mine ? Theme.PanelLight : Theme.Panel);
+                UIFactory.Height(row, 96);
+                if (entry.Mine)
+                {
+                    UiKit.CardFrame(row);
+                }
+                Text rank = Outlined(row.transform, "#" + entry.Rank, Theme.SmallSize, i < 3 ? medals[i] : Theme.TextMuted, TextAnchor.MiddleCenter);
+                UIFactory.Anchor(rank.rectTransform, 0.02f, 0.1f, 0.14f, 0.9f);
+                Text name = Outlined(row.transform, entry.Name, Theme.SmallSize - 2, entry.Mine ? Theme.Gold : Theme.Text, TextAnchor.MiddleLeft);
+                UIFactory.Anchor(name.rectTransform, 0.16f, 0.1f, 0.62f, 0.9f);
+                Text points = Outlined(row.transform, Loc.Number(entry.Points), Theme.SmallSize - 2, Theme.Crystal, TextAnchor.MiddleRight);
+                UIFactory.Anchor(points.rectTransform, 0.64f, 0.1f, 0.98f, 0.9f);
+            }
         }
 
         private void BuildBanner(RectTransform body)

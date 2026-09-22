@@ -308,6 +308,9 @@ public sealed record LeaderboardRow(int Rank, Guid PlayerId, string DisplayName,
 
 public sealed record GuildRankingRow(int Rank, long GuildId, string Name, long TotalTrophies, int Members, int Level);
 
+/// <summary>One line of the weekly guild race: only guilds large enough to be ranked appear.</summary>
+public sealed record GuildRaceRow(int Rank, long GuildId, string Name, long Points, int Members);
+
 public sealed record PlayerSummary(Guid Id, string DisplayName, int Trophies, League League, int HighestStage, long? GuildId, string? Frame, string? Title);
 
 public sealed record GuildSummary(long Id, string Name, int Level, int Members, long TotalTrophies, bool IsOpen, int MinTrophies);

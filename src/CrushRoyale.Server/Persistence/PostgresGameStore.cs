@@ -116,6 +116,31 @@ public sealed class PostgresGameStore : IGameStore
         return rows;
     }
 
+    public async Task<IReadOnlyList<GuildRaceRow>> TopRaceGuildsAsync(int week, int minMembers, int limit, CancellationToken cancellationToken)
+    {
+        // The score lives inside the guild JSON, and the week guards against ranking last week's leftovers.
+        const string sql = @"
+            select id, name, (state->'guild'->'tournament'->>'points')::bigint as points, member_count
+            from public.guilds
+            where member_count >= @minMembers
+              and coalesce((state->'guild'->'tournament'->>'week')::int, -1) = @week
+              and coalesce((state->'guild'->'tournament'->>'points')::bigint, 0) > 0
+            order by points desc, id
+            limit @limit";
+
+        await using NpgsqlCommand cmd = _dataSource.CreateCommand(sql);
+        cmd.Parameters.AddWithValue("minMembers", minMembers);
+        cmd.Parameters.AddWithValue("week", week);
+        cmd.Parameters.AddWithValue("limit", limit);
+        var rows = new List<GuildRaceRow>();
+        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            rows.Add(new GuildRaceRow(rows.Count + 1, reader.GetInt64(0), reader.GetString(1), reader.GetInt64(2), reader.GetInt32(3)));
+        }
+        return rows;
+    }
+
     public async Task<IReadOnlyList<GhostRow>> FindGhostsAsync(int minTrophies, int maxTrophies, DateTime recordedAfter, int limit, CancellationToken cancellationToken)
     {
         const string sql = @"

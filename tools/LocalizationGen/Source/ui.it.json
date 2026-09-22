@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "Scrigno gratis preso. Il prossimo si sta già riempiendo.",
   "currency.unlimitedLives": "∞ vite  {0}",
   "shop.item.PiggyBank": "Salvadanaio",
-  "shop.item.PiggyBank.desc": "{0} orbi messi da parte dalle tue vittorie. Rompilo e prendi tutto."
+  "shop.item.PiggyBank.desc": "{0} orbi messi da parte dalle tue vittorie. Rompilo e prendi tutto.",
+  "guild.raceRank": "La tua gilda è #{0} questa settimana"
 }
 

@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "Cofre gratis recogido. El siguiente ya se está llenando.",
   "currency.unlimitedLives": "∞ vidas  {0}",
   "shop.item.PiggyBank": "Hucha",
-  "shop.item.PiggyBank.desc": "{0} orbes ahorrados con tus propias victorias. Rómpela y llévatelos todos."
+  "shop.item.PiggyBank.desc": "{0} orbes ahorrados con tus propias victorias. Rómpela y llévatelos todos.",
+  "guild.raceRank": "Tu gremio es el #{0} esta semana"
 }
 

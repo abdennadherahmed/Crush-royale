@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "Baú grátis recolhido. O próximo já está enchendo.",
   "currency.unlimitedLives": "∞ vidas  {0}",
   "shop.item.PiggyBank": "Cofrinho",
-  "shop.item.PiggyBank.desc": "{0} orbes guardados pelas suas próprias vitórias. Quebre e leve tudo."
+  "shop.item.PiggyBank.desc": "{0} orbes guardados pelas suas próprias vitórias. Quebre e leve tudo.",
+  "guild.raceRank": "Sua guilda está em #{0} esta semana"
 }
 

@@ -615,6 +615,28 @@ namespace CrushRoyale.Contracts
         public int FirstPrizeCoins { get; set; }
 
         public int FirstPrizeOrbes { get; set; }
+
+        /// <summary>Our rank in this week's race, 0 while unranked.</summary>
+        public int Rank { get; set; }
+
+        /// <summary>Best guilds of the week, best first.</summary>
+        public List<GuildRaceEntryDto> Board { get; set; } = new List<GuildRaceEntryDto>();
+    }
+
+    public sealed class GuildRaceEntryDto
+    {
+        public int Rank { get; set; }
+
+        public long GuildId { get; set; }
+
+        public string Name { get; set; }
+
+        public long Points { get; set; }
+
+        public int Members { get; set; }
+
+        /// <summary>True for the asking player's own guild, so the row can be highlighted.</summary>
+        public bool Mine { get; set; }
     }
 
     public sealed class GuildDto

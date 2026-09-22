@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "Free chest taken. The next one is already filling.",
   "currency.unlimitedLives": "∞ lives  {0}",
   "shop.item.PiggyBank": "Piggy bank",
-  "shop.item.PiggyBank.desc": "{0} orbes saved up from your own wins. Break it open and take them all."
+  "shop.item.PiggyBank.desc": "{0} orbes saved up from your own wins. Break it open and take them all.",
+  "guild.raceRank": "Your guild is #{0} this week"
 }
 

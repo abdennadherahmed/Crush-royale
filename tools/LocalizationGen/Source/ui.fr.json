@@ -2098,6 +2098,7 @@
   "chest.freeTaken": "Coffre gratuit récupéré. Le prochain se remplit déjà.",
   "currency.unlimitedLives": "∞ vies  {0}",
   "shop.item.PiggyBank": "Tirelire",
-  "shop.item.PiggyBank.desc": "{0} orbes mis de côté par tes propres victoires. Casse-la et prends tout."
+  "shop.item.PiggyBank.desc": "{0} orbes mis de côté par tes propres victoires. Casse-la et prends tout.",
+  "guild.raceRank": "Ta guilde est #{0} cette semaine"
 }
 

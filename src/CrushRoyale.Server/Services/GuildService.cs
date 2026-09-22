@@ -495,6 +495,8 @@ public sealed class GuildService
         int week = Week;
 
         IReadOnlyList<GuildRankingRow> top = await _ops.Store.TopGuildsAsync(100, ct).ConfigureAwait(false);
+        IReadOnlyList<GuildRaceRow> race = await _ops.Store
+            .TopRaceGuildsAsync(week, ws.Balance.Guild.Tournament.MinMembers, 50, ct).ConfigureAwait(false);
 
         return new GuildDto
         {
@@ -530,13 +532,14 @@ public sealed class GuildService
             MinTrophies = g.MinTrophies,
             TotalTrophies = g.TotalTrophies,
             Boss = BossDto(g.Boss),
-            Tournament = TournamentDto(g, ws, week),
+            Tournament = TournamentDto(g, ws, week, race, record.Id),
             Rank = top.FirstOrDefault(t => t.GuildId == record.Id)?.Rank ?? 0
         };
     }
 
     /// <summary>This week's race as the asking member sees it, including how many members are still missing.</summary>
-    private static GuildTournamentDto TournamentDto(Guild guild, PlayerWorkspace ws, int week)
+    private static GuildTournamentDto TournamentDto(Guild guild, PlayerWorkspace ws, int week,
+        IReadOnlyList<GuildRaceRow> race, long myGuildId)
     {
         GuildTournamentBalance balance = ws.Balance.Guild.Tournament;
         GuildTournamentState state = guild.Tournament ?? new GuildTournamentState();
@@ -553,7 +556,17 @@ public sealed class GuildService
             LastPoints = state.LastPoints,
             LastRank = state.LastRank,
             FirstPrizeCoins = coins,
-            FirstPrizeOrbes = orbes
+            FirstPrizeOrbes = orbes,
+            Rank = race.FirstOrDefault(r => r.GuildId == myGuildId)?.Rank ?? 0,
+            Board = race.Select(r => new GuildRaceEntryDto
+            {
+                Rank = r.Rank,
+                GuildId = r.GuildId,
+                Name = r.Name,
+                Points = r.Points,
+                Members = r.Members,
+                Mine = r.GuildId == myGuildId
+            }).ToList()
         };
     }
 
