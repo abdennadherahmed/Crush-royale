@@ -2095,6 +2095,7 @@
   "guild.raceNeedMembers": "{0} more members and your guild enters the race. It needs {1} to be ranked, and the points below already count.",
   "chest.free": "FREE!",
   "chest.freeSoon": "A free chest fills here on its own. No win needed.",
-  "chest.freeTaken": "Free chest taken. The next one is already filling."
+  "chest.freeTaken": "Free chest taken. The next one is already filling.",
+  "currency.unlimitedLives": "∞ lives  {0}"
 }
 

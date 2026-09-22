@@ -120,6 +120,9 @@ namespace CrushRoyale.Core.Progression
             if (tier % 10 == 0)
             {
                 premium.AddPowerUp((PowerUpType)(6 + tier / 10 % 3), 1);
+                // Every tenth tier of the paid track buys an evening without the lives wall, which is worth more to a
+                // player than another handful of coins and is the reason they remember the pass.
+                premium.UnlimitedLivesMinutes += 60;
             }
             if (tier == 25)
             {

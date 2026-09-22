@@ -2095,6 +2095,7 @@
   "guild.raceNeedMembers": "Encore {0} membres et ta guilde entre dans la course. Il en faut {1} pour être classé, et les points ci-dessus comptent déjà.",
   "chest.free": "GRATUIT !",
   "chest.freeSoon": "Un coffre gratuit se remplit ici tout seul. Aucune victoire nécessaire.",
-  "chest.freeTaken": "Coffre gratuit récupéré. Le prochain se remplit déjà."
+  "chest.freeTaken": "Coffre gratuit récupéré. Le prochain se remplit déjà.",
+  "currency.unlimitedLives": "∞ vies  {0}"
 }
 

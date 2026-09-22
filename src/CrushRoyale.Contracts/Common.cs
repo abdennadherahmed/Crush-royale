@@ -139,6 +139,9 @@ namespace CrushRoyale.Contracts
         public long NextLifeCoins { get; set; }
 
         public long NextLifeOrbes { get; set; }
+
+        /// <summary>Seconds of free play left; while this is above zero losing costs nothing.</summary>
+        public int UnlimitedSecondsLeft { get; set; }
     }
 
     public sealed class RewardDto

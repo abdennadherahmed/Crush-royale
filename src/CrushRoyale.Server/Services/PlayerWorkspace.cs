@@ -179,6 +179,10 @@ public sealed class PlayerWorkspace
         {
             Achievements.IncrementStat(StatKey.OrbesEarned, reward.Orbes);
         }
+        if (reward.UnlimitedLivesMinutes > 0)
+        {
+            Stamina.GrantUnlimited(reward.UnlimitedLivesMinutes);
+        }
         if (reward.Lives > 0)
         {
             Stamina.AddLives(reward.Lives);

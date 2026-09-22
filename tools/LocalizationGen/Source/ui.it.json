@@ -2095,6 +2095,7 @@
   "guild.raceNeedMembers": "Ancora {0} membri e la tua gilda entra in gara. Ne servono {1} per essere classificata, e i punti sopra contano già.",
   "chest.free": "GRATIS!",
   "chest.freeSoon": "Qui si riempie da solo uno scrigno gratis. Non serve vincere.",
-  "chest.freeTaken": "Scrigno gratis preso. Il prossimo si sta già riempiendo."
+  "chest.freeTaken": "Scrigno gratis preso. Il prossimo si sta già riempiendo.",
+  "currency.unlimitedLives": "∞ vite  {0}"
 }
 

@@ -2095,6 +2095,7 @@
   "guild.raceNeedMembers": "Mais {0} membros e sua guilda entra na corrida. Precisa de {1} para ser classificada, e os pontos acima já contam.",
   "chest.free": "GRÁTIS!",
   "chest.freeSoon": "Um baú grátis se enche aqui sozinho. Não precisa vencer.",
-  "chest.freeTaken": "Baú grátis recolhido. O próximo já está enchendo."
+  "chest.freeTaken": "Baú grátis recolhido. O próximo já está enchendo.",
+  "currency.unlimitedLives": "∞ vidas  {0}"
 }
 

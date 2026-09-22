@@ -2095,6 +2095,7 @@
   "guild.raceNeedMembers": "あと {0} 人でレースに参加できます。ランキングには {1} 人必要で、上のポイントはすでに加算されています。",
   "chest.free": "むりょう！",
   "chest.freeSoon": "ここに無料の宝箱がひとりでに貯まります。勝たなくても大丈夫。",
-  "chest.freeTaken": "無料の宝箱を受け取りました。次はもう貯まり始めています。"
+  "chest.freeTaken": "無料の宝箱を受け取りました。次はもう貯まり始めています。",
+  "currency.unlimitedLives": "∞ ライフ  {0}"
 }
 

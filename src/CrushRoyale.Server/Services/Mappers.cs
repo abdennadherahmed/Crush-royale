@@ -32,7 +32,8 @@ public static class Mappers
             FreeContinues = stamina.GetContinueCount(),
             VipLifeAvailable = stamina.CanClaimVipDailyLife(),
             NextLifeCoins = next.Coins,
-            NextLifeOrbes = next.Orbes
+            NextLifeOrbes = next.Orbes,
+            UnlimitedSecondsLeft = stamina.UnlimitedSecondsLeft()
         };
     }
 

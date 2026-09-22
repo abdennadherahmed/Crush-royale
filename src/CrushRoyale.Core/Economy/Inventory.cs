@@ -21,7 +21,11 @@ namespace CrushRoyale.Core.Economy
 
         public int BattlePassXp { get; set; }
 
-        public bool IsEmpty => Coins == 0 && Orbes == 0 && PowerUps.Count == 0 && Cosmetics.Count == 0 && Lives == 0 && BattlePassXp == 0;
+        /// <summary>Minutes of unlimited lives: the reward that removes the wall instead of paying it off once.</summary>
+        public int UnlimitedLivesMinutes { get; set; }
+
+        public bool IsEmpty => Coins == 0 && Orbes == 0 && PowerUps.Count == 0 && Cosmetics.Count == 0 && Lives == 0
+            && BattlePassXp == 0 && UnlimitedLivesMinutes == 0;
 
         public static RewardData FromCurrency(long coins, long orbes = 0) => new RewardData { Coins = coins, Orbes = orbes };
 

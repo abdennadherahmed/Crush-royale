@@ -2095,6 +2095,7 @@
   "guild.raceNeedMembers": "Noch {0} Mitglieder und deine Gilde ist im Rennen. Für eine Wertung braucht sie {1}, und die Punkte oben zählen bereits.",
   "chest.free": "GRATIS!",
   "chest.freeSoon": "Hier füllt sich von selbst eine Gratis-Truhe. Kein Sieg nötig.",
-  "chest.freeTaken": "Gratis-Truhe genommen. Die nächste füllt sich schon."
+  "chest.freeTaken": "Gratis-Truhe genommen. Die nächste füllt sich schon.",
+  "currency.unlimitedLives": "∞ Leben  {0}"
 }
 

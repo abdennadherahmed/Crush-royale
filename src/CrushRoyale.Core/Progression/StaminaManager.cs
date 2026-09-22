@@ -23,6 +23,9 @@ namespace CrushRoyale.Core.Progression
         public int FreeContinueDay { get; set; } = -1;
 
         public int FreeContinuesUsedToday { get; set; }
+
+        /// <summary>While this is in the future, losing costs nothing (see StaminaManager.Unlimited).</summary>
+        public long UnlimitedUntilUnixMs { get; set; }
     }
 
     public sealed class LifePurchaseQuote
@@ -141,6 +144,12 @@ namespace CrushRoyale.Core.Progression
         public bool ConsumeLive()
         {
             Refresh();
+            if (Unlimited)
+            {
+                // The wall is what makes a bad run feel like a punishment; for the length of this window there is
+                // none, and a session can run as long as the player wants it to.
+                return true;
+            }
             if (State.Lives <= 0)
             {
                 return false;
@@ -157,7 +166,35 @@ namespace CrushRoyale.Core.Progression
         public void RefundLife()
         {
             Refresh();
+            if (Unlimited)
+            {
+                // Nothing was taken, so there is nothing to give back.
+                return;
+            }
             State.Lives++;
+        }
+
+        // ------------------------------------------------------------------ unlimited lives
+
+        /// <summary>True while a window of free play is running.</summary>
+        public bool Unlimited => State.UnlimitedUntilUnixMs > NowMs;
+
+        /// <summary>Seconds left in the window, 0 when there is none.</summary>
+        public int UnlimitedSecondsLeft() =>
+            (int)Math.Max(0, (State.UnlimitedUntilUnixMs - NowMs + 999) / 1000);
+
+        /// <summary>
+        /// Opens or extends a window of unlimited lives. Extending rather than replacing means two rewards landing
+        /// on the same evening add up instead of one quietly eating the other.
+        /// </summary>
+        public void GrantUnlimited(int minutes)
+        {
+            if (minutes <= 0)
+            {
+                return;
+            }
+            long from = Math.Max(NowMs, State.UnlimitedUntilUnixMs);
+            State.UnlimitedUntilUnixMs = from + (long)minutes * 60_000;
         }
 
         public void AddLives(int count)

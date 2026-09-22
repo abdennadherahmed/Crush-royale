@@ -686,7 +686,19 @@ namespace CrushRoyale.Game.UI
                 return;
             }
             Localization loc = GameRoot.Instance.Loc;
-            float remaining = Mathf.Max(0, _livesData.RechargeSeconds - (Time.realtimeSinceStartup - _rechargeReceivedAt));
+            float elapsed = Time.realtimeSinceStartup - _rechargeReceivedAt;
+
+            // A window of free play replaces the counter entirely: during it there is nothing to count down to, and
+            // showing a life total would suggest a wall that is not there.
+            float freeLeft = _livesData.UnlimitedSecondsLeft - elapsed;
+            if (freeLeft > 0)
+            {
+                int minutes = (int)(freeLeft / 60);
+                _lives.text = loc.T("currency.unlimitedLives", minutes + ":" + ((int)freeLeft % 60).ToString("00"));
+                return;
+            }
+
+            float remaining = Mathf.Max(0, _livesData.RechargeSeconds - elapsed);
             string timer = _livesData.Lives < _livesData.MaxRegen && remaining > 0
                 ? " " + (int)(remaining / 60) + ":" + ((int)remaining % 60).ToString("00")
                 : string.Empty;
