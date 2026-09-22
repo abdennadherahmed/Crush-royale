@@ -24,7 +24,10 @@ namespace CrushRoyale.Core.Economy
         LivesPack = 5,
         RemoveAds = 6,
         BattlePass = 7,
-        RarePerk = 8
+        RarePerk = 8,
+
+        /// <summary>The piggy bank: a real-money purchase that hands back orbes the player already earned.</summary>
+        PiggyBank = 9
     }
 
     public sealed class ShopItem
@@ -97,6 +100,9 @@ namespace CrushRoyale.Core.Economy
         public Inventory Inventory { get; set; }
 
         public ShopState Shop { get; set; }
+
+        /// <summary>The jar that fills as the player plays; the shop reads it to price the offer.</summary>
+        public PiggyBankState PiggyBank { get; set; } = new PiggyBankState();
 
         public StaminaManager Stamina { get; set; }
 
@@ -308,6 +314,19 @@ namespace CrushRoyale.Core.Economy
                 // Real money only: no PriceOrbes, so the pass cannot be ground out for free.
                 items.Add(new ShopItem { Id = "battlepass", Kind = ShopItemKind.BattlePass, Sku = _balance.Economy.BattlePassSku, PriceCents = _balance.Economy.BattlePassPriceCents });
             }
+            // The jar only appears once it holds enough to be worth the price: an almost empty piggy bank on the
+            // shelf teaches the player to ignore it.
+            if (PiggyBank.CanOffer(ctx.PiggyBank, _balance.Economy.PiggyBank))
+            {
+                items.Add(new ShopItem
+                {
+                    Id = "piggybank",
+                    Kind = ShopItemKind.PiggyBank,
+                    Sku = _balance.Economy.PiggyBank.Sku,
+                    PriceCents = _balance.Economy.PiggyBank.PriceCents,
+                    OrbesGranted = (int)ctx.PiggyBank.Orbes
+                });
+            }
             if (!ctx.Inventory.State.RarePerkUnlocked)
             {
                 items.Add(new ShopItem { Id = "crown", Kind = ShopItemKind.RarePerk, Sku = _balance.Economy.RarePerkSku, PriceCents = _balance.Economy.RarePerkPriceCents });
@@ -393,6 +412,9 @@ namespace CrushRoyale.Core.Economy
                     ctx.Inventory.AddCosmetic(item.CosmeticId);
                     result.Granted.Cosmetics.Add(item.CosmeticId);
                     break;
+                case ShopItemKind.PiggyBank:
+                    ctx.Wallet.Credit(currency, price, TransactionReason.Refund, item.Id);
+                    return PurchaseResult.Fail(ErrorCode.InvalidArgument, "The piggy bank is a real-money purchase.");
                 case ShopItemKind.BattlePass:
                     // Unreachable through the shop list (no orbe price) and refused here as well, so no future
                     // caller can quietly hand out the season pass for in-game currency.
@@ -484,6 +506,17 @@ namespace CrushRoyale.Core.Economy
             {
                 item.Kind = ShopItemKind.RemoveAds;
                 ctx.Inventory.State.AdsRemoved = true;
+            }
+            else if (sku == _balance.Economy.PiggyBank.Sku)
+            {
+                item.Kind = ShopItemKind.PiggyBank;
+                // Only ever hands over orbes the player earned by playing: it cannot pay out more than went in.
+                long contents = PiggyBank.Break(ctx.PiggyBank);
+                if (contents > 0)
+                {
+                    ctx.Wallet.Credit(Currency.Orbes, contents, TransactionReason.RealMoneyPurchase, item.Id);
+                }
+                result.Granted.Orbes = contents;
             }
             else if (sku == _balance.Economy.BattlePassSku)
             {

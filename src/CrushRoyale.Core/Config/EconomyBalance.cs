@@ -69,6 +69,9 @@ namespace CrushRoyale.Core.Config
 
         public int RemoveAdsPriceCents { get; set; } = 499;
 
+        /// <summary>The jar that fills as the player plays (see CrushRoyale.Core.Economy.PiggyBank).</summary>
+        public Economy.PiggyBankBalance PiggyBank { get; set; } = new Economy.PiggyBankBalance();
+
         public string BattlePassSku { get; set; } = "crushroyale.battlepass";
 
         public int BattlePassPriceCents { get; set; } = 999;
@@ -118,6 +121,7 @@ namespace CrushRoyale.Core.Config
         internal void Validate()
         {
             GameBalance.Require(OrbePacks.Count > 0, "Economy.OrbePacks");
+            PiggyBank.Validate();
             long previousValue = 0;
             OrbePackDefinition previous = null;
             foreach (OrbePackDefinition pack in OrbePacks)

@@ -128,6 +128,7 @@ public sealed class PlayerWorkspace
         Wallet = Wallet,
         Inventory = Inventory,
         Shop = State.Shop,
+        PiggyBank = State.PiggyBank,
         Stamina = Stamina,
         Vip = State.Vip,
         HighestLeague = State.Pvp.HighestLeague,

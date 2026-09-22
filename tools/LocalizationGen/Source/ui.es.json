@@ -2096,6 +2096,8 @@
   "chest.free": "¡GRATIS!",
   "chest.freeSoon": "Un cofre gratis se llena aquí solo. No hace falta ganar.",
   "chest.freeTaken": "Cofre gratis recogido. El siguiente ya se está llenando.",
-  "currency.unlimitedLives": "∞ vidas  {0}"
+  "currency.unlimitedLives": "∞ vidas  {0}",
+  "shop.item.PiggyBank": "Hucha",
+  "shop.item.PiggyBank.desc": "{0} orbes ahorrados con tus propias victorias. Rómpela y llévatelos todos."
 }
 

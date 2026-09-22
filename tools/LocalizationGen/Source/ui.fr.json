@@ -2096,6 +2096,8 @@
   "chest.free": "GRATUIT !",
   "chest.freeSoon": "Un coffre gratuit se remplit ici tout seul. Aucune victoire nécessaire.",
   "chest.freeTaken": "Coffre gratuit récupéré. Le prochain se remplit déjà.",
-  "currency.unlimitedLives": "∞ vies  {0}"
+  "currency.unlimitedLives": "∞ vies  {0}",
+  "shop.item.PiggyBank": "Tirelire",
+  "shop.item.PiggyBank.desc": "{0} orbes mis de côté par tes propres victoires. Casse-la et prends tout."
 }
 

@@ -2096,6 +2096,8 @@
   "chest.free": "مجاني!",
   "chest.freeSoon": "صندوق مجاني يمتلئ هنا وحده. لا تحتاج إلى فوز.",
   "chest.freeTaken": "تم أخذ الصندوق المجاني. التالي يمتلئ بالفعل.",
-  "currency.unlimitedLives": "∞ أرواح  {0}"
+  "currency.unlimitedLives": "∞ أرواح  {0}",
+  "shop.item.PiggyBank": "حصّالة",
+  "shop.item.PiggyBank.desc": "{0} كرة ادّخرتها من انتصاراتك. اكسرها وخذها كلها."
 }
 

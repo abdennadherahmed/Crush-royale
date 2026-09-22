@@ -2096,6 +2096,8 @@
   "chest.free": "GRÁTIS!",
   "chest.freeSoon": "Um baú grátis se enche aqui sozinho. Não precisa vencer.",
   "chest.freeTaken": "Baú grátis recolhido. O próximo já está enchendo.",
-  "currency.unlimitedLives": "∞ vidas  {0}"
+  "currency.unlimitedLives": "∞ vidas  {0}",
+  "shop.item.PiggyBank": "Cofrinho",
+  "shop.item.PiggyBank.desc": "{0} orbes guardados pelas suas próprias vitórias. Quebre e leve tudo."
 }
 

@@ -2096,6 +2096,8 @@
   "chest.free": "むりょう！",
   "chest.freeSoon": "ここに無料の宝箱がひとりでに貯まります。勝たなくても大丈夫。",
   "chest.freeTaken": "無料の宝箱を受け取りました。次はもう貯まり始めています。",
-  "currency.unlimitedLives": "∞ ライフ  {0}"
+  "currency.unlimitedLives": "∞ ライフ  {0}",
+  "shop.item.PiggyBank": "貯金箱",
+  "shop.item.PiggyBank.desc": "あなたの勝利で貯まった {0} オーブ。割ってすべて受け取ります。"
 }
 

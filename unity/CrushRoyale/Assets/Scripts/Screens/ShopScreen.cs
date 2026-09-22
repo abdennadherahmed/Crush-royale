@@ -311,7 +311,7 @@ namespace CrushRoyale.Game.Screens
                 Text title = UIFactory.Label(card.transform, Loc.T("shop.item." + item.Kind), Theme.HeaderSize - 8, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
                 UIFactory.Anchor(title.rectTransform, 0.28f, 0.66f, 0.96f, 0.9f);
                 Widgets.TitleOutline(title);
-                Text desc = UIFactory.Label(card.transform, Loc.T("shop.item." + item.Kind + ".desc"), Theme.SmallSize - 4, Theme.Text, TextAnchor.UpperLeft);
+                Text desc = UIFactory.Label(card.transform, Loc.T("shop.item." + item.Kind + ".desc", Loc.Number(item.OrbesGranted)), Theme.SmallSize - 4, Theme.Text, TextAnchor.UpperLeft);
                 UIFactory.Anchor(desc.rectTransform, 0.28f, 0.36f, 0.96f, 0.66f);
                 bool both = item.PriceOrbes > 0 && item.PriceCents > 0;
                 if (item.PriceOrbes > 0)

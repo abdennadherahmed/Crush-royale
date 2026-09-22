@@ -2096,6 +2096,8 @@
   "chest.free": "免费！",
   "chest.freeSoon": "这里会自动攒出一个免费宝箱，不需要获胜。",
   "chest.freeTaken": "已领取免费宝箱，下一个已经开始积攒。",
-  "currency.unlimitedLives": "∞ 生命  {0}"
+  "currency.unlimitedLives": "∞ 生命  {0}",
+  "shop.item.PiggyBank": "存钱罐",
+  "shop.item.PiggyBank.desc": "你靠自己的胜利攒下的 {0} 魔珠。敲开全部拿走。"
 }
 

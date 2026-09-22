@@ -2096,6 +2096,8 @@
   "chest.free": "GRATIS!",
   "chest.freeSoon": "Hier füllt sich von selbst eine Gratis-Truhe. Kein Sieg nötig.",
   "chest.freeTaken": "Gratis-Truhe genommen. Die nächste füllt sich schon.",
-  "currency.unlimitedLives": "∞ Leben  {0}"
+  "currency.unlimitedLives": "∞ Leben  {0}",
+  "shop.item.PiggyBank": "Sparschwein",
+  "shop.item.PiggyBank.desc": "{0} Kugeln, von deinen eigenen Siegen gespart. Schlag es auf und nimm alles."
 }
 

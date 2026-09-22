@@ -2096,6 +2096,8 @@
   "chest.free": "GRATIS!",
   "chest.freeSoon": "Qui si riempie da solo uno scrigno gratis. Non serve vincere.",
   "chest.freeTaken": "Scrigno gratis preso. Il prossimo si sta già riempiendo.",
-  "currency.unlimitedLives": "∞ vite  {0}"
+  "currency.unlimitedLives": "∞ vite  {0}",
+  "shop.item.PiggyBank": "Salvadanaio",
+  "shop.item.PiggyBank.desc": "{0} orbi messi da parte dalle tue vittorie. Rompilo e prendi tutto."
 }
 

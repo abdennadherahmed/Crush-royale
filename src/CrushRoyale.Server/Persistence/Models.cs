@@ -82,6 +82,9 @@ public sealed class PlayerState
 
     public ChestState Chests { get; set; } = new();
 
+    /// <summary>The jar that fills as the player plays (see CrushRoyale.Core.Economy.PiggyBank).</summary>
+    public PiggyBankState PiggyBank { get; set; } = new();
+
     public long LastSeenUnixMs { get; set; }
 }
 

@@ -170,6 +170,7 @@ public sealed class StoryService
             {
                 ws.TrackQuest(QuestType.WinStages, 1);
                 ws.TrackQuest(QuestType.EarnStars, result.Stars);
+                PiggyBank.Fill(ws.State.PiggyBank, ws.Balance.Economy.PiggyBank.OrbesPerStageWin, ws.Balance.Economy.PiggyBank);
                 // Everything a member clears feeds the guild's weekly race against the other guilds.
                 await _guilds.AwardTournamentPointsAsync(ctx,
                     GuildTournament.ForStage(result.Stars, ws.Balance.Guild.Tournament)).ConfigureAwait(false);
