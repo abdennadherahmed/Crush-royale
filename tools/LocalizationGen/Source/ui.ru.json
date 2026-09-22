@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ жизней  {0}",
   "shop.item.PiggyBank": "Копилка",
   "shop.item.PiggyBank.desc": "{0} сфер, накопленных вашими победами. Разбейте копилку и заберите всё.",
-  "guild.raceRank": "Ваша гильдия на #{0} месте на этой неделе"
+  "guild.raceRank": "Ваша гильдия на #{0} месте на этой неделе",
+  "pvp.nextLeague": "Следующая лига: {0}",
+  "pvp.nextLeagueTrophies": "осталось {0} трофеев",
+  "pvp.nextLeagueBonus": "В первый раз: +{0} сфер",
+  "wheel.spinPaid": "Крутить ещё  {0} сфер"
 }
 

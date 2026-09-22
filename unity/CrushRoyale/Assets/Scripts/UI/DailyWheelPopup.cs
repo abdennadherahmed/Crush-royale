@@ -111,8 +111,14 @@ namespace CrushRoyale.Game.UI
             Button oddsButton = UIFactory.Button(box, loc.T("wheel.oddsButton"), () => ShowOdds(loc), Theme.PanelLight, Theme.SmallSize, Theme.TextMuted);
             UIFactory.Anchor(oddsButton.GetComponent<RectTransform>(), 0.3f, 0.235f, 0.7f, 0.305f);
 
+            // The free spin first; once it is gone the button says what the next one costs, before any tap.
+            WheelStatusDto status = game.Backend.Profile?.Wheel;
             bool available = game.Backend.Profile?.WheelAvailable ?? false;
-            _spin = UIFactory.Button(box, loc.T(available ? "wheel.spin" : "wheel.tomorrow"), () => _ = SpinAsync(), available ? Theme.Success : Theme.PanelLight, Theme.HeaderSize);
+            int price = available ? 0 : status?.NextSpinOrbes ?? 0;
+            string label = available ? loc.T("wheel.spin")
+                : price > 0 ? loc.T("wheel.spinPaid", loc.Number(price))
+                : loc.T("wheel.tomorrow");
+            _spin = UIFactory.Button(box, label, () => _ = SpinAsync(), available || price > 0 ? Theme.Success : Theme.PanelLight, Theme.HeaderSize);
             UIFactory.Anchor(_spin.GetComponent<RectTransform>(), 0.18f, 0.1f, 0.82f, 0.21f);
             _spin.interactable = available && game.Backend.IsOnline;
             if (available)
@@ -187,6 +193,11 @@ namespace CrushRoyale.Game.UI
             if (profile != null)
             {
                 profile.WheelAvailable = false;
+                if (profile.Wheel != null)
+                {
+                    // The next spin is dearer; ask the server rather than guessing the new price here.
+                    profile.Wheel.FreeSpinAvailable = false;
+                }
                 profile.Pets = response.Pets ?? profile.Pets;
             }
             game.Backend.ApplyWallet(response.Wallet);

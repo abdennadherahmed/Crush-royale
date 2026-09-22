@@ -144,6 +144,17 @@ namespace CrushRoyale.Contracts
         public int UnlimitedSecondsLeft { get; set; }
     }
 
+    /// <summary>What one more wheel spin costs today, and whether the free one is still there.</summary>
+    public sealed class WheelStatusDto
+    {
+        public bool FreeSpinAvailable { get; set; }
+
+        /// <summary>Orbes for the next spin; 0 when there are none left to buy today.</summary>
+        public int NextSpinOrbes { get; set; }
+
+        public int ExtrasLeft { get; set; }
+    }
+
     public sealed class RewardDto
     {
         public long Coins { get; set; }

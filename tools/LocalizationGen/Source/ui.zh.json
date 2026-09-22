@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ 生命  {0}",
   "shop.item.PiggyBank": "存钱罐",
   "shop.item.PiggyBank.desc": "你靠自己的胜利攒下的 {0} 魔珠。敲开全部拿走。",
-  "guild.raceRank": "你的公会本周排名第 {0}"
+  "guild.raceRank": "你的公会本周排名第 {0}",
+  "pvp.nextLeague": "下一段位：{0}",
+  "pvp.nextLeagueTrophies": "还差 {0} 奖杯",
+  "pvp.nextLeagueBonus": "首次抵达：+{0} 魔珠",
+  "wheel.spinPaid": "再转一次  {0} 魔珠"
 }
 

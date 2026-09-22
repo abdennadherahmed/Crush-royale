@@ -74,6 +74,9 @@ public sealed class PlayerState
     /// <summary>UTC day of the last daily wheel spin.</summary>
     public int WheelDay { get; set; } = -1;
 
+    /// <summary>Paid spins taken today; reset with the day (see EconomyService).</summary>
+    public int WheelExtrasToday { get; set; }
+
     public long? GuildId { get; set; }
 
     public HashSet<StoryEnding> EndingsReached { get; set; } = new();

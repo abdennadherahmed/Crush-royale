@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ vidas  {0}",
   "shop.item.PiggyBank": "Cofrinho",
   "shop.item.PiggyBank.desc": "{0} orbes guardados pelas suas próprias vitórias. Quebre e leve tudo.",
-  "guild.raceRank": "Sua guilda está em #{0} esta semana"
+  "guild.raceRank": "Sua guilda está em #{0} esta semana",
+  "pvp.nextLeague": "Próxima liga: {0}",
+  "pvp.nextLeagueTrophies": "faltam {0} troféus",
+  "pvp.nextLeagueBonus": "Na primeira vez: +{0} orbes",
+  "wheel.spinPaid": "Girar de novo  {0} orbes"
 }
 

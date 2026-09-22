@@ -20,6 +20,20 @@ public static class Mappers
 {
     public static WalletDto Wallet(PlayerWorkspace ws) => new() { Coins = ws.State.Wallet.Coins, Orbes = ws.State.Wallet.Orbes };
 
+    /// <summary>The wheel as the hub needs it: the free spin, and the price of the next paid one.</summary>
+    public static WheelStatusDto WheelStatus(PlayerWorkspace ws)
+    {
+        int today = TimeUtil.DayIndex(ws.Now);
+        bool free = DailyWheel.CanSpin(ws.State.WheelDay, today);
+        int extras = ws.State.WheelDay == today ? ws.State.WheelExtrasToday : 0;
+        return new WheelStatusDto
+        {
+            FreeSpinAvailable = free,
+            NextSpinOrbes = free ? 0 : DailyWheel.ExtraSpinCost(extras, ws.Balance.Economy.Wheel),
+            ExtrasLeft = Math.Max(0, ws.Balance.Economy.Wheel.ExtraSpinsPerDay - extras)
+        };
+    }
+
     public static LivesDto Lives(PlayerWorkspace ws)
     {
         StaminaManager stamina = ws.Stamina;
@@ -147,6 +161,7 @@ public static class Mappers
             LoginBonusAvailable = LoginCalendar.CanClaim(s.Login, ws.Now),
             VipGiftAvailable = VipGifts.CanClaim((int)s.Vip.Tier, s.VipGiftDay, TimeUtil.DayIndex(ws.Now)),
             WheelAvailable = DailyWheel.CanSpin(s.WheelDay, TimeUtil.DayIndex(ws.Now)),
+            Wheel = WheelStatus(ws),
             LoginCalendarSlot = s.Login.NextSlot,
             CollectionPagesCompleted = s.Achievements.PagesCompleted.Count,
             UnclaimedAchievements = ws.Achievements.GetUnclaimed().Count,

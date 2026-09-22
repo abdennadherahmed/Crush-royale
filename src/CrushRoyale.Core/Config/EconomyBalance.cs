@@ -72,6 +72,9 @@ namespace CrushRoyale.Core.Config
         /// <summary>The jar that fills as the player plays (see CrushRoyale.Core.Economy.PiggyBank).</summary>
         public Economy.PiggyBankBalance PiggyBank { get; set; } = new Economy.PiggyBankBalance();
 
+        /// <summary>The daily wheel and its paid extra spins.</summary>
+        public WheelBalance Wheel { get; set; } = new WheelBalance();
+
         public string BattlePassSku { get; set; } = "crushroyale.battlepass";
 
         public int BattlePassPriceCents { get; set; } = 999;
@@ -122,6 +125,7 @@ namespace CrushRoyale.Core.Config
         {
             GameBalance.Require(OrbePacks.Count > 0, "Economy.OrbePacks");
             PiggyBank.Validate();
+            Wheel.Validate();
             long previousValue = 0;
             OrbePackDefinition previous = null;
             foreach (OrbePackDefinition pack in OrbePacks)
@@ -192,6 +196,23 @@ namespace CrushRoyale.Core.Config
     }
 
     /// <summary>Guilds (Task 11).</summary>
+    /// <summary>The daily wheel: one free spin, then a few paid ones at a climbing price.</summary>
+    public sealed class WheelBalance
+    {
+        public int ExtraSpinsPerDay { get; set; } = 3;
+
+        public int ExtraSpinBaseOrbes { get; set; } = 40;
+
+        public int ExtraSpinEscalationPermille { get; set; } = 1600;
+
+        internal void Validate()
+        {
+            GameBalance.Require(ExtraSpinsPerDay >= 0, "Wheel.ExtraSpinsPerDay");
+            GameBalance.Require(ExtraSpinBaseOrbes > 0, "Wheel.ExtraSpinBaseOrbes");
+            GameBalance.Require(ExtraSpinEscalationPermille >= 1000, "Wheel.ExtraSpinEscalationPermille");
+        }
+    }
+
     public sealed class GuildBalance
     {
         /// <summary>The weekly race between guilds (see CrushRoyale.Core.Social.GuildTournament).</summary>

@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ vidas  {0}",
   "shop.item.PiggyBank": "Hucha",
   "shop.item.PiggyBank.desc": "{0} orbes ahorrados con tus propias victorias. Rómpela y llévatelos todos.",
-  "guild.raceRank": "Tu gremio es el #{0} esta semana"
+  "guild.raceRank": "Tu gremio es el #{0} esta semana",
+  "pvp.nextLeague": "Siguiente liga: {0}",
+  "pvp.nextLeagueTrophies": "faltan {0} trofeos",
+  "pvp.nextLeagueBonus": "La primera vez: +{0} orbes",
+  "wheel.spinPaid": "Girar otra vez  {0} orbes"
 }
 

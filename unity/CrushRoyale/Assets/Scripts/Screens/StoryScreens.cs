@@ -978,6 +978,7 @@ namespace CrushRoyale.Game.Screens
                 Text league = UIFactory.Label(list, Loc.T("league." + profile.Pvp.League), 90, Theme.League(profile.Pvp.League), TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Height(league, 140);
                 UIFactory.Height(UIFactory.Label(list, Loc.T("pvp.record", profile.Pvp.Trophies, profile.Pvp.Wins, profile.Pvp.Losses, profile.Pvp.WinStreak), Theme.BodySize), 80);
+                BuildNextLeague(list, profile);
                 UIFactory.Height(UIFactory.Label(list, Loc.T("pvp.rules"), Theme.SmallSize, Theme.TextMuted), 150);
 
                 Widgets.SectionTitle(list, Loc.T("stage.boostsTitle"));
@@ -988,6 +989,56 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Height(UIFactory.Label(list, Loc.T("pvp.practiceBody"), Theme.BodySize, Theme.Warning), 200);
             }
 
+            BuildFooter(body, profile);
+        }
+
+        /// <summary>
+        /// How far the next league is, and what reaching it pays the first time.
+        ///
+        /// A trophy count on its own is a number; the league above it with a distance and a prize is a goal, and it
+        /// is the difference between closing the arena and playing one more match.
+        /// </summary>
+        private void BuildNextLeague(Transform list, ProfileDto profile)
+        {
+            TrophyBalance trophies = Game.Backend.Balance.Trophies;
+            if (!System.Enum.TryParse(profile.Pvp.League, out League current) || current >= League.Master)
+            {
+                return;
+            }
+            League next = current + 1;
+            int floor = CrushRoyale.Core.Pvp.LeagueTable.LowerBound(current, trophies);
+            int target = CrushRoyale.Core.Pvp.LeagueTable.LowerBound(next, trophies);
+            int span = System.Math.Max(1, target - floor);
+            float done = Mathf.Clamp01((profile.Pvp.Trophies - floor) / (float)span);
+
+            Image card = UIFactory.Panel("NextLeague", list, Theme.Panel);
+            UIFactory.Height(card, 170);
+            UiKit.CardFrame(card);
+
+            Text title = UIFactory.Label(card.transform, Loc.T("pvp.nextLeague", Loc.T("league." + next)),
+                Theme.SmallSize, Theme.League(next.ToString()), TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.05f, 0.58f, 0.95f, 0.92f);
+            Widgets.TitleOutline(title);
+
+            UIFactory.ProgressBar(card.transform, done, Theme.League(next.ToString()), out RectTransform bar);
+            UIFactory.Anchor(bar, 0.05f, 0.28f, 0.95f, 0.52f);
+            Text count = UIFactory.Label(bar, Loc.T("pvp.nextLeagueTrophies", System.Math.Max(0, target - profile.Pvp.Trophies)),
+                Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(count.rectTransform);
+            Widgets.TitleOutline(count);
+
+            int[] table = Game.Backend.Balance.Trophies.FirstReachOrbesByLeague;
+            int bonus = (int)next < table.Length ? table[(int)next] : 0;
+            if (bonus > 0)
+            {
+                Text prize = UIFactory.Label(card.transform, Loc.T("pvp.nextLeagueBonus", Loc.Number(bonus)),
+                    Theme.SmallSize - 6, Theme.Orbe, TextAnchor.MiddleCenter);
+                UIFactory.Anchor(prize.rectTransform, 0.05f, 0.04f, 0.95f, 0.26f);
+            }
+        }
+
+        private void BuildFooter(RectTransform body, ProfileDto profile)
+        {
             _status = UIFactory.Label(body, string.Empty, Theme.BodySize, Theme.Crystal);
             UIFactory.Anchor(_status.rectTransform, 0.05f, 0.13f, 0.95f, 0.19f);
             _find = UIFactory.Button(body, Loc.T(profile != null ? "pvp.find" : "pvp.practice"), () => _ = FindAsync());

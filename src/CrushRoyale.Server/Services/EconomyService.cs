@@ -84,13 +84,33 @@ public sealed class EconomyService
         {
             PlayerWorkspace ws = ctx.Player;
             int today = TimeUtil.DayIndex(ws.Now);
-            if (!DailyWheel.CanSpin(ws.State.WheelDay, today))
+            if (ws.State.WheelDay != today)
             {
-                throw new ApiException(ErrorCode.AlreadyClaimed, "The wheel was already spun today.");
+                // A new day: the free spin is back and the paid ones start again from the base price.
+                ws.State.WheelExtrasToday = 0;
             }
-            WheelSpin spin = DailyWheel.Spin(ws.IdString, today);
-            ws.State.WheelDay = today;
-            string key = "wheel:" + today;
+
+            WheelSpin spin;
+            string key;
+            if (DailyWheel.CanSpin(ws.State.WheelDay, today))
+            {
+                spin = DailyWheel.Spin(ws.IdString, today);
+                ws.State.WheelDay = today;
+                key = "wheel:" + today;
+            }
+            else
+            {
+                // The free spin is gone; the next ones are paid, at a price that climbs with each purchase.
+                int cost = DailyWheel.ExtraSpinCost(ws.State.WheelExtrasToday, ws.Balance.Economy.Wheel);
+                if (cost <= 0)
+                {
+                    throw new ApiException(ErrorCode.LimitReached, "No spins left today.");
+                }
+                key = "wheel:" + today + ":x" + ws.State.WheelExtrasToday;
+                ws.Wallet.Debit(Currency.Orbes, cost, TransactionReason.DailyWheel, key, key).ThrowIfFailed();
+                spin = DailyWheel.SpinExtra(ws.IdString, today, ws.State.WheelExtrasToday);
+                ws.State.WheelExtrasToday++;
+            }
             if (!spin.Reward.IsEmpty)
             {
                 ws.GrantReward(spin.Reward, TransactionReason.DailyWheel, key, key);

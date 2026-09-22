@@ -76,6 +76,28 @@ namespace CrushRoyale.Core.Economy
 
         public static bool CanSpin(int lastSpinDay, int today) => lastSpinDay != today;
 
+        /// <summary>
+        /// Orbes for one more spin today. The free spin stays free and the paid ones climb steeply, so buying a
+        /// handful is a choice and not a habit; the wheel is a daily appointment, not a slot machine.
+        /// </summary>
+        public static int ExtraSpinCost(int extrasToday, WheelBalance balance)
+        {
+            if (balance == null || balance.ExtraSpinsPerDay <= 0 || extrasToday >= balance.ExtraSpinsPerDay)
+            {
+                return 0;
+            }
+            long price = Math.Max(1, balance.ExtraSpinBaseOrbes);
+            for (int i = 0; i < extrasToday; i++)
+            {
+                price = price * Math.Max(1000, balance.ExtraSpinEscalationPermille) / 1000;
+            }
+            return (int)Math.Min(price, int.MaxValue / 2);
+        }
+
+        /// <summary>Rolls an extra spin: a different seed per purchase, so paying twice cannot land on the same slice.</summary>
+        public static WheelSpin SpinExtra(string playerId, int day, int extraIndex) =>
+            Spin(playerId + ":x" + extraIndex, day);
+
         /// <summary>Rolls the spin of <paramref name="playerId"/> on <paramref name="day"/> (deterministic).</summary>
         public static WheelSpin Spin(string playerId, int day)
         {

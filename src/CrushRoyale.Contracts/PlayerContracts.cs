@@ -491,6 +491,9 @@ namespace CrushRoyale.Contracts
         /// <summary>The free daily wheel can be spun.</summary>
         public bool WheelAvailable { get; set; }
 
+        /// <summary>The free spin and the price of the next paid one.</summary>
+        public WheelStatusDto Wheel { get; set; }
+
         public int LoginCalendarSlot { get; set; }
 
         public int CollectionPagesCompleted { get; set; }

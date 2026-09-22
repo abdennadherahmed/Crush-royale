@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ lives  {0}",
   "shop.item.PiggyBank": "Piggy bank",
   "shop.item.PiggyBank.desc": "{0} orbes saved up from your own wins. Break it open and take them all.",
-  "guild.raceRank": "Your guild is #{0} this week"
+  "guild.raceRank": "Your guild is #{0} this week",
+  "pvp.nextLeague": "Next league: {0}",
+  "pvp.nextLeagueTrophies": "{0} trophies to go",
+  "pvp.nextLeagueBonus": "First time there: +{0} orbes",
+  "wheel.spinPaid": "Spin again  {0} orbes"
 }
 

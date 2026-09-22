@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ Leben  {0}",
   "shop.item.PiggyBank": "Sparschwein",
   "shop.item.PiggyBank.desc": "{0} Kugeln, von deinen eigenen Siegen gespart. Schlag es auf und nimm alles.",
-  "guild.raceRank": "Deine Gilde ist diese Woche #{0}"
+  "guild.raceRank": "Deine Gilde ist diese Woche #{0}",
+  "pvp.nextLeague": "Nächste Liga: {0}",
+  "pvp.nextLeagueTrophies": "noch {0} Trophäen",
+  "pvp.nextLeagueBonus": "Beim ersten Mal: +{0} Kugeln",
+  "wheel.spinPaid": "Nochmal drehen  {0} Kugeln"
 }
 

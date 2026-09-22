@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ ライフ  {0}",
   "shop.item.PiggyBank": "貯金箱",
   "shop.item.PiggyBank.desc": "あなたの勝利で貯まった {0} オーブ。割ってすべて受け取ります。",
-  "guild.raceRank": "今週のギルド順位は #{0} 位"
+  "guild.raceRank": "今週のギルド順位は #{0} 位",
+  "pvp.nextLeague": "次のリーグ: {0}",
+  "pvp.nextLeagueTrophies": "あと {0} トロフィー",
+  "pvp.nextLeagueBonus": "初到達で +{0} オーブ",
+  "wheel.spinPaid": "もう一度回す  {0} オーブ"
 }
 

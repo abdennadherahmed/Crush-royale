@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ vite  {0}",
   "shop.item.PiggyBank": "Salvadanaio",
   "shop.item.PiggyBank.desc": "{0} orbi messi da parte dalle tue vittorie. Rompilo e prendi tutto.",
-  "guild.raceRank": "La tua gilda è #{0} questa settimana"
+  "guild.raceRank": "La tua gilda è #{0} questa settimana",
+  "pvp.nextLeague": "Prossima lega: {0}",
+  "pvp.nextLeagueTrophies": "mancano {0} trofei",
+  "pvp.nextLeagueBonus": "La prima volta: +{0} orbi",
+  "wheel.spinPaid": "Gira ancora  {0} orbi"
 }
 

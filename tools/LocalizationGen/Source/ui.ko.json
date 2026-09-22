@@ -2099,6 +2099,10 @@
   "currency.unlimitedLives": "∞ 하트  {0}",
   "shop.item.PiggyBank": "돼지 저금통",
   "shop.item.PiggyBank.desc": "내 승리로 모은 오브 {0}개. 깨뜨려 전부 가져가세요.",
-  "guild.raceRank": "이번 주 길드 순위 #{0}"
+  "guild.raceRank": "이번 주 길드 순위 #{0}",
+  "pvp.nextLeague": "다음 리그: {0}",
+  "pvp.nextLeagueTrophies": "트로피 {0}개 남음",
+  "pvp.nextLeagueBonus": "첫 도달 시 오브 +{0}",
+  "wheel.spinPaid": "한 번 더  오브 {0}"
 }
 
