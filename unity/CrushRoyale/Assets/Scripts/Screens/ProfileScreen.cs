@@ -265,8 +265,20 @@ namespace CrushRoyale.Game.Screens
         /// <summary>Small visual preview of a cosmetic: frame ring, title ribbon, outfit aura, board tiles, gems, emote.</summary>
         public static void CosmeticPreview(Transform parent, Localization Loc, string heroGender, CosmeticKind kind, string id, float minX, float minY, float maxX, float maxY)
         {
-            RectTransform box = UIFactory.Anchor(UIFactory.Rect("Preview", parent), minX, minY, maxX, maxY);
-            box.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            // The square that holds the preview, inside the bounds the caller asked for.
+            //
+            // An AspectRatioFitter set to FitInParent used to sit on the anchored rect itself. Unity does not support
+            // that combination: the fitter sizes from the PARENT, ignoring the anchors, so a board skin asked to
+            // occupy half of a card came out as a square the size of the whole card and spilled over its neighbours.
+            // The supported shape is a centred child: the bounds stay anchored, and the fitter works on a rect whose
+            // anchors are a single point.
+            RectTransform bounds = UIFactory.Anchor(UIFactory.Rect("Preview", parent), minX, minY, maxX, maxY);
+            RectTransform box = UIFactory.Rect("PreviewBox", bounds);
+            box.anchorMin = box.anchorMax = new Vector2(0.5f, 0.5f);
+            box.pivot = new Vector2(0.5f, 0.5f);
+            AspectRatioFitter fitter = box.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+            fitter.aspectRatio = 1f;
             switch (kind)
             {
                 case CosmeticKind.AvatarFrame:

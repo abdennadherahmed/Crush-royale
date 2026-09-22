@@ -152,7 +152,12 @@ namespace CrushRoyale.EditorTools
                 ClaimableQuests = 1,
                 Pets = new PetsDto
                 {
-                    Pets = new List<PetDto>(),
+                    // Every pet, in every state a card can be in: owned and equipped, owned and ready to awaken,
+                    // owned plainly, half collected, barely started. The demo owned none of them, so the pet screen
+                    // was an empty list in every capture and not one pet card was ever looked at -- which is exactly
+                    // where a reported defect was hiding.
+                    Pets = DemoPets(),
+                    Equipped = "FrostFox",
                     PityPulls = 40,
                     UnlockFragments = 50,
                     WholePetOneIn = 25,
@@ -174,6 +179,31 @@ namespace CrushRoyale.EditorTools
                 }
             };
         }
+
+        /// <summary>The five pets, each in a different state, so every branch of the pet card gets drawn.</summary>
+        private static List<PetDto> DemoPets() => new List<PetDto>
+        {
+            Pet("FrostFox", owned: true, level: 7, fragments: 28, canAwaken: true),
+            Pet("SunFennec", owned: true, level: 4, fragments: 9, canAwaken: false),
+            Pet("ForestOwl", owned: true, level: 1, fragments: 0, canAwaken: false),
+            Pet("EmberSalamander", owned: false, level: 0, fragments: 31, canAwaken: false),
+            Pet("CrystalDrake", owned: false, level: 0, fragments: 4, canAwaken: false)
+        };
+
+        private static PetDto Pet(string type, bool owned, int level, int fragments, bool canAwaken) => new PetDto
+        {
+            Type = type,
+            Owned = owned,
+            Level = level,
+            Xp = level * 100,
+            XpForCurrent = level * 100,
+            XpForNext = (level + 1) * 100,
+            Fragments = fragments,
+            CanAwaken = canAwaken,
+            AwakenFragments = 20,
+            AwakenCoins = 5000,
+            PowerUp = "ChronoBomb"
+        };
 
         /// <summary>"333...0": three stars on every cleared stage, the format the map reads (index = stage id - 1).</summary>
         private static string Stars(int cleared)

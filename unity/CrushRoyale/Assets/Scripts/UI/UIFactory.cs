@@ -406,9 +406,19 @@ namespace CrushRoyale.Game.UI
             return content;
         }
 
+        /// <summary>
+        /// A horizontal row of children sharing the width evenly.
+        ///
+        /// The rect is stretched over its parent up front. A bare RectTransform starts in the parent's bottom-left
+        /// corner at its default size, and a parent that is not itself a layout group never moves it: the row stayed
+        /// 100 px wide in the corner and its children split those 100 px between them. That is why the shop's four
+        /// tabs were slivers pressed against the left edge, and why the buttons on the friend cards were stacked on
+        /// top of each other. A parent that IS a layout group overwrites these anchors a moment later, so stretching
+        /// here is free and cannot break the rows that were already correct.
+        /// </summary>
         public static HorizontalLayoutGroup Row(Transform parent, float height, float spacing = 16)
         {
-            RectTransform rect = Rect("Row", parent);
+            RectTransform rect = Stretch(Rect("Row", parent));
             LayoutElement element = rect.gameObject.AddComponent<LayoutElement>();
             element.preferredHeight = height;
             element.minHeight = height;
