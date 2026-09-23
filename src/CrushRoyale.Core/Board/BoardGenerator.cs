@@ -39,6 +39,9 @@ namespace CrushRoyale.Core.Board
         /// <summary>Links on each chained cell: two means two neighbouring clears are needed to free it.</summary>
         public int ChainLinks { get; set; } = 1;
 
+        /// <summary>Cursed gems (stage 601+): matching one costs the player a move or seconds on the clock.</summary>
+        public int CursedCells { get; set; }
+
         public int MaxAttempts { get; set; } = 400;
 
         public int LowDifficultyBiasPermille { get; set; } = 350;
@@ -82,6 +85,11 @@ namespace CrushRoyale.Core.Board
             if (ChainLinks < 1 || ChainLinks > 3)
             {
                 throw new ArgumentException("ChainLinks must be 1-3.");
+            }
+            // A board where every other gem punishes you has no good move left, only least-bad ones.
+            if (CursedCells < 0 || CursedCells > cells / 6)
+            {
+                throw new ArgumentException("Too many cursed cells.");
             }
             if (IceLayers < 1 || IceLayers > 3)
             {
@@ -224,6 +232,17 @@ namespace CrushRoyale.Core.Board
                 foreach (Pos p in PickDistinctCells(o.Width, o.Height, o.IceCells, rng, stoneSet))
                 {
                     board.SetIce(p, o.IceLayers);
+                }
+            }
+
+            if (o.CursedCells > 0)
+            {
+                foreach (Pos p in PickDistinctCells(o.Width, o.Height, o.CursedCells, rng, stoneSet))
+                {
+                    if (board[p].IsPlainGem)
+                    {
+                        board.SetCursed(p, true);
+                    }
                 }
             }
 

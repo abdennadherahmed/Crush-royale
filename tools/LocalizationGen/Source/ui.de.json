@@ -2115,6 +2115,8 @@
   "mechanic.forge.body": "Sie verdirbt bei jedem Zug einen benachbarten Edelstein, und diese Verderbnis breitet sich dann von selbst aus. Drei Treffer zerstören sie. Zerschlage sie früh, sonst schließt sich das Feld.",
   "objective.BreakChains": "Ketten",
   "mechanic.chain.title": "Angekettete Edelsteine",
-  "mechanic.chain.body": "Ein angeketteter Edelstein lässt sich gar nicht bewegen. Nichts, was du mit ihm machst, hilft: Bilde direkt daneben eine Kombination, und die Kette reißt."
+  "mechanic.chain.body": "Ein angeketteter Edelstein lässt sich gar nicht bewegen. Nichts, was du mit ihm machst, hilft: Bilde direkt daneben eine Kombination, und die Kette reißt.",
+  "mechanic.curse.title": "Verfluchte Edelsteine",
+  "mechanic.curse.body": "Kombiniere sie nicht. Einen zu zerstören kostet dich einen Zug, oder fünf Sekunden auf einer Zeitstufe. Der größte Zug ist hier oft der falsche."
 }
 

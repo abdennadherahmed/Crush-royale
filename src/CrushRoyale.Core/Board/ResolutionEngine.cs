@@ -93,6 +93,9 @@ namespace CrushRoyale.Core.Board
         /// <summary>Chains snapped by a clear next to them (stage 501+).</summary>
         public List<Pos> ChainsBroken { get; } = new List<Pos>();
 
+        /// <summary>Cursed gems the player destroyed (stage 601+). Each one costs them.</summary>
+        public List<Pos> CursesTriggered { get; } = new List<Pos>();
+
         public List<StoneHit> StoneHits { get; } = new List<StoneHit>();
 
         public List<PieceFall> Falls { get; } = new List<PieceFall>();
@@ -527,6 +530,11 @@ namespace CrushRoyale.Core.Board
                 {
                     step.IceBroken.Add(p);
                     points += _scoring.IceLayerPoints;
+                }
+                if (board.IsCursed(p))
+                {
+                    step.CursesTriggered.Add(p);
+                    board.SetCursed(p, false);
                 }
                 // A chain is never broken by touching the gem it holds -- the player cannot even move that gem.
                 // It is broken by clearing beside it, which is what makes a chained cell a problem to be solved

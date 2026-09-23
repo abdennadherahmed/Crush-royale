@@ -2115,6 +2115,8 @@
   "mechanic.forge.body": "Corrompe una gemma vicina a ogni mossa, e quella corruzione poi si diffonde da sola. Tre colpi la distruggono. Rompila presto o il tabellone si chiude.",
   "objective.BreakChains": "Catene",
   "mechanic.chain.title": "Gemme incatenate",
-  "mechanic.chain.body": "Una gemma incatenata non può essere mossa. Nulla di ciò che le fai serve: crea una combinazione proprio accanto e la catena si spezza."
+  "mechanic.chain.body": "Una gemma incatenata non può essere mossa. Nulla di ciò che le fai serve: crea una combinazione proprio accanto e la catena si spezza.",
+  "mechanic.curse.title": "Gemme maledette",
+  "mechanic.curse.body": "Non abbinarle. Distruggerne una ti costa una mossa, o cinque secondi in un livello a tempo. Qui la combinazione più grande è spesso quella sbagliata."
 }
 

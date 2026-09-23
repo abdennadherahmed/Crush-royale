@@ -80,6 +80,11 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Corruption forges on the board (story, from stage 401): each corrupts a neighbour every move.</summary>
         public int ForgeCount { get; set; }
 
+        /// <summary>Moves lost for each cursed gem destroyed (stage 601+). Timed stages pay in seconds instead.</summary>
+        public int CursePenaltyMoves { get; set; }
+
+        public int CursePenaltySeconds { get; set; }
+
         public int TwoStarScore { get; set; }
 
         public int ThreeStarScore { get; set; }
@@ -158,6 +163,7 @@ namespace CrushRoyale.Core.Gameplay
                     ForgeCount = stage.ForgeCount,
                     ChainCells = stage.ChainCells,
                     ChainLinks = Math.Max(1, stage.ChainLinks),
+                    CursedCells = stage.CursedCells,
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },
@@ -167,6 +173,8 @@ namespace CrushRoyale.Core.Gameplay
                 BossStonesPerPhase = stage.BossStonesPerPhase,
                 TimeBombCount = stage.TimeBombCount,
                 ForgeCount = stage.ForgeCount,
+                CursePenaltyMoves = stage.CursedCells > 0 ? 1 : 0,
+                CursePenaltySeconds = stage.CursedCells > 0 ? 5 : 0,
                 TimeBombMoves = stage.TimeBombMoves,
                 TwoStarScore = stage.TwoStarScore,
                 ThreeStarScore = stage.ThreeStarScore,

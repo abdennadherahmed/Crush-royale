@@ -137,6 +137,9 @@ namespace CrushRoyale.Core.Story
 
         public int ChainLinks { get; set; } = 1;
 
+        /// <summary>Cursed gems (from stage 601): matching one costs a move, or seconds on a timed stage.</summary>
+        public int CursedCells { get; set; }
+
         public List<StageObjective> Objectives { get; set; } = new List<StageObjective>();
 
         public int BossHp { get; set; }

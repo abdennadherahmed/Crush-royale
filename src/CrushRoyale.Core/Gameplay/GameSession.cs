@@ -138,6 +138,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Cells frozen by this action because it broke nothing (the freezing guild boss).</summary>
         public int CellsFrozen { get; internal set; }
 
+        /// <summary>Cursed gems destroyed by this action; the player paid a move or five seconds for each.</summary>
+        public int CursesTriggered { get; internal set; }
+
         /// <summary>Share of the board corrupted after this action, in permille. Only tracked when a boss says so.</summary>
         public int BlightPermille { get; internal set; }
 
@@ -197,6 +200,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Chains snapped during the match (the goal of the chain stages).</summary>
         public int ChainsBroken { get; internal set; }
 
+        /// <summary>Cursed gems destroyed during the match; each one cost a move or five seconds.</summary>
+        public int CursesTriggered { get; internal set; }
+
         public int ContinuesUsed { get; internal set; }
 
         /// <summary>The stage was lost because a countdown bomb exploded.</summary>
@@ -241,6 +247,8 @@ namespace CrushRoyale.Core.Gameplay
         private int _blightDestroyed;
 
         private int _chainsBroken;
+
+        private int _cursesTriggered;
 
         private bool _bombExploded;
 
@@ -377,7 +385,11 @@ namespace CrushRoyale.Core.Gameplay
         public int ContinuesUsed { get; private set; }
 
         public int TimeLimitMs => Config.TimeLimitMs + _powerUps.ExtraTimeMs + _continueExtraTimeMs
-            + (Config.HasMoveLimit ? 0 : Config.AssistExtraMoves * AssistMsPerMove);
+            + (Config.HasMoveLimit ? 0 : Config.AssistExtraMoves * AssistMsPerMove)
+            - _cursePenaltyMs;
+
+        /// <summary>Time taken away by cursed gems the player destroyed on a timed stage.</summary>
+        private int _cursePenaltyMs;
 
         /// <summary>On timed stages the difficulty assist gives time instead of moves.</summary>
         public const int AssistMsPerMove = 2500;
@@ -658,6 +670,7 @@ namespace CrushRoyale.Core.Gameplay
                 StonesDestroyed = _stonesDestroyed,
                 BlightDestroyed = _blightDestroyed,
                 ChainsBroken = _chainsBroken,
+                CursesTriggered = _cursesTriggered,
                 IceBroken = _iceBroken,
                 ContinuesUsed = ContinuesUsed,
                 LostToBomb = _bombExploded && State == SessionState.Lost,
@@ -754,6 +767,7 @@ namespace CrushRoyale.Core.Gameplay
                 _stonesDestroyed += step.StonesDestroyed;
                 _blightDestroyed += step.BlightCleared;
                 _chainsBroken += step.ChainsBroken.Count;
+                _cursesTriggered += step.CursesTriggered.Count;
                 _iceBroken += step.IceBroken.Count;
                 _specialsCreated += step.SpecialsCreated.Count;
                 _specialsActivated += step.SpecialsActivated;
@@ -817,6 +831,7 @@ namespace CrushRoyale.Core.Gameplay
                 outcome.CellsFrozen = _boardManager.FreezeCells(_hazardRng, Config.IcePerWastedMove, Config.Board.IceLayers);
             }
 
+            ApplyCurses(outcome);
             CheckHazardCoverage(outcome);
             if (_hazardOverwhelmed)
             {
@@ -838,6 +853,47 @@ namespace CrushRoyale.Core.Gameplay
             {
                 outcome.BombSpawned = _boardManager.SpawnTimeBomb(_hazardRng, Config.TimeBombMoves);
             }
+        }
+
+        /// <summary>
+        /// Charges the player for every cursed gem they destroyed.
+        ///
+        /// A curse is the first hazard that punishes the obvious move rather than blocking it: the highest-scoring
+        /// match is often the one that costs a move, so the board asks for restraint instead of greed. Moves stages
+        /// pay in moves and timed stages in seconds, because taking a move from a stage that has none is no penalty
+        /// at all.
+        /// </summary>
+        private void ApplyCurses(ActionOutcome outcome)
+        {
+            int triggered = CursesIn(outcome.Resolution) + CursesIn(outcome.PetResolution);
+            if (triggered <= 0)
+            {
+                return;
+            }
+            outcome.CursesTriggered = triggered;
+            if (Config.HasMoveLimit && Config.CursePenaltyMoves > 0)
+            {
+                MovesLeft = Math.Max(0, MovesLeft - triggered * Config.CursePenaltyMoves);
+                outcome.MovesLeft = MovesLeft;
+            }
+            else if (Config.CursePenaltySeconds > 0)
+            {
+                _cursePenaltyMs += triggered * Config.CursePenaltySeconds * 1000;
+            }
+        }
+
+        private static int CursesIn(ResolutionResult resolution)
+        {
+            if (resolution == null)
+            {
+                return 0;
+            }
+            int n = 0;
+            foreach (ResolutionStep step in resolution.Steps)
+            {
+                n += step.CursesTriggered.Count;
+            }
+            return n;
         }
 
         /// <summary>True when the move destroyed no piece at all: no match, no ice broken, no stone chipped.</summary>

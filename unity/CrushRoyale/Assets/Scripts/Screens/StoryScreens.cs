@@ -820,6 +820,10 @@ namespace CrushRoyale.Game.Screens
             {
                 mechanics.Add(Loc.T("mechanic.chain.title"));
             }
+            if (stage.CursedCells > 0)
+            {
+                mechanics.Add(Loc.T("mechanic.curse.title"));
+            }
             if (mechanics.Count > 0)
             {
                 UIFactory.Height(UIFactory.Label(list, string.Join("  ·  ", mechanics), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold), 60);

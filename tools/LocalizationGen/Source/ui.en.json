@@ -2115,6 +2115,8 @@
   "mechanic.forge.body": "It corrupts a neighbouring gem every single move, and that corruption then spreads on its own. Three hits destroy it. Break it early or the board closes on you.",
   "objective.BreakChains": "Chains",
   "mechanic.chain.title": "Chained gems",
-  "mechanic.chain.body": "A chained gem cannot be moved at all. Nothing you do to it helps: clear a match right next to it and the chain snaps."
+  "mechanic.chain.body": "A chained gem cannot be moved at all. Nothing you do to it helps: clear a match right next to it and the chain snaps.",
+  "mechanic.curse.title": "Cursed gems",
+  "mechanic.curse.body": "Do not match these. Destroying one costs you a move, or five seconds on a timed stage. The biggest match is often the wrong one here."
 }
 

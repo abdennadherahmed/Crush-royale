@@ -26,6 +26,14 @@ namespace CrushRoyale.Core.Board
         /// </summary>
         private readonly byte[] _chains;
 
+        /// <summary>
+        /// Curses (stage 601+): gems that must NOT be matched.
+        ///
+        /// Every other hazard asks the player to destroy something. This one asks them not to, which turns the
+        /// highest-scoring move into the wrong move and is the first time the board rewards restraint.
+        /// </summary>
+        private readonly bool[] _cursed;
+
         public GameBoard(int width = 8, int height = 8)
         {
             if (width < MinSize || width > MaxSize)
@@ -42,6 +50,7 @@ namespace CrushRoyale.Core.Board
             _cells = new Piece[width * height];
             _ice = new byte[width * height];
             _chains = new byte[width * height];
+            _cursed = new bool[width * height];
             NextPieceId = 1;
         }
 
@@ -97,6 +106,23 @@ namespace CrushRoyale.Core.Board
             }
             _ice[i]--;
             return true;
+        }
+
+        public bool IsCursed(Pos p) => _cursed[Index(p)];
+
+        public void SetCursed(Pos p, bool cursed) => _cursed[Index(p)] = cursed;
+
+        public int CursedCells
+        {
+            get
+            {
+                int total = 0;
+                for (int i = 0; i < _cursed.Length; i++)
+                {
+                    total += _cursed[i] ? 1 : 0;
+                }
+                return total;
+            }
         }
 
         public int ChainAt(Pos p) => _chains[Index(p)];
@@ -215,6 +241,7 @@ namespace CrushRoyale.Core.Board
             Array.Copy(_cells, copy._cells, _cells.Length);
             Array.Copy(_ice, copy._ice, _ice.Length);
             Array.Copy(_chains, copy._chains, _chains.Length);
+            Array.Copy(_cursed, copy._cursed, _cursed.Length);
             copy.NextPieceId = NextPieceId;
             return copy;
         }
@@ -230,7 +257,7 @@ namespace CrushRoyale.Core.Board
             for (int i = 0; i < _cells.Length; i++)
             {
                 Piece p = _cells[i];
-                h.Add(p.Id).Add((byte)p.Color).Add((byte)p.Type).Add(p.Hp).Add(_ice[i]).Add(_chains[i]);
+                h.Add(p.Id).Add((byte)p.Color).Add((byte)p.Type).Add(p.Hp).Add(_ice[i]).Add(_chains[i]).Add(_cursed[i] ? (byte)1 : (byte)0);
             }
             return h.Value;
         }

@@ -32,6 +32,8 @@ namespace CrushRoyale.Game.Gameplay
         private int[] _iceLayers;
         private Image[] _chains;
         private int[] _chainLinks;
+        private Image[] _curses;
+        private bool[] _cursed;
         private Image _hintA;
         private Image _hintB;
         private TimingBalance _timing;
@@ -96,6 +98,9 @@ namespace CrushRoyale.Game.Gameplay
 
             UIFactory.Clear(_cellsLayer);
             UIFactory.Clear(_iceLayer);
+            // The chain layer holds the chains and the curses: leaving it out here stacked a second set of images
+            // over the first every time a board was rebound (a continue, a shuffle, a new attempt).
+            UIFactory.Clear(_chainLayer);
             UIFactory.Clear(_piecesLayer);
             _pieces.Clear();
 
@@ -103,6 +108,8 @@ namespace CrushRoyale.Game.Gameplay
             _iceLayers = new int[Width * Height];
             _chains = new Image[Width * Height];
             _chainLinks = new int[Width * Height];
+            _curses = new Image[Width * Height];
+            _cursed = new bool[Width * Height];
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
@@ -116,6 +123,15 @@ namespace CrushRoyale.Game.Gameplay
                     bg.type = Image.Type.Sliced;
                     bg.color = (x + y) % 2 == 0 ? new Color(1, 1, 1, 0.06f) : new Color(1, 1, 1, 0.03f);
                     bg.raycastTarget = false;
+
+                    RectTransform curse = UIFactory.Rect("Curse", _chainLayer);
+                    curse.sizeDelta = cell.sizeDelta;
+                    curse.anchoredPosition = cell.anchoredPosition;
+                    Image curseImage = curse.gameObject.AddComponent<Image>();
+                    curseImage.sprite = ArtLibrary.Cursed();
+                    curseImage.raycastTarget = false;
+                    curseImage.enabled = false;
+                    _curses[y * Width + x] = curseImage;
 
                     RectTransform chain = UIFactory.Rect("Chain", _chainLayer);
                     chain.sizeDelta = cell.sizeDelta;
@@ -216,6 +232,8 @@ namespace CrushRoyale.Game.Gameplay
                     RefreshIce(x, y);
                     _chainLinks[y * Width + x] = board.ChainAt(new Pos(x, y));
                     RefreshChain(x, y);
+                    _cursed[y * Width + x] = board.IsCursed(new Pos(x, y));
+                    RefreshCurse(x, y);
                 }
             }
         }
@@ -537,6 +555,10 @@ namespace CrushRoyale.Game.Gameplay
             {
                 OnChainBroken(chain);
             }
+            foreach (Pos curse in step.CursesTriggered)
+            {
+                OnCurseTriggered(curse);
+            }
 
             foreach (PieceView v in vanishing)
             {
@@ -831,6 +853,40 @@ namespace CrushRoyale.Game.Gameplay
             int links = _chainLinks[y * Width + x];
             chain.enabled = links > 0 && chain.sprite != null;
             chain.color = links >= 2 ? Color.white : new Color(1f, 1f, 1f, 0.72f);
+        }
+
+        /// <summary>
+        /// Marks a gem the player must not match.
+        ///
+        /// Drawn over the piece and left breathing, because the cost of missing one is a move: a curse the player
+        /// only notices after paying for it teaches nothing.
+        /// </summary>
+        private void RefreshCurse(int x, int y)
+        {
+            Image curse = _curses[y * Width + x];
+            if (curse == null)
+            {
+                return;
+            }
+            bool on = _cursed[y * Width + x] && curse.sprite != null;
+            curse.enabled = on;
+            if (on && curse.GetComponent<Pulse>() == null)
+            {
+                curse.gameObject.AddComponent<Pulse>();
+            }
+        }
+
+        /// <summary>Called when the player destroyed a cursed gem and paid for it.</summary>
+        public void OnCurseTriggered(Pos p)
+        {
+            int i = p.Y * Width + p.X;
+            if (i < 0 || i >= _cursed.Length)
+            {
+                return;
+            }
+            _cursed[i] = false;
+            RefreshCurse(p.X, p.Y);
+            StartCoroutine(Burst(CellPosition(p), new Color(0.75f, 0.2f, 0.95f)));
         }
 
         /// <summary>Called when a clear next to a chained cell snapped one of its links.</summary>

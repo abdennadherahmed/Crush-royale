@@ -2115,6 +2115,8 @@
   "mechanic.forge.body": "Elle corrompt une gemme voisine à chaque coup, et cette corruption s'étend ensuite toute seule. Trois coups la détruisent. Casse-la tôt, sinon le plateau se referme.",
   "objective.BreakChains": "Chaînes",
   "mechanic.chain.title": "Gemmes enchaînées",
-  "mechanic.chain.body": "Une gemme enchaînée ne peut pas être déplacée. Rien de ce que tu lui fais n'y change quoi que ce soit : réalise un alignement juste à côté et la chaîne cède."
+  "mechanic.chain.body": "Une gemme enchaînée ne peut pas être déplacée. Rien de ce que tu lui fais n'y change quoi que ce soit : réalise un alignement juste à côté et la chaîne cède.",
+  "mechanic.curse.title": "Gemmes maudites",
+  "mechanic.curse.body": "Ne les aligne pas. En détruire une te coûte un coup, ou cinq secondes sur un niveau chronométré. Ici, le plus gros alignement est souvent le mauvais."
 }
 

@@ -2115,6 +2115,8 @@
   "mechanic.forge.body": "Corrompe una gema vecina en cada movimiento, y esa corrupción luego se extiende sola. Tres golpes la destruyen. Rómpela pronto o el tablero se cerrará.",
   "objective.BreakChains": "Cadenas",
   "mechanic.chain.title": "Gemas encadenadas",
-  "mechanic.chain.body": "Una gema encadenada no se puede mover. Nada de lo que le hagas sirve: haz una combinación justo al lado y la cadena se rompe."
+  "mechanic.chain.body": "Una gema encadenada no se puede mover. Nada de lo que le hagas sirve: haz una combinación justo al lado y la cadena se rompe.",
+  "mechanic.curse.title": "Gemas malditas",
+  "mechanic.curse.body": "No las combines. Destruir una te cuesta un movimiento, o cinco segundos en una fase cronometrada. Aquí la combinación más grande suele ser la equivocada."
 }
 

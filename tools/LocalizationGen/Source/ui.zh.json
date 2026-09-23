@@ -2115,6 +2115,8 @@
   "mechanic.forge.body": "它每走一步就腐化一颗相邻宝石，而这腐化还会自行蔓延。三次打击可摧毁它。尽早打碎，否则棋盘会被封死。",
   "objective.BreakChains": "锁链",
   "mechanic.chain.title": "被锁住的宝石",
-  "mechanic.chain.body": "被锁住的宝石完全无法移动。对它本身做什么都没用：在它紧邻处消除一次即可挣断锁链。"
+  "mechanic.chain.body": "被锁住的宝石完全无法移动。对它本身做什么都没用：在它紧邻处消除一次即可挣断锁链。",
+  "mechanic.curse.title": "被诅咒的宝石",
+  "mechanic.curse.body": "不要消除它们。每摧毁一颗就损失一步，计时关卡则损失五秒。在这里，最大的一手往往是错的一手。"
 }
 
