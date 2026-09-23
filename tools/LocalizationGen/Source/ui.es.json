@@ -2117,6 +2117,8 @@
   "mechanic.chain.title": "Gemas encadenadas",
   "mechanic.chain.body": "Una gema encadenada no se puede mover. Nada de lo que le hagas sirve: haz una combinación justo al lado y la cadena se rompe.",
   "mechanic.curse.title": "Gemas malditas",
-  "mechanic.curse.body": "No las combines. Destruir una te cuesta un movimiento, o cinco segundos en una fase cronometrada. Aquí la combinación más grande suele ser la equivocada."
+  "mechanic.curse.body": "No las combines. Destruir una te cuesta un movimiento, o cinco segundos en una fase cronometrada. Aquí la combinación más grande suele ser la equivocada.",
+  "mechanic.mirror.title": "Gemas espejo",
+  "mechanic.mirror.body": "Destruye una y la casilla diametralmente opuesta también se destruye. Un movimiento, dos lugares: elige dónde cae la segunda mitad."
 }
 

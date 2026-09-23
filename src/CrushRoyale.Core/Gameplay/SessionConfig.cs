@@ -164,6 +164,7 @@ namespace CrushRoyale.Core.Gameplay
                     ChainCells = stage.ChainCells,
                     ChainLinks = Math.Max(1, stage.ChainLinks),
                     CursedCells = stage.CursedCells,
+                    MirrorCells = stage.MirrorCells,
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },

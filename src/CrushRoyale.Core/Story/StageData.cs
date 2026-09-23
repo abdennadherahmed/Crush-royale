@@ -140,6 +140,9 @@ namespace CrushRoyale.Core.Story
         /// <summary>Cursed gems (from stage 601): matching one costs a move, or seconds on a timed stage.</summary>
         public int CursedCells { get; set; }
 
+        /// <summary>Mirror gems (from stage 701): clearing one also clears the cell opposite it.</summary>
+        public int MirrorCells { get; set; }
+
         public List<StageObjective> Objectives { get; set; } = new List<StageObjective>();
 
         public int BossHp { get; set; }

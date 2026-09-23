@@ -42,6 +42,9 @@ namespace CrushRoyale.Core.Board
         /// <summary>Cursed gems (stage 601+): matching one costs the player a move or seconds on the clock.</summary>
         public int CursedCells { get; set; }
 
+        /// <summary>Mirror gems (stage 701+): clearing one also clears the cell opposite it.</summary>
+        public int MirrorCells { get; set; }
+
         public int MaxAttempts { get; set; } = 400;
 
         public int LowDifficultyBiasPermille { get; set; } = 350;
@@ -90,6 +93,11 @@ namespace CrushRoyale.Core.Board
             if (CursedCells < 0 || CursedCells > cells / 6)
             {
                 throw new ArgumentException("Too many cursed cells.");
+            }
+            // Mirrors are a gift, and a board made of gifts clears itself.
+            if (MirrorCells < 0 || MirrorCells > cells / 8)
+            {
+                throw new ArgumentException("Too many mirror cells.");
             }
             if (IceLayers < 1 || IceLayers > 3)
             {
@@ -232,6 +240,20 @@ namespace CrushRoyale.Core.Board
                 foreach (Pos p in PickDistinctCells(o.Width, o.Height, o.IceCells, rng, stoneSet))
                 {
                     board.SetIce(p, o.IceLayers);
+                }
+            }
+
+            if (o.MirrorCells > 0)
+            {
+                foreach (Pos p in PickDistinctCells(o.Width, o.Height, o.MirrorCells, rng, stoneSet))
+                {
+                    // A mirror whose reflection is a block would do nothing, and a mirror on its own centre cell
+                    // would reflect onto itself: both make the mechanic look broken rather than clever.
+                    Pos opposite = board.Opposite(p);
+                    if (board[p].IsPlainGem && !opposite.Equals(p) && board[opposite].IsPlainGem)
+                    {
+                        board.SetMirror(p, true);
+                    }
                 }
             }
 

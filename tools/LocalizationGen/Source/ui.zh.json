@@ -2117,6 +2117,8 @@
   "mechanic.chain.title": "被锁住的宝石",
   "mechanic.chain.body": "被锁住的宝石完全无法移动。对它本身做什么都没用：在它紧邻处消除一次即可挣断锁链。",
   "mechanic.curse.title": "被诅咒的宝石",
-  "mechanic.curse.body": "不要消除它们。每摧毁一颗就损失一步，计时关卡则损失五秒。在这里，最大的一手往往是错的一手。"
+  "mechanic.curse.body": "不要消除它们。每摧毁一颗就损失一步，计时关卡则损失五秒。在这里，最大的一手往往是错的一手。",
+  "mechanic.mirror.title": "镜像宝石",
+  "mechanic.mirror.body": "消除一颗，棋盘正对面的格子也会一并消除。一步两处：选好另一半落在哪里。"
 }
 

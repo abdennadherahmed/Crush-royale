@@ -2117,6 +2117,8 @@
   "mechanic.chain.title": "Gemme incatenate",
   "mechanic.chain.body": "Una gemma incatenata non può essere mossa. Nulla di ciò che le fai serve: crea una combinazione proprio accanto e la catena si spezza.",
   "mechanic.curse.title": "Gemme maledette",
-  "mechanic.curse.body": "Non abbinarle. Distruggerne una ti costa una mossa, o cinque secondi in un livello a tempo. Qui la combinazione più grande è spesso quella sbagliata."
+  "mechanic.curse.body": "Non abbinarle. Distruggerne una ti costa una mossa, o cinque secondi in un livello a tempo. Qui la combinazione più grande è spesso quella sbagliata.",
+  "mechanic.mirror.title": "Gemme specchio",
+  "mechanic.mirror.body": "Distruggine una e anche la cella diametralmente opposta si libera. Una mossa, due posti: scegli dove cade la seconda metà."
 }
 

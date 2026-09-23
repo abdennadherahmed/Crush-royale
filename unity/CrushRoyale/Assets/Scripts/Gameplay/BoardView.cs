@@ -34,6 +34,8 @@ namespace CrushRoyale.Game.Gameplay
         private int[] _chainLinks;
         private Image[] _curses;
         private bool[] _cursed;
+        private Image[] _mirrorMarks;
+        private bool[] _mirrors;
         private Image _hintA;
         private Image _hintB;
         private TimingBalance _timing;
@@ -110,6 +112,8 @@ namespace CrushRoyale.Game.Gameplay
             _chainLinks = new int[Width * Height];
             _curses = new Image[Width * Height];
             _cursed = new bool[Width * Height];
+            _mirrorMarks = new Image[Width * Height];
+            _mirrors = new bool[Width * Height];
             for (int y = 0; y < Height; y++)
             {
                 for (int x = 0; x < Width; x++)
@@ -123,6 +127,15 @@ namespace CrushRoyale.Game.Gameplay
                     bg.type = Image.Type.Sliced;
                     bg.color = (x + y) % 2 == 0 ? new Color(1, 1, 1, 0.06f) : new Color(1, 1, 1, 0.03f);
                     bg.raycastTarget = false;
+
+                    RectTransform mirror = UIFactory.Rect("Mirror", _chainLayer);
+                    mirror.sizeDelta = cell.sizeDelta;
+                    mirror.anchoredPosition = cell.anchoredPosition;
+                    Image mirrorImage = mirror.gameObject.AddComponent<Image>();
+                    mirrorImage.sprite = ArtLibrary.Mirror();
+                    mirrorImage.raycastTarget = false;
+                    mirrorImage.enabled = false;
+                    _mirrorMarks[y * Width + x] = mirrorImage;
 
                     RectTransform curse = UIFactory.Rect("Curse", _chainLayer);
                     curse.sizeDelta = cell.sizeDelta;
@@ -234,6 +247,8 @@ namespace CrushRoyale.Game.Gameplay
                     RefreshChain(x, y);
                     _cursed[y * Width + x] = board.IsCursed(new Pos(x, y));
                     RefreshCurse(x, y);
+                    _mirrors[y * Width + x] = board.IsMirror(new Pos(x, y));
+                    RefreshMirror(x, y);
                 }
             }
         }
@@ -559,6 +574,10 @@ namespace CrushRoyale.Game.Gameplay
             {
                 OnCurseTriggered(curse);
             }
+            foreach (Pos reflection in step.MirrorReflections)
+            {
+                OnMirrorReflected(reflection);
+            }
 
             foreach (PieceView v in vanishing)
             {
@@ -874,6 +893,34 @@ namespace CrushRoyale.Game.Gameplay
             {
                 curse.gameObject.AddComponent<Pulse>();
             }
+        }
+
+        /// <summary>
+        /// Marks a gem that will take its opposite with it.
+        ///
+        /// The player has to be able to plan the second half of the move, so the mark is on the board from the first
+        /// frame rather than revealed by the clear.
+        /// </summary>
+        private void RefreshMirror(int x, int y)
+        {
+            Image mark = _mirrorMarks[y * Width + x];
+            if (mark == null)
+            {
+                return;
+            }
+            mark.enabled = _mirrors[y * Width + x] && mark.sprite != null;
+        }
+
+        /// <summary>Called when a mirror gem reflected onto the far side of the board.</summary>
+        public void OnMirrorReflected(Pos p)
+        {
+            int i = p.Y * Width + p.X;
+            if (i >= 0 && i < _mirrors.Length)
+            {
+                _mirrors[i] = false;
+                RefreshMirror(p.X, p.Y);
+            }
+            StartCoroutine(Burst(CellPosition(p), new Color(0.8f, 0.92f, 1f)));
         }
 
         /// <summary>Called when the player destroyed a cursed gem and paid for it.</summary>

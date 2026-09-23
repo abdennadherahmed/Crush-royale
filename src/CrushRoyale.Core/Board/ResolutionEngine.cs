@@ -96,6 +96,9 @@ namespace CrushRoyale.Core.Board
         /// <summary>Cursed gems the player destroyed (stage 601+). Each one costs them.</summary>
         public List<Pos> CursesTriggered { get; } = new List<Pos>();
 
+        /// <summary>Cells a mirror gem took with it, on the far side of the board (stage 701+).</summary>
+        public List<Pos> MirrorReflections { get; } = new List<Pos>();
+
         public List<StoneHit> StoneHits { get; } = new List<StoneHit>();
 
         public List<PieceFall> Falls { get; } = new List<PieceFall>();
@@ -480,6 +483,32 @@ namespace CrushRoyale.Core.Board
                             }
                         }
                         break;
+                }
+            }
+
+            // 3b) Mirrors: a mirror gem in the clear takes the cell opposite it too.
+            //
+            // Done here, after everything else has been marked and before anything is removed, so a reflection can
+            // itself be a mirror and chain onward: the list is walked by index precisely so that additions made
+            // inside the loop are visited in their turn. A block is never reflected away -- a mirror that could
+            // delete a stone from across the board would trivialise every obstacle in the game.
+            for (int i = 0; i < order.Count; i++)
+            {
+                Pos source = order[i];
+                if (!board.IsMirror(source))
+                {
+                    continue;
+                }
+                board.SetMirror(source, false);
+                Pos target = board.Opposite(source);
+                if (target.Equals(source) || !board.InBounds(target) || board[target].IsEmpty || board[target].IsBlock)
+                {
+                    continue;
+                }
+                if (!causes.ContainsKey(target))
+                {
+                    step.MirrorReflections.Add(target);
+                    Mark(target, ClearCause.AreaBlast);
                 }
             }
 

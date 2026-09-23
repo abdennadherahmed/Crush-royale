@@ -2117,6 +2117,8 @@
   "mechanic.chain.title": "Chained gems",
   "mechanic.chain.body": "A chained gem cannot be moved at all. Nothing you do to it helps: clear a match right next to it and the chain snaps.",
   "mechanic.curse.title": "Cursed gems",
-  "mechanic.curse.body": "Do not match these. Destroying one costs you a move, or five seconds on a timed stage. The biggest match is often the wrong one here."
+  "mechanic.curse.body": "Do not match these. Destroying one costs you a move, or five seconds on a timed stage. The biggest match is often the wrong one here.",
+  "mechanic.mirror.title": "Mirror gems",
+  "mechanic.mirror.body": "Clear one and the cell directly opposite it on the board clears too. One move, two places: choose where the second half should land."
 }
 

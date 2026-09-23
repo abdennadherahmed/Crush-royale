@@ -65,6 +65,9 @@ namespace CrushRoyale.Game.UI
         /// <summary>Cursed gem (stage 601+): the one the player must not match.</summary>
         public static Sprite Cursed() => Load("Art/Gems/cursed");
 
+        /// <summary>Mirror gem (stage 701+): clearing it also clears the cell opposite it.</summary>
+        public static Sprite Mirror() => Load("Art/Gems/mirror");
+
         /// <summary>Dragon egg; cracked and glowing when one hit is left (stage 301+).</summary>
         public static Sprite Egg(int hp) => Load(hp <= 1 ? "Art/Gems/egg_cracked" : "Art/Gems/egg");
 

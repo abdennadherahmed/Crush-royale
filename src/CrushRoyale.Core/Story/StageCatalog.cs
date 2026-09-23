@@ -405,6 +405,12 @@ namespace CrushRoyale.Core.Story
         public const int CurseIntroStage = 601;
 
         /// <summary>
+        /// Mirror gems. The first mechanic that gives instead of taking: one move lands in two places, so the
+        /// question stops being what is still possible here and becomes where the second half should fall.
+        /// </summary>
+        public const int MirrorIntroStage = 701;
+
+        /// <summary>
         /// A new mechanic every 100 stages: countdown bombs (101), spreading blight (201), dragon eggs (301). Each one
         /// then returns on about one stage in five, and they mix as the campaign goes on. Never on boss stages.
         /// </summary>
@@ -426,6 +432,11 @@ namespace CrushRoyale.Core.Story
             if (campaignId == EggIntroStage || (campaignId > EggIntroStage && index % 5 == 2))
             {
                 stage.EggCount = campaignId == EggIntroStage ? 3 : 2 + d * 2 / 1000;
+            }
+            if (campaignId == MirrorIntroStage || (campaignId > MirrorIntroStage && index % 5 == 3))
+            {
+                // Two mirrors to learn them, four later. A board made of gifts clears itself.
+                stage.MirrorCells = campaignId == MirrorIntroStage ? 2 : 2 + d * 2 / 1000;
             }
             if (campaignId == CurseIntroStage || (campaignId > CurseIntroStage && index % 5 == 1))
             {

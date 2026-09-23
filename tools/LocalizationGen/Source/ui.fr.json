@@ -2117,6 +2117,8 @@
   "mechanic.chain.title": "Gemmes enchaînées",
   "mechanic.chain.body": "Une gemme enchaînée ne peut pas être déplacée. Rien de ce que tu lui fais n'y change quoi que ce soit : réalise un alignement juste à côté et la chaîne cède.",
   "mechanic.curse.title": "Gemmes maudites",
-  "mechanic.curse.body": "Ne les aligne pas. En détruire une te coûte un coup, ou cinq secondes sur un niveau chronométré. Ici, le plus gros alignement est souvent le mauvais."
+  "mechanic.curse.body": "Ne les aligne pas. En détruire une te coûte un coup, ou cinq secondes sur un niveau chronométré. Ici, le plus gros alignement est souvent le mauvais.",
+  "mechanic.mirror.title": "Gemmes miroir",
+  "mechanic.mirror.body": "Détruis-en une et la case diamétralement opposée est détruite aussi. Un coup, deux endroits : choisis où doit tomber la seconde moitié."
 }
 

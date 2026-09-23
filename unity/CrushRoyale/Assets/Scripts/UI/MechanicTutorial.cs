@@ -49,6 +49,10 @@ namespace CrushRoyale.Game.UI
             {
                 tips.Add(new Tip { Id = "curse", Title = loc.T("mechanic.curse.title"), Body = loc.T("mechanic.curse.body"), Art = ArtLibrary.Cursed() });
             }
+            if (stage.MirrorCells > 0)
+            {
+                tips.Add(new Tip { Id = "mirror", Title = loc.T("mechanic.mirror.title"), Body = loc.T("mechanic.mirror.body"), Art = ArtLibrary.Mirror() });
+            }
             if (stage.ForgeCount > 0)
             {
                 tips.Add(new Tip { Id = "forge", Title = loc.T("mechanic.forge.title"), Body = loc.T("mechanic.forge.body"), Art = ArtLibrary.Forge() ?? ArtLibrary.Blight() });

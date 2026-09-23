@@ -2117,6 +2117,8 @@
   "mechanic.chain.title": "Gemas acorrentadas",
   "mechanic.chain.body": "Uma gema acorrentada não pode ser movida. Nada do que você fizer com ela adianta: faça uma combinação bem ao lado e a corrente arrebenta.",
   "mechanic.curse.title": "Gemas amaldiçoadas",
-  "mechanic.curse.body": "Não combine com elas. Destruir uma custa uma jogada, ou cinco segundos numa fase cronometrada. Aqui a maior combinação costuma ser a errada."
+  "mechanic.curse.body": "Não combine com elas. Destruir uma custa uma jogada, ou cinco segundos numa fase cronometrada. Aqui a maior combinação costuma ser a errada.",
+  "mechanic.mirror.title": "Gemas espelho",
+  "mechanic.mirror.body": "Destrua uma e a casa diametralmente oposta também é destruída. Uma jogada, dois lugares: escolha onde cai a segunda metade."
 }
 

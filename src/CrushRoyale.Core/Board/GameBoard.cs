@@ -34,6 +34,15 @@ namespace CrushRoyale.Core.Board
         /// </summary>
         private readonly bool[] _cursed;
 
+        /// <summary>
+        /// Mirrors (stage 701+): a gem that also clears the cell opposite it on the board.
+        ///
+        /// The first mechanic that gives rather than takes. Everything before it made a move worth less; a mirror
+        /// makes one move land in two places, so the question stops being "what can I still do here" and becomes
+        /// "where do I want the second half of this move to fall".
+        /// </summary>
+        private readonly bool[] _mirrors;
+
         public GameBoard(int width = 8, int height = 8)
         {
             if (width < MinSize || width > MaxSize)
@@ -51,6 +60,7 @@ namespace CrushRoyale.Core.Board
             _ice = new byte[width * height];
             _chains = new byte[width * height];
             _cursed = new bool[width * height];
+            _mirrors = new bool[width * height];
             NextPieceId = 1;
         }
 
@@ -107,6 +117,26 @@ namespace CrushRoyale.Core.Board
             _ice[i]--;
             return true;
         }
+
+        public bool IsMirror(Pos p) => _mirrors[Index(p)];
+
+        public void SetMirror(Pos p, bool mirror) => _mirrors[Index(p)] = mirror;
+
+        public int MirrorCells
+        {
+            get
+            {
+                int total = 0;
+                for (int i = 0; i < _mirrors.Length; i++)
+                {
+                    total += _mirrors[i] ? 1 : 0;
+                }
+                return total;
+            }
+        }
+
+        /// <summary>The cell a mirror reflects onto: the same position rotated half a turn around the board's centre.</summary>
+        public Pos Opposite(Pos p) => new Pos(Width - 1 - p.X, Height - 1 - p.Y);
 
         public bool IsCursed(Pos p) => _cursed[Index(p)];
 
@@ -242,6 +272,7 @@ namespace CrushRoyale.Core.Board
             Array.Copy(_ice, copy._ice, _ice.Length);
             Array.Copy(_chains, copy._chains, _chains.Length);
             Array.Copy(_cursed, copy._cursed, _cursed.Length);
+            Array.Copy(_mirrors, copy._mirrors, _mirrors.Length);
             copy.NextPieceId = NextPieceId;
             return copy;
         }
@@ -257,7 +288,8 @@ namespace CrushRoyale.Core.Board
             for (int i = 0; i < _cells.Length; i++)
             {
                 Piece p = _cells[i];
-                h.Add(p.Id).Add((byte)p.Color).Add((byte)p.Type).Add(p.Hp).Add(_ice[i]).Add(_chains[i]).Add(_cursed[i] ? (byte)1 : (byte)0);
+                h.Add(p.Id).Add((byte)p.Color).Add((byte)p.Type).Add(p.Hp).Add(_ice[i]).Add(_chains[i])
+                    .Add(_cursed[i] ? (byte)1 : (byte)0).Add(_mirrors[i] ? (byte)1 : (byte)0);
             }
             return h.Value;
         }
