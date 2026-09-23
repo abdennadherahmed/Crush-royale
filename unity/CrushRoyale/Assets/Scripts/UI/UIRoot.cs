@@ -51,10 +51,7 @@ namespace CrushRoyale.Game.UI
         /// <summary>Rebuilds the whole screen (language change, data refresh).</summary>
         public void Rebuild()
         {
-            for (int i = transform.childCount - 1; i >= 0; i--)
-            {
-                Destroy(transform.GetChild(i).gameObject);
-            }
+            UIFactory.Clear(transform);
             Build();
         }
 

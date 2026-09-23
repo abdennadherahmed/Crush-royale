@@ -474,7 +474,31 @@ namespace CrushRoyale.Game.UI
         {
             for (int i = parent.childCount - 1; i >= 0; i--)
             {
-                UnityEngine.Object.Destroy(parent.GetChild(i).gameObject);
+                Remove(parent.GetChild(i).gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Destroys an object now, whether the game is running or a tool is driving it.
+        ///
+        /// Outside play mode Destroy is deferred to the end of the frame, and the screenshot tool builds, rebuilds
+        /// and photographs a screen inside one synchronous call: the old children were still there when the new ones
+        /// arrived, so every rebuilt screen was captured with two copies of itself stacked up. At runtime this is
+        /// the ordinary Destroy it always was.
+        /// </summary>
+        public static void Remove(GameObject go)
+        {
+            if (go == null)
+            {
+                return;
+            }
+            if (Application.isPlaying)
+            {
+                UnityEngine.Object.Destroy(go);
+            }
+            else
+            {
+                UnityEngine.Object.DestroyImmediate(go);
             }
         }
     }

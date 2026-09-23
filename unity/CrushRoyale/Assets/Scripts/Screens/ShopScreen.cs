@@ -169,7 +169,10 @@ namespace CrushRoyale.Game.Screens
             if (item.Quantity > 1)
             {
                 Text qty = UIFactory.Label(card.transform, "x" + item.Quantity, Theme.HeaderSize, Theme.Text, TextAnchor.MiddleRight, FontStyle.Bold);
-                UIFactory.Anchor(qty.rectTransform, 0.5f, 0.5f, 0.94f, 0.66f);
+                qty.resizeTextForBestFit = true;
+                qty.resizeTextMinSize = Theme.SmallSize;
+                qty.resizeTextMaxSize = Theme.HeaderSize;
+                UIFactory.Anchor(qty.rectTransform, 0.52f, 0.5f, 0.9f, 0.66f);
                 Widgets.TitleOutline(qty);
             }
             Text name = UIFactory.Label(card.transform, Loc.T("powerup." + item.PowerUp), Theme.SmallSize + 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);

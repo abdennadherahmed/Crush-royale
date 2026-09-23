@@ -136,6 +136,22 @@ namespace CrushRoyale.EditorTools
         public static ShopResponse DemoShop()
         {
             var items = new List<ShopItemDto>();
+            string[] deals = { "NuclearBomb", "FireStorm", "CascadeInfinity" };
+            for (int i = 0; i < deals.Length; i++)
+            {
+                items.Add(new ShopItemDto
+                {
+                    Id = "deal." + deals[i],
+                    Kind = "PowerUp",
+                    PowerUp = deals[i],
+                    Quantity = 2 + i,
+                    PriceCoins = 1800 + i * 900,
+                    PriceOrbes = i == 1 ? 45 : 0,
+                    IsDeal = i == 0,
+                    DiscountPermille = i == 0 ? 400 : 0
+                });
+            }
+
             string[] powerUps = { "ChronoBomb", "CoinBooster", "BrightSpark", "Multiplier2x", "GoldenChain", "FreezingGel" };
             for (int i = 0; i < powerUps.Length; i++)
             {
