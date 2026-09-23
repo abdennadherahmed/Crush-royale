@@ -135,6 +135,9 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Gems the corruption forges took this action, one per forge still standing.</summary>
         public List<Pos> ForgeCorrupted { get; } = new List<Pos>();
 
+        /// <summary>Wardens that recovered a hit point because this move did not touch them (stage 801+).</summary>
+        public List<Pos> WardensHealed { get; } = new List<Pos>();
+
         /// <summary>Cells frozen by this action because it broke nothing (the freezing guild boss).</summary>
         public int CellsFrozen { get; internal set; }
 
@@ -808,6 +811,13 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>After each player move: blight spreads when none was destroyed, bombs count down, new bombs arrive.</summary>
         private void ApplyHazards(ActionOutcome outcome)
         {
+            // Wardens heal whatever the player did not finish this move. Done before the forges so the two hazards
+            // cannot interleave differently on client and server.
+            if (Config.WardenCount > 0)
+            {
+                outcome.WardensHealed.AddRange(_boardManager.HealWardens(HitThisMove(outcome), Config.WardenMaxHp));
+            }
+
             // Forges work every move, whatever the player did. A stone sits there; a forge costs a gem per move,
             // and the blight it makes then spreads on its own, so the board does not decay in a straight line.
             if (Config.ForgeCount > 0)
@@ -894,6 +904,32 @@ namespace CrushRoyale.Core.Gameplay
                 n += step.CursesTriggered.Count;
             }
             return n;
+        }
+
+        /// <summary>
+        /// Every block this move hit, so the wardens that were left alone can be told apart from the ones that were not.
+        /// </summary>
+        private static HashSet<Pos> HitThisMove(ActionOutcome outcome)
+        {
+            var hit = new HashSet<Pos>();
+            AddHits(outcome.Resolution, hit);
+            AddHits(outcome.PetResolution, hit);
+            return hit;
+        }
+
+        private static void AddHits(ResolutionResult resolution, HashSet<Pos> into)
+        {
+            if (resolution == null)
+            {
+                return;
+            }
+            foreach (ResolutionStep step in resolution.Steps)
+            {
+                foreach (StoneHit stone in step.StoneHits)
+                {
+                    into.Add(stone.Position);
+                }
+            }
         }
 
         /// <summary>True when the move destroyed no piece at all: no match, no ice broken, no stone chipped.</summary>

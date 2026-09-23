@@ -80,6 +80,12 @@ namespace CrushRoyale.Core.Gameplay
         /// <summary>Corruption forges on the board (story, from stage 401): each corrupts a neighbour every move.</summary>
         public int ForgeCount { get; set; }
 
+        /// <summary>Wardens on the board (story, from stage 801): they heal on any move that did not hit them.</summary>
+        public int WardenCount { get; set; }
+
+        /// <summary>Hit points a warden is restored to. It never heals past this.</summary>
+        public int WardenMaxHp { get; set; } = 4;
+
         /// <summary>Moves lost for each cursed gem destroyed (stage 601+). Timed stages pay in seconds instead.</summary>
         public int CursePenaltyMoves { get; set; }
 
@@ -165,6 +171,7 @@ namespace CrushRoyale.Core.Gameplay
                     ChainLinks = Math.Max(1, stage.ChainLinks),
                     CursedCells = stage.CursedCells,
                     MirrorCells = stage.MirrorCells,
+                    WardenCount = stage.WardenCount,
                     MaxAttempts = balance.Board.MaxGenerationAttempts,
                     LowDifficultyBiasPermille = balance.Board.LowDifficultyBiasPermille
                 },
@@ -174,6 +181,7 @@ namespace CrushRoyale.Core.Gameplay
                 BossStonesPerPhase = stage.BossStonesPerPhase,
                 TimeBombCount = stage.TimeBombCount,
                 ForgeCount = stage.ForgeCount,
+                WardenCount = stage.WardenCount,
                 CursePenaltyMoves = stage.CursedCells > 0 ? 1 : 0,
                 CursePenaltySeconds = stage.CursedCells > 0 ? 5 : 0,
                 TimeBombMoves = stage.TimeBombMoves,

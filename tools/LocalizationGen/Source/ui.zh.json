@@ -2119,6 +2119,8 @@
   "mechanic.curse.title": "被诅咒的宝石",
   "mechanic.curse.body": "不要消除它们。每摧毁一颗就损失一步，计时关卡则损失五秒。在这里，最大的一手往往是错的一手。",
   "mechanic.mirror.title": "镜像宝石",
-  "mechanic.mirror.body": "消除一颗，棋盘正对面的格子也会一并消除。一步两处：选好另一半落在哪里。"
+  "mechanic.mirror.body": "消除一颗，棋盘正对面的格子也会一并消除。一步两处：选好另一半落在哪里。",
+  "mechanic.warden.title": "守卫",
+  "mechanic.warden.body": "它需要四次打击，而每一步没有击中它就会回复一点。零敲碎打毫无意义：要么连续解决，要么别管它。"
 }
 

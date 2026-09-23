@@ -2119,6 +2119,8 @@
   "mechanic.curse.title": "Gemme maledette",
   "mechanic.curse.body": "Non abbinarle. Distruggerne una ti costa una mossa, o cinque secondi in un livello a tempo. Qui la combinazione più grande è spesso quella sbagliata.",
   "mechanic.mirror.title": "Gemme specchio",
-  "mechanic.mirror.body": "Distruggine una e anche la cella diametralmente opposta si libera. Una mossa, due posti: scegli dove cade la seconda metà."
+  "mechanic.mirror.body": "Distruggine una e anche la cella diametralmente opposta si libera. Una mossa, due posti: scegli dove cade la seconda metà.",
+  "mechanic.warden.title": "Guardiani",
+  "mechanic.warden.body": "Regge quattro colpi e ne recupera uno a ogni mossa che non lo colpisce. Consumarlo poco a poco non serve: finiscilo di fila o lascialo stare."
 }
 

@@ -12,7 +12,7 @@ Bots use no power-ups, continues or pets: real players have more tools.
 | 201-400 | 64% | 86% | 75% | 92% | 100% | 100% |
 | 401-600 | 54% | 83% | 70% | 92% | 100% | 100% |
 | 601-800 | 54% | 81% | 63% | 89% | 100% | 100% |
-| 801-1000 | 53% | 81% | 65% | 91% | 100% | 100% |
+| 801-1000 | 52% | 81% | 65% | 91% | 100% | 100% |
 
 ## By stage kind (stages 14-1000, no assist)
 
@@ -21,8 +21,8 @@ Bots use no power-ups, continues or pets: real players have more tools.
 | Moves, normal | 542 | 62% | 72% | 100% |
 | Timed, normal | 197 | 52% | 69% | 100% |
 | Breather (after hard) | 149 | 70% | 79% | 100% |
-| Hard | 99 | 70% | 83% | 100% |
-| Super hard | 50 | 36% | 42% | 100% |
+| Hard | 99 | 69% | 83% | 100% |
+| Super hard | 50 | 33% | 41% | 100% |
 | Boss | 99 | 59% | 72% | 100% |
 
 ## Stages the expert bot never wins, even with the assist: 0
@@ -53,7 +53,7 @@ Bots use no power-ups, continues or pets: real players have more tools.
 - 636 (33% vs ~90% around, None, ReachScore)
 - 671 (17% vs ~82% around, None, ReachScore)
 - 732 (17% vs ~80% around, None, CollectColor)
-- 870 (33% vs ~90% around, MiniBoss, DefeatBoss)
+- 807 (17% vs ~90% around, None, CollectColor)
+- 857 (17% vs ~92% around, None, CollectColor)
+- 870 (33% vs ~93% around, MiniBoss, DefeatBoss)
 - 891 (33% vs ~92% around, None, ReachScore)
-- 917 (17% vs ~92% around, None, CollectColor)
-- 953 (50% vs ~100% around, None, ClearIce)

@@ -411,6 +411,12 @@ namespace CrushRoyale.Core.Story
         public const int MirrorIntroStage = 701;
 
         /// <summary>
+        /// Wardens. Everything else on the board can be chipped away at leisure; a warden heals whatever is not
+        /// finished, so the last stretch of the campaign asks for a plan instead of a run of individually good moves.
+        /// </summary>
+        public const int WardenIntroStage = 801;
+
+        /// <summary>
         /// A new mechanic every 100 stages: countdown bombs (101), spreading blight (201), dragon eggs (301). Each one
         /// then returns on about one stage in five, and they mix as the campaign goes on. Never on boss stages.
         /// </summary>
@@ -432,6 +438,11 @@ namespace CrushRoyale.Core.Story
             if (campaignId == EggIntroStage || (campaignId > EggIntroStage && index % 5 == 2))
             {
                 stage.EggCount = campaignId == EggIntroStage ? 3 : 2 + d * 2 / 1000;
+            }
+            if (campaignId == WardenIntroStage || (campaignId > WardenIntroStage && index % 5 == 2))
+            {
+                // One warden. Two would mean splitting attention between two things that both undo themselves.
+                stage.WardenCount = 1;
             }
             if (campaignId == MirrorIntroStage || (campaignId > MirrorIntroStage && index % 5 == 3))
             {
@@ -467,7 +478,7 @@ namespace CrushRoyale.Core.Story
                 }
             }
             // At most a quarter of the board is blocks.
-            int spare = 16 - stage.BlightCount - stage.EggCount - stage.ForgeCount;
+            int spare = 16 - stage.BlightCount - stage.EggCount - stage.ForgeCount - stage.WardenCount;
             stage.StoneCount = Math.Max(0, Math.Min(stage.StoneCount, spare));
             foreach (StageObjective objective in stage.Objectives)
             {

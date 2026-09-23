@@ -2119,6 +2119,8 @@
   "mechanic.curse.title": "Gemmes maudites",
   "mechanic.curse.body": "Ne les aligne pas. En détruire une te coûte un coup, ou cinq secondes sur un niveau chronométré. Ici, le plus gros alignement est souvent le mauvais.",
   "mechanic.mirror.title": "Gemmes miroir",
-  "mechanic.mirror.body": "Détruis-en une et la case diamétralement opposée est détruite aussi. Un coup, deux endroits : choisis où doit tomber la seconde moitié."
+  "mechanic.mirror.body": "Détruis-en une et la case diamétralement opposée est détruite aussi. Un coup, deux endroits : choisis où doit tomber la seconde moitié.",
+  "mechanic.warden.title": "Gardiens",
+  "mechanic.warden.body": "Il encaisse quatre coups, et en regagne un à chaque mouvement qui ne le touche pas. Le grignoter ne sert à rien : achève-le d'affilée, ou laisse-le tranquille."
 }
 

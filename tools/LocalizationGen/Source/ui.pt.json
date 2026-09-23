@@ -2119,6 +2119,8 @@
   "mechanic.curse.title": "Gemas amaldiçoadas",
   "mechanic.curse.body": "Não combine com elas. Destruir uma custa uma jogada, ou cinco segundos numa fase cronometrada. Aqui a maior combinação costuma ser a errada.",
   "mechanic.mirror.title": "Gemas espelho",
-  "mechanic.mirror.body": "Destrua uma e a casa diametralmente oposta também é destruída. Uma jogada, dois lugares: escolha onde cai a segunda metade."
+  "mechanic.mirror.body": "Destrua uma e a casa diametralmente oposta também é destruída. Uma jogada, dois lugares: escolha onde cai a segunda metade.",
+  "mechanic.warden.title": "Guardiões",
+  "mechanic.warden.body": "Aguenta quatro golpes e recupera um a cada jogada que não o atinge. Desgastá-lo aos poucos não adianta: acabe com ele seguido ou deixe-o em paz."
 }
 

@@ -828,6 +828,10 @@ namespace CrushRoyale.Game.Screens
             {
                 mechanics.Add(Loc.T("mechanic.mirror.title"));
             }
+            if (stage.WardenCount > 0)
+            {
+                mechanics.Add(Loc.T("mechanic.warden.title"));
+            }
             if (mechanics.Count > 0)
             {
                 UIFactory.Height(UIFactory.Label(list, string.Join("  ·  ", mechanics), Theme.SmallSize, Theme.Crystal, TextAnchor.MiddleCenter, FontStyle.Bold), 60);

@@ -68,6 +68,9 @@ namespace CrushRoyale.Game.UI
         /// <summary>Mirror gem (stage 701+): clearing it also clears the cell opposite it.</summary>
         public static Sprite Mirror() => Load("Art/Gems/mirror");
 
+        /// <summary>Warden (stage 801+): the block that heals whatever the player does not finish.</summary>
+        public static Sprite Warden() => Load("Art/Gems/warden");
+
         /// <summary>Dragon egg; cracked and glowing when one hit is left (stage 301+).</summary>
         public static Sprite Egg(int hp) => Load(hp <= 1 ? "Art/Gems/egg_cracked" : "Art/Gems/egg");
 

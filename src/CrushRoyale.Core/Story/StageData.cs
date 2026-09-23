@@ -143,6 +143,9 @@ namespace CrushRoyale.Core.Story
         /// <summary>Mirror gems (from stage 701): clearing one also clears the cell opposite it.</summary>
         public int MirrorCells { get; set; }
 
+        /// <summary>Wardens (from stage 801): blocks that heal on any move that did not hit them.</summary>
+        public int WardenCount { get; set; }
+
         public List<StageObjective> Objectives { get; set; } = new List<StageObjective>();
 
         public int BossHp { get; set; }

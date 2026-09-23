@@ -18,8 +18,13 @@ namespace CrushRoyale.Core.Config
         /// ice taking three quarters of it now ends a guild boss attack, and a move that breaks nothing freezes
         /// cells. The server re-simulates every attack, so a client still on version 5 would compute a different
         /// result from the same moves.
+        ///
+        /// 7: five new board mechanics. Corruption forges take a gem every move (401), chains hold a gem in place
+        /// until a match clears beside it (501), cursed gems charge a move when destroyed (601), mirrors clear the
+        /// cell opposite them (701) and wardens heal what a move did not finish (801). The board hash now covers
+        /// chains, curses and mirrors, so a client on version 6 would checkpoint differently from the server.
         /// </remarks>
-        public const int RulesVersion = 6;
+        public const int RulesVersion = 7;
 
         public BoardBalance Board { get; set; } = new BoardBalance();
 

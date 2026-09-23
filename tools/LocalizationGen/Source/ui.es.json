@@ -2119,6 +2119,8 @@
   "mechanic.curse.title": "Gemas malditas",
   "mechanic.curse.body": "No las combines. Destruir una te cuesta un movimiento, o cinco segundos en una fase cronometrada. Aquí la combinación más grande suele ser la equivocada.",
   "mechanic.mirror.title": "Gemas espejo",
-  "mechanic.mirror.body": "Destruye una y la casilla diametralmente opuesta también se destruye. Un movimiento, dos lugares: elige dónde cae la segunda mitad."
+  "mechanic.mirror.body": "Destruye una y la casilla diametralmente opuesta también se destruye. Un movimiento, dos lugares: elige dónde cae la segunda mitad.",
+  "mechanic.warden.title": "Guardianes",
+  "mechanic.warden.body": "Aguanta cuatro golpes y recupera uno con cada movimiento que no lo toca. Desgastarlo no sirve de nada: acábalo seguido o déjalo en paz."
 }
 

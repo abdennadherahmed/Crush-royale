@@ -45,6 +45,9 @@ namespace CrushRoyale.Core.Board
         /// <summary>Mirror gems (stage 701+): clearing one also clears the cell opposite it.</summary>
         public int MirrorCells { get; set; }
 
+        /// <summary>Wardens (stage 801+): 4-hit blocks that heal on any move that does not hit them.</summary>
+        public int WardenCount { get; set; }
+
         public int MaxAttempts { get; set; } = 400;
 
         public int LowDifficultyBiasPermille { get; set; } = 350;
@@ -72,7 +75,8 @@ namespace CrushRoyale.Core.Board
             {
                 throw new ArgumentException("StoneHp must be 1-3.");
             }
-            if (ForgeCount < 0 || BlightCount < 0 || EggCount < 0 || StoneCount + BlightCount + EggCount + ForgeCount > cells / 4)
+            if (WardenCount < 0 || ForgeCount < 0 || BlightCount < 0 || EggCount < 0
+                || StoneCount + BlightCount + EggCount + ForgeCount + WardenCount > cells / 4)
             {
                 throw new ArgumentException("Too many blocks (stones, blight, eggs).");
             }
@@ -190,6 +194,8 @@ namespace CrushRoyale.Core.Board
             PlaceBlocks(board, o, rng, stoneSet, o.EggCount, PieceType.Egg, 2);
             // Three hits: a forge has to be a decision, not a nuisance you clear on the way past.
             PlaceBlocks(board, o, rng, stoneSet, o.ForgeCount, PieceType.Forge, 3);
+            // Four, because the warden heals: fewer and a single lucky cascade would finish it by accident.
+            PlaceBlocks(board, o, rng, stoneSet, o.WardenCount, PieceType.Warden, 4);
 
             int biasPermille = o.LowDifficultyBiasPermille * (1000 - Clamp(o.DifficultyPermille)) / 1000;
             var candidates = new List<PieceColor>(o.ColorCount);

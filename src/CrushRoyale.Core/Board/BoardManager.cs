@@ -224,6 +224,28 @@ namespace CrushRoyale.Core.Board
             return frozen;
         }
 
+        /// <summary>
+        /// Heals every warden that was not hit this move, and returns the cells that recovered.
+        ///
+        /// This is what makes a warden different from a tough stone: a stone can be chipped at over twenty moves,
+        /// a warden has to be finished in consecutive ones. Ignoring it for a single move gives the point back.
+        /// </summary>
+        public List<Pos> HealWardens(HashSet<Pos> hitThisMove, int maxHp)
+        {
+            var healed = new List<Pos>();
+            foreach (Pos p in Board.AllPositions())
+            {
+                Piece piece = Board[p];
+                if (!piece.IsWarden || piece.Hp >= maxHp || (hitThisMove != null && hitThisMove.Contains(p)))
+                {
+                    continue;
+                }
+                Board[p] = new Piece(piece.Id, piece.Color, piece.Type, (byte)(piece.Hp + 1));
+                healed.Add(p);
+            }
+            return healed;
+        }
+
         /// <summary>Cells carrying at least one layer of ice.</summary>
         public int IcedCells()
         {

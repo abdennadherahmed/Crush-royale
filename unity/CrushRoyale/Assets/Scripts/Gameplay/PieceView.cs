@@ -156,6 +156,17 @@ namespace CrushRoyale.Game.Gameplay
                 _eyes.gameObject.SetActive(!piece.IsBlock);
             }
             ShowCountdown(piece);
+            if (piece.IsWarden)
+            {
+                // The eye is the tell: a warden that looked like a stone would be chipped at over ten moves and
+                // heal every one of them, and the player would never understand why it was not dying.
+                _body.sprite = ArtLibrary.Warden() ?? ArtLibrary.Stone() ?? ProceduralSprites.Stone();
+                // Dimmer as it takes damage, so progress towards finishing it is visible.
+                float wear = Mathf.Clamp01(piece.Hp / 4f);
+                _body.color = new Color(1f, 0.55f + 0.45f * wear, 0.45f + 0.55f * wear, 1f);
+                _overlay.enabled = false;
+                return;
+            }
             if (piece.IsForge)
             {
                 // A forge has to look alive, because it is: it takes a gem every move. A still block would read as

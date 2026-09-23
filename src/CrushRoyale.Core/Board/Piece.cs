@@ -55,7 +55,16 @@ namespace CrushRoyale.Core.Board
         /// gem into blight after every move until it is destroyed. The blight it makes still spreads on its own, so
         /// a forge left standing does not merely add work, it compounds.
         /// </summary>
-        Forge = 9
+        Forge = 9,
+
+        /// <summary>
+        /// Warden (from stage 801): a block that heals a point of damage on any move that did not hit it.
+        ///
+        /// Everything else on the board can be chipped away at leisure. A warden cannot: it has to be finished in
+        /// consecutive moves or the work is undone, which is the first time the game asks for a plan rather than a
+        /// sequence of individually good moves.
+        /// </summary>
+        Warden = 10
     }
 
     /// <summary>
@@ -97,7 +106,8 @@ namespace CrushRoyale.Core.Board
 
         /// <summary>Colorless obstacles hit by neighbouring matches: stones, blight, eggs, forges.</summary>
         public static bool IsBlockType(PieceType type) =>
-            type == PieceType.Stone || type == PieceType.Blight || type == PieceType.Egg || type == PieceType.Forge;
+            type == PieceType.Stone || type == PieceType.Blight || type == PieceType.Egg
+            || type == PieceType.Forge || type == PieceType.Warden;
 
         public bool IsEmpty => Id == 0;
 
@@ -111,6 +121,8 @@ namespace CrushRoyale.Core.Board
         public bool IsEgg => !IsEmpty && Type == PieceType.Egg;
 
         public bool IsForge => !IsEmpty && Type == PieceType.Forge;
+
+        public bool IsWarden => !IsEmpty && Type == PieceType.Warden;
 
         public bool IsTimeBomb => !IsEmpty && Type == PieceType.TimeBomb;
 
