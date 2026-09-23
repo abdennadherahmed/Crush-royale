@@ -63,6 +63,12 @@ public class StageCatalogTests
         for (int id = 1; id <= Fixtures.Balance.Story.TotalStages; id++)
         {
             StageData stage = _catalog.Get(id);
+            if (StageCatalog.NeedsBoosts(stage))
+            {
+                // A boost-gated stage asks for more than a bare-handed run reaches. That is the entire point of it,
+                // and the stage says so before the life is spent; the invariant below is about every other stage.
+                continue;
+            }
             foreach (StageObjective goal in stage.Objectives)
             {
                 switch (goal.Type)

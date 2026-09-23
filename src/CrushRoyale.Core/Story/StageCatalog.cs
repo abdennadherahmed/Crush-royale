@@ -35,7 +35,13 @@ namespace CrushRoyale.Core.Story
         /// <summary>Goals are capped to these shares of the expert bot's reach (StageTuning.g.cs).</summary>
         /// <summary>Stages 1 to 40 ease in; the first asks 46% of what its difficulty would otherwise demand.</summary>
         /// <summary>A stage may ask for this much of what a mid run reaches: above 100% it is a coin toss, below it is free.</summary>
-        private const int MidReachCeilingPermille = 1000;
+        /// <summary>
+        /// The most an ordinary stage may ask for, as a share of what a mid run reaches.
+        ///
+        /// Above 1000 it asks for more than half of mid runs produce, which is what makes a campaign have tension
+        /// instead of scenery. It was exactly 1000 and the game read as free past the first hundred stages.
+        /// </summary>
+        public const int MidReachCeilingPermille = 1120;
 
         /// <summary>
         /// What a super hard stage may ask for, as a share of what a mid player reaches with no boosts equipped.
@@ -64,18 +70,18 @@ namespace CrushRoyale.Core.Story
         /// Chrono Bomb or Multiplier closes it, so the stage falls on the second attempt with the right boost, not
         /// on the tenth with luck.
         /// </summary>
-        private const int BoostGatePerfectCapPermille = 1100;
+        private const int BoostGatePerfectCapPermille = 940;
 
         /// <summary>Share of a perfect run's gems, ice or stones a gated stage demands. Over 1000 by design.</summary>
-        private const int BoostGateObstaclePermille = 1150;
+        private const int BoostGateObstaclePermille = 1210;
 
         private const int OnboardingEase = 41;
 
         private const int OnboardingFloorPermille = 460;
 
-        private const int TunedScoreEasyPermille = 780;
+        private const int TunedScoreEasyPermille = 830;
 
-        private const int TunedScoreHardPermille = 800;
+        private const int TunedScoreHardPermille = 880;
 
         private const int TunedBossReliefPermille = 130;
 
@@ -86,7 +92,7 @@ namespace CrushRoyale.Core.Story
 
         private const int TunedBreatherPermille = 80;
 
-        private const int TunedMaxSharePermille = 870;
+        private const int TunedMaxSharePermille = 930;
 
         private const int TunedObstacleEasyPermille = 820;
 
@@ -97,7 +103,7 @@ namespace CrushRoyale.Core.Story
         /// steer a colour at all, so those stages were twice as likely as any other to turn into a wall: 257, 277,
         /// 297, 907 and 917 were unwinnable for an average run even with the difficulty assist.
         /// </summary>
-        private const int TunedCollectReliefPermille = 260;
+        private const int TunedCollectReliefPermille = 330;
 
         /// <summary>Share of the ice layers / stones an obstacle goal asks for.</summary>
         private const int GoalObstaclePermille = 900;
@@ -538,6 +544,17 @@ namespace CrushRoyale.Core.Story
                 case 14:
                     return StageTier.Hard;
                 case 17:
+                    return StageTier.SuperHard;
+                // Super hard stages get denser as the campaign goes on: one per chapter to begin with, two past the
+                // third act and three in the last. A rhythm that never changes stops being a rhythm, and a player who
+                // has learned every mechanic should meet the wall more often, not less.
+                //
+                // They also land on different indices, so they stop all being the same kind of stage: index 17 asks
+                // for a colour, 11 for a score and 5 for both. All fifty of them used to be colour-collection
+                // stages, which made the hardest stage of every chapter the same puzzle fifty times over.
+                case 11 when campaignId > 300:
+                    return StageTier.SuperHard;
+                case 5 when campaignId > 600:
                     return StageTier.SuperHard;
                 default:
                     return StageTier.Normal;

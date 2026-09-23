@@ -185,16 +185,24 @@ public sealed class PlayabilityTests
         for (int id = 1; id <= catalog.TotalCampaignStages; id++)
         {
             StageData stage = catalog.Get(id);
+            if (StageCatalog.NeedsBoosts(stage))
+            {
+                // Gated stages ask above a mid run on purpose: the missing slice is what the loadout is for.
+                continue;
+            }
             foreach (StageObjective objective in stage.Objectives)
             {
                 if (objective.Type != ObjectiveType.ReachScore)
                 {
                     continue;
                 }
+                // A stage may ask for a little more than a median mid run -- that is where the tension comes from --
+                // but never wildly more, which is how a stage becomes a wall nobody reports until a player quits.
                 int reach = StageCatalog.MidReach(id);
-                if (reach > 0 && objective.Target > reach)
+                int ceiling = (int)((long)reach * StageCatalog.MidReachCeilingPermille / 1000) + 50;
+                if (reach > 0 && objective.Target > ceiling)
                 {
-                    problems.Add($"stage {id}: asks {objective.Target}, a mid run reaches {reach}");
+                    problems.Add($"stage {id}: asks {objective.Target}, a mid run reaches {reach} (ceiling {ceiling})");
                 }
             }
         }

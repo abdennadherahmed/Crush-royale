@@ -378,10 +378,25 @@ namespace CrushRoyale.Tools.StageAudit
                 sb.AppendLine($"- Stage {r.Stage.Id} ({r.Stage.BossKind}, {string.Join(" + ", r.Stage.Objectives.Select(o => o.Type))}, {r.Stage.MoveLimit} moves, target {r.Stage.TargetScore}): expert avg score {r.AvgScore[2]}");
             }
 
-            List<StageReport> hardForAverage = reports.Skip(1).Where(r => r.WinRateWithAssist[1] == 0).ToList();
+            // Boost-gated stages are supposed to defeat a bare-handed run: that is the whole design, and these bots
+            // carry no boosts, no pets and no continues. Counting them as broken buried the accidents among the
+            // deliberate walls, so they are reported apart and the alarm stays about accidents.
+            List<StageReport> hardForAverage = reports.Skip(1)
+                .Where(r => r.WinRateWithAssist[1] == 0 && !StageCatalog.NeedsBoosts(r.Stage)).ToList();
             sb.AppendLine();
             sb.AppendLine($"## Stages an average player never wins, even with the assist: {hardForAverage.Count}");
             sb.AppendLine(string.Join(", ", hardForAverage.Take(150).Select(r => r.Stage.Id)));
+
+            List<StageReport> gated = reports.Skip(1).Where(r => StageCatalog.NeedsBoosts(r.Stage)).ToList();
+            sb.AppendLine();
+            sb.AppendLine($"## Boost-gated stages: {gated.Count}");
+            sb.AppendLine("Bare-handed win rates. They are meant to be low: the missing slice comes from the loadout,");
+            sb.AppendLine("and the stage says so before the life is spent.");
+            sb.AppendLine();
+            sb.AppendLine("| Casual | Average | Expert | Beaten by nobody bare-handed |");
+            sb.AppendLine("|---|---|---|---|");
+            sb.AppendLine($"| {Pct(gated.Average(r => r.WinRate[0]))}% | {Pct(gated.Average(r => r.WinRate[1]))}%"
+                + $" | {Pct(gated.Average(r => r.WinRate[2]))}% | {gated.Count(r => r.WinRateWithAssist[2] == 0)} |");
 
             // Spikes: a stage much harder than the average of its 10 neighbours (average player, with assist).
             var spikes = new List<string>();
