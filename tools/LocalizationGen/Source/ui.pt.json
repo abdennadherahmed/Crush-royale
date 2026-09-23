@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "Gemas espelho",
   "mechanic.mirror.body": "Destrua uma e a casa diametralmente oposta também é destruída. Uma jogada, dois lugares: escolha onde cai a segunda metade.",
   "mechanic.warden.title": "Guardiões",
-  "mechanic.warden.body": "Aguenta quatro golpes e recupera um a cada jogada que não o atinge. Desgastá-lo aos poucos não adianta: acabe com ele seguido ou deixe-o em paz."
+  "mechanic.warden.body": "Aguenta quatro golpes e recupera um a cada jogada que não o atinge. Desgastá-lo aos poucos não adianta: acabe com ele seguido ou deixe-o em paz.",
+  "piggy.title": "Seu cofrinho",
+  "piggy.body": "Cada fase concluída e cada vitória na arena deixa orbes aqui. Já são suas: quebrá-lo é a única forma de tirá-las.",
+  "piggy.amount": "{0} / {1} orbes",
+  "piggy.break": "Quebrar  {0}",
+  "piggy.keepPlaying": "Continue jogando para enchê-lo"
 }
 

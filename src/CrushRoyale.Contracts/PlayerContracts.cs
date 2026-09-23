@@ -455,11 +455,36 @@ namespace CrushRoyale.Contracts
         public bool PremiumPass { get; set; }
     }
 
+    /// <summary>
+    /// The jar that fills as the player plays.
+    ///
+    /// It existed on the server from the start -- it filled on every stage and every arena win -- and was never
+    /// carried to the client, so nobody could see it and nobody could ever break it. A reward the player cannot
+    /// look at is not a reward.
+    /// </summary>
+    public sealed class PiggyBankDto
+    {
+        public long Orbes { get; set; }
+
+        public long Cap { get; set; }
+
+        public int TimesBroken { get; set; }
+
+        /// <summary>True once there is enough inside to be worth offering.</summary>
+        public bool Offered { get; set; }
+
+        public string Sku { get; set; }
+
+        public int PriceCents { get; set; }
+    }
+
     public sealed class ProfileDto
     {
         public string Id { get; set; }
 
         public string DisplayName { get; set; }
+
+        public PiggyBankDto PiggyBank { get; set; }
 
         public HeroDto Hero { get; set; }
 

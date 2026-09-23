@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "Gemmes miroir",
   "mechanic.mirror.body": "Détruis-en une et la case diamétralement opposée est détruite aussi. Un coup, deux endroits : choisis où doit tomber la seconde moitié.",
   "mechanic.warden.title": "Gardiens",
-  "mechanic.warden.body": "Il encaisse quatre coups, et en regagne un à chaque mouvement qui ne le touche pas. Le grignoter ne sert à rien : achève-le d'affilée, ou laisse-le tranquille."
+  "mechanic.warden.body": "Il encaisse quatre coups, et en regagne un à chaque mouvement qui ne le touche pas. Le grignoter ne sert à rien : achève-le d'affilée, ou laisse-le tranquille.",
+  "piggy.title": "Ta tirelire",
+  "piggy.body": "Chaque niveau réussi et chaque victoire en arène y dépose des orbes. Elles sont déjà à toi : la briser est la seule façon de les sortir.",
+  "piggy.amount": "{0} / {1} orbes",
+  "piggy.break": "La briser  {0}",
+  "piggy.keepPlaying": "Continue à jouer pour la remplir"
 }
 

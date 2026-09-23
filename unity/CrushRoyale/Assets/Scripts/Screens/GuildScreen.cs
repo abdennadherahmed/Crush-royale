@@ -268,7 +268,10 @@ namespace CrushRoyale.Game.Screens
             BuildBanner(body);
 
             RectTransform tabs = UIFactory.Anchor(UIFactory.Rect("Tabs", body), 0.02f, 0.715f, 0.98f, 0.78f);
-            tabs.gameObject.AddComponent<VerticalLayoutGroup>().childForceExpandWidth = true;
+            // No layout group on the holder. It has exactly one child -- the tab row -- and a VerticalLayoutGroup
+            // that does not control width overwrites that row's stretch anchors with a point and never gives it a
+            // size, so the row collapsed to nothing and every tab label was zero pixels wide. The row stretches
+            // itself; the holder only has to stay out of its way.
             Action<int> setTab = Widgets.Tabs(tabs, MemberTabs.Select(k => Loc.T(k)).ToList(), index =>
             {
                 Game.Audio.PlaySFX(SoundIds.Click);

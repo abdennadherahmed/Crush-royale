@@ -222,7 +222,9 @@ namespace CrushRoyale.EditorTools
                     NextLifeCoins = 900,
                     NextLifeOrbes = 0
                 },
-                Vip = new VipDto { Tier = 3, LifetimeSpendCents = 2999, NextThresholdCents = 4999, Progress = 0.6f },
+                Vip = new VipDto { Tier = 3, LifetimeSpendCents = 2999, NextThresholdCents = 4999, Progress = 0.6f },
+                // Full enough to be offered: the state worth photographing is the one with the button in it.
+                PiggyBank = new PiggyBankDto { Orbes = 420, Cap = 600, TimesBroken = 1, Offered = true, Sku = "crushroyale.piggybank", PriceCents = 499 },
                 Pvp = new PvpDto
                 {
                     Trophies = 1420,

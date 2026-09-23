@@ -119,10 +119,17 @@ namespace CrushRoyale.Game.Screens
             List<RevealItem> items = GiftItems(gift);
             RectTransform grid = UIFactory.Anchor(UIFactory.Rect("Content", panel.transform), 0.26f, 0.28f, 0.96f, 0.74f);
             GridLayoutGroup layout = grid.gameObject.AddComponent<GridLayoutGroup>();
-            layout.cellSize = new Vector2(170, 76);
+            const int columns = 3;
+            // The cell height follows the number of rows, because a GridLayoutGroup does not clip: with more than
+            // six rewards the chips ran straight out of the bottom of their band and printed over the Claim button.
+            // The band is 46% of a 380 px panel.
+            int rows = Mathf.Max(1, (items.Count + columns - 1) / columns);
+            float band = 380f * 0.46f;
+            float cellHeight = Mathf.Clamp((band - (rows - 1) * 6f) / rows, 34f, 76f);
+            layout.cellSize = new Vector2(170, cellHeight);
             layout.spacing = new Vector2(8, 6);
             layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            layout.constraintCount = 3;
+            layout.constraintCount = columns;
             GridFit.On(layout);
             foreach (RevealItem item in items)
             {

@@ -170,6 +170,20 @@ namespace CrushRoyale.EditorTools
                     object args = test.Args != null ? test.Args(game) : null;
                     var screen = (UIScreen)host.gameObject.AddComponent(test.Type);
                     screen.Setup(game.UI, args);
+
+                    // The step where a screen loads what it shows.
+                    //
+                    // Setup only builds the layout; screens that fetch their contents do it here, so leaving this out
+                    // meant every one of them was captured on its "Loading" frame. The shop was photographed empty
+                    // in every build ever taken for exactly this reason, and two defects reported in its grid were
+                    // invisible to me because of it. Offline the work is synchronous, so the task is already
+                    // finished by the time it is returned; anything that genuinely waits on a server is skipped
+                    // rather than hanging the capture.
+                    System.Threading.Tasks.Task shown = screen.OnShownAsync();
+                    if (shown != null && shown.IsFaulted)
+                    {
+                        Debug.LogWarning("OnShownAsync failed on " + test.Name + ": " + shown.Exception?.GetBaseException().Message);
+                    }
                     test.Overlay?.Invoke(game);
                 }
                 catch (Exception ex)
@@ -324,13 +338,23 @@ namespace CrushRoyale.EditorTools
                     audit.Add(screen + " | unformatted placeholder on screen | " + Shorten(label.text));
                 }
 
-                int smallest = label.resizeTextForBestFit ? label.resizeTextMinSize : label.fontSize;
-                if (smallest > 0 && smallest < MinReadableFontSize)
+                // The size actually drawn, not the floor the label is allowed to shrink to.
+                //
+                // Reading resizeTextMinSize reported every best-fit label in the game: a caption rendering at 28 px
+                // was flagged because it was permitted to go down to 14 if it ever had to. That was 140 of the 150
+                // lines in this report, which made the whole thing unreadable and hid the three real defects in it.
+                int drawn = label.resizeTextForBestFit && label.cachedTextGenerator != null
+                    && label.cachedTextGenerator.fontSizeUsedForBestFit > 0
+                    ? label.cachedTextGenerator.fontSizeUsedForBestFit
+                    : label.fontSize;
+                if (drawn > 0 && drawn < MinReadableFontSize)
                 {
-                    audit.Add(screen + " | font size " + smallest + " below " + MinReadableFontSize + " | " + Shorten(label.text));
+                    audit.Add(screen + " | font size " + drawn + " below " + MinReadableFontSize + " | " + Shorten(label.text));
                 }
                 boxes.Add(new KeyValuePair<Text, Rect>(label, WorldRect(rect)));
             }
+
+            CheckCentring(host, screen, audit);
 
             for (int i = 0; i < boxes.Count; i++)
             {
@@ -379,6 +403,48 @@ namespace CrushRoyale.EditorTools
                 }
             }
             return true;
+        }
+
+        /// <summary>
+        /// Finds artwork and text that hangs out of the thing holding it, and does so unevenly.
+        ///
+        /// Something wider than its container but overhanging equally on both sides is a deliberate bleed. Something
+        /// overhanging on one side only is a centring mistake -- and it is the mistake that kept being reported by
+        /// eye: a gear whose teeth sat over the right edge of its plate, a map icon pushed sideways inside its own
+        /// file, a caption running off a tile. Measuring it costs nothing and stops those reaching the phone.
+        /// </summary>
+        private static void CheckCentring(RectTransform host, string screen, List<string> audit)
+        {
+            const float tolerance = 6f;
+            foreach (Graphic graphic in host.GetComponentsInChildren<Graphic>(false))
+            {
+                var rect = graphic.rectTransform;
+                var parent = rect.parent as RectTransform;
+                if (parent == null || !MostlyVisible(rect) || graphic is Text text && string.IsNullOrWhiteSpace(text.text))
+                {
+                    continue;
+                }
+                Rect self = WorldRect(rect);
+                Rect box = WorldRect(parent);
+                if (self.width <= 1f || box.width <= 1f)
+                {
+                    continue;
+                }
+                float left = box.xMin - self.xMin;
+                float right = self.xMax - box.xMax;
+                // Both sides inside, or both hanging out by the same amount: nothing to report.
+                if (left <= tolerance && right <= tolerance)
+                {
+                    continue;
+                }
+                if (Mathf.Abs(left - right) <= tolerance)
+                {
+                    continue;
+                }
+                string what = graphic is Text t ? Shorten(t.text) : graphic.gameObject.name;
+                audit.Add(screen + " | sits off centre in its box (" + Mathf.RoundToInt(left) + " px left, "
+                    + Mathf.RoundToInt(right) + " px right) | " + what);
+            }
         }
 
         private static Rect WorldRect(RectTransform rect)

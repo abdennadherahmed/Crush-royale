@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "Gemme specchio",
   "mechanic.mirror.body": "Distruggine una e anche la cella diametralmente opposta si libera. Una mossa, due posti: scegli dove cade la seconda metà.",
   "mechanic.warden.title": "Guardiani",
-  "mechanic.warden.body": "Regge quattro colpi e ne recupera uno a ogni mossa che non lo colpisce. Consumarlo poco a poco non serve: finiscilo di fila o lascialo stare."
+  "mechanic.warden.body": "Regge quattro colpi e ne recupera uno a ogni mossa che non lo colpisce. Consumarlo poco a poco non serve: finiscilo di fila o lascialo stare.",
+  "piggy.title": "Il tuo salvadanaio",
+  "piggy.body": "Ogni livello superato e ogni vittoria in arena lascia orbe qui dentro. Sono già tue: romperlo è l'unico modo per tirarle fuori.",
+  "piggy.amount": "{0} / {1} orbe",
+  "piggy.break": "Rompilo  {0}",
+  "piggy.keepPlaying": "Continua a giocare per riempirlo"
 }
 

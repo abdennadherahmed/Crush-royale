@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "Mirror gems",
   "mechanic.mirror.body": "Clear one and the cell directly opposite it on the board clears too. One move, two places: choose where the second half should land.",
   "mechanic.warden.title": "Wardens",
-  "mechanic.warden.body": "It takes four hits, and heals one back on every move that does not hit it. Chipping away at it does nothing: finish it in a row or leave it alone."
+  "mechanic.warden.body": "It takes four hits, and heals one back on every move that does not hit it. Chipping away at it does nothing: finish it in a row or leave it alone.",
+  "piggy.title": "Your piggy bank",
+  "piggy.body": "Every stage cleared and every arena win drops orbes in here. They are yours already: breaking it open is the only way to take them out.",
+  "piggy.amount": "{0} / {1} orbes",
+  "piggy.break": "Break it open  {0}",
+  "piggy.keepPlaying": "Keep playing to fill it"
 }
 

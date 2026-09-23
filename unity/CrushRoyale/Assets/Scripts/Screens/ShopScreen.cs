@@ -49,7 +49,10 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Anchor((RectTransform)bar.transform, 0.02f, 0.93f, 0.98f, 1f);
 
             RectTransform tabs = UIFactory.Anchor(UIFactory.Rect("Tabs", body), 0.02f, 0.85f, 0.98f, 0.925f);
-            tabs.gameObject.AddComponent<VerticalLayoutGroup>().childForceExpandWidth = true;
+            // No layout group on the holder. It has exactly one child -- the tab row -- and a VerticalLayoutGroup
+            // that does not control width overwrites that row's stretch anchors with a point and never gives it a
+            // size, so the row collapsed to nothing and every tab label was zero pixels wide. The row stretches
+            // itself; the holder only has to stay out of its way.
             Action<int> setTab = Widgets.Tabs(tabs, TabKeys.Select(k => Loc.T(k)).ToList(), index =>
             {
                 _tab = index;
@@ -132,7 +135,10 @@ namespace CrushRoyale.Game.Screens
             if (always.Count > 0)
             {
                 Widgets.SectionTitle(_list, Loc.T("shop.alwaysAvailable"));
-                Grid(_list, always, 3, 430, (cell, item) => PowerUpCard(cell, item, deal: false));
+                // Two columns, like every other section. Three never fitted: the cards are drawn for a
+                // half-width slot, so at a third of the screen the art, the name and the price were all
+                // squeezed and the right-hand column ran under the edge of the list.
+                Grid(_list, always, 2, 470, (cell, item) => PowerUpCard(cell, item, deal: false));
             }
         }
 
@@ -202,11 +208,72 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
+        /// <summary>
+        /// The jar the player has been filling by playing.
+        ///
+        /// It filled on every stage and every arena win from the day the game shipped, and no screen ever showed it,
+        /// so it could not be seen and could not be broken. It goes at the top of the orbes tab because that is where
+        /// somebody looking for orbes arrives, and because it is the only offer here whose contents the player earned
+        /// themselves rather than being sold.
+        /// </summary>
+        private void BuildPiggyBank(PiggyBankDto piggy)
+        {
+            if (piggy == null || piggy.Cap <= 0)
+            {
+                return;
+            }
+            Image card = UIFactory.Panel("PiggyBank", _list, Theme.Panel);
+            UIFactory.Height(card, 330);
+            UiKit.FramePanel(card);
+
+            Sprite art = UiKit.Art("item_pouch") ?? ArtLibrary.Icon("orb");
+            if (art != null)
+            {
+                Image icon = UIFactory.Icon(card.transform, art, Color.white, 0);
+                icon.preserveAspect = true;
+                UIFactory.Anchor(icon.rectTransform, 0.04f, 0.28f, 0.32f, 0.92f);
+                if (piggy.Offered)
+                {
+                    icon.gameObject.AddComponent<Breathe>().Amount = 0.04f;
+                }
+            }
+
+            Text title = UIFactory.Label(card.transform, Loc.T("piggy.title"), Theme.BodySize + 2, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(title.rectTransform, 0.34f, 0.74f, 0.97f, 0.94f);
+            Widgets.TitleOutline(title);
+
+            Text blurb = UIFactory.Label(card.transform, Loc.T("piggy.body"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.UpperLeft);
+            UIFactory.Anchor(blurb.rectTransform, 0.34f, 0.52f, 0.97f, 0.74f);
+
+            float fill = Mathf.Clamp01(piggy.Orbes / (float)piggy.Cap);
+            UIFactory.ProgressBar(card.transform, fill, Theme.Orbe, out RectTransform bar);
+            UIFactory.Anchor(bar, 0.34f, 0.36f, 0.97f, 0.5f);
+            Text amount = UIFactory.Label(bar, Loc.T("piggy.amount", Loc.Number(piggy.Orbes), Loc.Number(piggy.Cap)),
+                Theme.SmallSize - 4, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(amount.rectTransform);
+            Widgets.TitleOutline(amount);
+
+            if (piggy.Offered)
+            {
+                string price = Game.Iap.LocalizedPrice(piggy.Sku) ?? (piggy.PriceCents / 100m).ToString("0.00") + " EUR";
+                Button buy = UIFactory.Button(card.transform, Loc.T("piggy.break", price), () => _ = BuyRealMoneyAsync(piggy.Sku), Theme.Success, Theme.BodySize);
+                UIFactory.Anchor(buy.GetComponent<RectTransform>(), 0.34f, 0.06f, 0.97f, 0.32f);
+                buy.gameObject.AddComponent<Breathe>().Amount = 0.02f;
+            }
+            else
+            {
+                // Saying how far off it is turns an unavailable button into a reason to play one more stage.
+                Text soon = UIFactory.Label(card.transform, Loc.T("piggy.keepPlaying"), Theme.SmallSize - 4, Theme.Crystal, TextAnchor.MiddleCenter);
+                UIFactory.Anchor(soon.rectTransform, 0.34f, 0.08f, 0.97f, 0.32f);
+            }
+        }
+
         private void FillOrbes()
         {
             ProfileDto profile = Game.Backend.Profile;
             if (profile != null)
             {
+                BuildPiggyBank(profile.PiggyBank);
                 Image vip = UIFactory.Panel("Vip", _list, Theme.Panel);
                 UIFactory.Height(vip, 220);
                 UiKit.FramePanel(vip);

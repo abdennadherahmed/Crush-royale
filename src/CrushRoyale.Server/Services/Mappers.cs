@@ -63,6 +63,24 @@ public static class Mappers
         };
     }
 
+    /// <summary>
+    /// The jar, as the client needs to see it: what is inside, what it holds, and whether it is worth offering yet.
+    /// </summary>
+    public static PiggyBankDto PiggyBank(PlayerWorkspace ws)
+    {
+        CrushRoyale.Core.Economy.PiggyBankBalance b = ws.Balance.Economy.PiggyBank;
+        long orbes = ws.State.PiggyBank?.Orbes ?? 0;
+        return new PiggyBankDto
+        {
+            Orbes = orbes,
+            Cap = b.CapOrbes,
+            TimesBroken = ws.State.PiggyBank?.TimesBroken ?? 0,
+            Offered = orbes >= b.MinOrbesToOffer,
+            Sku = b.Sku,
+            PriceCents = b.PriceCents
+        };
+    }
+
     public static PvpDto Pvp(PlayerWorkspace ws)
     {
         PlayerTrophyRecord r = ws.State.Pvp;
@@ -147,6 +165,7 @@ public static class Mappers
         {
             Id = ws.IdString,
             DisplayName = s.DisplayName,
+            PiggyBank = PiggyBank(ws),
             Hero = new HeroDto { Gender = s.Hero.Gender, Name = s.Hero.Name, Appearance = s.Hero.Appearance },
             HeroChosen = s.HeroChosen,
             DeclaredAge = s.DeclaredAge,

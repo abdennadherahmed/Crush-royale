@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "镜像宝石",
   "mechanic.mirror.body": "消除一颗，棋盘正对面的格子也会一并消除。一步两处：选好另一半落在哪里。",
   "mechanic.warden.title": "守卫",
-  "mechanic.warden.body": "它需要四次打击，而每一步没有击中它就会回复一点。零敲碎打毫无意义：要么连续解决，要么别管它。"
+  "mechanic.warden.body": "它需要四次打击，而每一步没有击中它就会回复一点。零敲碎打毫无意义：要么连续解决，要么别管它。",
+  "piggy.title": "你的存钱罐",
+  "piggy.body": "每通过一关、每赢一场竞技场，都会往这里投入宝珠。它们已经属于你了：打碎它是取出的唯一方式。",
+  "piggy.amount": "{0} / {1} 宝珠",
+  "piggy.break": "打碎  {0}",
+  "piggy.keepPlaying": "继续游戏来装满它"
 }
 

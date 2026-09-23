@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "Gemas espejo",
   "mechanic.mirror.body": "Destruye una y la casilla diametralmente opuesta también se destruye. Un movimiento, dos lugares: elige dónde cae la segunda mitad.",
   "mechanic.warden.title": "Guardianes",
-  "mechanic.warden.body": "Aguanta cuatro golpes y recupera uno con cada movimiento que no lo toca. Desgastarlo no sirve de nada: acábalo seguido o déjalo en paz."
+  "mechanic.warden.body": "Aguanta cuatro golpes y recupera uno con cada movimiento que no lo toca. Desgastarlo no sirve de nada: acábalo seguido o déjalo en paz.",
+  "piggy.title": "Tu hucha",
+  "piggy.body": "Cada fase superada y cada victoria en la arena deja orbes aquí. Ya son tuyas: romperla es la única forma de sacarlas.",
+  "piggy.amount": "{0} / {1} orbes",
+  "piggy.break": "Rómpela  {0}",
+  "piggy.keepPlaying": "Sigue jugando para llenarla"
 }
 

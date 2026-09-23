@@ -2121,6 +2121,11 @@
   "mechanic.mirror.title": "Spiegel-Edelsteine",
   "mechanic.mirror.body": "Zerstöre einen, und das genau gegenüberliegende Feld wird ebenfalls geleert. Ein Zug, zwei Orte: Wähle, wo die zweite Hälfte landet.",
   "mechanic.warden.title": "Wächter",
-  "mechanic.warden.body": "Er hält vier Treffer aus und heilt einen zurück bei jedem Zug, der ihn nicht trifft. Ihn langsam abzutragen bringt nichts: Erledige ihn am Stück oder lass ihn stehen."
+  "mechanic.warden.body": "Er hält vier Treffer aus und heilt einen zurück bei jedem Zug, der ihn nicht trifft. Ihn langsam abzutragen bringt nichts: Erledige ihn am Stück oder lass ihn stehen.",
+  "piggy.title": "Dein Sparschwein",
+  "piggy.body": "Jede geschaffte Stufe und jeder Arenasieg wirft Orbes hier hinein. Sie gehören dir bereits: Es zu zerschlagen ist der einzige Weg, sie herauszuholen.",
+  "piggy.amount": "{0} / {1} Orbes",
+  "piggy.break": "Zerschlagen  {0}",
+  "piggy.keepPlaying": "Spiel weiter, um es zu füllen"
 }
 

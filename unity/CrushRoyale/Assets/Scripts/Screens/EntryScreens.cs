@@ -604,6 +604,13 @@ namespace CrushRoyale.Game.Screens
 
             Button gear = IconButton(safe, "settings", () => UI.Show<SettingsScreen>());
             UIFactory.Anchor(gear.GetComponent<RectTransform>(), 0.875f, 0.915f, 0.985f, 0.99f);
+            // The hub tiles carry their own frame in the artwork, so IconButton fills the whole button with it. The
+            // gear does not: it is a bare icon laid on a framed button, and at full size its teeth hung over the
+            // gold plate on both sides. It gets its own inset rather than shrinking every tile in the hub.
+            if (gear.transform.childCount > 0 && gear.transform.GetChild(0).GetComponent<Image>() != null)
+            {
+                UIFactory.Anchor((RectTransform)gear.transform.GetChild(0), 0.18f, 0.16f, 0.82f, 0.84f);
+            }
         }
 
         /// <summary>Daily wheel under the pets: glows with a "!" while today's free spin is waiting.</summary>
