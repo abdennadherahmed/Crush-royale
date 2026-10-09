@@ -636,6 +636,263 @@ namespace CrushRoyale.Game.UI
     }
 
     /// <summary>Top bar: coins, orbes, lives with recharge countdown. Updates itself from profile changes.</summary>
+    /// <summary>
+    /// Settles the rows of a list into place one after another instead of showing the whole page at once.
+    ///
+    /// Only the alpha and the scale are animated. A list is driven by a VerticalLayoutGroup, which rewrites every
+    /// child's position on each layout pass, so a row asked to slide up would be put back where the layout wants it
+    /// on the very next frame; the layout never touches localScale, and a CanvasGroup is the row's own.
+    ///
+    /// The whole cascade is over in a third of a second: it should read as the page arriving, never as a wait.
+    /// </summary>
+    public sealed class StaggerIn : MonoBehaviour
+    {
+        /// <summary>Gap between two rows. Long enough to be a sequence, short enough not to be a queue.</summary>
+        private const float Step = 0.035f;
+
+        private const float Duration = 0.24f;
+
+        /// <summary>Rows past this one appear with the last of them: the player cannot see the bottom of the list.</summary>
+        private const int MaxRows = 14;
+
+        private CanvasGroup[] _groups;
+        private RectTransform[] _rects;
+        private float _start;
+
+        private void OnEnable()
+        {
+            if (Transitions.ReduceMotion)
+            {
+                enabled = false;
+                return;
+            }
+            int count = Mathf.Min(transform.childCount, MaxRows);
+            if (count == 0)
+            {
+                return;
+            }
+            _groups = new CanvasGroup[count];
+            _rects = new RectTransform[count];
+            for (int i = 0; i < count; i++)
+            {
+                var rect = transform.GetChild(i) as RectTransform;
+                if (rect == null)
+                {
+                    continue;
+                }
+                CanvasGroup group = rect.GetComponent<CanvasGroup>() ?? rect.gameObject.AddComponent<CanvasGroup>();
+                group.alpha = 0f;
+                rect.localScale = new Vector3(0.965f, 0.965f, 1f);
+                _groups[i] = group;
+                _rects[i] = rect;
+            }
+            _start = Time.unscaledTime;
+        }
+
+        private void Update()
+        {
+            if (_groups == null)
+            {
+                enabled = false;
+                return;
+            }
+            bool running = false;
+            for (int i = 0; i < _groups.Length; i++)
+            {
+                if (_groups[i] == null)
+                {
+                    continue;
+                }
+                float k = (Time.unscaledTime - _start - i * Step) / Duration;
+                if (k >= 1f)
+                {
+                    Settle(i);
+                    continue;
+                }
+                running = true;
+                if (k <= 0f)
+                {
+                    continue;
+                }
+                float e = 1f - Mathf.Pow(1f - k, 3f);
+                _groups[i].alpha = e;
+                float scale = Mathf.LerpUnclamped(0.965f, 1f, e);
+                _rects[i].localScale = new Vector3(scale, scale, 1f);
+            }
+            if (!running)
+            {
+                enabled = false;
+            }
+        }
+
+        /// <summary>Puts a row in its final state, whether the animation finished or something ended it early.</summary>
+        private void Settle(int i)
+        {
+            if (_groups[i] == null)
+            {
+                return;
+            }
+            _groups[i].alpha = 1f;
+            _rects[i].localScale = Vector3.one;
+            _groups[i] = null;
+        }
+
+        private void OnDisable()
+        {
+            if (_groups == null)
+            {
+                return;
+            }
+            for (int i = 0; i < _groups.Length; i++)
+            {
+                Settle(i);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Counts a number up to its new value instead of replacing it.
+    ///
+    /// A purse that jumps from 12,450 to 14,250 states a fact; one that runs up to it is the reward being paid, and
+    /// it is the cheapest feedback in the game. The label also takes a short punch, so the eye is sent to the number
+    /// that changed even on a screen full of them.
+    ///
+    /// The first value a label is given is shown as it is: a screen opening is not a reward being paid.
+    /// </summary>
+    public sealed class RollingNumber : MonoBehaviour
+    {
+        private const float Duration = 0.5f;
+
+        private Text _label;
+        private Func<long, string> _format;
+        private long _from;
+        private long _to;
+        private float _start;
+        private bool _seeded;
+
+        public static void Set(Text label, long value, Func<long, string> format)
+        {
+            if (label == null || format == null)
+            {
+                return;
+            }
+            RollingNumber roll = label.GetComponent<RollingNumber>();
+            if (roll == null)
+            {
+                roll = label.gameObject.AddComponent<RollingNumber>();
+            }
+            roll.Apply(label, value, format);
+        }
+
+        private void Apply(Text label, long value, Func<long, string> format)
+        {
+            _label = label;
+            _format = format;
+            if (!_seeded || value == _to || Transitions.ReduceMotion)
+            {
+                _seeded = true;
+                _from = value;
+                _to = value;
+                _label.text = format(value);
+                enabled = false;
+                return;
+            }
+            _from = _to;
+            _to = value;
+            _start = Time.unscaledTime;
+            enabled = true;
+        }
+
+        private void Update()
+        {
+            if (_label == null || _format == null)
+            {
+                enabled = false;
+                return;
+            }
+            float k = (Time.unscaledTime - _start) / Duration;
+            if (k >= 1f)
+            {
+                _label.text = _format(_to);
+                _label.rectTransform.localScale = Vector3.one;
+                enabled = false;
+                return;
+            }
+            float e = 1f - Mathf.Pow(1f - k, 3f);
+            _label.text = _format(_from + (long)((_to - _from) * (double)e));
+            float punch = 1f + 0.14f * Mathf.Sin(Mathf.PI * Mathf.Clamp01(k * 1.6f));
+            _label.rectTransform.localScale = new Vector3(punch, punch, 1f);
+        }
+    }
+
+    /// <summary>
+    /// Fills a progress bar from empty to its value when the bar appears.
+    ///
+    /// A bar drawn already full states a number; a bar that runs up to it is the progress being made, and every bar
+    /// in the game goes through UiKit.Bar, so this is one place for the experience bar, the league bar, the battle
+    /// pass, the kingdom rebuild, the summon pity and the VIP track.
+    ///
+    /// It drives anchorMax.x, which is where the bar's value already lives, so nothing else has to know about it.
+    /// </summary>
+    public sealed class BarFill : MonoBehaviour
+    {
+        private const float Delay = 0.12f;
+        private const float Duration = 0.55f;
+
+        private RectTransform _rect;
+        private float _target;
+        private float _start;
+
+        public static void Run(RectTransform fill, float value)
+        {
+            if (fill == null)
+            {
+                return;
+            }
+            float target = Mathf.Clamp01(value);
+            // Outside play mode Unity never calls OnEnable or Update, so a bar emptied here would stay empty: the
+            // screenshot tool captured every progress bar at zero. Filling is a runtime effect and says so.
+            if (!Application.isPlaying || Transitions.ReduceMotion || target <= 0.001f)
+            {
+                fill.anchorMax = new Vector2(target, 1f);
+                return;
+            }
+            BarFill run = fill.gameObject.AddComponent<BarFill>();
+            run._rect = fill;
+            run._target = target;
+            run._start = Time.unscaledTime + Delay;
+            fill.anchorMax = new Vector2(0f, 1f);
+        }
+
+        private void Update()
+        {
+            float k = (Time.unscaledTime - _start) / Duration;
+            if (k <= 0f)
+            {
+                return;
+            }
+            if (k >= 1f)
+            {
+                Snap();
+                return;
+            }
+            // Ease-out-cubic: most of the bar is filled at once and the last part eases in, which reads as effort.
+            _rect.anchorMax = new Vector2(_target * (1f - Mathf.Pow(1f - k, 3f)), 1f);
+        }
+
+        /// <summary>Puts the bar at its value, whether it finished or something ended it early (a capture does).</summary>
+        private void Snap()
+        {
+            if (_rect != null)
+            {
+                _rect.anchorMax = new Vector2(_target, 1f);
+            }
+            enabled = false;
+        }
+
+        private void OnDisable() => Snap();
+    }
+
     public sealed class CurrencyBar : MonoBehaviour
     {
         private Text _coins;
@@ -699,8 +956,8 @@ namespace CrushRoyale.Game.UI
                 _lives.text = string.Empty;
                 return;
             }
-            _coins.text = loc.T("currency.coins", loc.Number(profile.Wallet.Coins));
-            _orbes.text = loc.T("currency.orbes", loc.Number(profile.Wallet.Orbes));
+            RollingNumber.Set(_coins, profile.Wallet.Coins, v => loc.T("currency.coins", loc.Number(v)));
+            RollingNumber.Set(_orbes, profile.Wallet.Orbes, v => loc.T("currency.orbes", loc.Number(v)));
             _livesData = profile.Lives;
             _rechargeReceivedAt = Time.realtimeSinceStartup;
             RefreshLives();

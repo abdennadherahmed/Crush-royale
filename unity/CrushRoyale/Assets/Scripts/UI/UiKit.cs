@@ -274,6 +274,7 @@ namespace CrushRoyale.Game.UI
             bar.raycastTarget = false;
             bar.rectTransform.anchorMin = Vector2.zero;
             bar.rectTransform.anchorMax = new Vector2(Mathf.Clamp01(value), 1);
+            BarFill.Run(bar.rectTransform, value);
             bar.rectTransform.offsetMin = new Vector2(9, 8);
             bar.rectTransform.offsetMax = new Vector2(-9, -8);
             Image shine = UIFactory.Panel("Shine", bar.transform, new Color(1f, 1f, 1f, 0.3f));

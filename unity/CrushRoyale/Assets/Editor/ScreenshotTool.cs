@@ -226,7 +226,9 @@ namespace CrushRoyale.EditorTools
         {
             foreach (MonoBehaviour behaviour in root.GetComponentsInChildren<MonoBehaviour>(true))
             {
-                if (behaviour is PopIn || behaviour is Pulse || behaviour is Breathe || behaviour is Spinner || behaviour is ButtonFeedback)
+                if (behaviour is PopIn || behaviour is Pulse || behaviour is Breathe || behaviour is Spinner
+                    || behaviour is ButtonFeedback || behaviour is StaggerIn || behaviour is RollingNumber
+                    || behaviour is BarFill)
                 {
                     UnityEngine.Object.DestroyImmediate(behaviour);
                 }

@@ -380,7 +380,9 @@ namespace CrushRoyale.Game.Screens
             GameSession s = _controller.Session;
             int now = _controller.Clock.NowMs;
 
-            _score.text = Loc.Number(s.Score);
+            // Counted up rather than replaced: during a cascade the number chases the gems instead of jumping
+            // once they have all gone, which is where the whole feeling of a big move lives.
+            RollingNumber.Set(_score, s.Score, v => Loc.Number(v));
             int seconds = Mathf.CeilToInt(s.RemainingTimeMs(now) / 1000f);
             string clock = (seconds / 60) + ":" + (seconds % 60).ToString("00");
             if (s.Config.Mode == GameMode.Story)

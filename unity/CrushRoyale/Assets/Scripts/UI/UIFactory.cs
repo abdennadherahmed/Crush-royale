@@ -400,6 +400,9 @@ namespace CrushRoyale.Game.UI
             layout.childForceExpandWidth = true;
             ContentSizeFitter fitter = content.gameObject.AddComponent<ContentSizeFitter>();
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            // Every list in the game is built here, so this is the one place that makes every page arrive instead
+            // of appearing. It costs a CanvasGroup on the first fourteen rows and a third of a second.
+            content.gameObject.AddComponent<StaggerIn>();
 
             scrollRect.viewport = viewport;
             scrollRect.content = content;
