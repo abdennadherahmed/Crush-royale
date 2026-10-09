@@ -330,6 +330,12 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
 
         WheelSpinResponse spin = await http.PostOk<WheelSpinResponse>(ApiRoutes.WheelSpin, null);
         Assert.InRange(spin.SliceIndex, 0, 7);
+
+        // The free spin is gone, but the next ones are on sale, so a second call is refused only when the player
+        // cannot pay for it. Emptying the purse first is what makes this test about the once-a-day rule: the spin
+        // the player just took sometimes pays out orbes, and on those runs the paid spin went through and the
+        // assertion failed for a reason that had nothing to do with the rule under test.
+        await _app.MutateAsync(id, s => s.Wallet.Orbes = 0);
         await http.PostError(ApiRoutes.WheelSpin, null, HttpStatusCode.Conflict);
     }
 

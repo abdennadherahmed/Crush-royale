@@ -593,8 +593,13 @@ namespace CrushRoyale.Game.UI
         }
     }
 
-    /// <summary>Keeps content inside the device safe area (notches, rounded corners).</summary>
-    public sealed class SafeArea : MonoBehaviour
+    /// <summary>
+    /// Keeps content inside the device safe area (notches, rounded corners).
+    ///
+    /// Named SafeAreaPadding and not SafeArea: Unity 6000.6 added UnityEngine.UI.SafeArea, and every screen
+    /// here has both that namespace and ours in scope, so the short name is ambiguous and will not compile.
+    /// </summary>
+    public sealed class SafeAreaPadding : MonoBehaviour
     {
         private Rect _applied;
 

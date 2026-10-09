@@ -50,7 +50,7 @@ namespace CrushRoyale.Game.Screens
             ArtLibrary.GemSkin = ArtLibrary.GemSkinFolder(Game.Backend.Profile?.Inventory?.EquippedPieceSkin);
             AddBackdrop();
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
-            safe.gameObject.AddComponent<SafeArea>();
+            safe.gameObject.AddComponent<SafeAreaPadding>();
 
             Widgets.Fade(Root, true, 0.2f, 0.75f);
 

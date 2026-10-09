@@ -1011,7 +1011,7 @@ namespace CrushRoyale.Game.Screens
         {
             RectTransform body = Frame("pvp.title");
             RectTransform list = UIFactory.ScrollList(body, 20, 40);
-            UIFactory.Stretch((RectTransform)list.parent.parent, 0, 0, 0, 380);
+            UIFactory.Stretch((RectTransform)list.parent.parent, 0, 0, 0, FooterHeight);
 
             ProfileDto profile = Game.Backend.Profile;
             if (profile != null)
@@ -1078,16 +1078,33 @@ namespace CrushRoyale.Game.Screens
             }
         }
 
+        /// <summary>The band kept free at the bottom of the screen, below the scrolling list.</summary>
+        private const float FooterHeight = 380f;
+
+        /// <summary>
+        /// The three controls at the bottom, inside a band of their own.
+        ///
+        /// They used to be anchored as fractions of the whole body while the list stopped FooterHeight pixels above
+        /// the bottom, so the two measurements only agreed on a screen of one particular height: on 1080x1920 the
+        /// challenge code button landed a little above the band and printed itself across the boost cards.
+        /// </summary>
         private void BuildFooter(RectTransform body, ProfileDto profile)
         {
-            _status = UIFactory.Label(body, string.Empty, Theme.BodySize, Theme.Crystal);
-            UIFactory.Anchor(_status.rectTransform, 0.05f, 0.13f, 0.95f, 0.19f);
-            _find = UIFactory.Button(body, Loc.T(profile != null ? "pvp.find" : "pvp.practice"), () => _ = FindAsync());
-            UIFactory.Anchor(_find.GetComponent<RectTransform>(), 0.15f, 0.02f, 0.85f, 0.11f);
+            RectTransform footer = UIFactory.Rect("Footer", body);
+            footer.anchorMin = new Vector2(0f, 0f);
+            footer.anchorMax = new Vector2(1f, 0f);
+            footer.pivot = new Vector2(0.5f, 0f);
+            footer.offsetMin = Vector2.zero;
+            footer.offsetMax = new Vector2(0f, FooterHeight);
+
+            _status = UIFactory.Label(footer, string.Empty, Theme.BodySize, Theme.Crystal);
+            UIFactory.Anchor(_status.rectTransform, 0.05f, 0.50f, 0.95f, 0.70f);
+            _find = UIFactory.Button(footer, Loc.T(profile != null ? "pvp.find" : "pvp.practice"), () => _ = FindAsync());
+            UIFactory.Anchor(_find.GetComponent<RectTransform>(), 0.15f, 0.08f, 0.85f, 0.44f);
             if (profile != null)
             {
-                Button code = UIFactory.Button(body, Loc.T("challenge.haveCode"), () => _ = ChallengeFlow.PromptCodeAsync(UI, Game), Theme.PanelLight, Theme.SmallSize, Theme.Text);
-                UIFactory.Anchor(code.GetComponent<RectTransform>(), 0.25f, 0.195f, 0.75f, 0.245f);
+                Button code = UIFactory.Button(footer, Loc.T("challenge.haveCode"), () => _ = ChallengeFlow.PromptCodeAsync(UI, Game), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+                UIFactory.Anchor(code.GetComponent<RectTransform>(), 0.25f, 0.74f, 0.75f, 0.96f);
             }
         }
 

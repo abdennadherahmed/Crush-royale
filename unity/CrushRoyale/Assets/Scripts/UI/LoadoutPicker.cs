@@ -99,7 +99,9 @@ namespace CrushRoyale.Game.UI
             RectTransform gridRect = UIFactory.Rect("Loadout", list);
             List<PowerUpDefinition> defs = balance.PowerUps.Definitions.Where(d => _pvp || !d.PvpOnly).ToList();
             int rows = (defs.Count + 2) / 3;
-            const int cellHeight = 390;
+            // 420 and not 390: the longest effect line ("for 20 seconds, your matches create bonus gems") needs
+            // three lines at the smallest size we allow, and on the shorter card it was cut off mid-sentence.
+            const int cellHeight = 420;
             UIFactory.Height(gridRect, rows * cellHeight + (rows - 1) * 18);
             GridLayoutGroup grid = gridRect.gameObject.AddComponent<GridLayoutGroup>();
             // Authored to fit a 1080-wide canvas on its own (3 x 290 + spacing + padding = 922), so even the frame
@@ -136,10 +138,10 @@ namespace CrushRoyale.Game.UI
             if (art != null)
             {
                 Image icon = UIFactory.Icon(frame.transform, art, leagueLocked || count == 0 ? new Color(0.45f, 0.45f, 0.5f, 1f) : Color.white, 0);
-                UIFactory.Anchor(icon.rectTransform, 0.2f, 0.52f, 0.8f, 0.95f);
+                UIFactory.Anchor(icon.rectTransform, 0.2f, 0.58f, 0.8f, 0.96f);
             }
             Text name = UIFactory.Label(frame.transform, Loc.T("powerup." + type), Theme.SmallSize - 2, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(name.rectTransform, 0.05f, 0.4f, 0.95f, 0.53f);
+            UIFactory.Anchor(name.rectTransform, 0.05f, 0.455f, 0.95f, 0.575f);
             Widgets.TitleOutline(name);
 
             // What it actually does, on every card: without it the boost screen was a row of unreadable icons.
@@ -147,7 +149,7 @@ namespace CrushRoyale.Game.UI
             effect.resizeTextForBestFit = true;
             effect.resizeTextMinSize = UIFactory.MinFontSize;
             effect.resizeTextMaxSize = Theme.SmallSize - 4;
-            UIFactory.Anchor(effect.rectTransform, 0.06f, 0.24f, 0.94f, 0.4f);
+            UIFactory.Anchor(effect.rectTransform, 0.06f, 0.235f, 0.94f, 0.45f);
 
             // Owned count in a gold coin at the top-right corner, entirely inside the card: it used to be anchored
             // past the card's top and right edges, so it was the first thing clipped and the player could not see how

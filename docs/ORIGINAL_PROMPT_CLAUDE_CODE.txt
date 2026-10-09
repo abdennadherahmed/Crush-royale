@@ -1,0 +1,891 @@
+================================================================================
+CRUSH ROYALE - COMPLETE GAME GENERATION PROMPT FOR CLAUDE CODE
+================================================================================
+
+CRITICAL: Read the CRUSH_ROYALE_GAME_DESIGN_DOC.md FIRST before implementing.
+All specifications in that document are binding and must be followed exactly.
+
+================================================================================
+PHASE 1: FOUNDATION & CORE SYSTEMS (Priority #1)
+================================================================================
+
+TASK 1: Board Manager System
+------
+Generate a complete BoardManager.cs for Unity that handles:
+
+1. Board Data Structure:
+   - 8x8 grid of Piece objects
+   - Each piece has: color (enum 0-5), type (normal/bonus/bomb/etc), position
+
+2. Piece Matching Algorithm:
+   - Horizontal match detection (3+ consecutive)
+   - Vertical match detection (3+ consecutive)
+   - Return list of all matching pieces
+
+3. Board Generation (INTELLIGENT):
+   - Generate random pieces
+   - Validate: at least 3-4 possible opening moves exist
+   - If no valid moves, regenerate board
+   - Support difficulty parameter (0-100) to adjust match probability
+
+4. Gravity Simulation:
+   - After match, apply gravity
+   - Drop pieces down until hitting piece or floor
+   - Handle cascading (pieces falling multiple rows)
+
+5. Match Removal:
+   - Remove matched pieces from board
+   - Track combo count for cascade system
+   - Generate bonus pieces for 4/5 matches
+
+Requirements:
+- Use enums for piece colors and types
+- Include GetValidMoves() method
+- Include GenerateNewBoard(float difficulty) method
+- Support easy mocking for testing
+
+Code Requirements:
+- Full C# implementation
+- Comment every major method
+- Include validation/error handling
+- Minimum 500 lines of production code
+
+---
+
+TASK 2: Cascade Calculator System
+------
+Generate CascadeCalculator.cs that:
+
+1. Cascade Detection:
+   - Track consecutive cascades in a single match sequence
+   - Increment cascade level on each new match from falling pieces
+   - Return cascade level (1, 2, 3, 4+)
+
+2. Cascade Scoring:
+   - Base cascade multipliers: 1x, 1.5x, 2x, 3x
+   - Add +10% per cascade level
+   - Apply multiplier to all cascade pieces
+   - Track total cascade score contribution
+
+3. ComboMeter System:
+   - Track meter fill percentage (0-100%)
+   - Fill rates: Match3=+10%, Match4=+20%, Match5=+35%, Cascade=+50%
+   - Activation: When full, apply 2x multiplier for 20 seconds
+   - Auto-reset after activation
+
+4. Scoring Algorithm:
+   ```
+   baseScore = pieceCount * scorePerPiece
+   cascadeMultiplier = GetCascadeMultiplier(cascadeLevel)
+   comboMeterBonus = isRedSurgeActive ? 2.0 : 1.0
+   finalScore = baseScore * cascadeMultiplier * comboMeterBonus
+   ```
+
+Code Requirements:
+- Method: CalculateCascadeLevel() → int
+- Method: CalculateCascadeScore(float baseScore, int cascadeLevel) → float
+- Method: UpdateComboMeter(float fillAmount) → bool (returns true if activated)
+- Method: GetComboMultiplier() → float
+- Include cascade animation trigger system
+
+---
+
+TASK 3: Match-3 Core Gameplay Loop
+------
+Generate GameplayCore.cs that orchestrates:
+
+1. Turn Flow:
+   - Player selects piece → API: AttemptMove(pieceA, pieceB)
+   - Swap pieces if adjacent
+   - Check for matches
+   - If matches: Remove → Cascade → Update score
+   - If no matches: Revert swap
+   - Check win/lose conditions
+
+2. Time/Move Tracking:
+   - Start: maxTime = 60 sec (configurable), maxMoves = 25 (configurable)
+   - Count elapsed time
+   - Decrement moves on each swap
+   - Lose if time runs out OR moves reach 0
+   - Win if score >= targetScore
+
+3. Event System:
+   - OnMatch(matchedPieces) → broadcast
+   - OnCascade(cascadeLevel) → broadcast
+   - OnTimeWarning(10 sec remaining) → broadcast
+   - OnGameEnd(bool won, int finalScore) → broadcast
+
+4. Difficulty Scaling:
+   - Input: stageNumber (1-1000+)
+   - Calculate: difficultyPercent = (stageNumber / 1000) * 100
+   - Apply to board generation
+   - Track player performance for balancing
+
+Code Requirements:
+- Main method: PlayStage(StageData stage) → StageResult
+- Async support for animations
+- Configurable time/moves limits
+- Event delegates for UI integration
+- Time management: don't use Time.deltaTime for gameplay logic (use fixed time)
+
+---
+
+TASK 4: Power-Up System
+------
+Generate PowerUpManager.cs that handles:
+
+1. Power-Up Data Model (9 types):
+   ```
+   Tier 1 (Common):
+   - ChronoBomb (+20 sec): 50 coins, no cooldown
+   - CoinBooster (+50% score 20s): 60 coins, no cooldown
+   - BrightSpark (Match4=auto bonus): 70 coins, no cooldown
+   
+   Tier 2 (Rare):
+   - Multiplier2x (all scores x2, 15s): 200 coins, 1x per match
+   - GoldenChain (destroy col+row): 180 coins, 1x per match
+   - FreezingGel (freeze opponent 10s): 220 coins, 1x per match
+   
+   Tier 3 (Epic):
+   - NuclearBomb (5x5 explosion): 500 coins, 1x per match
+   - FireStorm (burn red+orange): 480 coins, 1x per match
+   - CascadeInfinity (2x cascade 30s): 550 coins, 1x per match
+   ```
+
+2. Power-Up Application:
+   - Method: ActivatePowerUp(int powerUpId) → bool
+   - Check: Unlocked for current league? Used already this match?
+   - Apply effect to board/score
+   - Start cooldown timer if applicable
+
+3. Unlock Logic:
+   - Tier 1: Unlocked from stage 1
+   - Tier 2: Unlock at Silver League (PVP)
+   - Tier 3: Unlock at Gold League (PVP)
+   - Rare power-up: Unlock at day 30 (2h/day) OR VIP 10
+
+4. Shop Integration:
+   - Method: GetPowerUpPrice(int id) → (int coins, int orbes)
+   - Prices by tier + VIP discount logic
+
+Code Requirements:
+- Enum for PowerUpType (9 types)
+- PowerUpData scriptable object
+- Activation effects system
+- Cooldown tracking per power-up
+- VIP tier pricing (10% discount per VIP level)
+- Method: IsPowerUpAvailable(int id) → bool
+
+---
+
+================================================================================
+PHASE 2: PVP & RANKING SYSTEMS (Priority #2)
+================================================================================
+
+TASK 5: Trophy & Ranking System
+------
+Generate TrophySystem.cs that:
+
+1. Trophy Calculation Engine:
+   ```
+   Victory:
+   - If opponent_mmr > player_mmr: +40 + (difference * 0.5)
+   - If opponent_mmr ≈ player_mmr: +25
+   - Else: +10
+   - Win streak bonus: +5 per win in current streak (max +20)
+   
+   Defeat:
+   - If opponent_mmr > player_mmr: -5
+   - If opponent_mmr ≈ player_mmr: -15
+   - Else: -35 (anti-boosting harsh penalty)
+   ```
+
+2. League Calculation:
+   ```
+   Bronze:     0-299
+   Silver:     300-699
+   Gold:       700-1199
+   Platinum:   1200-1799
+   Diamond:    1800-2499
+   Master:     2500+
+   ```
+
+3. Matchmaking Algorithm:
+   ```
+   targetTrophies = playerTrophies ± (random * 10% ± winStreakBonus)
+   Ensure: trophy difference < 300 (max deviation)
+   If difference > 200: Extra points multiplier
+   If difference < 50: Reduced points
+   ```
+
+4. Weekly Reset:
+   - Every Sunday midnight UTC
+   - Store top 100 per league
+   - Calculate rewards based on final league
+   - Reset all player trophies (except history)
+   - Archive leaderboards for records
+
+5. Anti-Boosting Detection:
+   - Flag: Win rate > 95%
+   - Flag: Trophy gains > 200 per day consistently
+   - Flag: Win streak > 50 against same opponent
+   - Soft action: Require pause before next match
+
+Code Requirements:
+- Method: CalculateTrophyGain(int playerTrophies, int opponentTrophies, bool won) → int
+- Method: GetLeagueName(int trophies) → string
+- Method: GetCurrentWinStreak() → int
+- Method: ResetSeasonalData() → bool
+- Persist: PlayerTrophyHistory (for replays, stats)
+- Database schema for leaderboards
+
+---
+
+TASK 6: Ghost Play PVP System
+------
+Generate PVPGhostPlay.cs that:
+
+1. Match Recording:
+   - Record every player move: (timestamp, pieceA_pos, pieceB_pos, score)
+   - Store board state snapshots every 5 seconds
+   - Serialize moves to binary format (minimal storage)
+
+2. Replay System:
+   - Deserialize opponent moves
+   - Replay opponent moves in real-time (with slight delay)
+   - Show opponent's board + score live
+   - Compare final scores
+
+3. Ghost Rendering:
+   - Draw opponent's board in semi-transparent overlay
+   - Show opponent's pieces moving
+   - Display opponent's live score
+   - Timeline: can rewind to see opponent's moves
+
+4. Async Match Management:
+   - Player 1 plays → save moves to server
+   - Player 2 downloads moves → plays against ghost
+   - Compare scores → winner determined
+   - Store result for leaderboard
+
+Code Requirements:
+- Struct: PlayerMove { timestamp, pieceA, pieceB, resultingScore }
+- Method: RecordMove(Vector2Int from, Vector2Int to) → void
+- Method: SerializeMoves() → byte[]
+- Method: LoadOpponentGhost(byte[] moveData) → void
+- Method: GetMatchResult() → (winnerId, score1, score2)
+- Networking: POST /pvp/match/record, GET /pvp/match/{matchId}
+
+---
+
+TASK 7: Matchmaking Engine
+------
+Generate MatchmakingEngine.cs that:
+
+1. Queue System:
+   - Player requests match
+   - Add to queue with metadata: (playerId, trophies, winStreak, region)
+   - Wait for similar opponent (timeout: 30 seconds)
+
+2. Matching Algorithm:
+   ```
+   targetRange = [playerTrophies - 100, playerTrophies + 100]
+   candidates = FindPlayersInRange(targetRange, excluding_self)
+   best = SelectBestMatch(candidates, using_win_streak + region)
+   ```
+
+3. Fairness Checks:
+   - Trophy difference validation
+   - Region/latency check (optional)
+   - Prevent rematches within 5 minutes
+   - Prevent duplicate opponents > 3x per hour
+
+4. Post-Match:
+   - Calculate final trophies
+   - Update leaderboard
+   - Award rewards based on trophy change
+   - Log match for anti-cheat analysis
+
+Code Requirements:
+- Method: RequestMatch(int playerId) → waiting (or matchId if found)
+- Method: CancelMatchRequest(int playerId) → bool
+- Method: FindOpponent() → int opponentId or null
+- Queue management (priority queue by trophy delta)
+- Timeout handling (30 sec without match → cancel + re-enter)
+
+---
+
+================================================================================
+PHASE 3: PROGRESSION & SYSTEMS (Priority #3)
+================================================================================
+
+TASK 8: Story Campaign Manager
+------
+Generate StoryManager.cs that:
+
+1. Stage Data Structure:
+   ```
+   StageData {
+      id (1-1000+)
+      chapter
+      boss (bool)
+      timeLimit (seconds)
+      moveLimit (count)
+      targetScore (int)
+      difficulty (0-100%)
+      character (name)
+      dialogue (cinematics)
+   }
+   ```
+
+2. Stage Progression:
+   - Load stage data from database
+   - Check if player meets level requirements
+   - Track completion status (played, won, lost, abandoned)
+   - Unlock next stage only if current won
+   - Support replay (can replay beaten stage anytime)
+
+3. Story Progression:
+   - Calculate which act/chapter from stage ID
+   - Track character unlocks by stage
+   - Trigger dialogues/cinematics at key points
+   - Handle story branching (choices affect story)
+
+4. Difficulty Curve:
+   - Stage 1: difficulty = 0%
+   - Stage 500: difficulty = 50%
+   - Stage 1000: difficulty = 100%
+   - Progressive scaling: difficulty = (stageId / 1000) * 100
+
+5. Character Unlock System:
+   - Stage 50: Lyra joins
+   - Stage 80: Kael joins
+   - Stage 250: Mira joins
+   - Stage 280: Thorin joins
+   - Stage 500: Zara joins
+   - Stage 550: Elian joins
+   - Stage 750: Mark joins (optional)
+   - Stage 800: Soren joins (optional)
+
+Code Requirements:
+- Method: LoadStage(int stageId) → StageData
+- Method: CompleteStage(int stageId, bool won, int finalScore) → bool
+- Method: GetNextStage(int currentStage) → int
+- Method: GetProgressionPercent() → float (0-100)
+- Database: 1000+ stage configurations
+- Cinematic trigger system (between chapters every ~10 stages)
+
+---
+
+TASK 9: Achievement & Collection System
+------
+Generate AchievementSystem.cs that:
+
+1. Achievement Types:
+   - Story: Reach stage 100/500/1000, defeat boss X
+   - Gameplay: 100 PVP wins, trigger 50 cascades, reach Diamond
+   - Collection: Unlock 10 cosmetics, complete power-up set
+
+2. Collection Book:
+   - Organize achievements into PAGES (5-10 per page)
+   - Completion reward: +5% coins per page (stacking)
+   - Track page progress (visual bar)
+   - Unlock exclusive cosmetics on page completion
+
+3. Unlock Logic:
+   - Method: CheckAchievementUnlock(string achievementId) → bool
+   - Track progress toward multi-step achievements
+   - Broadcast OnAchievementUnlocked(id) event
+
+4. Rewards System:
+   - Achievement unlock: Coins + Orbes + cosmetics
+   - Page completion: +5% coins permanent bonus (cosmetic effect)
+   - Display reward preview before unlock
+
+Code Requirements:
+- Enum: AchievementType (Story, Gameplay, Collection)
+- AchievementData scriptable objects (50+ total)
+- Method: UnlockAchievement(string id) → RewardData
+- Method: GetPageCompletion(int pageNum) → float (0-1)
+- Method: GetTotalCoinBonus() → float (sum all pages)
+- Persistence: achievement_progress.json with unlock timestamps
+
+---
+
+TASK 10: Lives & Stamina System
+------
+Generate StaminaManager.cs that:
+
+1. Lives Tracking:
+   - Start: 2 free lives
+   - Track recharge times per life
+   - Each life takes ~30 minutes to recharge (configurable)
+
+2. Recharge Purchase Logic:
+   ```
+   Life 1-2: Cost in Coins (standard: 100 coins)
+   Life 3+: Cost in Orbes (escalating):
+      Life 3: 100 orbes
+      Life 4: 125 orbes (100 * 1.25)
+      Life 5: 156 orbes (125 * 1.25)
+      ...continuing with -25% malus per purchase
+   ```
+
+3. VIP 10 Privilege:
+   - Get 1 free continue per day
+   - Continue = replay last failed stage with same conditions
+   - Resets daily at UTC midnight
+
+4. Shop Integration:
+   - Buy lives immediately (no wait)
+   - Display next recharge timer
+   - Offer bulk buy discount
+
+Code Requirements:
+- Method: HasLives() → bool
+- Method: ConsumeLive() → bool (fails if no lives)
+- Method: BuyLives(int count) → bool (requires coins/orbes)
+- Method: GetRechargeTimer() → float (seconds until next free life)
+- Method: GetContinueCount() → int (remaining continues today)
+- Persistence: lives_data.json with timestamps
+
+---
+
+================================================================================
+PHASE 4: SOCIAL & MONETIZATION (Priority #4)
+================================================================================
+
+TASK 11: Guild System
+------
+Generate GuildManager.cs that:
+
+1. Guild Creation/Management:
+   - Create guild: cost 100 coins, needs name
+   - Max 20 members
+   - Guild levels 1-20
+   - Track donations per member
+
+2. Guild Levels & Donations:
+   - Level 1: Base
+   - Each level requires donations:
+      Donation 1 (Level 2): Coins (standard: 500)
+      Donations 2-20: Orbes (increasing cost -25% per):
+         Donation 2: 100 orbes
+         Donation 3: 125 orbes
+         ...continuing pattern
+   - Tech tree unlocks on level-up
+
+3. Guild Ranking:
+   - Rank by sum of all members' PVP trophies
+   - Weekly leaderboard (Sunday reset)
+   - Top 100 guilds get rewards
+   - Distribute rewards to all members evenly
+
+4. Guild Boss System:
+   - 1 boss per week
+   - All 20 members can attack
+   - Boss HP = total_hp_scaled_by_difficulty
+   - Each member: submit score, counts toward cumulative damage
+   - If cumulative_score >= boss_hp: victory, distribute rewards
+   - Boss difficulty escalates (Boss 1 easy, Boss N hard)
+
+Code Requirements:
+- Class: Guild { id, name, level, members[], totalTrophies }
+- Class: GuildMember { playerId, role, joinDate, totalDonations }
+- Method: CreateGuild(string name) → Guild
+- Method: JoinGuild(int guildId) → bool
+- Method: DonateTechPoints(int amount) → bool
+- Method: SubmitBossDamage(int damage) → bool
+- Method: CalculateGuildRank() → int
+- Leaderboard caching (recalc weekly)
+
+---
+
+TASK 12: Shop & Monetization System
+------
+Generate ShopSystem.cs that:
+
+1. Shop Inventory:
+   - Power-ups (rotating daily, 5-8 items)
+   - Coins packages
+   - Orbes packages (with pricing logic from GDD)
+   - Cosmetics (permanent or limited)
+   - Lives packs
+
+2. Daily Refresh:
+   - Auto-refresh at UTC midnight
+   - Randomize power-up selection (weighted by tier)
+   - Player can refresh manually with Orbes (cost: 50 orbes)
+
+3. Purchase Logic:
+   - Check player has sufficient funds (coins/orbes/real money)
+   - Execute purchase
+   - Deduct currency
+   - Add item to inventory
+   - Log transaction for analytics
+
+4. Orbes Packing:
+   - Implement pricing from GDD (74 orbes @ 0.99€, etc.)
+   - Calculate bonus orbes (Pack 2 = +10, etc.)
+   - Track purchase history (3x same pack = +20% bonus)
+   - Show clear pricing (obfuscated math intentional)
+
+5. Real Money Integration:
+   - Unity IAP support
+   - Validate receipts
+   - Store bundle mapping (SKU → orbes + bonus)
+
+Code Requirements:
+- Method: RefreshShop() → void
+- Method: BuyItem(int itemId, PaymentMethod) → bool
+- Method: GetShopItems() → List<ShopItem>
+- Method: CalculateOrbePricing(int packLevel) → (orbes, priceEUR)
+- Payment enum: Coins, Orbes, RealMoney
+- Transaction logging for monetization analytics
+
+---
+
+TASK 13: VIP & Progression System
+------
+Generate VIPSystem.cs that:
+
+1. VIP Tier Calculation:
+   - Based on total lifetime spending
+   - 10 tiers (1.50€ to 10000€)
+   - Track cumulative spending in database
+
+2. VIP Benefits:
+   ```
+   VIP 1  (1.50€):  +15% coins/stage
+   VIP 2  (5€):     +15% coins + 1 free life/day
+   VIP 3  (20€):    +20% coins + basic cosmetics
+   VIP 4  (50€):    +25% coins + speedup x1.2
+   VIP 5  (100€):   +30% coins + rare cosmetics
+   VIP 6  (500€):   +35% coins + cosmetics + 2x event rewards
+   VIP 7  (1000€):  +40% coins + 5% orbes gains + skip 1 ad/day
+   VIP 8  (2000€):  +45% coins + 10% orbes gains + continue 1x/day
+   VIP 9  (5000€):  +50% coins + 15% orbes gains + steal power-up 60%
+   VIP 10 (10000€): +60% coins + 20% orbes gains + rare power-up + steal 75%
+   ```
+
+3. Benefit Application:
+   - Apply multipliers to coin rewards
+   - Grant cosmetics unlocks
+   - Modify power-up steal chance (PVP)
+   - Auto-unlock rare power-up at VIP 10
+
+4. UI Display:
+   - Show current VIP tier + spending progress to next tier
+   - Highlight VIP-exclusive items in shop
+   - Badge on profile
+
+Code Requirements:
+- VipTier enum (1-10)
+- VipBenefit data struct
+- Method: GetPlayerVipTier(int playerId) → VipTier
+- Method: ApplyVipBonuses(float baseCoins) → float
+- Method: CanStealPowerUp() → bool (VIP 9-10 only)
+- Method: GetOrbeBonusMultiplier() → float
+- Persistence: vip_status.json
+
+---
+
+TASK 14: Anti-Cheat Implementation
+------
+Generate AntiCheatManager.cs that:
+
+1. Score Validation:
+   - Verify score matches board state
+   - Detect impossible cascades
+   - Check for timestamp tampering
+   - Flag scores > 1000x average for player
+
+2. Pattern Detection:
+   - Win rate > 95% over 50 games: flag
+   - Win rate > 85% against specific opponent: flag
+   - Sudden +200 trophy jump: flag
+   - Device fingerprinting: multiple accounts same device
+
+3. Move Validation:
+   - Server-side verify each move was valid
+   - Check move timing (min 200ms between moves)
+   - Validate piece positions
+
+4. Punishment:
+   - First offense: Warning + 1 day temp ban + trophy freeze
+   - Second: 7 day ban + 50% trophy reset
+   - Third: Permanent ban
+   - Severe (cheating detected): Immediate permaban
+
+Code Requirements:
+- Method: ValidateScore(int score, BoardState boardBefore) → bool
+- Method: ValidateMove(Vector2Int from, Vector2Int to) → bool
+- Method: FlagSuspiciousActivity(int playerId, string reason) → void
+- Method: EnforcePunishment(int playerId, int offenseCount) → bool
+- Logging: Store all flagged activities for review
+- Server-side validation required (not client-side)
+
+---
+
+================================================================================
+PHASE 5: UI & POLISH (Priority #5)
+================================================================================
+
+TASK 15: UI System Integration
+------
+Generate UIController.cs & related UI scripts:
+
+1. Main Menu UI:
+   - Hero selection (male/female)
+   - Login button (Google Play Games)
+   - Quick play buttons (Story/PVP/Shop/Guild)
+   - Settings icon
+   - Profile display
+
+2. Gameplay UI (Story Mode):
+   - Score display (top center)
+   - Timer + Moves remaining (corners)
+   - Lives indicator
+   - Power-up buttons
+   - Pause menu
+   - Win/Lose screens with rewards
+
+3. PVP UI:
+   - Matchmaking loading
+   - vs Screen (opponent profile)
+   - Ghost opponent board overlay
+   - Score comparison live
+   - Results screen
+
+4. Shop UI:
+   - Tabs: Power-ups, Coins, Cosmetics
+   - Refresh button
+   - Purchase confirmation
+   - VIP indicator on items
+
+5. Guild UI:
+   - Guild info panel
+   - Members leaderboard
+   - Chat interface
+   - Boss fight dashboard
+   - Donation UI
+
+6. Settings/Profile:
+   - Notification preferences
+   - Sound/haptic settings
+   - Language selector
+   - VIP status display
+   - Account info
+   - Logout button
+
+Code Requirements:
+- Canvas-based UI (Unity UI)
+- Responsive design (portrait only)
+- Smooth transitions between screens
+- Button feedback (click animations)
+- Loading indicators
+- Proper error dialogs
+
+---
+
+TASK 16: Audio System
+------
+Generate AudioManager.cs:
+
+1. Sound Effects:
+   - Piece match (different for Match3/4/5)
+   - Cascade trigger
+   - Cascade complete (satisfying sound)
+   - Button clicks
+   - Win/Lose fanfares
+   - Power-up activation
+   - Trophy gain/loss
+   - Chat message notification
+
+2. Music:
+   - Main menu theme (loop)
+   - Story mode background (varies by act)
+   - PVP battle music (intense)
+   - Win fanfare (short clip)
+   - Lose music (sad)
+
+3. Volume Control:
+   - Master volume
+   - SFX volume
+   - Music volume
+   - Toggle in settings
+   - Persist volume preferences
+
+Code Requirements:
+- Method: PlaySFX(string soundId) → void
+- Method: PlayMusic(string musicId, bool loop) → void
+- Method: SetVolume(float masterVol, float sfxVol, float musicVol) → void
+- Use AudioMixer for professional audio control
+- Support muting for notification preferences
+
+---
+
+================================================================================
+PHASE 6: BACKEND & NETWORKING (Priority #6)
+================================================================================
+
+TASK 17: Firebase Integration
+------
+Generate FirebaseManager.cs:
+
+1. Authentication:
+   - Google Play Games sign-in
+   - Firebase Email/Password auth fallback
+   - Anonymous auth for guest mode
+   - Session management
+   - Token refresh
+
+2. Real-time Database:
+   - Player profile sync
+   - Chat messages (guild chat)
+   - Trophy updates
+   - Achievement tracking
+   - Match results storage
+
+3. Cloud Functions:
+   - Weekly leaderboard calculation
+   - Reward distribution
+   - Anti-cheat flagging
+   - Seasonal reset
+
+Code Requirements:
+- Method: SignIn(provider) → Task<User>
+- Method: SignOut() → Task
+- Method: SyncPlayerData(PlayerData) → Task
+- Method: UploadMatchResult(matchData) → Task
+- Listen for real-time updates
+- Offline queue for offline actions (when online again, sync)
+
+---
+
+TASK 18: REST API Client
+------
+Generate ServerAPIClient.cs:
+
+1. Endpoints to Implement:
+   - POST /auth/login → validate token
+   - GET /player/{id}/stats → fetch player stats
+   - POST /pvp/match/record → save match
+   - GET /leaderboard/weekly → fetch rankings
+   - POST /guild/boss/damage → submit damage
+   - POST /achievement/unlock → log achievement
+   - GET /story/{stageId}/data → fetch stage config
+   - POST /admin/report/cheat → report cheat
+
+2. Request/Response Handling:
+   - Retry logic (3 attempts)
+   - Timeout (10 seconds)
+   - Error handling (400, 401, 403, 500)
+   - Rate limiting awareness
+
+3. Serialization:
+   - JSON serialization (Newtonsoft.Json)
+   - Versioning support
+   - Backward compatibility
+
+Code Requirements:
+- HttpClient-based implementation
+- Async/await patterns
+- Request queuing
+- Response validation
+- Error logging
+
+---
+
+================================================================================
+FINAL DELIVERABLES & REQUIREMENTS
+================================================================================
+
+COMPLETION CHECKLIST:
+
+1. Core Gameplay:
+   [ ] BoardManager working 100%
+   [ ] Match detection accurate
+   [ ] Cascade system complete
+   [ ] Power-ups fully functional
+   [ ] Story campaign fully playable (all 1000+ stages data)
+
+2. PVP & Social:
+   [ ] Trophy system accurate
+   [ ] Ghost play working
+   [ ] Matchmaking fair
+   [ ] Guild system fully featured
+   [ ] Anti-cheat effective
+
+3. Monetization:
+   [ ] Shop functional
+   [ ] IAP working
+   [ ] VIP tier system accurate
+   [ ] Reward calculations correct
+
+4. Technical:
+   [ ] Firebase integration complete
+   [ ] Server API client working
+   [ ] All data persisted correctly
+   [ ] Performance optimized (60 FPS target)
+
+5. Polish:
+   [ ] All UI responsive
+   [ ] Audio playing correctly
+   [ ] No console errors
+   [ ] Proper error handling everywhere
+
+PERFORMANCE TARGETS:
+- Game load time: < 3 seconds
+- Match start: < 1 second
+- UI response: < 100ms
+- Network calls: < 2 seconds (with retry)
+- Frame rate: 60 FPS stable
+
+CODE QUALITY:
+- All methods documented
+- No hardcoded values (use configs)
+- Proper error handling everywhere
+- Logging for debugging
+- Unit test coverage > 50%
+
+DELIVERY FORMAT:
+- Complete C# scripts (production ready)
+- Organized into folder structure from Tech Architecture section
+- Configuration files (JSON for stage data, power-up data, etc.)
+- Database schema (SQL for server-side)
+- API documentation (endpoints, request/response formats)
+
+================================================================================
+IMPORTANT NOTES FOR CLAUDE CODE:
+================================================================================
+
+1. This is a PRODUCTION GAME. Quality must be high.
+2. All systems must be interconnected and balanced.
+3. No placeholder code - everything must be functional.
+4. Follow the exact specifications from CRUSH_ROYALE_GAME_DESIGN_DOC.md.
+5. If you encounter ambiguity, prioritize fairness and player experience.
+6. Test all calculations (trophy, cascade, pricing) manually before submitting.
+7. Include comments explaining complex algorithms.
+8. Use enums and constants, not magic numbers.
+
+TIMELINE ESTIMATE:
+- Phase 1 (Foundation): ~2 weeks
+- Phase 2 (PVP): ~1.5 weeks
+- Phase 3 (Progression): ~1.5 weeks
+- Phase 4 (Social/Monetization): ~2 weeks
+- Phase 5 (UI/Polish): ~1.5 weeks
+- Phase 6 (Backend): ~1.5 weeks
+- TOTAL: ~10 weeks (iterative with testing)
+
+================================================================================
+BEGIN IMPLEMENTATION
+================================================================================
+
+Start with TASK 1 (BoardManager). Each task builds on previous ones.
+Generate complete, functional code for EACH task.
+When complete with all tasks, generate integration tests and build system.
+
+Good luck! 🚀
+
+================================================================================

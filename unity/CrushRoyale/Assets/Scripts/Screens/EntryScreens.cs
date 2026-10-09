@@ -431,7 +431,7 @@ namespace CrushRoyale.Game.Screens
             Widgets.Fade(Root, top: true, 0.26f, 0.8f);
             Widgets.Fade(Root, top: false, 0.34f, 0.9f);
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
-            safe.gameObject.AddComponent<SafeArea>();
+            safe.gameObject.AddComponent<SafeAreaPadding>();
 
             ProfileDto profile = Game.Backend.Profile;
             PlayerSettings settings = Game.Save.Settings;

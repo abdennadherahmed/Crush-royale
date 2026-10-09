@@ -404,29 +404,34 @@ namespace CrushRoyale.Game.UI
         /// <summary>Narrower than this and the rect is simply not laid out yet, whatever the number says.</summary>
         private const float MinCellWidth = 40f;
 
-        private GridLayoutGroup _grid;
+        /// <summary>
+        /// A grid that has been laid out spans the list, which on any phone is several hundred points wide. Anything
+        /// narrower is still the 100 px every freshly created rect carries before the first layout pass.
+        ///
+        /// The per-column test alone was not enough. Two columns on that authored 100 px leave 80 usable, which
+        /// clears 2 x 40 and reads as an honest measurement: the wallet tiles of the bag locked in 40 px cells and
+        /// rendered as vertical slivers, one character per line, while the three column grids beside them were saved
+        /// by their own arithmetic.
+        /// </summary>
+        private const float MinLaidOutWidth = 200f;
 
-        /// <summary>True once a real width has been measured, so the per-frame retry can stop.</summary>
-        private bool _settled;
+        private GridLayoutGroup _grid;
 
         public static GridFit On(GridLayoutGroup grid)
         {
             GridFit fit = grid.GetComponent<GridFit>() ?? grid.gameObject.AddComponent<GridFit>();
             fit._grid = grid;
-            fit._settled = false;
             fit.Refresh();
             return fit;
         }
 
         private void OnEnable()
         {
-            _settled = false;
             Refresh();
         }
 
         private void OnRectTransformDimensionsChange()
         {
-            _settled = false;
             Refresh();
         }
 
@@ -441,13 +446,14 @@ namespace CrushRoyale.Game.UI
         /// </summary>
         private void LateUpdate()
         {
-            if (!_settled)
-            {
-                Refresh();
-            }
+            Refresh();
         }
 
-        private void Refresh()
+        /// <summary>
+        /// Recomputes the cell from the width the rect has right now. Public so a tool that drives the layout by
+        /// hand, with no frames in which LateUpdate could run, can ask for it once the canvas has a width to give.
+        /// </summary>
+        public void Refresh()
         {
             if (_grid == null)
             {
@@ -455,15 +461,11 @@ namespace CrushRoyale.Game.UI
             }
             float width = ((RectTransform)transform).rect.width;
             int columns = Mathf.Max(1, _grid.constraintCount);
-            if (width <= 1f || _grid.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
+            if (width < MinLaidOutWidth || _grid.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
             {
                 return;
             }
             float usable = width - _grid.padding.left - _grid.padding.right - _grid.spacing.x * (columns - 1);
-            if (usable >= columns * MinCellWidth)
-            {
-                _settled = true;
-            }
             if (usable < columns * MinCellWidth)
             {
                 // The rect is not laid out yet: padding and spacing alone are wider than it. Computing from that gave

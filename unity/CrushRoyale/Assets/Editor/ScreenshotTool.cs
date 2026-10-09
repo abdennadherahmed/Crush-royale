@@ -195,6 +195,12 @@ namespace CrushRoyale.EditorTools
                 // Twice: layout groups and content-size fitters settle on the second pass, and the first render is
                 // what makes the dynamic font build the glyphs the second one actually draws.
                 Canvas.ForceUpdateCanvases();
+                // A grid sizes its cells from the width it measures, and in the game that measurement is retried
+                // every frame. A tool has no frames, so it asks once the canvas has a real width to hand over.
+                foreach (GridFit fit in canvas.GetComponentsInChildren<GridFit>(true))
+                {
+                    fit.Refresh();
+                }
                 if (camera != null)
                 {
                     camera.Render();

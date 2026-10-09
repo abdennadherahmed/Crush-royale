@@ -76,7 +76,7 @@ namespace CrushRoyale.Game.UI
                 Widgets.Backdrop(Root, BackdropScene, 0.45f);
             }
             RectTransform safe = UIFactory.Stretch(UIFactory.Rect("Safe", Root));
-            safe.gameObject.AddComponent<SafeArea>();
+            safe.gameObject.AddComponent<SafeAreaPadding>();
 
             RectTransform bar = UIFactory.Anchor(UIFactory.Rect("TitleBar", safe), 0, 0.92f, 1, 1);
             Widgets.Fade(Root, true, 0.16f, 0.85f);
