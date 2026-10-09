@@ -30,20 +30,37 @@ namespace CrushRoyale.EditorTools
             SpriteAtlasBuilder.BuildAll();
 
             CrushRoyaleSetup.ConfigureAndroid();
-            EditorUserBuildSettings.buildAppBundle = appBundle;
             if (!File.Exists(BootScenePath))
             {
                 CrushRoyaleSetup.CreateBootScene();
             }
 
             ApplyReleaseSigning();
-            ApplyBuildSpeed(!appBundle && GetArgument("-fastTestBuild") == "true");
 
             string versionCode = GetArgument("-androidVersionCode");
             if (int.TryParse(versionCode, out int code) && code > 0)
             {
                 PlayerSettings.Android.bundleVersionCode = code;
             }
+
+            Build(output, appBundle, !appBundle && GetArgument("-fastTestBuild") == "true");
+
+            // Google Play has not accepted an APK for a new application since 2021, and the phone cannot install a
+            // bundle, so a release needs both. Built in the same editor session: installing Unity and importing the
+            // project is most of a run's time, and doing it twice would double a thirty minute build to no purpose.
+            if (!appBundle && GetArgument("-alsoBundle") == "true")
+            {
+                string bundle = Path.ChangeExtension(output, ".aab");
+                Debug.Log("CIBuild: the APK is done, building the Play bundle beside it at " + bundle);
+                Build(bundle, true, false);
+            }
+        }
+
+        /// <summary>One build, to one file, in the format the extension asked for.</summary>
+        private static void Build(string output, bool appBundle, bool fastTest)
+        {
+            EditorUserBuildSettings.buildAppBundle = appBundle;
+            ApplyBuildSpeed(fastTest);
 
             BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {

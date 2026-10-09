@@ -131,6 +131,7 @@ jobs:
             -customBuildPath ${{ github.workspace }}/build/Android/CrushRoyale.${{ inputs.format || 'apk' }}
             -androidVersionCode ${{ github.run_number }}
             -fastTestBuild ${{ (inputs.format || 'apk') == 'apk' && 'true' || 'false' }}
+            -alsoBundle ${{ (inputs.format || 'apk') == 'apk' && 'true' || 'false' }}
 
       - name: Upload build
         if: success()
@@ -138,6 +139,17 @@ jobs:
         with:
           name: CrushRoyale-${{ inputs.format || 'apk' }}-${{ github.run_number }}
           path: build/Android/CrushRoyale.${{ inputs.format || 'apk' }}
+          retention-days: 14
+
+      # The same run also produces the bundle Google Play wants, from the same code and the same key, so the
+      # version a tester installs by hand and the version on the store can never drift apart.
+      - name: Upload Play bundle
+        if: success() && (inputs.format || 'apk') == 'apk'
+        uses: actions/upload-artifact@v7
+        with:
+          name: CrushRoyale-aab-${{ github.run_number }}
+          path: build/Android/CrushRoyale.aab
+          if-no-files-found: warn
           retention-days: 14
 
       - name: Publish for in-game updates

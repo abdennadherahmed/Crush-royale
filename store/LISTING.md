@@ -17,6 +17,8 @@ deciding. Limits are Google's: 30 characters for the title, 80 for the short des
 | Tags | Match 3, Casual, Multiplayer |
 | Free or paid | Free, with in-app purchases |
 | Contains ads | No |
+| Developer name (public) | Crush Royale Dev. |
+| Developer account | personal, id 5023382387031574788 |
 | Support email | abdennadherahmed975@gmail.com |
 | Privacy policy | https://crushroyale-legal.onrender.com/privacy.html |
 | Terms | https://crushroyale-legal.onrender.com/terms.html |
@@ -170,15 +172,17 @@ abdennadherahmed975@gmail.com. Play requires a deletion route; an in-app button 
 **Only you can do these.** They need your identity, your card and your signature, and I am not able to act on
 them for you:
 
-1. Create the developer account at https://play.google.com/console/signup, personal type.
-2. Accept the Developer Distribution Agreement.
-3. Pay the one-time 25 USD registration fee.
-4. Pass identity verification: an identity document, your address, and a phone number. Google takes between a
-   few hours and a few days.
+1. ~~Create the developer account~~ done: "Crush Royale Dev.", personal, 9 October 2026.
+2. ~~Accept the Developer Distribution Agreement~~ done.
+3. ~~Pay the one-time 25 USD registration fee~~ done.
+4. The three verifications the console now blocks everything on, including the button that creates the app:
+   an identity document, signing in to the Play Console app on a real Android phone, and confirming the
+   contact phone number. Google takes between a few hours and a few days over the first one.
 
 **Then, with the account open**, the listing above is copy and paste, and the release itself needs:
 
-5. An **Android App Bundle** (.aab), not an APK. Play has not accepted APKs for new apps since August 2021.
+5. ~~An Android App Bundle (.aab)~~ every build now produces one beside the APK, from the same code and the
+   same key, as artifact `CrushRoyale-aab-<run>`.
 6. **Play App Signing**: let Google hold the signing key. The upload key is the keystore already in the CI
    secrets.
 7. A **closed test with at least 12 testers for 14 days** before a personal developer account may go to
