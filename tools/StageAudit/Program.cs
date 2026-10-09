@@ -40,7 +40,20 @@ namespace CrushRoyale.Tools.StageAudit
             public double[] WinRate = new double[3];
             public double[] WinRateWithAssist = new double[3];
             public long[] AvgScore = new long[3];
+
+            /// <summary>Expert win rate on a gated stage with the loadout proxy below. Only filled for gated stages.</summary>
+            public double WinRateWithBoosts;
         }
+
+        /// <summary>
+        /// What three equipped boosts are worth, expressed in moves, because the bots cannot press a boost.
+        ///
+        /// A Chrono Bomb is twenty seconds, a Multiplier doubles a stretch of the run, a Bright Spark seeds bonus
+        /// gems: together they are worth roughly a third of a run, and a run is about twenty moves. It is a proxy
+        /// and it says so, but it is the only thing standing between "this stage needs boosts" and "this stage
+        /// cannot be beaten", and those two must never be confused.
+        /// </summary>
+        private const int BoostProxyMoves = 12;
 
         private static int Main(string[] args)
         {
@@ -87,6 +100,22 @@ namespace CrushRoyale.Tools.StageAudit
                     report.WinRate[p] = wins / (double)attempts;
                     report.WinRateWithAssist[p] = winsAssist / (double)attempts;
                     report.AvgScore[p] = score / attempts;
+                }
+                if (StageCatalog.NeedsBoosts(stage))
+                {
+                    // A gated stage is meant to defeat a bare-handed run, so the only question worth asking about
+                    // it is whether a loadout carries it. Asked of the average bot, not the expert: the stage has
+                    // to fall for the player who brings the right boosts, not only for the one who plays perfectly.
+                    int wins = 0;
+                    for (int a = 0; a < attempts; a++)
+                    {
+                        ulong seed = (ulong)(id * 7919 + 104729 + a * 1299709);
+                        if (Play(stage, balance, Profiles[1], seed, StoryManager.MaxAssistMoves + BoostProxyMoves).Won)
+                        {
+                            wins++;
+                        }
+                    }
+                    report.WinRateWithBoosts = wins / (double)attempts;
                 }
                 reports[id] = report;
             });
@@ -390,7 +419,11 @@ namespace CrushRoyale.Tools.StageAudit
                 sb.AppendLine($"| {name} | {group.Count} | {Pct(group.Average(r => r.WinRate[0]))}% | {Pct(group.Average(r => r.WinRate[1]))}% | {Pct(group.Average(r => r.WinRate[2]))}% |");
             }
 
-            List<StageReport> impossible = reports.Skip(1).Where(r => r.WinRateWithAssist[2] == 0).ToList();
+            // Gated stages are excluded here and checked below against a loadout instead: since they ask for more
+            // than a perfect bare-handed run by design, listing them as "the expert never wins" would bury every
+            // real accident under a hundred deliberate ones.
+            List<StageReport> impossible = reports.Skip(1)
+                .Where(r => r.WinRateWithAssist[2] == 0 && !StageCatalog.NeedsBoosts(r.Stage)).ToList();
             sb.AppendLine();
             sb.AppendLine($"## Stages the expert bot never wins, even with the assist: {impossible.Count}");
             foreach (StageReport r in impossible.Take(60))
@@ -417,6 +450,17 @@ namespace CrushRoyale.Tools.StageAudit
             sb.AppendLine("|---|---|---|---|");
             sb.AppendLine($"| {Pct(gated.Average(r => r.WinRate[0]))}% | {Pct(gated.Average(r => r.WinRate[1]))}%"
                 + $" | {Pct(gated.Average(r => r.WinRate[2]))}% | {gated.Count(r => r.WinRateWithAssist[2] == 0)} |");
+
+            List<StageReport> walled = gated.Where(r => r.WinRateWithBoosts == 0).ToList();
+            sb.AppendLine();
+            sb.AppendLine($"An average player carrying a loadout (worth about {BoostProxyMoves} moves) wins "
+                + $"{Pct(gated.Average(r => r.WinRateWithBoosts))}% of them.");
+            sb.AppendLine($"Gated stages even a loadout does not carry: {walled.Count}");
+            foreach (StageReport r in walled.Take(40))
+            {
+                sb.AppendLine($"- Stage {r.Stage.Id} ({string.Join(" + ", r.Stage.Objectives.Select(o => o.Type))}, "
+                    + $"target {r.Stage.TargetScore}): average scores {r.AvgScore[1]}, expert {r.AvgScore[2]}");
+            }
 
             // Spikes: a stage much harder than the average of its 10 neighbours (average player, with assist).
             var spikes = new List<string>();

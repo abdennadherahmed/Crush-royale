@@ -51,7 +51,7 @@ namespace CrushRoyale.Core.Story
         /// come back to with a Chrono Bomb and a Multiplier, and win -- which is the point. It is deliberately not
         /// higher: a wall nobody can climb is not difficulty, it is a dead end.
         /// </summary>
-        private const int BoostGateCeilingPermille = 2050;
+        private const int BoostGateCeilingPermille = 1700;
 
         /// <summary>
         /// First stage allowed to be boost-gated.
@@ -62,18 +62,19 @@ namespace CrushRoyale.Core.Story
         /// </summary>
         private const int BoostGateFromStage = 30;
 
-        /// <summary>
-        /// How far above a perfect bare-handed run a gated target may sit.
+/// <summary>
+        /// How far above a perfect bare-handed run a gated target sits.
         ///
-        /// Above 1000 the stage cannot be won without a loadout at all -- which is the whole point of the gate, and
-        /// the reason the audit stops treating these stages as broken. The margin is small on purpose: a single
-        /// Chrono Bomb or Multiplier closes it, so the stage falls on the second attempt with the right boost, not
-        /// on the tenth with luck.
+        /// It used to be held below 1000, which kept these stages winnable with nothing in hand. That was the whole
+        /// complaint: a player who plays well cleared the hardest stage of every chapter bare-handed and the gate
+        /// was a sign on an open door. Above 1000 the stage asks for more than a flawless run produces, so the rest
+        /// has to come from the loadout. The margin stays small on purpose: one Chrono Bomb or one Multiplier
+        /// closes it, so the stage falls on the second attempt with the right boost, not on the tenth with luck.
         /// </summary>
-        private const int BoostGatePerfectCapPermille = 985;
+        private const int BoostGatePerfectCapPermille = 1060;
 
         /// <summary>Share of a perfect run's gems, ice or stones a gated stage demands. Over 1000 by design.</summary>
-        private const int BoostGateObstaclePermille = 1250;
+        private const int BoostGateObstaclePermille = 1340;
 
         private const int OnboardingEase = 41;
 
@@ -612,6 +613,26 @@ namespace CrushRoyale.Core.Story
         /// </summary>
         private const int HardTierCeilingPermille = 1220;
 
+        /// <summary>
+        /// What a gated stage may ask for, from the two measurements of a mid run.
+        ///
+        /// The gate is a multiple of what a mid player reaches, and on a swingy board that median is a fiction:
+        /// five gated stages asked for 1.7 times a median run that the audit never reproduced, which no loadout
+        /// could close. Taking the lower of the two readings keeps the gate at a distance a loadout actually
+        /// covers, on stable boards and unstable ones alike.
+        /// </summary>
+        private const int GatedBadLuckCeilingPermille = 1950;
+
+        private static long GateReach(int id)
+        {
+            long gate = (long)StageTuning.Average[id] * BoostGateCeilingPermille / 1000;
+            if (id < StageTuning.AverageLow.Length && StageTuning.AverageLow[id] > 0)
+            {
+                gate = Math.Min(gate, (long)StageTuning.AverageLow[id] * GatedBadLuckCeilingPermille / 1000);
+            }
+            return gate;
+        }
+
         private static int Reachable(int id, int onboarding, StageTier tier)
         {
             if (id >= StageTuning.Average.Length || StageTuning.Average[id] <= 0)
@@ -619,7 +640,7 @@ namespace CrushRoyale.Core.Story
                 return int.MaxValue;
             }
             bool gated = tier == StageTier.SuperHard && id >= BoostGateFromStage;
-            long ceiling = (long)StageTuning.Average[id] * (gated ? BoostGateCeilingPermille : MidReachCeilingPermille) / 1000;
+            long ceiling = gated ? GateReach(id) : (long)StageTuning.Average[id] * MidReachCeilingPermille / 1000;
             if (!gated && id < StageTuning.AverageLow.Length && StageTuning.AverageLow[id] > 0)
             {
                 ceiling = Math.Min(ceiling, (long)StageTuning.AverageLow[id] * BadLuckCeilingPermille / 1000);
@@ -685,7 +706,7 @@ namespace CrushRoyale.Core.Story
                             // The cap above only permits a higher target; this is what actually asks for it. Held
                             // under a perfect run so the stage stays theoretically winnable bare-handed, and well
                             // over a mid run so in practice it is the loadout that carries it.
-                            int gate = RoundTo((int)((long)MidReach(id) * BoostGateCeilingPermille / 1000), 50);
+                            int gate = RoundTo((int)GateReach(id), 50);
                             int perfect = RoundTo((int)((long)score * BoostGatePerfectCapPermille / 1000), 50);
                             tunedScore = Math.Max(tunedScore, Math.Min(gate, perfect));
                         }
