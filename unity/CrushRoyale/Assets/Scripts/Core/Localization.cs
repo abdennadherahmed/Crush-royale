@@ -80,7 +80,11 @@ namespace CrushRoyale.Game
                     // Broken translation placeholder: show the raw text.
                 }
             }
-            return IsRightToLeft ? ArabicShaper.Shape(value) : value;
+            // Shaped whatever the current language is, not only in Arabic. The settings screen lists every
+            // language under its own name, so an English player reads the button for Arabic: unshaped, uGUI drew
+            // its letters apart and backwards. Shape returns the string untouched when it holds no Arabic, so
+            // this costs one scan on the other ten languages.
+            return ArabicShaper.Shape(value);
         }
 
         public string Number(long value) => value.ToString("N0", CultureFor(Language));
