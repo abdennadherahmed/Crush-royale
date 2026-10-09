@@ -117,6 +117,12 @@ namespace CrushRoyale.Tools.StageAudit
             // a board the expert exploits can be a wall for everyone else, which is where the unwinnable stages came
             // from. Targets are capped against this second number.
             var average = new int[total + 1];
+            // And what the same mid player reaches on an unlucky board. A stage's seed decides the board, and some
+            // boards swing enormously: the median said a mid run reaches 8380 on stage 606 while the audit, which
+            // rolls its own seeds, measured 3459 on the same stage with the same bot. A target set against the
+            // median of a swingy board is a coin toss, which is how stages nobody could win kept reappearing every
+            // time the campaign was made harder.
+            var averageLow = new int[total + 1];
             var ice = new int[total + 1];
             var stones = new int[total + 1];
             var collect = new int[total + 1];
@@ -162,6 +168,7 @@ namespace CrushRoyale.Tools.StageAudit
                 }
                 score[id] = Median(s);
                 average[id] = Median(avg);
+                averageLow[id] = SecondLowest(avg);
                 ice[id] = Median(i);
                 stones[id] = Median(st);
                 collect[id] = Median(co);
@@ -180,6 +187,8 @@ namespace CrushRoyale.Tools.StageAudit
             sb.AppendLine();
             AppendArray(sb, "Average", average);
             sb.AppendLine();
+            AppendArray(sb, "AverageLow", averageLow);
+            sb.AppendLine();
             AppendArray(sb, "Ice", ice);
             sb.AppendLine();
             AppendArray(sb, "Stones", stones);
@@ -194,6 +203,17 @@ namespace CrushRoyale.Tools.StageAudit
             File.WriteAllText(output, sb.ToString());
             Console.WriteLine("Baked " + total + " stages into " + output);
             return 0;
+        }
+
+        /// <summary>
+        /// Second lowest of the runs: a bad board, without taking the single worst as gospel. The distance between
+        /// this and the median is how much a stage depends on luck.
+        /// </summary>
+        private static int SecondLowest(int[] values)
+        {
+            var sorted = (int[])values.Clone();
+            Array.Sort(sorted);
+            return sorted[Math.Min(1, sorted.Length - 1)];
         }
 
         /// <summary>Middle value of the runs: immune to the one run where a cascade went wild.</summary>

@@ -41,7 +41,7 @@ namespace CrushRoyale.Core.Story
         /// Above 1000 it asks for more than half of mid runs produce, which is what makes a campaign have tension
         /// instead of scenery. It was exactly 1000 and the game read as free past the first hundred stages.
         /// </summary>
-        public const int MidReachCeilingPermille = 1120;
+        public const int MidReachCeilingPermille = 1300;
 
         /// <summary>
         /// What a super hard stage may ask for, as a share of what a mid player reaches with no boosts equipped.
@@ -51,7 +51,7 @@ namespace CrushRoyale.Core.Story
         /// come back to with a Chrono Bomb and a Multiplier, and win -- which is the point. It is deliberately not
         /// higher: a wall nobody can climb is not difficulty, it is a dead end.
         /// </summary>
-        private const int BoostGateCeilingPermille = 1850;
+        private const int BoostGateCeilingPermille = 2050;
 
         /// <summary>
         /// First stage allowed to be boost-gated.
@@ -70,43 +70,46 @@ namespace CrushRoyale.Core.Story
         /// Chrono Bomb or Multiplier closes it, so the stage falls on the second attempt with the right boost, not
         /// on the tenth with luck.
         /// </summary>
-        private const int BoostGatePerfectCapPermille = 940;
+        private const int BoostGatePerfectCapPermille = 985;
 
         /// <summary>Share of a perfect run's gems, ice or stones a gated stage demands. Over 1000 by design.</summary>
-        private const int BoostGateObstaclePermille = 1210;
+        private const int BoostGateObstaclePermille = 1250;
 
         private const int OnboardingEase = 41;
 
         private const int OnboardingFloorPermille = 460;
 
-        private const int TunedScoreEasyPermille = 830;
+        private const int TunedScoreEasyPermille = 850;
 
-        private const int TunedScoreHardPermille = 880;
+        private const int TunedScoreHardPermille = 905;
 
-        private const int TunedBossReliefPermille = 130;
+        private const int TunedBossReliefPermille = 100;
 
         /// <summary>Sawtooth: extra share of the expert's reach on Hard / Super hard stages, relief on the stage after.</summary>
-        private const int TunedHardExtraPermille = 90;
+        private const int TunedHardExtraPermille = 110;
 
-        private const int TunedSuperHardExtraPermille = 110;
+        private const int TunedSuperHardExtraPermille = 150;
 
-        private const int TunedBreatherPermille = 80;
+        private const int TunedBreatherPermille = 60;
 
-        private const int TunedMaxSharePermille = 930;
+        private const int TunedMaxSharePermille = 950;
 
-        private const int TunedObstacleEasyPermille = 820;
+        private const int TunedObstacleEasyPermille = 850;
 
-        private const int TunedObstacleHardPermille = 880;
+        private const int TunedObstacleHardPermille = 910;
 
         /// <summary>
-        /// Relief on "collect N of a colour" goals. The audit bots always play the highest-scoring move and cannot
-        /// steer a colour at all, so those stages were twice as likely as any other to turn into a wall: 257, 277,
-        /// 297, 907 and 917 were unwinnable for an average run even with the difficulty assist.
+        /// Relief on "collect N of a colour" goals.
+        ///
+        /// The audit bots always play the highest-scoring move and cannot steer a colour at all, so without relief
+        /// those stages turned into walls for them and the measurements were worthless. A player steers perfectly
+        /// well, and these are the stages that carry the Hard label, so a third of the goal was being handed to the
+        /// one kind of stage that was meant to bite. It buys the bots room to be measured, not a discount.
         /// </summary>
-        private const int TunedCollectReliefPermille = 330;
+        private const int TunedCollectReliefPermille = 270;
 
         /// <summary>Share of the ice layers / stones an obstacle goal asks for.</summary>
-        private const int GoalObstaclePermille = 900;
+        private const int GoalObstaclePermille = 930;
 
         private readonly GameBalance _balance;
         private readonly Dictionary<int, StageData> _cache = new Dictionary<int, StageData>();
@@ -543,6 +546,11 @@ namespace CrushRoyale.Core.Story
                 case 7:
                 case 14:
                     return StageTier.Hard;
+                // A third and a fourth hard stage, once the player has stopped learning the game and started
+                // playing it. Two peaks in twenty stages read as a flat campaign with two accidents in it.
+                case 2 when campaignId > 100:
+                case 10 when campaignId > 150:
+                    return StageTier.Hard;
                 case 17:
                     return StageTier.SuperHard;
                 // Super hard stages get denser as the campaign goes on: one per chapter to begin with, two past the
@@ -552,9 +560,9 @@ namespace CrushRoyale.Core.Story
                 // They also land on different indices, so they stop all being the same kind of stage: index 17 asks
                 // for a colour, 11 for a score and 5 for both. All fifty of them used to be colour-collection
                 // stages, which made the hardest stage of every chapter the same puzzle fifty times over.
-                case 11 when campaignId > 300:
+                case 11 when campaignId > 200:
                     return StageTier.SuperHard;
-                case 5 when campaignId > 600:
+                case 5 when campaignId > 450:
                     return StageTier.SuperHard;
                 default:
                     return StageTier.Normal;
@@ -585,6 +593,25 @@ namespace CrushRoyale.Core.Story
         public static int MidReach(int stageId) =>
             stageId > 0 && stageId < StageTuning.Average.Length ? StageTuning.Average[stageId] : 0;
 
+        /// <summary>
+        /// How far above an unlucky mid run a stage may still ask, for a stage nobody is meant to need boosts for.
+        ///
+        /// On a stage whose board is stable this never bites, because a bad run and a median run are the same
+        /// number. On a swingy one it is the whole guarantee: the player who draws the bad board still has a way
+        /// through, instead of losing six lives to a stage the balance believed was average.
+        /// </summary>
+        private const int BadLuckCeilingPermille = 1450;
+
+        /// <summary>
+        /// How much further a stage marked Hard may reach than an ordinary one.
+        ///
+        /// The tier used to add to the share of the expert's run, which decided nothing: the ceiling below is what
+        /// sets almost every target, so Hard stages ended up asking exactly what their neighbours asked. The audit
+        /// read 78% wins on Hard against 69% on ordinary stages, which is to say the label was a decoration and the
+        /// hardest thing in a chapter was an ordinary stage with a bad board.
+        /// </summary>
+        private const int HardTierCeilingPermille = 1220;
+
         private static int Reachable(int id, int onboarding, StageTier tier)
         {
             if (id >= StageTuning.Average.Length || StageTuning.Average[id] <= 0)
@@ -593,6 +620,16 @@ namespace CrushRoyale.Core.Story
             }
             bool gated = tier == StageTier.SuperHard && id >= BoostGateFromStage;
             long ceiling = (long)StageTuning.Average[id] * (gated ? BoostGateCeilingPermille : MidReachCeilingPermille) / 1000;
+            if (!gated && id < StageTuning.AverageLow.Length && StageTuning.AverageLow[id] > 0)
+            {
+                ceiling = Math.Min(ceiling, (long)StageTuning.AverageLow[id] * BadLuckCeilingPermille / 1000);
+            }
+            if (tier == StageTier.Hard)
+            {
+                // Applied after the guarantee, not before: a Hard stage is allowed to be a wall, and it says so on
+                // the map before the life is spent. The assist still softens it after three failures.
+                ceiling = ceiling * HardTierCeilingPermille / 1000;
+            }
             return (int)Math.Max(200, ceiling * onboarding / 1000);
         }
 
@@ -618,9 +655,12 @@ namespace CrushRoyale.Core.Story
             int onboarding = id < OnboardingEase
                 ? OnboardingFloorPermille + (1000 - OnboardingFloorPermille) * (id - 1) / (OnboardingEase - 1)
                 : 1000;
-            int scoreShare = Math.Min(TunedMaxSharePermille, TunedScoreEasyPermille + (TunedScoreHardPermille - TunedScoreEasyPermille) * d / 1000 + tierShare) * onboarding / 1000;
+            // The tier is added after the cap, not inside it. Inside, the cap swallowed it: an ordinary late stage
+            // already sat at the ceiling, so Hard and Super hard asked for exactly the same as their neighbours and
+            // the audit measured higher win rates on Hard stages than on ordinary ones.
+            int scoreShare = (Math.Min(TunedMaxSharePermille, TunedScoreEasyPermille + (TunedScoreHardPermille - TunedScoreEasyPermille) * d / 1000) + tierShare) * onboarding / 1000;
             int bossShare = scoreShare - TunedBossReliefPermille;
-            int obstacleShare = Math.Min(1000, TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000 + tierShare) * onboarding / 1000;
+            int obstacleShare = (Math.Min(1000, TunedObstacleEasyPermille + (TunedObstacleHardPermille - TunedObstacleEasyPermille) * d / 1000) + tierShare) * onboarding / 1000;
             if (NeedsBoosts(stage))
             {
                 // A gated stage asks for slightly more than a perfect bare-handed run collects, which is exactly
@@ -640,6 +680,8 @@ namespace CrushRoyale.Core.Story
                         tunedScore = Math.Min(tunedScore, Reachable(id, onboarding, stage.Tier));
                         if (NeedsBoosts(stage) && MidReach(id) > 0)
                         {
+                            // Never past a perfect run, whatever the tier added above.
+                            tunedScore = Math.Min(tunedScore, RoundTo((int)((long)score * BoostGatePerfectCapPermille / 1000), 50));
                             // The cap above only permits a higher target; this is what actually asks for it. Held
                             // under a perfect run so the stage stays theoretically winnable bare-handed, and well
                             // over a mid run so in practice it is the loadout that carries it.
@@ -676,7 +718,11 @@ namespace CrushRoyale.Core.Story
                         objective.Target = Floor(StageTuning.Blight[id], obstacleShare, 2);
                         break;
                     case ObjectiveType.CollectColor when StageTuning.Collect[id] > 0:
-                        int collectShare = Math.Max(400, obstacleShare - TunedCollectReliefPermille);
+                        // The tier does not raise a colour goal. A Hard stage earns its label through the score and
+                        // the obstacles, which are measured on a bot that plays them properly; a colour goal is
+                        // measured on a bot that cannot steer a colour at all, so adding to it asks for a number
+                        // nobody can check. Stage 807 wanted 50 of a colour a perfect run finds 68 of.
+                        int collectShare = Math.Max(400, obstacleShare - tierShare - TunedCollectReliefPermille);
                         objective.Target = Floor(StageTuning.Collect[id], collectShare, 8);
                         break;
                 }
