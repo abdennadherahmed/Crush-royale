@@ -1101,10 +1101,22 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Anchor(_status.rectTransform, 0.05f, 0.50f, 0.95f, 0.70f);
             _find = UIFactory.Button(footer, Loc.T(profile != null ? "pvp.find" : "pvp.practice"), () => _ = FindAsync());
             UIFactory.Anchor(_find.GetComponent<RectTransform>(), 0.15f, 0.08f, 0.85f, 0.44f);
-            if (profile != null)
+            if (profile == null)
             {
-                Button code = UIFactory.Button(footer, Loc.T("challenge.haveCode"), () => _ = ChallengeFlow.PromptCodeAsync(UI, Game), Theme.PanelLight, Theme.SmallSize, Theme.Text);
-                UIFactory.Anchor(code.GetComponent<RectTransform>(), 0.25f, 0.74f, 0.75f, 0.96f);
+                return;
+            }
+
+            // Accepting a challenge was offered here while sending one lived on the result screen of a finished
+            // duel, so a player who wanted to challenge a friend had nowhere to ask from. The two halves of the
+            // same feature now sit side by side, and sharing only appears once there is a duel to share: the code
+            // is a particular match of yours, and the server refuses to invent one.
+            bool hasDuel = profile.Pvp != null && profile.Pvp.Wins + profile.Pvp.Losses > 0;
+            Button code = UIFactory.Button(footer, Loc.T("challenge.haveCode"), () => _ = ChallengeFlow.PromptCodeAsync(UI, Game), Theme.PanelLight, Theme.SmallSize, Theme.Text);
+            UIFactory.Anchor(code.GetComponent<RectTransform>(), hasDuel ? 0.52f : 0.25f, 0.74f, hasDuel ? 0.94f : 0.75f, 0.96f);
+            if (hasDuel)
+            {
+                Button share = UIFactory.Button(footer, Loc.T("challenge.share"), () => _ = ChallengeFlow.ShareAsync(UI, Game), Theme.Hex("2F6B4F"), Theme.SmallSize, Theme.Text);
+                UIFactory.Anchor(share.GetComponent<RectTransform>(), 0.06f, 0.74f, 0.48f, 0.96f);
             }
         }
 
