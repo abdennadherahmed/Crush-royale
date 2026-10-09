@@ -34,8 +34,8 @@ namespace CrushRoyale.EditorTools
             PlayerSettings.SetApiCompatibilityLevel(NamedBuildTarget.Android, ApiCompatibilityLevel.NET_Standard);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Android, ManagedStrippingLevel.Low);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
-            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
-            PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
+            PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel26;
+            PlayerSettings.Android.targetSdkVersion = HighestTargetSdk();
             PlayerSettings.Android.forceInternetPermission = true;
             PlayerSettings.runInBackground = false;
             EditorUserBuildSettings.buildAppBundle = true;
@@ -219,5 +219,47 @@ namespace CrushRoyale.EditorTools
             }
             Debug.Log("Localization audit (" + used.Count + " literal keys in code):\n" + report);
         }
-    }
+            /// <summary>
+        /// The Android API level to build against, chosen rather than inherited.
+        ///
+        /// This used to be AndroidApiLevelAuto, which means "whatever the machine compiling happens to have". That
+        /// is not a decision, it is a consequence, and Google Play turns it into a rejection: since 31 August 2026
+        /// a new application must target Android 16 (API 36) to be accepted at all, so a runner that shipped with
+        /// an older SDK would produce a bundle nobody could upload, and the only clue would be the refusal.
+        ///
+        /// Asked of the editor rather than hardcoded: an editor that does not know level 36 cannot build against
+        /// it, and failing the build over it would be worse than building what this editor can. The level is
+        /// logged either way, so the answer is in the build log instead of in a guess.
+        /// </summary>
+        private static AndroidSdkVersions HighestTargetSdk()
+        {
+            const int playRequires = 36;
+            // Exactly what Play asks for when this editor knows it, and not the highest it knows. The highest is a
+            // preview: this machine ships android-37.0 beside android-36, Unity tried to install that preview
+            // platform, needed Windows elevation to write under Program Files and failed the build -- and Play
+            // refuses a production upload that targets a preview API anyway. Asking for more than is required
+            // bought nothing and cost everything.
+            if (Enum.IsDefined(typeof(AndroidSdkVersions), playRequires))
+            {
+                Debug.Log("CrushRoyaleSetup: targeting Android API " + playRequires + ", the level Play requires.");
+                return (AndroidSdkVersions)playRequires;
+            }
+
+            int best = 0;
+            foreach (object value in Enum.GetValues(typeof(AndroidSdkVersions)))
+            {
+                int level = (int)value;
+                // AndroidApiLevelAuto is 0 and the enum has no sentinel above the real levels; the guard is there
+                // in case a future version adds one.
+                if (level > best && level < 1000)
+                {
+                    best = level;
+                }
+            }
+            Debug.LogWarning("CrushRoyaleSetup: this editor does not know Android API " + playRequires
+                + ", which Google Play requires for a new application, and tops out at " + best
+                + ". The build will succeed and the upload will be refused. Move this build to a newer Unity.");
+            return best > 0 ? (AndroidSdkVersions)best : AndroidSdkVersions.AndroidApiLevelAuto;
+        }
+}
 }
