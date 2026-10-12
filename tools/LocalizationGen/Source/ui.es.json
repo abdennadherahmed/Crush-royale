@@ -2126,6 +2126,10 @@
   "piggy.body": "Cada fase superada y cada victoria en la arena deja orbes aquí. Ya son tuyas: romperla es la única forma de sacarlas.",
   "piggy.amount": "{0} / {1} orbes",
   "piggy.break": "Rómpela  {0}",
-  "piggy.keepPlaying": "Sigue jugando para llenarla"
+  "piggy.keepPlaying": "Sigue jugando para llenarla",
+  "chat.report": "Denunciar este mensaje",
+  "chat.block": "Bloquear a este jugador",
+  "chat.reported": "Denunciado. Nuestros moderadores lo revisarán.",
+  "chat.blocked": "{0} está bloqueado. No volverás a ver sus mensajes."
 }
 

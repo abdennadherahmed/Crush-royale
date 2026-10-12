@@ -294,6 +294,8 @@ namespace CrushRoyale.Client
         public Task<GuildBossAttackResponse> SubmitGuildBossAsync(SubmitReplayRequest request, CancellationToken ct = default) => Transport.PostAsync<GuildBossAttackResponse>(ApiRoutes.GuildBossDamage, request, ct);
         public Task<ChatMessageDto> SendChatAsync(string text, CancellationToken ct = default) => Transport.PostAsync<ChatMessageDto>(ApiRoutes.GuildChat, new ChatSendRequest { Text = text }, ct);
         public Task<ChatHistoryResponse> GetChatHistoryAsync(long? beforeId = null, CancellationToken ct = default) => Transport.GetAsync<ChatHistoryResponse>(ApiRoutes.GuildChat + (beforeId.HasValue ? "?before=" + Id(beforeId.Value) : string.Empty), ct);
+        public Task<ChatReportResponse> ReportChatAsync(long messageId, string reason = null, CancellationToken ct = default) => Transport.PostAsync<ChatReportResponse>(ApiRoutes.GuildChatReport, new ChatReportRequest { MessageId = messageId, Reason = reason }, ct);
+        public Task<ChatBlockResponse> BlockPlayerAsync(string playerId, bool blocked, CancellationToken ct = default) => Transport.PostAsync<ChatBlockResponse>(ApiRoutes.GuildChatBlock, new ChatBlockRequest { PlayerId = playerId, Blocked = blocked }, ct);
 
         // Progression
         public Task<AchievementsResponse> GetAchievementsAsync(CancellationToken ct = default) => Transport.GetAsync<AchievementsResponse>(ApiRoutes.Achievements, ct);

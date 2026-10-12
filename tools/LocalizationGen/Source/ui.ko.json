@@ -2126,6 +2126,10 @@
   "piggy.body": "클리어한 스테이지와 아레나 승리마다 오브가 이곳에 쌓입니다. 이미 당신의 것이며, 꺼내는 방법은 깨는 것뿐입니다.",
   "piggy.amount": "{0} / {1} 오브",
   "piggy.break": "깨뜨리기  {0}",
-  "piggy.keepPlaying": "계속 플레이해서 채우세요"
+  "piggy.keepPlaying": "계속 플레이해서 채우세요",
+  "chat.report": "이 메시지 신고",
+  "chat.block": "이 플레이어 차단",
+  "chat.reported": "신고되었습니다. 운영자가 검토합니다.",
+  "chat.blocked": "{0} 님을 차단했습니다. 메시지가 더 이상 표시되지 않습니다."
 }
 

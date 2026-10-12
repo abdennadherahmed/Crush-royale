@@ -128,6 +128,8 @@ public static class ApiEndpoints
         api.MapPost(ApiRoutes.GuildBossDamage, (SubmitReplayRequest body, ClaimsPrincipal user, GuildService s, CancellationToken ct) => s.SubmitBossDamageAsync(Me(user), body, ct));
         api.MapPost(ApiRoutes.GuildChat, (ChatSendRequest body, ClaimsPrincipal user, GuildService s, CancellationToken ct) => s.SendChatAsync(Me(user), body, ct));
         api.MapGet(ApiRoutes.GuildChat, ([FromQuery] long? before, ClaimsPrincipal user, GuildService s, CancellationToken ct) => s.ChatHistoryAsync(Me(user), before, ct));
+        api.MapPost(ApiRoutes.GuildChatReport, (ChatReportRequest body, ClaimsPrincipal user, GuildService s, CancellationToken ct) => s.ReportChatAsync(Me(user), body, ct));
+        api.MapPost(ApiRoutes.GuildChatBlock, (ChatBlockRequest body, ClaimsPrincipal user, GuildService s, CancellationToken ct) => s.BlockPlayerAsync(Me(user), body, ct));
     }
 
     private static void MapProgression(RouteGroupBuilder api)

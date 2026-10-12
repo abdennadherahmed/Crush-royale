@@ -28,6 +28,14 @@ public sealed class PlayerState
 {
     public string DisplayName { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Players this one has blocked: their guild chat messages are never sent to this account again.
+    ///
+    /// On the account rather than on the device, because a block that a reinstall undoes is not a block, and
+    /// because Google Play requires the people in a chat to be able to get away from each other.
+    /// </summary>
+    public List<string> BlockedPlayerIds { get; set; } = new();
+
     public HeroProfile Hero { get; set; } = new();
 
     public bool HeroChosen { get; set; }

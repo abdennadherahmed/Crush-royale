@@ -2126,6 +2126,10 @@
   "piggy.body": "Jede geschaffte Stufe und jeder Arenasieg wirft Orbes hier hinein. Sie gehören dir bereits: Es zu zerschlagen ist der einzige Weg, sie herauszuholen.",
   "piggy.amount": "{0} / {1} Orbes",
   "piggy.break": "Zerschlagen  {0}",
-  "piggy.keepPlaying": "Spiel weiter, um es zu füllen"
+  "piggy.keepPlaying": "Spiel weiter, um es zu füllen",
+  "chat.report": "Diese Nachricht melden",
+  "chat.block": "Diesen Spieler blockieren",
+  "chat.reported": "Gemeldet. Unsere Moderatoren sehen es sich an.",
+  "chat.blocked": "{0} ist blockiert. Du siehst keine Nachrichten mehr."
 }
 

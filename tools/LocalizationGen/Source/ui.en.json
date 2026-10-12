@@ -2126,6 +2126,10 @@
   "piggy.body": "Every stage cleared and every arena win drops orbes in here. They are yours already: breaking it open is the only way to take them out.",
   "piggy.amount": "{0} / {1} orbes",
   "piggy.break": "Break it open  {0}",
-  "piggy.keepPlaying": "Keep playing to fill it"
+  "piggy.keepPlaying": "Keep playing to fill it",
+  "chat.report": "Report this message",
+  "chat.block": "Block this player",
+  "chat.reported": "Reported. Our moderators will look at it.",
+  "chat.blocked": "{0} is blocked. You will not see their messages again."
 }
 

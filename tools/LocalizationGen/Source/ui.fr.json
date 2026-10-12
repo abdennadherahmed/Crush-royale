@@ -2126,6 +2126,10 @@
   "piggy.body": "Chaque niveau réussi et chaque victoire en arène y dépose des orbes. Elles sont déjà à toi : la briser est la seule façon de les sortir.",
   "piggy.amount": "{0} / {1} orbes",
   "piggy.break": "La briser  {0}",
-  "piggy.keepPlaying": "Continue à jouer pour la remplir"
+  "piggy.keepPlaying": "Continue à jouer pour la remplir",
+  "chat.report": "Signaler ce message",
+  "chat.block": "Bloquer ce joueur",
+  "chat.reported": "Signalé. Nos modérateurs vont l'examiner.",
+  "chat.blocked": "{0} est bloqué. Tu ne verras plus ses messages."
 }
 

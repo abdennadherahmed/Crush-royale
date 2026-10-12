@@ -927,6 +927,74 @@ namespace CrushRoyale.Game.Screens
             body.resizeTextForBestFit = false;
             body.horizontalOverflow = HorizontalWrapMode.Wrap;
             UIFactory.Anchor(body.rectTransform, 0.05f, 0.06f, 0.95f, 1f - 58f / (70 + lines * 44));
+
+            // Somebody else's message can be reported or its author silenced. Google Play requires both of a game
+            // where players write to each other, and a player who is being harassed needs them long before Google
+            // does. One's own message has nothing to offer, so it stays a plain bubble.
+            if (!mine)
+            {
+                Button tap = bubble.gameObject.AddComponent<Button>();
+                tap.targetGraphic = bubble;
+                bubble.gameObject.AddComponent<ButtonFeedback>();
+                tap.onClick.AddListener(() => ShowChatActions(message));
+            }
+        }
+
+        /// <summary>Report the message, or never hear from its author again.</summary>
+        private void ShowChatActions(ChatMessageDto message)
+        {
+            Image shade = UIFactory.Panel("ChatActions", UI.DialogLayer, new Color(0.02f, 0.01f, 0.06f, 0.82f), rounded: false);
+            UIFactory.Stretch(shade.rectTransform);
+            Button dismiss = shade.gameObject.AddComponent<Button>();
+            dismiss.targetGraphic = shade;
+
+            Image box = UIFactory.Panel("Box", shade.transform, Theme.Panel);
+            UIFactory.Anchor(box.rectTransform, 0.08f, 0.33f, 0.92f, 0.67f);
+            UiKit.FramePanel(box);
+            box.gameObject.AddComponent<PopIn>();
+
+            Text who = UIFactory.Label(box.transform, message.DisplayName, Theme.HeaderSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Anchor(who.rectTransform, 0.06f, 0.78f, 0.94f, 0.92f);
+            Widgets.TitleOutline(who);
+            Text quote = UIFactory.Label(box.transform, message.Body, Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.UpperCenter);
+            quote.horizontalOverflow = HorizontalWrapMode.Wrap;
+            UIFactory.Anchor(quote.rectTransform, 0.08f, 0.56f, 0.92f, 0.76f);
+
+            void Close()
+            {
+                UIFactory.Remove(shade.gameObject);
+            }
+
+            dismiss.onClick.AddListener(Close);
+            Button report = UIFactory.Button(box.transform, Loc.T("chat.report"), () => _ = ReportChatAsync(message, Close), Theme.Danger, Theme.BodySize);
+            UIFactory.Anchor(report.GetComponent<RectTransform>(), 0.08f, 0.36f, 0.92f, 0.52f);
+            Button block = UIFactory.Button(box.transform, Loc.T("chat.block"), () => _ = BlockPlayerAsync(message, Close), Theme.PanelLight, Theme.BodySize, Theme.Text);
+            UIFactory.Anchor(block.GetComponent<RectTransform>(), 0.08f, 0.18f, 0.92f, 0.34f);
+            Button cancel = UIFactory.Button(box.transform, Loc.T("common.cancel"), Close, Theme.PanelLight, Theme.SmallSize, Theme.TextMuted);
+            UIFactory.Anchor(cancel.GetComponent<RectTransform>(), 0.3f, 0.04f, 0.7f, 0.15f);
+        }
+
+        private async Task ReportChatAsync(ChatMessageDto message, Action close)
+        {
+            close();
+            ChatReportResponse response = await Api(api => api.ReportChatAsync(message.Id));
+            if (response != null)
+            {
+                UI.Toast(Loc.T("chat.reported"), 3f);
+            }
+        }
+
+        private async Task BlockPlayerAsync(ChatMessageDto message, Action close)
+        {
+            close();
+            ChatBlockResponse response = await Api(api => api.BlockPlayerAsync(message.PlayerId, true));
+            if (response == null)
+            {
+                return;
+            }
+            // Gone from this screen at once: being told "blocked" while their words are still on screen is not it.
+            UI.Toast(Loc.T("chat.blocked", message.DisplayName), 3f);
+            Rebuild();
         }
 
         private void ScrollChatToBottom()

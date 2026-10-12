@@ -1,4 +1,5 @@
 using CrushRoyale.Contracts;
+using CrushRoyale.Core.AntiCheat;
 using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Economy;
@@ -419,7 +420,84 @@ public sealed class GuildService
         {
             long guildId = ws.State.GuildId ?? throw new ApiException(ErrorCode.NotMember);
             IReadOnlyList<GuildMessageRow> rows = await _ops.Store.GetGuildMessagesAsync(guildId, beforeId, 50, ct).ConfigureAwait(false);
-            return new ChatHistoryResponse { Messages = rows.Select(ToChat).ToList() };
+            // Filtered on the way out rather than on the device: a blocked player's words never reach the phone.
+            List<string> blocked = ws.State.BlockedPlayerIds ?? new List<string>();
+            return new ChatHistoryResponse
+            {
+                Messages = rows.Where(r => !blocked.Contains(r.PlayerId.ToString())).Select(ToChat).ToList()
+            };
+        }, ct);
+
+    /// <summary>
+    /// Sends one message to the moderation queue.
+    ///
+    /// The queue is the same table the anti-cheat writes to, and FlagReason.PlayerReport was already defined for
+    /// exactly this: the review workflow, the severity and the outcome field all exist. What was missing was any
+    /// way for a player to put something in it, which is what Google Play requires of an app where players write
+    /// to each other, and what this is.
+    ///
+    /// The flag is raised against the author of the message, so a moderator opens the right account, and the
+    /// message is copied into the details because a reported message that is later deleted must still be readable.
+    /// </summary>
+    public Task<ChatReportResponse> ReportChatAsync(Guid userId, ChatReportRequest request, CancellationToken ct) =>
+        _ops.RunAsync(userId, async ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            long guildId = ws.State.GuildId ?? throw new ApiException(ErrorCode.NotMember);
+            if (request == null || request.MessageId <= 0)
+            {
+                throw new ApiException(ErrorCode.InvalidArgument, "No message to report.");
+            }
+
+            IReadOnlyList<GuildMessageRow> recent = await _ops.Store.GetGuildMessagesAsync(guildId, null, 200, ct).ConfigureAwait(false);
+            GuildMessageRow message = recent.FirstOrDefault(m => m.Id == request.MessageId)
+                ?? throw new ApiException(ErrorCode.NotFound, "Message not found.");
+            if (message.PlayerId == userId)
+            {
+                throw new ApiException(ErrorCode.InvalidArgument, "You cannot report yourself.");
+            }
+
+            string reason = (request.Reason ?? string.Empty).Trim();
+            if (reason.Length > 200)
+            {
+                reason = reason.Substring(0, 200);
+            }
+            await ctx.Tx.InsertFlagAsync(new CheatFlag
+            {
+                Id = Mappers.NewId("rep"),
+                PlayerId = message.PlayerId.ToString(),
+                Reason = FlagReason.PlayerReport,
+                Severity = CheatSeverity.Suspicious,
+                Details = "guild chat #" + message.Id + " by " + message.DisplayName + ": \"" + message.Body + "\""
+                    + " | reported by " + ws.IdString + (reason.Length > 0 ? " | " + reason : string.Empty),
+                AtUnixMs = ws.NowMs
+            }).ConfigureAwait(false);
+            return new ChatReportResponse();
+        }, ct);
+
+    /// <summary>Blocks or unblocks one player for this account, and answers with the whole list.</summary>
+    public Task<ChatBlockResponse> BlockPlayerAsync(Guid userId, ChatBlockRequest request, CancellationToken ct) =>
+        _ops.RunAsync(userId, ctx =>
+        {
+            PlayerWorkspace ws = ctx.Player;
+            string target = (request?.PlayerId ?? string.Empty).Trim();
+            if (string.IsNullOrEmpty(target) || target == ws.IdString)
+            {
+                throw new ApiException(ErrorCode.InvalidArgument, "No player to block.");
+            }
+            ws.State.BlockedPlayerIds ??= new List<string>();
+            if (request.Blocked)
+            {
+                if (!ws.State.BlockedPlayerIds.Contains(target))
+                {
+                    ws.State.BlockedPlayerIds.Add(target);
+                }
+            }
+            else
+            {
+                ws.State.BlockedPlayerIds.Remove(target);
+            }
+            return Task.FromResult(new ChatBlockResponse { BlockedPlayerIds = new List<string>(ws.State.BlockedPlayerIds) });
         }, ct);
 
     // ------------------------------------------------------------------ helpers

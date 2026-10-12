@@ -87,6 +87,8 @@ namespace CrushRoyale.Contracts
         public const string GuildBossStart = Prefix + "/guild/boss/start";
         public const string GuildBossDamage = Prefix + "/guild/boss/damage";
         public const string GuildChat = Prefix + "/guild/chat";
+        public const string GuildChatReport = Prefix + "/guild/chat/report";
+        public const string GuildChatBlock = Prefix + "/guild/chat/block";
 
         public const string Achievements = Prefix + "/achievements";
         public const string AchievementUnlock = Prefix + "/achievement/unlock";

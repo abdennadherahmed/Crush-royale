@@ -2126,6 +2126,10 @@
   "piggy.body": "Cada fase concluída e cada vitória na arena deixa orbes aqui. Já são suas: quebrá-lo é a única forma de tirá-las.",
   "piggy.amount": "{0} / {1} orbes",
   "piggy.break": "Quebrar  {0}",
-  "piggy.keepPlaying": "Continue jogando para enchê-lo"
+  "piggy.keepPlaying": "Continue jogando para enchê-lo",
+  "chat.report": "Denunciar esta mensagem",
+  "chat.block": "Bloquear este jogador",
+  "chat.reported": "Denunciado. Os nossos moderadores vão analisá-lo.",
+  "chat.blocked": "{0} está bloqueado. Não verás mais as mensagens dele."
 }
 

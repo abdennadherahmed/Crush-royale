@@ -59,7 +59,7 @@ namespace CrushRoyale.EditorTools
             }
             PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { icon }, IconKind.Any);
 #if UNITY_ANDROID
-            ApplyAdaptiveIcons(icon);
+            ApplyAdaptiveIcons();
 #endif
         }
 
@@ -69,9 +69,9 @@ namespace CrushRoyale.EditorTools
 
         /// <summary>
         /// Android 8+ launchers mask icons to their own shape: adaptive layers (blurred art behind, art inside the safe
-        /// zone in front) avoid the white frame around a plain square icon. Round icons reuse the full art.
+        /// zone in front) avoid the white frame around a plain square icon.
         /// </summary>
-        private static void ApplyAdaptiveIcons(Texture2D legacy)
+        private static void ApplyAdaptiveIcons()
         {
             AssetDatabase.ImportAsset(AdaptiveBackgroundPath, ImportAssetOptions.ForceSynchronousImport);
             AssetDatabase.ImportAsset(AdaptiveForegroundPath, ImportAssetOptions.ForceSynchronousImport);
@@ -90,12 +90,10 @@ namespace CrushRoyale.EditorTools
             }
             PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Adaptive, adaptive);
 
-            PlatformIcon[] round = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Round);
-            foreach (PlatformIcon slot in round)
-            {
-                slot.SetTexture(legacy);
-            }
-            PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, UnityEditor.Android.AndroidPlatformIconKind.Round, round);
+            // The round icon kind is gone. It existed for Android 7.1 launchers, which asked for a second circular
+            // image; Android 8 replaced the idea with the adaptive layers set just above, and the editor now treats
+            // any use of it as an error rather than a warning. The minimum supported version here is 26, so there is
+            // no launcher left that would have asked for it.
         }
 #endif
 

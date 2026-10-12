@@ -771,6 +771,33 @@ namespace CrushRoyale.Contracts
         public string Text { get; set; }
     }
 
+    /// <summary>Reports one message to moderation. The reason is the player's own words, and may be empty.</summary>
+    public sealed class ChatReportRequest
+    {
+        public long MessageId { get; set; }
+
+        public string Reason { get; set; }
+    }
+
+    /// <summary>Hides, or stops hiding, everything one player says. Kept on the account, not on the device.</summary>
+    public sealed class ChatBlockRequest
+    {
+        public string PlayerId { get; set; }
+
+        public bool Blocked { get; set; }
+    }
+
+    /// <summary>Answer to a report: the queue took it. There is nothing else useful to tell the player.</summary>
+    public sealed class ChatReportResponse
+    {
+        public bool Accepted { get; set; } = true;
+    }
+
+    public sealed class ChatBlockResponse
+    {
+        public List<string> BlockedPlayerIds { get; set; } = new List<string>();
+    }
+
     public sealed class ChatMessageDto
     {
         public long Id { get; set; }

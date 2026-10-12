@@ -2126,6 +2126,10 @@
   "piggy.body": "Ogni livello superato e ogni vittoria in arena lascia orbe qui dentro. Sono già tue: romperlo è l'unico modo per tirarle fuori.",
   "piggy.amount": "{0} / {1} orbe",
   "piggy.break": "Rompilo  {0}",
-  "piggy.keepPlaying": "Continua a giocare per riempirlo"
+  "piggy.keepPlaying": "Continua a giocare per riempirlo",
+  "chat.report": "Segnala questo messaggio",
+  "chat.block": "Blocca questo giocatore",
+  "chat.reported": "Segnalato. I nostri moderatori lo esamineranno.",
+  "chat.blocked": "{0} è bloccato. Non vedrai più i suoi messaggi."
 }
 

@@ -2126,6 +2126,10 @@
   "piggy.body": "每通过一关、每赢一场竞技场，都会往这里投入宝珠。它们已经属于你了：打碎它是取出的唯一方式。",
   "piggy.amount": "{0} / {1} 宝珠",
   "piggy.break": "打碎  {0}",
-  "piggy.keepPlaying": "继续游戏来装满它"
+  "piggy.keepPlaying": "继续游戏来装满它",
+  "chat.report": "举报这条消息",
+  "chat.block": "屏蔽该玩家",
+  "chat.reported": "已举报，管理员会查看。",
+  "chat.blocked": "已屏蔽 {0}，你不会再看到他的消息。"
 }
 
