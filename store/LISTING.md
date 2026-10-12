@@ -167,6 +167,42 @@ abdennadherahmed975@gmail.com. Play requires a deletion route; an in-app button 
 
 ---
 
+## Data safety form, answer sheet
+
+Filled in the console in this order. Every answer below was checked against what the code actually sends, not
+against what is comfortable: a wrong declaration here is what gets an app pulled.
+
+**Step 2, collection and security**
+
+- Does the app collect or share any of the required user data types: **Yes**
+- Is all collected data encrypted in transit: **Yes** (everything goes over HTTPS)
+- Account creation methods: **OAuth** only (Sign in with Google; the game never holds a password)
+- Account deletion URL: `https://crushroyale-legal.onrender.com/delete-account.html`
+
+**Step 3, data types collected**
+
+| Category | Type | Why it is true |
+|---|---|---|
+| Personal info | Name | the player's chosen display name, shown in leaderboards and guilds |
+| Personal info | Email address | from Google Sign-In |
+| Personal info | User ID | the account id |
+| Financial info | Purchase history | the server records what was bought in order to grant it |
+| Messages | Other in-app messages | guild chat is stored on the server |
+| App activity | App interactions | every match is replayed server side for the anti-cheat |
+| App info and performance | Crash logs | the client reports its own exceptions |
+| App info and performance | Diagnostics | telemetry events |
+| Device or other IDs | Device or other IDs | a **salted SHA-256** of the device id, used to spot one person running many accounts. The raw id never leaves the phone, but a pseudonym is still collected data |
+
+Everything else is **not** collected: no location, no contacts, no photos, no audio, no files, no calendar, no
+health data, no web browsing, no advertising ID. Payments go through Google Play Billing and never reach this
+server, so "user payment info" stays unchecked.
+
+**Step 4, usage and handling**, for every type above: collected, **not shared** with third parties, and
+**required** rather than optional (the game cannot run its anti-cheat or its guilds without them), except the
+email address, which is **optional** because the campaign is playable offline with no account at all.
+
+---
+
 ## What is left, and who has to do it
 
 **Only you can do these.** They need your identity, your card and your signature, and I am not able to act on
