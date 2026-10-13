@@ -644,14 +644,40 @@ namespace CrushRoyale.Game.Gameplay
                 moves.Add((view, start, CellPosition(refill.Position)));
             }
 
+            // A fall of four cells takes twice as long as one of a single cell, not the same time: the duration
+            // follows the square root of the distance, the way gravity does. They all start together, the longest
+            // one fills the step, and the shorter ones settle early, so a column pours instead of blinking.
+            float longest = 0f;
+            foreach ((PieceView _, Vector2 from, Vector2 to) in moves)
+            {
+                longest = Mathf.Max(longest, (from - to).magnitude);
+            }
+            var shares = new float[moves.Count];
+            var landed = new bool[moves.Count];
+            for (int i = 0; i < moves.Count; i++)
+            {
+                float distance = (moves[i].From - moves[i].To).magnitude;
+                shares[i] = longest > 0.01f ? Mathf.Max(0.2f, Mathf.Sqrt(distance / longest)) : 1f;
+            }
+
             yield return CoroutineTask.Tween(fallTime, k =>
             {
-                float e = Ease.InQuad(k);
-                foreach ((PieceView view, Vector2 from, Vector2 to) in moves)
+                for (int i = 0; i < moves.Count; i++)
                 {
-                    if (view != null)
+                    (PieceView view, Vector2 from, Vector2 to) = moves[i];
+                    if (view == null)
                     {
-                        view.Rect.anchoredPosition = Vector2.LerpUnclamped(from, to, e);
+                        continue;
+                    }
+                    float local = Mathf.Clamp01(k / shares[i]);
+                    view.Rect.anchoredPosition = Vector2.LerpUnclamped(from, to, Ease.InQuad(local));
+                    if (local >= 1f && !landed[i])
+                    {
+                        landed[i] = true;
+                        if ((from - to).sqrMagnitude > 1f)
+                        {
+                            view.Land();
+                        }
                     }
                 }
                 float pop = Ease.OutBack(k);
@@ -663,9 +689,10 @@ namespace CrushRoyale.Game.Gameplay
                     }
                 }
             });
-            foreach ((PieceView view, Vector2 from, Vector2 to) in moves)
+            for (int i = 0; i < moves.Count; i++)
             {
-                if (view != null && (from - to).sqrMagnitude > 1f)
+                (PieceView view, Vector2 from, Vector2 to) = moves[i];
+                if (view != null && !landed[i] && (from - to).sqrMagnitude > 1f)
                 {
                     view.Land();
                 }

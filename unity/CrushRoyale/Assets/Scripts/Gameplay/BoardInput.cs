@@ -17,7 +17,15 @@ namespace CrushRoyale.Game.Gameplay
 
         public BoardView Board { get; set; }
 
+        /// <summary>False when the match itself is over or paused: nothing is accepted at all.</summary>
         public bool Interactable { get; set; } = true;
+
+        /// <summary>
+        /// True while the board plays a swap or a cascade. Swipes are still read and queued, because a gesture
+        /// dropped on the floor reads as a bug, but a power-up target is not: the cell under the finger is still
+        /// moving and would not be the one the player meant.
+        /// </summary>
+        public bool Animating { get; set; }
 
         public bool TargetingMode { get; set; }
 
@@ -48,6 +56,7 @@ namespace CrushRoyale.Game.Gameplay
                 Board.LookAt(look);
             }
             if (!Interactable || TargetingMode || _pressed == null || _swiped || !ToLocal(eventData, out Vector2 local))
+            // Animating is deliberately not tested here: the swipe is queued and played when the board settles.
             {
                 return;
             }
@@ -82,6 +91,10 @@ namespace CrushRoyale.Game.Gameplay
 
             if (TargetingMode)
             {
+                if (Animating)
+                {
+                    return;
+                }
                 TargetingMode = false;
                 TargetPicked?.Invoke(tapped);
                 return;

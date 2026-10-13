@@ -128,7 +128,8 @@ namespace CrushRoyale.Game.Gameplay
             _finished = false;
             if (Input != null)
             {
-                Input.Interactable = !_animating;
+                Input.Interactable = true;
+                Input.Animating = _animating;
                 Input.TargetingMode = false;
             }
             if (Board != null)
@@ -175,9 +176,13 @@ namespace CrushRoyale.Game.Gameplay
             // Invariant checked every frame instead of being trusted to every path that locks the board: a running
             // match that is neither animating nor paused MUST accept input. A board left locked is unplayable and
             // the player can only quit, which is exactly how the paid continue felt on device.
-            if (!_animating && !Clock.IsPaused && Input != null && !Input.Interactable)
+            if (!Clock.IsPaused && Input != null && !Input.Interactable && !_finished)
             {
                 Input.Interactable = true;
+            }
+            if (Input != null)
+            {
+                Input.Animating = _animating;
             }
 
             if (_animating || Clock.IsPaused || _inputs.Count == 0)
@@ -219,7 +224,7 @@ namespace CrushRoyale.Game.Gameplay
         private IEnumerator Present(ActionOutcome outcome)
         {
             _animating = true;
-            Input.Interactable = false;
+            Input.Animating = true;
             if (outcome.Action.Type == ActionType.PowerUp)
             {
                 _game.Audio.PlaySFX(outcome.Action.PowerUp == PowerUpType.NuclearBomb || outcome.Action.PowerUp == PowerUpType.FireStorm ? SoundIds.Explosion : SoundIds.PowerUp);
@@ -240,7 +245,7 @@ namespace CrushRoyale.Game.Gameplay
             }
 
             _animating = false;
-            Input.Interactable = true;
+            Input.Animating = false;
             ActionPresented?.Invoke(outcome);
             Changed?.Invoke();
         }

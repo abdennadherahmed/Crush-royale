@@ -160,9 +160,9 @@ namespace CrushRoyale.Core.Config
     /// </summary>
     public sealed class TimingBalance
     {
-        public int SwapAnimationMs { get; set; } = 250;
+        public int SwapAnimationMs { get; set; } = 200;
 
-        public int CascadeStepMs { get; set; } = 400;
+        public int CascadeStepMs { get; set; } = 280;
 
         public int PowerUpAnimationMs { get; set; } = 600;
 
