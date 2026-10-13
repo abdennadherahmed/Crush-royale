@@ -3,8 +3,8 @@
   "rootNamespace": "CrushRoyale.Game",
   "references": [
     "UnityEngine.UI",
-    "UnityEngine.Purchasing",
-    "UnityEngine.Purchasing.Stores",
+    "Unity.Purchasing",
+    "Unity.Purchasing.Stores",
     "Unity.Notifications.Android"
   ],
   "includePlatforms": [],

@@ -201,7 +201,10 @@ namespace CrushRoyale.Game.Screens
             skus.Add(economy.RemoveAdsSku);
             skus.Add(economy.BattlePassSku);
             skus.Add(economy.RarePerkSku);
-            game.Iap.Initialize(skus, "crushroyale.orbes");
+            skus.Add(economy.PiggyBank.Sku);
+            // Only these two are bought once and kept. Everything else, orbes, the battle pass and the piggy
+            // bank, is bought again and again, and Google refuses to sell a durable product a second time.
+            game.Iap.Initialize(skus, new[] { economy.RemoveAdsSku, economy.RarePerkSku });
             game.Notifications.RequestPermission();
 
             ProfileDto profile = game.Backend.Profile;

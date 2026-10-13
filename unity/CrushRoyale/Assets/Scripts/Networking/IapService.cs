@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CrushRoyale.Client;
 using CrushRoyale.Contracts;
@@ -7,20 +8,17 @@ using UnityEngine;
 #if CRUSH_IAP
 using Newtonsoft.Json.Linq;
 using UnityEngine.Purchasing;
-using UnityEngine.Purchasing.Extension;
 #endif
 
 namespace CrushRoyale.Game.Networking
 {
     /// <summary>
     /// Google Play billing through Unity IAP. Flow: server precheck (age gate, minor cap) -> store purchase ->
-    /// server receipt validation and grant -> ConfirmPendingPurchase (consumes packs so they can be bought again).
-    /// Purchases interrupted by a crash are re-delivered by Unity IAP at the next launch and granted exactly once.
+    /// server receipt validation and grant -> ConfirmPurchase (consumes packs so they can be bought again).
+    /// Purchases interrupted by a crash are re-delivered by Unity IAP at the next launch and granted exactly once,
+    /// because only a confirmed order is consumed and the server refuses to grant the same token twice.
     /// </summary>
     public sealed class IapService
-#if CRUSH_IAP
-        : IDetailedStoreListener
-#endif
     {
         private readonly BackendManager _backend;
         private readonly ClientConfig _config;
@@ -36,33 +34,72 @@ namespace CrushRoyale.Game.Networking
         public bool IsReady { get; private set; }
 
 #if CRUSH_IAP
-        private IStoreController _controller;
+        private StoreController _store;
         private TaskCompletionSource<IapValidateResponse> _pending;
 
-        public void Initialize(IEnumerable<string> skus, string consumablePrefix)
+        /// <param name="durableSkus">
+        /// The products bought once and kept. Everything else is consumable, so it can be bought again.
+        /// </param>
+        public void Initialize(IEnumerable<string> skus, IEnumerable<string> durableSkus)
         {
-            if (!_config.IapEnabled || IsReady)
+            if (!_config.IapEnabled || _store != null)
             {
                 return;
             }
-            ConfigurationBuilder builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-            foreach (string sku in skus)
+            _ = ConnectAsync(skus, durableSkus);
+        }
+
+        private async Task ConnectAsync(IEnumerable<string> skus, IEnumerable<string> durableSkus)
+        {
+            var durable = new HashSet<string>(durableSkus ?? Array.Empty<string>(), StringComparer.Ordinal);
+            List<ProductDefinition> products = skus
+                .Select(sku => new ProductDefinition(sku, durable.Contains(sku) ? ProductType.NonConsumable : ProductType.Consumable))
+                .ToList();
+
+            try
             {
-                bool consumable = sku.StartsWith(consumablePrefix, StringComparison.Ordinal) || sku.EndsWith("battlepass", StringComparison.Ordinal);
-                builder.AddProduct(sku, consumable ? ProductType.Consumable : ProductType.NonConsumable);
+                _store = UnityIAPServices.StoreController();
+                // Subscribed before connecting: a purchase the player made last session, that the server never
+                // granted, arrives as soon as the connection opens and would be missed otherwise.
+                _store.OnPurchasePending += OnPurchasePending;
+                _store.OnPurchaseFailed += OnPurchaseFailed;
+                _store.OnProductsFetched += OnProductsFetched;
+                _store.OnProductsFetchFailed += failure => Debug.LogWarning("IAP products unavailable: " + failure.FailureReason);
+                _store.OnStoreDisconnected += reason =>
+                {
+                    IsReady = false;
+                    Debug.LogWarning("IAP store disconnected: " + reason.message);
+                };
+
+                await _store.Connect();
+                _store.FetchProducts(products);
             }
-            UnityPurchasing.Initialize(this, builder);
+            catch (Exception ex)
+            {
+                // No store on this device, or Play Services missing: the game stays playable, the shop does not.
+                Debug.LogWarning("IAP init failed: " + ex.Message);
+                _store = null;
+                IsReady = false;
+            }
+        }
+
+        private void OnProductsFetched(List<Product> products)
+        {
+            IsReady = products.Count > 0;
+            // Only once the catalogue is in: fetching purchases first would hand back orders for products the
+            // controller cannot name yet.
+            _store.FetchPurchases();
         }
 
         public string LocalizedPrice(string sku)
         {
-            Product product = _controller?.products.WithID(sku);
+            Product product = _store?.GetProductById(sku);
             return product != null && product.availableToPurchase ? product.metadata.localizedPriceString : null;
         }
 
         public async Task<IapValidateResponse> BuyAsync(string sku)
         {
-            if (!IsReady || _controller == null)
+            if (!IsReady || _store == null)
             {
                 throw new CrushApiException("StoreUnavailable", 0, "Store not ready.");
             }
@@ -73,35 +110,25 @@ namespace CrushRoyale.Game.Networking
             }
 
             _pending = new TaskCompletionSource<IapValidateResponse>();
-            _controller.InitiatePurchase(sku);
+            _store.PurchaseProduct(sku);
             return await _pending.Task;
         }
 
-        public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
+        /// <summary>
+        /// A purchase the store has taken money for. It stays pending, and the player keeps their claim on it,
+        /// until the server has checked the receipt and granted the contents.
+        /// </summary>
+        private void OnPurchasePending(PendingOrder order) => _ = ValidateAsync(order);
+
+        private void OnPurchaseFailed(FailedOrder order)
         {
-            _controller = controller;
-            IsReady = true;
+            bool cancelled = order.FailureReason == PurchaseFailureReason.UserCancelled;
+            _pending?.TrySetException(new CrushApiException(cancelled ? "Cancelled" : "PurchaseFailed", 0, order.Details));
         }
 
-        public void OnInitializeFailed(InitializationFailureReason error) => Debug.LogWarning("IAP init failed: " + error);
-
-        public void OnInitializeFailed(InitializationFailureReason error, string message) => Debug.LogWarning("IAP init failed: " + error + " " + message);
-
-        public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
+        private async Task ValidateAsync(PendingOrder order)
         {
-            Product product = purchaseEvent.purchasedProduct;
-            _ = ValidateAsync(product);
-            return PurchaseProcessingResult.Pending;
-        }
-
-        public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason) =>
-            _pending?.TrySetException(new CrushApiException("PurchaseFailed", 0, failureReason.ToString()));
-
-        public void OnPurchaseFailed(Product product, PurchaseFailureDescription failureDescription) =>
-            _pending?.TrySetException(new CrushApiException(failureDescription.reason == PurchaseFailureReason.UserCancelled ? "Cancelled" : "PurchaseFailed", 0, failureDescription.message));
-
-        private async Task ValidateAsync(Product product)
-        {
+            string sku = order.CartOrdered.Items().FirstOrDefault()?.Product?.definition.id;
             try
             {
                 if (!_backend.IsOnline)
@@ -111,15 +138,15 @@ namespace CrushRoyale.Game.Networking
                     return;
                 }
 
-                string token = ExtractPurchaseToken(product.receipt, out string orderId);
+                string token = ExtractPurchaseToken(order.Info.Receipt, out string orderId);
                 IapValidateResponse response = await _backend.Client.Api.ValidatePurchaseAsync(new IapValidateRequest
                 {
-                    Sku = product.definition.id,
+                    Sku = sku,
                     PurchaseToken = token,
                     OrderId = orderId
                 });
 
-                _controller.ConfirmPendingPurchase(product);
+                _store.ConfirmPurchase(order);
                 _backend.ApplyWallet(response.Wallet);
                 _backend.ApplyInventory(response.Inventory);
                 MainThread.Post(() => PurchaseGranted?.Invoke(response));
@@ -130,7 +157,7 @@ namespace CrushRoyale.Game.Networking
                 if (!ex.IsRetryable)
                 {
                     // Invalid receipt: never grant, release the transaction.
-                    _controller.ConfirmPendingPurchase(product);
+                    _store.ConfirmPurchase(order);
                 }
                 _pending?.TrySetException(ex);
             }
@@ -146,7 +173,7 @@ namespace CrushRoyale.Game.Networking
             return (string)json["purchaseToken"];
         }
 #else
-        public void Initialize(IEnumerable<string> skus, string consumablePrefix)
+        public void Initialize(IEnumerable<string> skus, IEnumerable<string> durableSkus)
         {
             Debug.Log("Unity IAP package not installed: purchases disabled.");
         }
