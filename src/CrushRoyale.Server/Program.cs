@@ -59,7 +59,7 @@ if (iap.AllowFakeReceipts)
     }
     builder.Services.AddSingleton<IReceiptValidator, FakeReceiptValidator>();
 }
-else if (!string.IsNullOrWhiteSpace(iap.ServiceAccountJsonPath))
+else if (iap.HasServiceAccount)
 {
     builder.Services.AddSingleton<IReceiptValidator, GooglePlayReceiptValidator>();
 }

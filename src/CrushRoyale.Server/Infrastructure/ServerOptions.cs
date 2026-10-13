@@ -38,6 +38,16 @@ public sealed class IapOptions
     /// <summary>Path to the Google Play Console service-account JSON with Android Publisher access.</summary>
     public string? ServiceAccountJsonPath { get; set; }
 
+    /// <summary>
+    /// The same credentials as a value rather than a path, for hosts that hand secrets over as environment
+    /// variables and give you no durable disk. Takes precedence over the path when both are set.
+    /// </summary>
+    public string? ServiceAccountJson { get; set; }
+
+    /// <summary>True when credentials are available by either route.</summary>
+    public bool HasServiceAccount =>
+        !string.IsNullOrWhiteSpace(ServiceAccountJson) || !string.IsNullOrWhiteSpace(ServiceAccountJsonPath);
+
     /// <summary>Development/testing only: accept receipts whose token starts with "fake:". Refused in Production.</summary>
     public bool AllowFakeReceipts { get; set; }
 }

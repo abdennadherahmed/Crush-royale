@@ -30,14 +30,22 @@ public sealed class GooglePlayReceiptValidator : IReceiptValidator, IDisposable
 
     public GooglePlayReceiptValidator(IapOptions options, ILogger<GooglePlayReceiptValidator> logger)
     {
-        if (string.IsNullOrWhiteSpace(options.ServiceAccountJsonPath) || !File.Exists(options.ServiceAccountJsonPath))
+        GoogleCredential credential;
+        if (!string.IsNullOrWhiteSpace(options.ServiceAccountJson))
         {
-            throw new InvalidOperationException("Iap:ServiceAccountJsonPath must point to the Play Console service account JSON.");
+            credential = GoogleCredential.FromJson(options.ServiceAccountJson).CreateScoped(AndroidPublisherService.Scope.Androidpublisher);
         }
-
+        else if (!string.IsNullOrWhiteSpace(options.ServiceAccountJsonPath) && File.Exists(options.ServiceAccountJsonPath))
+        {
 #pragma warning disable CS0618 // FromFile is flagged obsolete in recent Google.Apis.Auth; the file is our own trusted service account.
-        GoogleCredential credential = GoogleCredential.FromFile(options.ServiceAccountJsonPath).CreateScoped(AndroidPublisherService.Scope.Androidpublisher);
+            credential = GoogleCredential.FromFile(options.ServiceAccountJsonPath).CreateScoped(AndroidPublisherService.Scope.Androidpublisher);
 #pragma warning restore CS0618
+        }
+        else
+        {
+            throw new InvalidOperationException(
+                "Set Iap:ServiceAccountJson to the Play Console service account JSON, or Iap:ServiceAccountJsonPath to a file holding it.");
+        }
 
         _service = new AndroidPublisherService(new BaseClientService.Initializer
         {
