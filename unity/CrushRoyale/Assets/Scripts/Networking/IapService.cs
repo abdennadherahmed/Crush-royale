@@ -63,6 +63,7 @@ namespace CrushRoyale.Game.Networking
                 // granted, arrives as soon as the connection opens and would be missed otherwise.
                 _store.OnPurchasePending += OnPurchasePending;
                 _store.OnPurchaseFailed += OnPurchaseFailed;
+                _store.OnPurchaseDeferred += OnPurchaseDeferred;
                 _store.OnProductsFetched += OnProductsFetched;
                 _store.OnProductsFetchFailed += failure => Debug.LogWarning("IAP products unavailable: " + failure.FailureReason);
                 _store.OnStoreDisconnected += reason =>
@@ -97,11 +98,19 @@ namespace CrushRoyale.Game.Networking
             return product != null && product.availableToPurchase ? product.metadata.localizedPriceString : null;
         }
 
+        /// <summary>How long the store gets to say anything at all before the player is let go.</summary>
+        private const int PurchaseTimeoutSeconds = 90;
+
         public async Task<IapValidateResponse> BuyAsync(string sku)
         {
             if (!IsReady || _store == null)
             {
                 throw new CrushApiException("StoreUnavailable", 0, "Store not ready.");
+            }
+            if (_pending != null && !_pending.Task.IsCompleted)
+            {
+                // A second tap while the Google sheet is open would strand the first waiter.
+                throw new CrushApiException("PurchaseFailed", 0, "A purchase is already in progress.");
             }
             IapPrecheckResponse precheck = await _backend.Client.Api.PrecheckPurchaseAsync(sku);
             if (!precheck.Allowed)
@@ -109,9 +118,26 @@ namespace CrushRoyale.Game.Networking
                 throw new CrushApiException(precheck.Error ?? "PermissionDenied", 403, precheck.Error);
             }
 
-            _pending = new TaskCompletionSource<IapValidateResponse>();
+            TaskCompletionSource<IapValidateResponse> waiter = new TaskCompletionSource<IapValidateResponse>();
+            _pending = waiter;
             _store.PurchaseProduct(sku);
-            return await _pending.Task;
+
+            // A store that answers nothing is the worst case: the player would sit on a frozen screen for ever.
+            Task finished = await Task.WhenAny(waiter.Task, Task.Delay(TimeSpan.FromSeconds(PurchaseTimeoutSeconds)));
+            if (finished != waiter.Task)
+            {
+                Fail(waiter, new CrushApiException("PurchaseFailed", 0, "The store did not answer.", true));
+            }
+            return await waiter.Task;
+        }
+
+        private void Fail(TaskCompletionSource<IapValidateResponse> waiter, CrushApiException error)
+        {
+            if (ReferenceEquals(waiter, _pending))
+            {
+                _pending = null;
+            }
+            waiter?.TrySetException(error);
         }
 
         /// <summary>
@@ -123,8 +149,15 @@ namespace CrushRoyale.Game.Networking
         private void OnPurchaseFailed(FailedOrder order)
         {
             bool cancelled = order.FailureReason == PurchaseFailureReason.UserCancelled;
-            _pending?.TrySetException(new CrushApiException(cancelled ? "Cancelled" : "PurchaseFailed", 0, order.Details));
+            Fail(_pending, new CrushApiException(cancelled ? "Cancelled" : "PurchaseFailed", 0, order.Details));
         }
+
+        /// <summary>
+        /// Waiting on someone else, a parent approving the purchase for instance. The money is not taken yet and
+        /// nothing is granted, so the player is told and released rather than left on a frozen screen.
+        /// </summary>
+        private void OnPurchaseDeferred(DeferredOrder order) =>
+            Fail(_pending, new CrushApiException("PurchaseDeferred", 0, "Waiting for approval.", true));
 
         private async Task ValidateAsync(PendingOrder order)
         {
@@ -134,7 +167,7 @@ namespace CrushRoyale.Game.Networking
                 if (!_backend.IsOnline)
                 {
                     // Left pending: Unity IAP re-delivers it after the next successful login.
-                    _pending?.TrySetException(new CrushApiException("Network", 0, "Offline: the purchase will be delivered at next launch.", true));
+                    Fail(_pending, new CrushApiException("Network", 0, "Offline: the purchase will be delivered at next launch.", true));
                     return;
                 }
 
@@ -150,7 +183,9 @@ namespace CrushRoyale.Game.Networking
                 _backend.ApplyWallet(response.Wallet);
                 _backend.ApplyInventory(response.Inventory);
                 MainThread.Post(() => PurchaseGranted?.Invoke(response));
-                _pending?.TrySetResult(response);
+                TaskCompletionSource<IapValidateResponse> waiter = _pending;
+                _pending = null;
+                waiter?.TrySetResult(response);
             }
             catch (CrushApiException ex)
             {
@@ -159,7 +194,14 @@ namespace CrushRoyale.Game.Networking
                     // Invalid receipt: never grant, release the transaction.
                     _store.ConfirmPurchase(order);
                 }
-                _pending?.TrySetException(ex);
+                Fail(_pending, ex);
+            }
+            catch (Exception ex)
+            {
+                // A receipt that will not parse, a null the store did not promise: whatever it is, the player
+                // must not be left waiting on it. The order stays pending so the purchase is re-delivered.
+                Debug.LogError("IAP validation crashed for " + sku + ": " + ex);
+                Fail(_pending, new CrushApiException("PurchaseFailed", 0, ex.Message, true));
             }
         }
 

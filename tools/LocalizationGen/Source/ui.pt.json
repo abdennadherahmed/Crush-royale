@@ -2130,6 +2130,7 @@
   "chat.report": "Denunciar esta mensagem",
   "chat.block": "Bloquear este jogador",
   "chat.reported": "Denunciado. Os nossos moderadores vão analisá-lo.",
-  "chat.blocked": "{0} está bloqueado. Não verás mais as mensagens dele."
+  "chat.blocked": "{0} está bloqueado. Não verás mais as mensagens dele.",
+  "error.PurchaseDeferred": "A tua compra aguarda aprovação. Chegará assim que for aceite."
 }
 

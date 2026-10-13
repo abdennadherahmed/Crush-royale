@@ -2130,6 +2130,7 @@
   "chat.report": "Diese Nachricht melden",
   "chat.block": "Diesen Spieler blockieren",
   "chat.reported": "Gemeldet. Unsere Moderatoren sehen es sich an.",
-  "chat.blocked": "{0} ist blockiert. Du siehst keine Nachrichten mehr."
+  "chat.blocked": "{0} ist blockiert. Du siehst keine Nachrichten mehr.",
+  "error.PurchaseDeferred": "Dein Kauf wartet auf Freigabe. Er kommt an, sobald er bestätigt ist."
 }
 

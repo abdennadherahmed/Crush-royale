@@ -2130,6 +2130,7 @@
   "chat.report": "Report this message",
   "chat.block": "Block this player",
   "chat.reported": "Reported. Our moderators will look at it.",
-  "chat.blocked": "{0} is blocked. You will not see their messages again."
+  "chat.blocked": "{0} is blocked. You will not see their messages again.",
+  "error.PurchaseDeferred": "Your purchase is waiting for approval. It will arrive once it is accepted."
 }
 

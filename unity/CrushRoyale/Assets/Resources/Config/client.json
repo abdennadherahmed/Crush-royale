@@ -6,8 +6,8 @@
   "deviceSalt": "crush-royale-device-v1",
   "iapEnabled": true,
   "adsEnabled": false,
-  "levelPlayAppKey": "",
+  "levelPlayAppKey": "28b3561c5",
   "privacyPolicyUrl": "https://crushroyale-legal.onrender.com/privacy.html",
   "termsUrl": "https://crushroyale-legal.onrender.com/terms.html",
-  "supportEmail": "support@crushroyale.example"
+  "supportEmail": "abdennadherahmed975@gmail.com"
 }
