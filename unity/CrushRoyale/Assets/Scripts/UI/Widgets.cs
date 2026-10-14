@@ -108,11 +108,23 @@ namespace CrushRoyale.Game.UI
         }
 
         /// <summary>Thick dark outline used on titles laid over illustrated ribbons and buttons.</summary>
+        /// <summary>
+        /// Contour sombre derriere un texte pose sur une illustration.
+        ///
+        /// L'epaisseur suit la taille du texte. Elle etait fixe a 3 pixels, ce qui va pour un titre de quarante
+        /// pixels et ruine un chiffre de dix-huit : le contour fait alors un cinquieme de la hauteur des glyphes,
+        /// les jambages se touchent, et un trait fin comme la barre oblique se dedouble. Les « 263 / 400 » des
+        /// barres de progression se lisaient « 263 // 400 » sur trois ecrans differents pour cette seule raison.
+        ///
+        /// Un seizieme de la taille du texte garde exactement le rendu d'avant sur les titres, et l'allege la ou
+        /// il ecrasait tout. Jamais moins d'un pixel, sinon le contour disparait et le texte se perd sur l'image.
+        /// </summary>
         public static void TitleOutline(Text text)
         {
             Outline outline = text.gameObject.AddComponent<Outline>();
             outline.effectColor = new Color(0.16f, 0.04f, 0.22f, 0.95f);
-            outline.effectDistance = new Vector2(3, -3);
+            float thickness = Mathf.Clamp(text.fontSize / 16f, 1f, 3f);
+            outline.effectDistance = new Vector2(thickness, -thickness);
         }
 
         /// <summary>Row of reward chips (icon + amount) filling <paramref name="parent"/>.</summary>

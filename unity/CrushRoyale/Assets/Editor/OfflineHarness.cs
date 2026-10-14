@@ -144,9 +144,9 @@ namespace CrushRoyale.EditorTools
             (string Id, string Type, int Target, int Progress, bool Claimed)[] rows =
             {
                 ("quest.win3", "WinStages", 3, 3, true),
-                ("quest.cascade", "Cascades", 12, 12, false),
-                ("quest.gems", "ClearGems", 400, 263, false),
-                ("quest.pvp", "PvpWins", 2, 0, false)
+                ("quest.stars", "EarnStars", 12, 12, false),
+                ("quest.coins", "SpendCoins", 400, 263, false),
+                ("quest.duel", "WinDuels", 2, 0, false)
             };
             foreach ((string id, string type, int target, int progress, bool claimed) in rows)
             {

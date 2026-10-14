@@ -845,8 +845,11 @@ namespace CrushRoyale.Game.Screens
             }
             if (!string.IsNullOrEmpty(state))
             {
+                // Remonte au-dessus du cadre. A 4 % de la hauteur, la ligne passait sous la bordure interne de
+                // CardFrame, qui la coupait en deux : « Every time you play » n'etait lisible qu'a moitie sur les
+                // trois missions permanentes. Le cadre mord sur une quinzaine de pixels, il faut partir au-dessus.
                 Text pill = UIFactory.Label(row.transform, state, Theme.SmallSize - 6, stateColor ?? Theme.Crystal, TextAnchor.MiddleLeft, FontStyle.Bold);
-                UIFactory.Anchor(pill.rectTransform, 0.15f, 0.04f, 0.62f, 0.2f);
+                UIFactory.Anchor(pill.rectTransform, 0.15f, 0.12f, 0.62f, 0.3f);
             }
             Sprite art = UiKit.Art(icon);
             if (art != null)
