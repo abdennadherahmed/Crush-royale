@@ -361,6 +361,8 @@ namespace CrushRoyale.EditorTools
                 new ScreenCase("11-Pvp", typeof(PvpScreen)),
                 new ScreenCase("12-PvpResult", typeof(PvpResultScreen), PvpResult),
                 new ScreenCase("13-Shop", typeof(ShopScreen), _ => 0),
+                new ScreenCase("13b-Shop-Orbes", typeof(ShopScreen), _ => 1),
+                new ScreenCase("13c-Shop-Coins", typeof(ShopScreen), _ => 2),
                 new ScreenCase("14-Shop-Offline", typeof(ShopScreen), _ => 0, withProfile: false),
                 new ScreenCase("15-Guild", typeof(GuildScreen)),
                 new ScreenCase("16-Friends", typeof(FriendsScreen)),

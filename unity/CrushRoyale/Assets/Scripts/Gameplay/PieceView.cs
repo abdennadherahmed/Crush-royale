@@ -341,13 +341,20 @@ namespace CrushRoyale.Game.Gameplay
                 _bombBadge = UIFactory.Icon(Rect, ArtLibrary.BombBadge() ?? ProceduralSprites.Circle(), Color.white, 0);
                 _bombBadge.raycastTarget = false;
                 _bombBadge.preserveAspect = true;
-                UIFactory.Anchor(_bombBadge.rectTransform, 0.38f, 0.38f, 1.02f, 1.02f);
-                _countdown = UIFactory.Label(_bombBadge.transform, string.Empty, Mathf.RoundToInt(Rect.sizeDelta.y * 0.34f), Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
+                // Une bombe qui compte les coups est l'information la plus urgente du plateau, et elle tenait
+                // dans un pastille de 64 % de la case avec un chiffre que l'ajustement automatique rétrécissait
+                // encore. Elle occupe maintenant 84 % de la case, et le chiffre a sa taille complète.
+                UIFactory.Anchor(_bombBadge.rectTransform, 0.2f, 0.2f, 1.04f, 1.04f);
+                _countdown = UIFactory.Label(_bombBadge.transform, string.Empty, Mathf.RoundToInt(Rect.sizeDelta.y * 0.46f), Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
                 _countdown.raycastTarget = false;
-                UIFactory.Anchor(_countdown.rectTransform, 0f, -0.05f, 0.86f, 0.8f);
+                // Pas d'ajustement automatique : il ne sait que réduire, et c'est exactement ce qu'on ne veut pas.
+                _countdown.resizeTextForBestFit = false;
+                _countdown.horizontalOverflow = HorizontalWrapMode.Overflow;
+                _countdown.verticalOverflow = VerticalWrapMode.Overflow;
+                UIFactory.Anchor(_countdown.rectTransform, 0.04f, 0f, 0.92f, 0.86f);
                 Outline outline = _countdown.gameObject.AddComponent<Outline>();
-                outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
-                outline.effectDistance = new Vector2(2f, -2f);
+                outline.effectColor = new Color(0f, 0f, 0f, 0.95f);
+                outline.effectDistance = new Vector2(3f, -3f);
             }
             _bombBadge.gameObject.SetActive(true);
             _countdown.gameObject.SetActive(true);

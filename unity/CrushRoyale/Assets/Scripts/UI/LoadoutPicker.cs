@@ -254,7 +254,11 @@ namespace CrushRoyale.Game.UI
             GameRoot game = GameRoot.Instance;
             Localization loc = game.Loc;
             UIRoot ui = game.UI;
-            RectTransform box = ui.Popup(0.2f, 0.8f);
+            // Haut et large. Cette fenêtre empile un bandeau, une illustration, une description, la ligne
+            // d'achat, quatre sources gratuites et un bouton de fermeture : sur 60 % de la hauteur, la ligne qui
+            // porte le prix se réduisait à un bandeau de quelques dizaines de pixels, et c'est elle qu'on vient
+            // chercher. Elle va de 8 % à 92 %, et la ligne d'achat prend sa part de ce qui a été gagné.
+            RectTransform box = ui.Popup(0.08f, 0.92f);
 
             RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", box), -0.03f, 0.88f, 1.03f, 1.03f);
             UiKit.Ribbon(ribbon);
@@ -281,9 +285,9 @@ namespace CrushRoyale.Game.UI
             }
 
             // Buy now (always-available single items).
-            Text buyTitle = UIFactory.Label(box, loc.T("get.buyNow"), Theme.BodySize, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(buyTitle.rectTransform, 0.07f, 0.63f, 0.93f, 0.69f);
-            RectTransform buyRow = UIFactory.Anchor(UIFactory.Rect("Buy", box), 0.07f, 0.53f, 0.93f, 0.625f);
+            Text buyTitle = UIFactory.Label(box, loc.T("get.buyNow"), Theme.HeaderSize - 2, Theme.Gold, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(buyTitle.rectTransform, 0.07f, 0.655f, 0.93f, 0.715f);
+            RectTransform buyRow = UIFactory.Anchor(UIFactory.Rect("Buy", box), 0.07f, 0.525f, 0.93f, 0.645f);
             HorizontalLayoutGroup buyLayout = buyRow.gameObject.AddComponent<HorizontalLayoutGroup>();
             buyLayout.spacing = 20;
             buyLayout.childControlWidth = buyLayout.childControlHeight = true;
@@ -291,8 +295,8 @@ namespace CrushRoyale.Game.UI
             Text pending = UIFactory.Label(buyRow, loc.T("common.loading"), Theme.SmallSize, Theme.TextMuted);
 
             // Free sources.
-            Text freeTitle = UIFactory.Label(box, loc.T("get.free"), Theme.BodySize, Theme.Crystal, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(freeTitle.rectTransform, 0.07f, 0.46f, 0.93f, 0.52f);
+            Text freeTitle = UIFactory.Label(box, loc.T("get.free"), Theme.HeaderSize - 2, Theme.Crystal, TextAnchor.MiddleLeft, FontStyle.Bold);
+            UIFactory.Anchor(freeTitle.rectTransform, 0.07f, 0.455f, 0.93f, 0.515f);
             RectTransform sources = UIFactory.Anchor(UIFactory.Rect("Sources", box), 0.07f, 0.13f, 0.93f, 0.455f);
             VerticalLayoutGroup sourceLayout = sources.gameObject.AddComponent<VerticalLayoutGroup>();
             sourceLayout.spacing = 12;

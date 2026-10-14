@@ -328,8 +328,10 @@ namespace CrushRoyale.Game.Screens
                     Badge(card.transform, Loc.T("shop.popular"), Theme.Danger, -0.04f, 0.86f, 0.62f, 1.02f);
                 }
                 string price = Game.Iap.LocalizedPrice(item.Sku) ?? (item.PriceCents / 100m).ToString("0.00") + " €";
-                Button buy = UIFactory.Button(card.transform, price, () => _ = BuyRealMoneyAsync(item.Sku), Theme.Success, Theme.BodySize);
-                UIFactory.Anchor(buy.GetComponent<RectTransform>(), 0.08f, 0.04f, 0.92f, 0.21f);
+                // Le prix est ce qu'on vient lire sur une carte de pack : il a droit au quart de sa hauteur et à
+                // la taille d'un titre, pas au corps de texte.
+                Button buy = UIFactory.Button(card.transform, price, () => _ = BuyRealMoneyAsync(item.Sku), Theme.Success, Theme.HeaderSize - 2);
+                UIFactory.Anchor(buy.GetComponent<RectTransform>(), 0.06f, 0.035f, 0.94f, 0.26f);
             });
         }
 
