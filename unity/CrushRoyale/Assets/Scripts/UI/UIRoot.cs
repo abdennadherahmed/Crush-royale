@@ -191,6 +191,8 @@ namespace CrushRoyale.Game.UI
             root._screens = Layer(go.transform, "Screens", 0);
             root._dialogs = Layer(go.transform, "Dialogs", 10);
             root._toasts = Layer(go.transform, "Toasts", 20);
+            // BRANCHE LAB-3D : l'interface entiere passe sous une camera en perspective.
+            Lab3DUI.Setup(root.Canvas, root._screens);
             root._loading = Layer(go.transform, "Loading", 30);
             root.BuildLoading();
 

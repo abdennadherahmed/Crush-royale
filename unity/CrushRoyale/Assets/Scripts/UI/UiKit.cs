@@ -157,7 +157,16 @@ namespace CrushRoyale.Game.UI
         public static bool FramePanel(Image image) => Apply(image, Sliced("panel_ornate", 0.3f), 64f);
 
         /// <summary>Gold-trimmed card frame for list rows.</summary>
-        public static bool CardFrame(Image image) => Apply(image, Sliced("card_frame", 0.3f), 30f);
+        public static bool CardFrame(Image image)
+        {
+            // BRANCHE LAB-3D : une carte se detache de la page et penche quand on la touche.
+            if (image != null)
+            {
+                Lab3DUI.SetDepth(image.rectTransform, Lab3DUI.CardDepth, false);
+                Tilt3D.On(image, 5f, 8f);
+            }
+            return Apply(image, Sliced("card_frame", 0.3f), 30f);
+        }
 
         /// <summary>
         /// Glass card: translucent dark pane, violet bevel, slim gold hairline. The default surface of the game -

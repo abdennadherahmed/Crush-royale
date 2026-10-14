@@ -320,6 +320,8 @@ namespace CrushRoyale.Game.UI
             RectTransform holder = UIFactory.Stretch(UIFactory.Rect("Backdrop", parent));
             holder.SetAsFirstSibling();
             holder.localScale = new Vector3(1.06f, 1.06f, 1f);
+            // BRANCHE LAB-3D : le decor recule loin derriere la page, a taille apparente egale.
+            Lab3DUI.SetDepth(holder, Lab3DUI.BackdropDepth, true);
             holder.gameObject.AddComponent<Parallax>();
             RectTransform rect = UIFactory.Stretch(UIFactory.Rect("Art", holder));
             Image image = rect.gameObject.AddComponent<Image>();

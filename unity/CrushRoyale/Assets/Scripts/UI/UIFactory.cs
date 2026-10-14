@@ -312,6 +312,9 @@ namespace CrushRoyale.Game.UI
             }
 
             Button button = image.gameObject.AddComponent<Button>();
+            // BRANCHE LAB-3D : chaque bouton du jeu avance d'un cran et s'enfonce sous le doigt.
+            Lab3DUI.SetDepth(rect, Lab3DUI.ButtonDepth, false);
+            Tilt3D.On(button, 10f, 16f);
             button.targetGraphic = image;
             button.transition = Selectable.Transition.ColorTint;
             ColorBlock colors = button.colors;

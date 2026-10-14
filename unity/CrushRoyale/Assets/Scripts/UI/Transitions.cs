@@ -44,12 +44,17 @@ namespace CrushRoyale.Game.UI
                     inRect.anchoredPosition = new Vector2(Mathf.LerpUnclamped(from, 0f, k), 0f);
                     float scale = Mathf.LerpUnclamped(zoom, 1f, k);
                     inRect.localScale = new Vector3(scale, scale, 1f);
+                    // BRANCHE LAB-3D : la page arrive en pivotant depuis la profondeur, comme une carte qu'on tourne.
+                    inRect.localRotation = Quaternion.Euler(0f, Mathf.LerpUnclamped(back ? -26f : 26f, 0f, k), 0f);
+                    inRect.localPosition = new Vector3(inRect.localPosition.x, inRect.localPosition.y, Mathf.LerpUnclamped(260f, 0f, k));
                     if (outRect != null)
                     {
                         // The old page leaves the other way and sinks slightly: it goes behind, not just away.
                         outRect.anchoredPosition = new Vector2(Mathf.LerpUnclamped(0f, -from * 0.55f, k), 0f);
                         float outScale = Mathf.LerpUnclamped(1f, back ? 0.96f : 1.03f, k);
                         outRect.localScale = new Vector3(outScale, outScale, 1f);
+                        outRect.localRotation = Quaternion.Euler(0f, Mathf.LerpUnclamped(0f, back ? 18f : -18f, k), 0f);
+                        outRect.localPosition = new Vector3(outRect.localPosition.x, outRect.localPosition.y, Mathf.LerpUnclamped(0f, 180f, k));
                     }
                 }
                 if (outgoing != null)
@@ -62,6 +67,8 @@ namespace CrushRoyale.Game.UI
             incoming.alpha = 1f;
             inRect.anchoredPosition = Vector2.zero;
             inRect.localScale = Vector3.one;
+            inRect.localRotation = Quaternion.identity;
+            inRect.localPosition = new Vector3(inRect.localPosition.x, inRect.localPosition.y, 0f);
         }
 
         /// <summary>
