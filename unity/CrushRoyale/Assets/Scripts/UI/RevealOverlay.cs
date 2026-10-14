@@ -182,22 +182,46 @@ namespace CrushRoyale.Game.UI
             yield return new WaitForSeconds(0.35f);
 
             // Suspense: the shake grows; rare prizes glow gold before breaking out.
+            //
+            // Le coffre tremble en place plutot que de pivoter sur lui-meme. Un coffre pose par terre qui essaie
+            // de s'ouvrir se cogne, il ne se balance pas : l'essentiel du mouvement est une secousse, la
+            // rotation n'est la que pour qu'il ne paraisse pas rigide. Et la lueur bat au lieu de monter tout
+            // droit, parce qu'une montee lineaire n'a pas d'urgence.
             _tapped = false;
+            Vector2 home = container.rectTransform.anchoredPosition;
             float shakeTime = rare ? 1.5f : 0.9f;
             for (float t = 0; t < shakeTime && !_skip; t += Time.deltaTime)
             {
                 float k = t / shakeTime;
-                float angle = Mathf.Sin(t * (20f + 30f * k)) * (4f + 14f * k);
-                container.rectTransform.localEulerAngles = new Vector3(0, 0, angle);
-                container.rectTransform.localScale = Vector3.one * (1f + 0.06f * k);
-                glow.color = new Color(1f, rare ? 0.8f : 0.6f, rare ? 0.3f : 1f, (rare ? 0.9f : 0.45f) * k);
+                float frequency = 20f + 34f * k;
+                float amount = 3f + 16f * k * k;
+                container.rectTransform.anchoredPosition = home + new Vector2(
+                    Mathf.Sin(t * frequency) * amount,
+                    Mathf.Sin(t * frequency * 1.7f) * amount * 0.45f);
+                container.rectTransform.localEulerAngles = new Vector3(0, 0, Mathf.Sin(t * frequency * 0.8f) * (1.5f + 5f * k));
+                container.rectTransform.localScale = Vector3.one * (1f + 0.05f * k);
+                float pulse = 0.78f + 0.22f * Mathf.Sin(t * 14f);
+                glow.color = new Color(1f, rare ? 0.8f : 0.6f, rare ? 0.3f : 1f, (rare ? 0.9f : 0.45f) * k * pulse);
                 if (_tapped)
                 {
                     shakeTime = Mathf.Min(shakeTime, t + 0.15f);
                 }
                 yield return null;
             }
+            container.rectTransform.anchoredPosition = home;
             container.rectTransform.localEulerAngles = Vector3.zero;
+
+            // L'anticipation. Le coffre se tasse sur lui-meme juste avant de ceder : c'est ce creux qui donne du
+            // poids a ce qui suit, et sans lui l'ouverture arrive de nulle part.
+            if (!_skip)
+            {
+                yield return CoroutineTask.Tween(0.12f, k =>
+                {
+                    float a = Ease.OutCubic(k);
+                    container.rectTransform.localScale = new Vector3(1f + 0.14f * a, 1f - 0.16f * a, 1f);
+                    container.rectTransform.anchoredPosition = home + new Vector2(0f, -10f * a);
+                });
+            }
             if (cracked != null && !_skip)
             {
                 container.sprite = cracked;
@@ -215,11 +239,42 @@ namespace CrushRoyale.Game.UI
             Sprite burstArt = UiKit.Art("burst") ?? ProceduralSprites.Glow(128);
             Image burst = UIFactory.Icon(_stage, burstArt, Color.white, 0);
             UIFactory.Anchor(burst.rectTransform, 0.1f, 0.1f, 0.9f, 0.9f);
+
+            // Des rais qui tournent lentement derriere le coffre ouvert. Ils restent apres l'eclat : c'est ce qui
+            // fait qu'un coffre ouvert a l'air d'etre une recompense et pas une image posee la.
+            Image rays = null;
+            if (keepOpened)
+            {
+                rays = UIFactory.Icon(_stage, burstArt, new Color(1f, 0.93f, 0.65f, 0f), 0);
+                UIFactory.Anchor(rays.rectTransform, -0.15f, -0.15f, 1.15f, 1.15f);
+                rays.rectTransform.SetAsFirstSibling();
+                rays.gameObject.AddComponent<Spin>();
+            }
+
+            // Le coffre s'etire en sortant de son ecrasement, depasse sa taille, puis se pose. C'est la detente
+            // qui repond a l'anticipation : sans elle le coffre s'ouvre et se fige.
             yield return CoroutineTask.Tween(0.35f, k =>
             {
                 burst.rectTransform.localScale = Vector3.one * (0.3f + 2.2f * k);
                 burst.color = new Color(1f, 1f, 1f, 1f - k);
+                if (container != null)
+                {
+                    float s = Ease.OutBack(Mathf.Clamp01(k / 0.75f));
+                    container.rectTransform.localScale = new Vector3(
+                        Mathf.Lerp(1.14f, 1f, s),
+                        Mathf.Lerp(0.84f, 1f, s), 1f);
+                    container.rectTransform.anchoredPosition = Vector2.Lerp(home + new Vector2(0f, -10f), home, s);
+                }
+                if (rays != null)
+                {
+                    rays.color = new Color(1f, 0.93f, 0.65f, 0.55f * Mathf.Clamp01(k * 2f));
+                }
             });
+            if (container != null)
+            {
+                container.rectTransform.localScale = Vector3.one;
+                container.rectTransform.anchoredPosition = home;
+            }
             Destroy(burst.gameObject);
             if (!keepOpened)
             {
