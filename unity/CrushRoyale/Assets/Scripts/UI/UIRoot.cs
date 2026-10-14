@@ -163,7 +163,12 @@ namespace CrushRoyale.Game.UI
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080, 1920);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-            scaler.matchWidthOrHeight = 0.5f;
+            // Width only, deliberately. Splitting the match half and half made the logical width depend on how
+            // tall the phone is: on a 1080 x 2340 screen the canvas was about 978 units wide, while every size in
+            // the code is written against 1080. The four-column login calendar needs 986 and ran off the right
+            // edge, and so did the guild tech tree. Pinned to the width, a size written here is the size drawn,
+            // and a taller phone simply gets more vertical room for the lists to scroll through.
+            scaler.matchWidthOrHeight = 0f;
             go.AddComponent<GraphicRaycaster>();
 
             if (FindFirstObjectByType<EventSystem>() == null)

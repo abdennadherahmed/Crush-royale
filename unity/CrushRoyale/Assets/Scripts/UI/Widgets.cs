@@ -417,6 +417,9 @@ namespace CrushRoyale.Game.UI
 
         private GridLayoutGroup _grid;
 
+        /// <summary>The shape the cell was drawn with, kept so a narrower cell stays the same shape.</summary>
+        private Vector2 _authored;
+
         public static GridFit On(GridLayoutGroup grid)
         {
             GridFit fit = grid.GetComponent<GridFit>() ?? grid.gameObject.AddComponent<GridFit>();
@@ -459,6 +462,10 @@ namespace CrushRoyale.Game.UI
             {
                 _grid = GetComponent<GridLayoutGroup>();
             }
+            if (_authored == Vector2.zero)
+            {
+                _authored = _grid.cellSize;
+            }
             float width = ((RectTransform)transform).rect.width;
             int columns = Mathf.Max(1, _grid.constraintCount);
             if (width < MinLaidOutWidth || _grid.constraint != GridLayoutGroup.Constraint.FixedColumnCount)
@@ -477,7 +484,12 @@ namespace CrushRoyale.Game.UI
             float cell = usable / columns;
             if (Mathf.Abs(cell - _grid.cellSize.x) > 0.5f)
             {
-                _grid.cellSize = new Vector2(cell, _grid.cellSize.y);
+                // Height follows, or a cell squeezed from 236 to 222 keeps the height it was drawn with and the
+                // card turns squat. Shrinking only, so a narrow grid never grows taller than it was meant to be.
+                float height = _authored.x > 1f
+                    ? _authored.y * Mathf.Min(1f, cell / _authored.x)
+                    : _grid.cellSize.y;
+                _grid.cellSize = new Vector2(cell, height);
             }
         }
     }
