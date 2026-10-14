@@ -619,10 +619,17 @@ namespace CrushRoyale.Game.Gameplay
                     _fx?.BonusCreated(CellPosition(special.Position));
                 }
             }
-            // Big clears (a line/bomb going off, or a large combo) shake the board a little.
-            if (_fx != null && step.Cleared.Count >= 10)
+            // The board answers in proportion. Two things make a step feel big: how many gems it took and how
+            // deep into the chain it is, so both feed the shake. A plain match of three gets a short tap, a deep
+            // step with a line gem going off gets most of what the red surge uses. Capped at 22, above which the
+            // gems are harder to read than the hit is satisfying.
+            if (_fx != null && step.Cleared.Count >= 3)
             {
-                _fx.Shake(0.18f, 12f);
+                float weight = Mathf.Min(1f, (step.Cleared.Count - 3) / 12f) + Mathf.Min(1f, step.CascadeLevel * 0.25f);
+                if (weight > 0.1f)
+                {
+                    _fx.Shake(0.12f + 0.05f * weight, Mathf.Min(22f, 6f + 8f * weight));
+                }
             }
 
             var moves = new List<(PieceView View, Vector2 From, Vector2 To)>();

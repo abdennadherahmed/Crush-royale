@@ -127,7 +127,7 @@ namespace CrushRoyale.EditorTools
                 enableAlphaDilation = true,
                 enableRotation = false,
                 enableTightPacking = false,
-                padding = 4
+                padding = 8
             });
             atlas.SetTextureSettings(new SpriteAtlasTextureSettings
             {
