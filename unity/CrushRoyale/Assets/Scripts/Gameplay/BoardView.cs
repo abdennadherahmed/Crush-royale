@@ -544,15 +544,61 @@ namespace CrushRoyale.Game.Gameplay
             float clearTime = seconds * ClearFraction;
             float fallTime = seconds - clearTime;
 
+            // Le souffle part d'un endroit. Une fusee ou une bombe qui fait disparaitre vingt cases d'un seul
+            // coup ne se lit pas : on voit un trou, on ne voit pas d'ou il vient. En retardant chaque case de sa
+            // distance a l'origine, le vide se propage, et le joueur comprend quelle piece a fait quoi.
+            //
+            // L'origine, c'est l'alignement qui a declenche le special : ces cases-la portent la cause Match,
+            // celles du souffle portent LineBlast, AreaBlast ou ColorBlast. Sans alignement (un power-up pose a
+            // la main), on prend le centre de ce qui disparait.
+            Vector2 origin = Vector2.zero;
+            int originCount = 0;
+            foreach (ClearedPiece cleared in step.Cleared)
+            {
+                if (cleared.Cause == ClearCause.Match)
+                {
+                    origin += new Vector2(cleared.Position.X, cleared.Position.Y);
+                    originCount++;
+                }
+            }
+            if (originCount == 0)
+            {
+                foreach (ClearedPiece cleared in step.Cleared)
+                {
+                    origin += new Vector2(cleared.Position.X, cleared.Position.Y);
+                    originCount++;
+                }
+            }
+            if (originCount > 0)
+            {
+                origin /= originCount;
+            }
+
             var vanishing = new List<PieceView>();
+            var vanishDelay = new List<float>();
+            float longestDelay = 0f;
             foreach (ClearedPiece cleared in step.Cleared)
             {
                 if (_pieces.TryGetValue(cleared.Piece.Id, out PieceView view))
                 {
                     vanishing.Add(view);
+                    // Un alignement ordinaire part d'un bloc : tout ensemble, sinon on casse son rythme. Seules
+                    // les cases soufflees attendent leur tour. Plafonne, pour qu'une explosion de plateau entier
+                    // ne tienne pas l'ecran une seconde de plus.
+                    float delay = 0f;
+                    if (cleared.Cause != ClearCause.Match)
+                    {
+                        float distance = Mathf.Abs(cleared.Position.X - origin.x) + Mathf.Abs(cleared.Position.Y - origin.y);
+                        delay = Mathf.Min(distance * BlastStaggerPerCell, MaxBlastStagger);
+                    }
+                    vanishDelay.Add(delay);
+                    longestDelay = Mathf.Max(longestDelay, delay);
                     if (!IsGhost && vanishing.Count <= 24)
                     {
-                        StartCoroutine(Burst(CellPosition(cleared.Position), (ColorBlind ? Theme.GemsColorBlind : Theme.Gems)[(int)cleared.Piece.Color]));
+                        Vector2 at = CellPosition(cleared.Position);
+                        Color tint = (ColorBlind ? Theme.GemsColorBlind : Theme.Gems)[(int)cleared.Piece.Color];
+                        // L'eclat part quand sa case part, pas avant.
+                        StartCoroutine(delay > 0.001f ? DelayedBurst(delay, at, tint) : Burst(at, tint));
                     }
                 }
             }
@@ -608,30 +654,45 @@ namespace CrushRoyale.Game.Gameplay
             // s'ecrase en hauteur, et disparait plus vite qu'elle n'a gonfle. Une sphere qui retrecit n'a pas
             // l'air de casser ; une forme qui se deforme, oui.
             const float swell = 0.28f;
-            yield return CoroutineTask.Tween(clearTime, k =>
+            // La duree de l'effacement absorbe le retard le plus long : la derniere case touchee a toujours le
+            // temps de jouer son animation entiere, et l'etape se termine quand elle se terminait avant plus ce
+            // retard, jamais au milieu d'une disparition.
+            float clearSpan = clearTime + longestDelay;
+            yield return CoroutineTask.Tween(clearSpan, k =>
             {
-                float x, y, alpha;
-                if (k < swell)
+                float now = k * clearSpan;
+                for (int i = 0; i < vanishing.Count; i++)
                 {
-                    float a = Ease.OutCubic(k / swell);
-                    x = 1f + 0.22f * a;
-                    y = 1f + 0.26f * a;
-                    alpha = 1f;
-                }
-                else
-                {
-                    float a = Ease.InQuad((k - swell) / (1f - swell));
-                    x = (1f + 0.22f) * (1f - a) + 0.45f * a;
-                    y = (1f + 0.26f) * (1f - a * 1.35f);
-                    alpha = 1f - a;
-                }
-                foreach (PieceView v in vanishing)
-                {
-                    if (v != null)
+                    PieceView v = vanishing[i];
+                    if (v == null)
                     {
-                        v.Rect.localScale = new Vector3(x, Mathf.Max(0f, y), 1f);
-                        v.Alpha = Mathf.Clamp01(alpha);
+                        continue;
                     }
+                    float local = Mathf.Clamp01((now - vanishDelay[i]) / clearTime);
+                    float x, y, alpha;
+                    if (local <= 0f)
+                    {
+                        // Pas encore son tour : elle reste entiere, elle n'a pas commence a partir.
+                        x = 1f;
+                        y = 1f;
+                        alpha = 1f;
+                    }
+                    else if (local < swell)
+                    {
+                        float a = Ease.OutCubic(local / swell);
+                        x = 1f + 0.22f * a;
+                        y = 1f + 0.26f * a;
+                        alpha = 1f;
+                    }
+                    else
+                    {
+                        float a = Ease.InQuad((local - swell) / (1f - swell));
+                        x = (1f + 0.22f) * (1f - a) + 0.45f * a;
+                        y = (1f + 0.26f) * (1f - a * 1.35f);
+                        alpha = 1f - a;
+                    }
+                    v.Rect.localScale = new Vector3(x, Mathf.Max(0f, y), 1f);
+                    v.Alpha = Mathf.Clamp01(alpha);
                 }
             });
             foreach (PieceView v in vanishing)
@@ -845,6 +906,18 @@ namespace CrushRoyale.Game.Gameplay
         }
 
         /// <summary>Gem shatter: a white pop ring, star sparks that fly out and fall, and small colored shards.</summary>
+        /// <summary>Retard par case entre l'origine d'un souffle et la case touchee.</summary>
+        private const float BlastStaggerPerCell = 0.035f;
+
+        /// <summary>Plafond du retard : au-dela, une explosion de plateau entier tiendrait l'ecran trop longtemps.</summary>
+        private const float MaxBlastStagger = 0.3f;
+
+        private IEnumerator DelayedBurst(float delay, Vector2 center, Color color)
+        {
+            yield return new WaitForSeconds(delay);
+            yield return Burst(center, color);
+        }
+
         private IEnumerator Burst(Vector2 center, Color color)
         {
             const int particles = 8;
