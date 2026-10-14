@@ -403,8 +403,16 @@ namespace CrushRoyale.Game.UI
 
         private IEnumerator ToastRoutine(string message, float seconds)
         {
+            // Dans la colonne du milieu, haut dans l'ecran.
+            //
+            // Le bas appartient aux boutons principaux : STORY et PVP ARENA sur le menu, les pouvoirs en partie,
+            // le bouton d'action sur toutes les pages. A dix pour cent de hauteur, le message se posait dessus et
+            // masquait precisement ce que le joueur allait toucher, y compris pour lui dire qu'il etait hors
+            // ligne. Et les deux bords appartiennent aux colonnes de boutons du menu, donc un bandeau pleine
+            // largeur les couvrait a son tour en remontant. Entre les deux il n'y a que de l'illustration, et
+            // l'illustration ne se clique pas.
             Image toast = UIFactory.Panel("Toast", _toasts, new Color(0.08f, 0.06f, 0.16f, 0.95f));
-            UIFactory.Anchor(toast.rectTransform, 0.08f, 0.1f, 0.92f, 0.17f);
+            UIFactory.Anchor(toast.rectTransform, 0.19f, 0.70f, 0.81f, 0.78f);
             Text label = UIFactory.Label(toast.transform, message, Theme.SmallSize + 4);
             UIFactory.Stretch(label.rectTransform, 24, 24, 8, 8);
             CanvasGroup group = toast.gameObject.AddComponent<CanvasGroup>();
