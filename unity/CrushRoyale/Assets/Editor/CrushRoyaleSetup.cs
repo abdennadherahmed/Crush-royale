@@ -24,9 +24,11 @@ namespace CrushRoyale.EditorTools
         public static void ConfigureAndroid()
         {
             PlayerSettings.companyName = "Crush Royale";
-            PlayerSettings.productName = "Crush Royale";
+            // BRANCHE LAB-3D UNIQUEMENT. Ne jamais fusionner dans crush-royale-v1 : un autre identifiant fait du
+            // labo une autre application, installee a cote du vrai jeu au lieu de le remplacer.
+            PlayerSettings.productName = "Crush Royale 3D";
             PlayerSettings.bundleVersion = "1.0.0";
-            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.crushroyale.game");
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Android, "com.crushroyale.lab3d");
             PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
             PlayerSettings.allowedAutorotateToLandscapeLeft = false;
             PlayerSettings.allowedAutorotateToLandscapeRight = false;

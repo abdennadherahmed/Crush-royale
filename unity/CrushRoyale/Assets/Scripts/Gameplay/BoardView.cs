@@ -87,6 +87,11 @@ namespace CrushRoyale.Game.Gameplay
             view._piecesLayer = UIFactory.Stretch(UIFactory.Rect("Pieces", rect));
             view._chainLayer = UIFactory.Stretch(UIFactory.Rect("Chains", rect));
             view._fxLayer = UIFactory.Stretch(UIFactory.Rect("Fx", rect));
+            // BRANCHE LAB-3D : le plateau principal passe en volume ; celui de l'adversaire reste en 2D.
+            if (!ghost)
+            {
+                Board3D.Attach(view, view._piecesLayer);
+            }
             return view;
         }
 

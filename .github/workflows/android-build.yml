@@ -153,7 +153,8 @@ jobs:
           retention-days: 14
 
       - name: Publish for in-game updates
-        if: success() && (inputs.format || 'apk') == 'apk'
+        # Le labo 3D ne doit jamais etre propose aux joueurs comme mise a jour du vrai jeu.
+        if: success() && (inputs.format || 'apk') == 'apk' && github.ref_name != 'lab-3d'
         shell: pwsh
         env:
           SUPABASE_URL: https://gzivxtzugewlvygnxkhn.supabase.co

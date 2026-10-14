@@ -144,6 +144,19 @@ namespace CrushRoyale.Game.Gameplay
             _releasing = true;
         }
 
+        /// <summary>
+        /// Labo 3D : eteint ou rallume le corps peint de la gemme, et seulement lui. Les yeux, les rayures d'une
+        /// speciale, le compte a rebours et l'ombre portee restent ou s'en vont avec, selon ce qui les porte : les
+        /// enfants restent, l'ombre (un effet du corps) disparait avec lui puisque la 3D a la sienne.
+        /// </summary>
+        public void SetBodyVisible(bool visible)
+        {
+            if (_body != null && _body.enabled != visible)
+            {
+                _body.enabled = visible;
+            }
+        }
+
         /// <summary>Squash-and-stretch after a fall (skipped with reduced motion).</summary>
         public void Land()
         {
