@@ -39,8 +39,19 @@ namespace CrushRoyale.EditorTools
         /// when the APK is built and never in the editor, so the editor cannot even reproduce the fault. Five
         /// sprites of 384 px, drawn one at a time on a card, were the worst candidates for packing in the first
         /// place: they save almost no draw calls and they were the only place the damage showed.
+        ///
+        /// Gems left for the same reason, and it cost three versions to admit it. A sliver of the neighbouring
+        /// sprite, gold edge and all, showed in the corner of every gem on the device: an orange shard inside the
+        /// blue one, a blue shard inside the orange one. The source files are clean, one single shape each with
+        /// nothing stray around it, and the editor never reproduced any of it, because the editor never packs.
+        /// The padding was raised from 4 to 8 and the defect stayed. Tuning the margin was treating the symptom:
+        /// what removes the defect is not packing the gems at all.
+        ///
+        /// The price is a few draw calls on the one screen that draws sixty-four sprites at once. The board is
+        /// also the thing a player looks at for the whole game, and a visible seam on every gem costs more than a
+        /// few batches ever will.
         /// </summary>
-        public static readonly string[] Roots = { "Icons", "Gems", "PowerUps", "Chests", "Frames" };
+        public static readonly string[] Roots = { "Icons", "PowerUps", "Chests", "Frames" };
 
         [MenuItem("Crush Royale/6. Build Sprite Atlases", priority = 22)]
         public static void BuildAll()

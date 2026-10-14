@@ -90,6 +90,24 @@ namespace CrushRoyale.Game.Networking
         /// </summary>
         internal ShopResponse OfflineShop { get; set; }
 
+        /// <summary>
+        /// Reponses servies a la place du serveur quand il n'y a pas de serveur.
+        ///
+        /// Le harnais de captures est le seul a remplir ce dictionnaire. Dans un build livre, personne ne le
+        /// remplit, il reste vide, et un ecran hors ligne se comporte exactement comme avant : pas de donnees,
+        /// un message, rien d'invente. C'est la condition pour que ce mecanisme n'existe que pour l'outillage.
+        ///
+        /// Il est indexe par type de reponse, parce que c'est ce que l'ecran appelant connait : il demande un
+        /// BattlePassResponse, il recoit le BattlePassResponse de demonstration. Sans ca il faudrait une
+        /// propriete par ecran, et c'est precisement ce qui a fait que seule la boutique en avait une.
+        /// </summary>
+        internal readonly System.Collections.Generic.Dictionary<Type, object> OfflineFixtures =
+            new System.Collections.Generic.Dictionary<Type, object>();
+
+        /// <summary>La reponse de demonstration pour ce type, ou null si le harnais n'en a pas pose.</summary>
+        internal T OfflineFixture<T>() where T : class =>
+            OfflineFixtures.TryGetValue(typeof(T), out object value) ? value as T : null;
+
         public ProfileDto Profile => IsOnline ? Client.Profile : OfflineProfile;
 
         public string PlayerId => Client?.Auth.UserId ?? "offline-player";

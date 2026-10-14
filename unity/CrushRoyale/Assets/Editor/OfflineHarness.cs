@@ -94,6 +94,107 @@ namespace CrushRoyale.EditorTools
         {
             game.Backend.OfflineProfile = withProfile ? (Snapshot() ?? DemoProfile()) : null;
             game.Backend.OfflineShop = withProfile ? DemoShop() : null;
+            game.Backend.OfflineFixtures.Clear();
+            if (withProfile)
+            {
+                // Chaque ecran qui demande ses donnees au serveur restait sur « Loading » dans les captures, et
+                // ses defauts ne pouvaient donc etre trouves que par un joueur, sur un telephone, apres un build.
+                // Le Battle Pass, les quetes, les hauts faits et le classement en font partie.
+                game.Backend.OfflineFixtures[typeof(BattlePassResponse)] = DemoBattlePass();
+                game.Backend.OfflineFixtures[typeof(QuestsResponse)] = DemoQuests();
+                game.Backend.OfflineFixtures[typeof(AchievementsResponse)] = DemoAchievements();
+                game.Backend.OfflineFixtures[typeof(LeaderboardResponse)] = DemoLeaderboard();
+            }
+        }
+
+        private static long InDays(int days) =>
+            CrushRoyale.Core.Common.TimeUtil.ToUnixMs(DateTime.UtcNow.AddDays(days));
+
+        /// <summary>Un pass a mi-saison : des paliers pris, un palier en cours, et de quoi remplir l'ecran.</summary>
+        private static BattlePassResponse DemoBattlePass()
+        {
+            var pass = new BattlePassResponse
+            {
+                Season = 3,
+                Tier = 14,
+                Xp = 2840,
+                XpPerTier = 200,
+                Premium = false,
+                TierPriceOrbes = 120,
+                SeasonEndUnixMs = InDays(11)
+            };
+            for (int tier = 1; tier <= 30; tier++)
+            {
+                pass.Tiers.Add(new BattlePassTierDto
+                {
+                    Tier = tier,
+                    Free = new RewardDto { Coins = 250 * tier, Lives = tier % 5 == 0 ? 1 : 0 },
+                    Premium = new RewardDto { Orbes = 20 + tier * 2, Coins = 400 * tier },
+                    FreeClaimed = tier <= 12,
+                    PremiumClaimed = false
+                });
+            }
+            return pass;
+        }
+
+        /// <summary>Des quetes du jour dans les trois etats : finie et prise, finie a prendre, en cours.</summary>
+        private static QuestsResponse DemoQuests()
+        {
+            var quests = new QuestsResponse { ResetAtUnixMs = InDays(1) };
+            (string Id, string Type, int Target, int Progress, bool Claimed)[] rows =
+            {
+                ("quest.win3", "WinStages", 3, 3, true),
+                ("quest.cascade", "Cascades", 12, 12, false),
+                ("quest.gems", "ClearGems", 400, 263, false),
+                ("quest.pvp", "PvpWins", 2, 0, false)
+            };
+            foreach ((string id, string type, int target, int progress, bool claimed) in rows)
+            {
+                quests.Quests.Add(new QuestDto { Id = id, Type = type, Target = target, Progress = progress, Claimed = claimed });
+            }
+            return quests;
+        }
+
+        /// <summary>Assez de hauts faits pour que la grille deborde et que ses lignes se mesurent.</summary>
+        private static AchievementsResponse DemoAchievements()
+        {
+            var response = new AchievementsResponse { CoinBonus = 0.12f };
+            response.PagesCompleted.Add(1);
+            string[] types = { "StagesCleared", "GemsCleared", "PvpWins", "ChestsOpened", "PetsOwned", "CascadeMax" };
+            for (int i = 0; i < 18; i++)
+            {
+                long target = 50L * (i + 1);
+                response.Achievements.Add(new AchievementDto
+                {
+                    Id = "ach." + i,
+                    Type = types[i % types.Length],
+                    Page = 1 + i / 6,
+                    Target = target,
+                    Progress = i < 7 ? target : target / (2 + i % 3),
+                    Unlocked = i < 7,
+                    Claimed = i < 4
+                });
+            }
+            return response;
+        }
+
+        /// <summary>Un classement ou le joueur n'est ni premier ni dernier : c'est la que la ligne se lit mal.</summary>
+        private static LeaderboardResponse DemoLeaderboard()
+        {
+            var board = new LeaderboardResponse { League = "Crystal", Week = 42, ResetAtUnixMs = InDays(3) };
+            string[] names = { "Nyx", "Valdoran", "Mira", "Kaelthas", "Sora", "Demo Hero", "Ilya", "Branwen", "Tariq", "Zhao", "Esme", "Ruben" };
+            for (int i = 0; i < names.Length; i++)
+            {
+                board.Entries.Add(new LeaderboardEntryDto
+                {
+                    Rank = i + 1,
+                    PlayerId = "p" + i,
+                    DisplayName = names[i],
+                    Trophies = 2400 - i * 90,
+                    League = "Crystal"
+                });
+            }
+            return board;
         }
 
         /// <summary>

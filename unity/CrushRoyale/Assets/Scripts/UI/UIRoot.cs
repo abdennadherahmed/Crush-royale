@@ -106,6 +106,14 @@ namespace CrushRoyale.Game.UI
         {
             if (!Game.Backend.IsOnline)
             {
+                // Hors ligne, un ecran n'a rien a montrer... sauf quand le harnais de captures a pose une reponse
+                // de demonstration pour ce type. C'est ce qui permet de photographier le Battle Pass rempli au
+                // lieu de son ecran de chargement, et donc de voir ses defauts ailleurs que sur un telephone.
+                T fixture = Game.Backend.OfflineFixture<T>();
+                if (fixture != null)
+                {
+                    return fixture;
+                }
                 UI.Toast(Loc.T("error.offline"));
                 return null;
             }
