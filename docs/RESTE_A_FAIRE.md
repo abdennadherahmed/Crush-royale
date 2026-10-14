@@ -25,6 +25,11 @@
 9. ~~**Les cascades qui ne montaient pas en intensité.**~~ La secousse grandit avec ce que l'étape a pris et
    avec la profondeur de la chaîne. Le son montait déjà d'un demi-ton par étape.
 10. ~~**Les publicités.**~~ Tout le circuit est en place, voir la section suivante.
+11. ~~**Le panneau admin dans les Réglages.**~~ Visible seulement pour un compte administrateur : ajouter des
+    orbes, ajouter des pièces, débloquer la campagne jusqu'à une étape. Ça passe par l'API, donc un crédit
+    atterrit dans le portefeuille et dans le registre et porte l'identifiant de l'administrateur, au lieu de
+    contourner les règles du serveur comme le fait une écriture directe en base. Attention : le panneau n'est
+    dans aucun build existant, il arrive avec la 59.
 
 ## Les publicités : ce qui est fait, et les deux choses qui restent de ton côté
 
@@ -38,11 +43,11 @@ puisqu'il tourne sur le téléphone du joueur. C'est LevelPlay qui appelle le se
 clé que seuls eux et toi connaissez, et c'est cet appel qui rend une récompense payable. Un test vérifie la
 signature, le fait qu'une vidéo non confirmée ne donne rien, et le fait qu'un rappel répété ne paie qu'une fois.
 
-11. **Sur Render**, trois variables : `Ads__LevelPlayPrivateKey` (une chaîne que tu inventes),
+12. **Sur Render**, trois variables : `Ads__LevelPlayPrivateKey` (une chaîne que tu inventes),
     `Ads__RewardedUnitId` (l'identifiant de l'unité Rewarded Video du tableau de bord LevelPlay) et
     `Game__RewardedAdsEnabled` à `true`. `Ads__InterstitialUnitId` quand tu voudras des interstitiels. Les
     identifiants d'unité sont servis avec la configuration, donc les changer ne demande aucun nouveau build.
-12. **Sur LevelPlay**, Apps → ton application → Set S2S callback. L'URL est
+13. **Sur LevelPlay**, Apps → ton application → Set S2S callback. L'URL est
     `https://crushroyale-api.onrender.com/api/v1/ads/levelplay?applicationUserId=[USER_ID]&eventId=[EVENT_ID]&rewards=[REWARDS]`
     et la clé privée est exactement celle que tu as mise sur Render. Teste depuis leur page avant d'enregistrer :
     tant que le serveur ne répond pas, le rappel reste inactif.
@@ -51,25 +56,18 @@ Tant que ces deux points ne sont pas faits, la vidéo se lance et se regarde mai
 
 ## Dans la console Play, quand tu t'y connecteras
 
-13. **Inscrire les 114 testeurs comme testeurs de licence** (Paramètres → Monétisation → Test de licence). Sans
+14. **Inscrire les 114 testeurs comme testeurs de licence** (Paramètres → Monétisation → Test de licence). Sans
     ça, le premier achat qui fonctionnera sera débité pour de vrai.
-14. **Retourner trois déclarations** maintenant que les pubs sont dans le build : contient des annonces,
+15. **Retourner trois déclarations** maintenant que les pubs sont dans le build : contient des annonces,
     identifiant publicitaire, et la collecte à des fins publicitaires dans la sécurité des données. Le manifeste
     déclare déjà `AD_ID` ; ces trois cases sont la moitié que le relecteur regarde.
-15. **Vérifier que les onze produits sont visibles depuis le jeu**, la propagation étant faite depuis longtemps.
-16. **Deux identifiants OAuth Android supplémentaires**, pour les empreintes de la clé d'importation, afin que
+16. **Vérifier que les onze produits sont visibles depuis le jeu**, la propagation étant faite depuis longtemps.
+17. **Deux identifiants OAuth Android supplémentaires**, pour les empreintes de la clé d'importation, afin que
     les APK installés à la main puissent aussi se connecter à Google.
-17. **API Play Integrity**, zéro service actif sur sept. Pour un PvP classé, c'est la protection côté appareil
+18. **API Play Integrity**, zéro service actif sur sept. Pour un PvP classé, c'est la protection côté appareil
     qui manque, en plus de la resimulation serveur déjà en place.
-18. **Les vérifications d'appareil sur la fiche**, à activer après les quatorze jours : activées maintenant,
+19. **Les vérifications d'appareil sur la fiche**, à activer après les quatorze jours : activées maintenant,
     elles peuvent barrer la route à un testeur sur un téléphone non certifié.
-
-## Ce qui reste à écrire
-
-19. **Un panneau admin dans les Réglages**, visible seulement pour les comptes administrateurs, pour se créditer
-    et débloquer la campagne. Ça demande trois choses qui n'existent pas encore : le profil ne dit pas si le
-    compte est administrateur, il n'y a pas de route pour débloquer une étape, et l'écran reste à faire. Ça
-    remplacerait les modifications directes en base, qui marchent mais contournent les règles du serveur.
 
 ## Ce qui dépend de toi
 
