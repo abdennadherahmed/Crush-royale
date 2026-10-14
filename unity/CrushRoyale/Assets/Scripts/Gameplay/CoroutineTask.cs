@@ -54,5 +54,46 @@ namespace CrushRoyale.Game.Gameplay
             const float c3 = c1 + 1f;
             return 1f + c3 * Mathf.Pow(t - 1f, 3f) + c1 * Mathf.Pow(t - 1f, 2f);
         }
+
+        /// <summary>Depasse puis revient en oscillant. Pour un refus : le geste a ete vu, il n'a pas ete accepte.</summary>
+        public static float OutElastic(float t)
+        {
+            if (t <= 0f || t >= 1f)
+            {
+                return Mathf.Clamp01(t);
+            }
+            const float period = 0.3f;
+            return Mathf.Pow(2f, -10f * t) * Mathf.Sin((t * 10f - 0.75f) * (2f * Mathf.PI / period)) + 1f;
+        }
+
+        /// <summary>Rebondit a l'arrivee, de moins en moins haut. Pour une chute qui se pose.</summary>
+        public static float OutBounce(float t)
+        {
+            const float n = 7.5625f;
+            const float d = 2.75f;
+            if (t < 1f / d)
+            {
+                return n * t * t;
+            }
+            if (t < 2f / d)
+            {
+                t -= 1.5f / d;
+                return n * t * t + 0.75f;
+            }
+            if (t < 2.5f / d)
+            {
+                t -= 2.25f / d;
+                return n * t * t + 0.9375f;
+            }
+            t -= 2.625f / d;
+            return n * t * t + 0.984375f;
+        }
+
+        /// <summary>Recule avant d'avancer. L'anticipation qui rend un depart lisible.</summary>
+        public static float InBack(float t)
+        {
+            const float c1 = 1.70158f;
+            return (c1 + 1f) * t * t * t - c1 * t * t;
+        }
     }
 }

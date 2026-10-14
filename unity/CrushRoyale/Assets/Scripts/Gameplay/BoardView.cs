@@ -355,6 +355,24 @@ namespace CrushRoyale.Game.Gameplay
             }
         }
 
+        /// <summary>Enfonce ou relache la gemme d'une case. Sans effet si la case est vide.</summary>
+        public void Press(Pos cell, bool down)
+        {
+            PieceView view = FindAt(cell);
+            if (view == null)
+            {
+                return;
+            }
+            if (down)
+            {
+                view.PressIn();
+            }
+            else
+            {
+                view.PressOut();
+            }
+        }
+
         public void SetSelected(Pos? cell)
         {
             if (_hintA == null)
@@ -395,9 +413,11 @@ namespace CrushRoyale.Game.Gameplay
                 pb.Rect.anchoredPosition = Vector2.Lerp(posB, posA, e);
                 pa.Rect.localScale = Vector3.one * (1f + 0.12f * k);
             });
-            yield return CoroutineTask.Tween(half, k =>
+            // Retour elastique : la piece repasse sa place et revient. Un retour plat se lit comme un bug
+            // d'affichage, une oscillation se lit comme un refus.
+            yield return CoroutineTask.Tween(half * 1.5f, k =>
             {
-                float e = (1 - Ease.OutCubic(k)) * 0.45f;
+                float e = (1 - Ease.OutElastic(k)) * 0.45f;
                 pa.Rect.anchoredPosition = Vector2.Lerp(posA, posB, e);
                 pb.Rect.anchoredPosition = Vector2.Lerp(posB, posA, e);
                 pa.Rect.localScale = Vector3.one * (1.12f - 0.12f * k);
@@ -583,15 +603,34 @@ namespace CrushRoyale.Game.Gameplay
             {
                 v?.Panic();
             }
+            // Squash and stretch plutot qu'un retrecissement uniforme. La gemme gonfle sur le premier quart,
+            // ce qui annonce ce qui va se passer, puis s'ecrase : elle s'etale en largeur pendant qu'elle
+            // s'ecrase en hauteur, et disparait plus vite qu'elle n'a gonfle. Une sphere qui retrecit n'a pas
+            // l'air de casser ; une forme qui se deforme, oui.
+            const float swell = 0.28f;
             yield return CoroutineTask.Tween(clearTime, k =>
             {
-                float s = 1f - Ease.InQuad(k);
+                float x, y, alpha;
+                if (k < swell)
+                {
+                    float a = Ease.OutCubic(k / swell);
+                    x = 1f + 0.22f * a;
+                    y = 1f + 0.26f * a;
+                    alpha = 1f;
+                }
+                else
+                {
+                    float a = Ease.InQuad((k - swell) / (1f - swell));
+                    x = (1f + 0.22f) * (1f - a) + 0.45f * a;
+                    y = (1f + 0.26f) * (1f - a * 1.35f);
+                    alpha = 1f - a;
+                }
                 foreach (PieceView v in vanishing)
                 {
                     if (v != null)
                     {
-                        v.Rect.localScale = new Vector3(s, s, 1);
-                        v.Alpha = s;
+                        v.Rect.localScale = new Vector3(x, Mathf.Max(0f, y), 1f);
+                        v.Alpha = Mathf.Clamp01(alpha);
                     }
                 }
             });

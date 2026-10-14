@@ -11,6 +11,9 @@ namespace CrushRoyale.Game.Gameplay
         private const float SwipeThreshold = 0.35f;
 
         private Pos? _pressed;
+
+        /// <summary>La case dont la gemme est actuellement enfoncee, pour etre sure de la relacher.</summary>
+        private Pos? _pressedVisual;
         private Vector2 _pressLocal;
         private bool _swiped;
         private Pos? _selected;
@@ -47,6 +50,10 @@ namespace CrushRoyale.Game.Gameplay
             _pressed = cell;
             _pressLocal = local;
             _swiped = false;
+            // Avant toute decision de jeu : le doigt s'est pose, ca se voit.
+            ReleaseVisual();
+            Board.Press(cell, true);
+            _pressedVisual = cell;
         }
 
         public void OnDrag(PointerEventData eventData)
@@ -71,6 +78,9 @@ namespace CrushRoyale.Game.Gameplay
                 ? from.Offset(delta.x > 0 ? 1 : -1, 0)
                 : from.Offset(0, delta.y > 0 ? 1 : -1);
             _swiped = true;
+            // Le glissement part : la gemme se relache pour que ce soit le deplacement qu'on regarde, pas un
+            // appui reste coince.
+            ReleaseVisual();
             ClearSelection();
             if (to.X >= 0 && to.Y >= 0 && to.X < Board.Width && to.Y < Board.Height)
             {
@@ -78,8 +88,20 @@ namespace CrushRoyale.Game.Gameplay
             }
         }
 
+        /// <summary>Rend sa taille a la derniere gemme enfoncee. Appele par toutes les sorties, sans exception :
+        /// une gemme laissee enfoncee resterait petite pour le reste de la partie.</summary>
+        private void ReleaseVisual()
+        {
+            if (_pressedVisual.HasValue)
+            {
+                Board?.Press(_pressedVisual.Value, false);
+                _pressedVisual = null;
+            }
+        }
+
         public void OnPointerUp(PointerEventData eventData)
         {
+            ReleaseVisual();
             if (!Interactable || _pressed == null || _swiped)
             {
                 _pressed = null;

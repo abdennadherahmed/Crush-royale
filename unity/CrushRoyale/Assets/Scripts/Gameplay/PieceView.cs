@@ -31,6 +31,9 @@ namespace CrushRoyale.Game.Gameplay
         private float _nextGlint;
         private float _glintTime = -1f;
         private float _land = -1f;
+        private float _press;
+        private bool _pressing;
+        private bool _releasing;
         private static bool? _reduceMotion;
 
         /// <summary>Board-local point the gems look at (last touch) and until when.</summary>
@@ -120,6 +123,26 @@ namespace CrushRoyale.Game.Gameplay
 
         /// <summary>Wide eyes for a moment (being swapped).</summary>
         public void Surprise() => _surprise = 0.45f;
+
+        /// <summary>
+        /// Le doigt se pose : la gemme s'enfonce. C'est le retour que le plateau n'avait pas du tout, et c'est
+        /// celui qu'on sent avant tous les autres, parce qu'il arrive avant que le jeu ait decide quoi que ce
+        /// soit. Il survit au mode « animations reduites » : ce n'est pas de la decoration, c'est la preuve que
+        /// l'appui a ete recu.
+        /// </summary>
+        public void PressIn()
+        {
+            _press = 0f;
+            _pressing = true;
+        }
+
+        /// <summary>Le doigt se leve : la gemme repasse au-dessus de sa taille avant de se poser.</summary>
+        public void PressOut()
+        {
+            _press = 0f;
+            _pressing = false;
+            _releasing = true;
+        }
 
         /// <summary>Squash-and-stretch after a fall (skipped with reduced motion).</summary>
         public void Land()
@@ -384,12 +407,39 @@ namespace CrushRoyale.Game.Gameplay
         {
             UpdateEyes();
             UpdateGlint();
+            if (_pressing || _releasing)
+            {
+                _press += Time.unscaledDeltaTime;
+                if (_pressing)
+                {
+                    // 60 ms pour s'enfoncer a 0.92, puis on y reste tant que le doigt est pose.
+                    float k = Mathf.Clamp01(_press / 0.06f);
+                    float s = Mathf.Lerp(1f, 0.92f, Ease.OutCubic(k));
+                    Rect.localScale = new Vector3(s, s, 1f);
+                }
+                else
+                {
+                    // 120 ms pour revenir, en depassant a 1.07 au passage : c'est le depassement qui donne
+                    // l'impression que la gemme a du ressort, pas le retour lui-meme.
+                    float k = Mathf.Clamp01(_press / 0.12f);
+                    float s = Mathf.Lerp(0.92f, 1f, Ease.OutBack(k));
+                    Rect.localScale = new Vector3(s, s, 1f);
+                    if (k >= 1f)
+                    {
+                        Rect.localScale = Vector3.one;
+                        _releasing = false;
+                    }
+                }
+            }
             if (_land >= 0f)
             {
                 _land += Time.unscaledDeltaTime;
-                float k = Mathf.Clamp01(_land / 0.24f);
-                float wobble = Mathf.Sin(k * Mathf.PI * 2f) * (1f - k);
-                Rect.localScale = new Vector3(1f + wobble * 0.14f, 1f - wobble * 0.16f, 1f);
+                float k = Mathf.Clamp01(_land / 0.28f);
+                // Un ecrasement franc a l'impact, puis des rebonds de plus en plus courts. Le sinus amorti
+                // d'avant donnait une seule ondulation molle, qui se lisait comme un tremblement, pas comme
+                // une pierre qui se pose.
+                float squash = (1f - Ease.OutBounce(k)) * (1f - k * 0.3f);
+                Rect.localScale = new Vector3(1f + squash * 0.3f, 1f - squash * 0.34f, 1f);
                 if (k >= 1f)
                 {
                     Rect.localScale = Vector3.one;
