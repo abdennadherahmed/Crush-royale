@@ -99,6 +99,35 @@ public sealed class AdminService
             return true;
         }, ct);
 
+    /// <summary>
+    /// Moves a player's campaign progress to a given stage. Support uses it for a player stuck behind a bug, and
+    /// testing uses it to reach a late chapter without replaying a hundred stages. It writes through the same
+    /// workspace as everything else, so the story state stays consistent instead of being poked in the database.
+    /// </summary>
+    public Task<StoryDto> UnlockAsync(Guid adminId, AdminUnlockRequest request, CancellationToken ct)
+    {
+        if (!Guid.TryParse(request?.PlayerId, out Guid target))
+        {
+            throw new ApiException(ErrorCode.InvalidArgument);
+        }
+        int total = _ops.Balance.Current.Story.TotalStages;
+        if (request!.Stage < 1 || request.Stage > total)
+        {
+            throw new ApiException(ErrorCode.InvalidArgument, "Stage must be between 1 and " + total + ".");
+        }
+        string note = (request.Note ?? string.Empty).Trim();
+        if (note.Length is 0 or > 200)
+        {
+            throw new ApiException(ErrorCode.InvalidArgument, "A note (1-200 chars) is required for the audit trail.");
+        }
+        return _ops.RunAsync(target, ctx =>
+        {
+            ctx.Player.State.Story.HighestUnlockedStage = request.Stage;
+            _logger.LogWarning("Admin {AdminId} unlocked stage {Stage} for {PlayerId}: {Note}", adminId, request.Stage, target, note);
+            return Mappers.Story(ctx.Player);
+        }, ct, allowBanned: true);
+    }
+
     public Task<WalletDto> GrantAsync(Guid adminId, AdminGrantRequest request, CancellationToken ct)
     {
         if (!Guid.TryParse(request?.PlayerId, out Guid target))

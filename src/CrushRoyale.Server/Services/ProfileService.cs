@@ -96,8 +96,14 @@ public sealed class ProfileService
         }, ct, allowBanned: true).ConfigureAwait(false);
     }
 
-    public Task<ProfileDto> GetMeAsync(Guid userId, CancellationToken ct) =>
-        _ops.ReadAsync(userId, (ws, _) => Task.FromResult(Mappers.Profile(ws)), ct);
+    public Task<ProfileDto> GetMeAsync(Guid userId, bool isAdmin, CancellationToken ct) =>
+        _ops.ReadAsync(userId, (ws, _) =>
+        {
+            ProfileDto profile = Mappers.Profile(ws);
+            // Admin rights live on the token, not on the player, so they are stamped on here rather than mapped.
+            profile.IsAdmin = isAdmin;
+            return Task.FromResult(profile);
+        }, ct);
 
     /// <summary>
     /// Permanent account deletion requested by the player (Google Play / GDPR). The guild is left first so the other

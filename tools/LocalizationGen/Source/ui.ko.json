@@ -2141,6 +2141,14 @@
   "ads.consentTitle": "광고",
   "ads.consentBody": "Crush Royale는 광고 덕분에 무료입니다. 광고 네트워크가 당신에 대해 아는 정보로 광고를 고르게 해도 괜찮습니까? 거절해도 게임은 그대로입니다.",
   "ads.consentYes": "허용",
-  "ads.consentNo": "허용 안 함"
+  "ads.consentNo": "허용 안 함",
+  "settings.admin": "관리",
+  "admin.hint": "이 버튼은 본인 계정에 작용하며 서버에 기록됩니다.",
+  "admin.grantOrbes": "오브 추가",
+  "admin.grantCoins": "코인 추가",
+  "admin.unlockStage": "단계까지 해제",
+  "admin.amount": "수량",
+  "admin.apply": "적용",
+  "admin.done": "완료되었습니다."
 }
 

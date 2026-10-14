@@ -492,6 +492,13 @@ namespace CrushRoyale.Contracts
     {
         public string Id { get; set; }
 
+        /// <summary>
+        /// True when this account carries admin rights. The game only uses it to decide whether to draw the admin
+        /// section in the settings; every admin route checks the token again, so a client that lies about this
+        /// gets a screen full of buttons that all return 403.
+        /// </summary>
+        public bool IsAdmin { get; set; }
+
         public string DisplayName { get; set; }
 
         public PiggyBankDto PiggyBank { get; set; }
@@ -771,6 +778,17 @@ namespace CrushRoyale.Contracts
         public bool Punish { get; set; }
 
         public bool Severe { get; set; }
+    }
+
+    /// <summary>Opens the campaign up to a stage, for support and for testing a late chapter.</summary>
+    public sealed class AdminUnlockRequest
+    {
+        public string PlayerId { get; set; }
+
+        /// <summary>The highest stage to unlock. Lowering it is allowed: a test sometimes needs the early game.</summary>
+        public int Stage { get; set; }
+
+        public string Note { get; set; }
     }
 
     public sealed class AdminGrantRequest

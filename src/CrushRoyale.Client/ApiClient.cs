@@ -238,6 +238,14 @@ namespace CrushRoyale.Client
         public Task<InventoryDto> EquipAsync(string cosmeticId, CancellationToken ct = default) => Transport.PostAsync<InventoryDto>(ApiRoutes.Equip, new EquipRequest { CosmeticId = cosmeticId }, ct);
         public Task<RewardedAdResponse> RewardedAdAsync(string placement, string adToken, CancellationToken ct = default) => Transport.PostAsync<RewardedAdResponse>(ApiRoutes.RewardedAd, new RewardedAdRequest { Placement = placement, AdToken = adToken }, ct);
 
+        /// <summary>Admin only: credits an account. Refused with 403 for everyone else.</summary>
+        public Task<WalletDto> AdminGrantAsync(string playerId, long coins, long orbes, string note, CancellationToken ct = default) =>
+            Transport.PostAsync<WalletDto>(ApiRoutes.AdminGrant, new AdminGrantRequest { PlayerId = playerId, Coins = coins, Orbes = orbes, Note = note }, ct);
+
+        /// <summary>Admin only: moves an account's campaign progress to a stage.</summary>
+        public Task<StoryDto> AdminUnlockAsync(string playerId, int stage, string note, CancellationToken ct = default) =>
+            Transport.PostAsync<StoryDto>(ApiRoutes.AdminUnlock, new AdminUnlockRequest { PlayerId = playerId, Stage = stage, Note = note }, ct);
+
         // PvP
         public Task<MatchmakingStatusResponse> RequestMatchAsync(MatchmakingRequest request, CancellationToken ct = default) => Transport.PostAsync<MatchmakingStatusResponse>(ApiRoutes.Matchmaking, request, ct);
         public Task<MatchmakingStatusResponse> GetMatchmakingStatusAsync(CancellationToken ct = default) => Transport.GetAsync<MatchmakingStatusResponse>(ApiRoutes.Matchmaking, ct);

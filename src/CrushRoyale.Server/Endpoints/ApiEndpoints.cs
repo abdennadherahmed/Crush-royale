@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using CrushRoyale.Contracts;
 using CrushRoyale.Server.Auth;
+using CrushRoyale.Server.Infrastructure;
 using CrushRoyale.Server.Persistence;
 using CrushRoyale.Server.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +48,7 @@ public static class ApiEndpoints
     private static void MapPlayer(RouteGroupBuilder api)
     {
         api.MapPost(ApiRoutes.Login, (LoginRequest body, ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.LoginAsync(Me(user), body, ct));
-        api.MapGet(ApiRoutes.Me, (ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.GetMeAsync(Me(user), ct));
+        api.MapGet(ApiRoutes.Me, (ClaimsPrincipal user, ProfileService s, GameServerOptions game, CancellationToken ct) => s.GetMeAsync(Me(user), user.IsAdmin(game.AdminUserIds), ct));
         api.MapDelete(ApiRoutes.Me, (ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.DeleteAccountAsync(Me(user), ct));
         api.MapPut(ApiRoutes.Hero, (SetHeroRequest body, ClaimsPrincipal user, ProfileService s, CancellationToken ct) => s.SetHeroAsync(Me(user), body, ct));
         api.MapGet(ApiRoutes.PlayerStats, (Guid id, ProfileService s, CancellationToken ct) => s.GetStatsAsync(id, ct));
@@ -163,6 +164,7 @@ public static class ApiEndpoints
         admin.MapGet(ApiRoutes.AdminFlags, ([FromQuery] int? limit, AdminService s, CancellationToken ct) => s.PendingFlagsAsync(limit ?? 100, ct));
         admin.MapPost(ApiRoutes.AdminFlagReview, async (long flagId, ReviewFlagRequest body, ClaimsPrincipal user, AdminService s, CancellationToken ct) => Results.Ok(new { reviewed = await s.ReviewAsync(Me(user), flagId, body, ct) }));
         admin.MapPost(ApiRoutes.AdminGrant, (AdminGrantRequest body, ClaimsPrincipal user, AdminService s, CancellationToken ct) => s.GrantAsync(Me(user), body, ct));
+        admin.MapPost(ApiRoutes.AdminUnlock, (AdminUnlockRequest body, ClaimsPrincipal user, AdminService s, CancellationToken ct) => s.UnlockAsync(Me(user), body, ct));
         admin.MapPut(ApiRoutes.AdminBalance, (UpdateBalanceRequest body, ClaimsPrincipal user, AdminService s, CancellationToken ct) => s.UpdateBalanceAsync(Me(user), body, ct));
         admin.MapPost(ApiRoutes.AdminSeasonReset, async (SeasonJobService s, CancellationToken ct) => Results.Ok(new { processed = await s.RunIfDueAsync(true, ct) }));
     }

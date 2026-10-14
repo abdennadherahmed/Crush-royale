@@ -2141,6 +2141,14 @@
   "ads.consentTitle": "广告",
   "ads.consentBody": "《Crush Royale》靠广告免费。可以让广告平台用它们掌握的信息来挑选广告吗？拒绝不会影响游戏。",
   "ads.consentYes": "允许",
-  "ads.consentNo": "不允许"
+  "ads.consentNo": "不允许",
+  "settings.admin": "管理",
+  "admin.hint": "这些按钮作用于你自己的账号，并会记录在服务器上。",
+  "admin.grantOrbes": "添加宝珠",
+  "admin.grantCoins": "添加金币",
+  "admin.unlockStage": "解锁到关卡",
+  "admin.amount": "数量",
+  "admin.apply": "应用",
+  "admin.done": "完成。"
 }
 

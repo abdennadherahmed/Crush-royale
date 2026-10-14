@@ -2141,6 +2141,14 @@
   "ads.consentTitle": "Ads",
   "ads.consentBody": "Crush Royale is free thanks to ads. May the networks use what they know about you to choose which ones you see? Saying no changes nothing in the game.",
   "ads.consentYes": "Allow",
-  "ads.consentNo": "Don't allow"
+  "ads.consentNo": "Don't allow",
+  "settings.admin": "Admin",
+  "admin.hint": "These buttons act on your own account and are logged on the server.",
+  "admin.grantOrbes": "Add orbs",
+  "admin.grantCoins": "Add coins",
+  "admin.unlockStage": "Unlock up to stage",
+  "admin.amount": "Amount",
+  "admin.apply": "Apply",
+  "admin.done": "Done."
 }
 

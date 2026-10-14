@@ -41,6 +41,8 @@ namespace CrushRoyale.Contracts
 
         /// <summary>The ad network calls this one, not the game. Anonymous, signed, and idempotent.</summary>
         public const string AdCallback = Prefix + "/ads/levelplay";
+
+        public const string AdminUnlock = Prefix + "/admin/unlock";
         public const string PetSummon = Prefix + "/pets/summon";
         public const string Telemetry = Prefix + "/telemetry";
         public const string ChallengeCreate = Prefix + "/challenges";

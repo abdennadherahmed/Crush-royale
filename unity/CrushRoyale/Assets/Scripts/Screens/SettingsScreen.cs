@@ -109,6 +109,11 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Height(UIFactory.Label(list, Loc.T("menu.practiceBody"), Theme.BodySize, Theme.Warning), 140);
             }
 
+            if (profile != null && profile.IsAdmin)
+            {
+                BuildAdminSection(list, profile);
+            }
+
             Widgets.SectionTitle(list, Loc.T("settings.legal"));
             UIFactory.Height(UIFactory.Button(list, Loc.T("settings.privacy"), () => Application.OpenURL(Game.Config.PrivacyPolicyUrl), Theme.PanelLight, Theme.BodySize, Theme.Text), 110);
             UIFactory.Height(UIFactory.Button(list, Loc.T("settings.terms"), () => Application.OpenURL(Game.Config.TermsUrl), Theme.PanelLight, Theme.BodySize, Theme.Text), 110);
@@ -124,6 +129,53 @@ namespace CrushRoyale.Game.Screens
                 Application.OpenURL("mailto:" + Game.Config.SupportEmail + "?subject=" + System.Uri.EscapeDataString("Account deletion " + id));
             }, Theme.PanelLight, Theme.BodySize, Theme.Danger), 110);
             UIFactory.Height(UIFactory.Label(list, Loc.T("settings.version", Application.version), Theme.SmallSize, Theme.TextMuted), 70);
+        }
+
+        /// <summary>
+        /// The admin section, drawn only for an account the server says carries admin rights. It replaces editing
+        /// the database by hand, which works but walks straight past every rule the server enforces: a grant made
+        /// here goes through the wallet, lands in the ledger, and is logged with the admin's id.
+        ///
+        /// The flag is only about what to draw. Both routes check the token again, so a tampered client showing
+        /// itself these buttons gets nothing but refusals.
+        /// </summary>
+        private void BuildAdminSection(RectTransform list, ProfileDto profile)
+        {
+            Widgets.SectionTitle(list, Loc.T("settings.admin"));
+            UIFactory.Height(UIFactory.Label(list, Loc.T("admin.hint"), Theme.SmallSize, Theme.TextMuted, TextAnchor.MiddleLeft), 80);
+
+            InputField amount = Widgets.Input(list, Loc.T("admin.amount"), 7, InputField.ContentType.IntegerNumber);
+            UIFactory.Height((RectTransform)amount.transform, 110);
+
+            UIFactory.Height(UIFactory.Button(list, Loc.T("admin.grantOrbes"),
+                () => _ = AdminGrantAsync(profile.Id, 0, Read(amount)), Theme.PanelLight, Theme.BodySize, Theme.Text), 110);
+            UIFactory.Height(UIFactory.Button(list, Loc.T("admin.grantCoins"),
+                () => _ = AdminGrantAsync(profile.Id, Read(amount), 0), Theme.PanelLight, Theme.BodySize, Theme.Text), 110);
+            UIFactory.Height(UIFactory.Button(list, Loc.T("admin.unlockStage"),
+                () => _ = AdminUnlockAsync(profile.Id, (int)Read(amount)), Theme.PanelLight, Theme.BodySize, Theme.Text), 110);
+        }
+
+        private static long Read(InputField field) =>
+            long.TryParse(field.text, out long value) ? value : 0;
+
+        private async Task AdminGrantAsync(string playerId, long coins, long orbes)
+        {
+            WalletDto wallet = await Api(api => api.AdminGrantAsync(playerId, coins, orbes, "admin panel"));
+            if (wallet != null)
+            {
+                Game.Backend.ApplyWallet(wallet);
+                UI.Toast(Loc.T("admin.done"));
+            }
+        }
+
+        private async Task AdminUnlockAsync(string playerId, int stage)
+        {
+            StoryDto story = await Api(api => api.AdminUnlockAsync(playerId, stage, "admin panel"));
+            if (story != null)
+            {
+                await Game.Backend.RefreshProfileAsync();
+                UI.Toast(Loc.T("admin.done"));
+            }
         }
 
         private async Task LinkGoogleAsync()

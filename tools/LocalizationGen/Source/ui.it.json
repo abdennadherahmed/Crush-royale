@@ -2141,6 +2141,14 @@
   "ads.consentTitle": "Pubblicità",
   "ads.consentBody": "Crush Royale è gratis grazie alla pubblicità. I circuiti possono usare quello che sanno di te per scegliere gli annunci? Un no non cambia nulla nel gioco.",
   "ads.consentYes": "Consenti",
-  "ads.consentNo": "Non consentire"
+  "ads.consentNo": "Non consentire",
+  "settings.admin": "Admin",
+  "admin.hint": "Questi pulsanti agiscono sul tuo account e vengono registrati sul server.",
+  "admin.grantOrbes": "Aggiungi orbi",
+  "admin.grantCoins": "Aggiungi monete",
+  "admin.unlockStage": "Sblocca fino alla tappa",
+  "admin.amount": "Quantità",
+  "admin.apply": "Applica",
+  "admin.done": "Fatto."
 }
 

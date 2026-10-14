@@ -2141,6 +2141,14 @@
   "ads.consentTitle": "الإعلانات",
   "ads.consentBody": "Crush Royale مجاني بفضل الإعلانات. هل تسمح لشبكات الإعلانات باستخدام ما تعرفه عنك لاختيار الإعلانات؟ الرفض لا يغيّر شيئًا في اللعبة.",
   "ads.consentYes": "موافق",
-  "ads.consentNo": "رفض"
+  "ads.consentNo": "رفض",
+  "settings.admin": "الإدارة",
+  "admin.hint": "تعمل هذه الأزرار على حسابك وتُسجَّل على الخادم.",
+  "admin.grantOrbes": "إضافة كرات",
+  "admin.grantCoins": "إضافة عملات",
+  "admin.unlockStage": "فتح حتى المرحلة",
+  "admin.amount": "الكمية",
+  "admin.apply": "تطبيق",
+  "admin.done": "تم."
 }
 

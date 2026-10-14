@@ -612,6 +612,14 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         WalletDto wallet = await admin.PostOk<WalletDto>(ApiRoutes.AdminGrant, new AdminGrantRequest { PlayerId = target.ToString(), Orbes = 50, Note = "support ticket #42" });
         Assert.Equal(65, wallet.Orbes);
 
+        // Unlocking the campaign is admin-only too, and the profile tells the game which section to draw.
+        Assert.Equal(HttpStatusCode.Forbidden, (await http.PostAsJsonAsync(ApiRoutes.AdminUnlock, new AdminUnlockRequest { PlayerId = target.ToString(), Stage = 150, Note = "nope" })).StatusCode);
+        StoryDto story = await admin.PostOk<StoryDto>(ApiRoutes.AdminUnlock, new AdminUnlockRequest { PlayerId = target.ToString(), Stage = 150, Note = "late chapter test" });
+        Assert.Equal(150, story.HighestUnlockedStage);
+        // The profile says which section the settings screen should draw. Same player, two tokens, two answers.
+        Assert.False((await http.GetOk<ProfileDto>(ApiRoutes.Me)).IsAdmin);
+        Assert.True((await _app.ClientFor(reporter.Id, admin: true).GetOk<ProfileDto>(ApiRoutes.Me)).IsAdmin);
+
         await _app.MutateAsync(target, s => s.Pvp.Trophies = 1000);
         var result = await admin.PostOk<System.Text.Json.JsonElement>(ApiRoutes.AdminSeasonReset, null);
         Assert.True(result.TryGetProperty("processed", out var processed) && processed.ValueKind == System.Text.Json.JsonValueKind.Number && processed.GetInt32() >= 2, result.GetRawText());
