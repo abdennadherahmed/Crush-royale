@@ -2131,6 +2131,16 @@
   "chat.block": "이 플레이어 차단",
   "chat.reported": "신고되었습니다. 운영자가 검토합니다.",
   "chat.blocked": "{0} 님을 차단했습니다. 메시지가 더 이상 표시되지 않습니다.",
-  "error.PurchaseDeferred": "구매가 승인을 기다리고 있습니다. 승인되면 지급됩니다."
+  "error.PurchaseDeferred": "구매가 승인을 기다리고 있습니다. 승인되면 지급됩니다.",
+  "ads.freeLifeTitle": "무료 목숨",
+  "ads.freeLifeBody": "짧은 영상을 보고 목숨을 하나 돌려받으십시오.",
+  "ads.watch": "보기",
+  "ads.notReady": "지금은 보여드릴 영상이 없습니다.",
+  "ads.pending": "광고 네트워크에 확인 중...",
+  "error.AdNotVerified": "아직 영상이 확인되지 않았습니다. 잠시 후 다시 시도하십시오.",
+  "ads.consentTitle": "광고",
+  "ads.consentBody": "Crush Royale는 광고 덕분에 무료입니다. 광고 네트워크가 당신에 대해 아는 정보로 광고를 고르게 해도 괜찮습니까? 거절해도 게임은 그대로입니다.",
+  "ads.consentYes": "허용",
+  "ads.consentNo": "허용 안 함"
 }
 

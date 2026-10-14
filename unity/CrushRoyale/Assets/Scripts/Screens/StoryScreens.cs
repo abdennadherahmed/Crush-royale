@@ -969,6 +969,14 @@ namespace CrushRoyale.Game.Screens
             ProfileDto profile = Game.Backend.Profile;
             if (profile.Lives.Lives <= 0)
             {
+                // The free route first: a player out of lives would rather watch thirty seconds than spend.
+                if (await Networking.RewardedAdFlow.OfferFreeLifeAsync(Game))
+                {
+                    profile = Game.Backend.Profile;
+                }
+            }
+            if (profile.Lives.Lives <= 0)
+            {
                 bool buy = await UI.Confirm(Loc.T("lives.emptyTitle"), Loc.T("lives.emptyBody", profile.Lives.NextLifeCoins, profile.Lives.NextLifeOrbes), Loc.T("lives.buy"));
                 if (!buy)
                 {

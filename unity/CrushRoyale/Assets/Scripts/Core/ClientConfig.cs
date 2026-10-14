@@ -18,6 +18,12 @@ namespace CrushRoyale.Game
         [JsonProperty("iapEnabled")] public bool IapEnabled;
         [JsonProperty("adsEnabled")] public bool AdsEnabled;
         [JsonProperty("levelPlayAppKey")] public string LevelPlayAppKey;
+
+        /// <summary>The LevelPlay ad unit the free-life video comes from.</summary>
+        [JsonProperty("levelPlayRewardedUnitId")] public string LevelPlayRewardedUnitId;
+
+        /// <summary>The ad unit the between-rounds interstitial comes from. The server decides when it shows.</summary>
+        [JsonProperty("levelPlayInterstitialUnitId")] public string LevelPlayInterstitialUnitId;
         [JsonProperty("privacyPolicyUrl")] public string PrivacyPolicyUrl;
         [JsonProperty("termsUrl")] public string TermsUrl;
         [JsonProperty("supportEmail")] public string SupportEmail;

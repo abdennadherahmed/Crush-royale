@@ -362,6 +362,20 @@ namespace CrushRoyale.Core.Progression
         public int StoryWinsSinceAd { get; set; }
 
         public int PvpBattlesSinceAd { get; set; }
+
+        /// <summary>
+        /// Videos the ad network has told the server, directly, that this player watched to the end, and which the
+        /// player has not yet been paid for. The client never writes this: it arrives on the server-to-server
+        /// callback, signed, which is the only reason a reward can be trusted at all.
+        /// </summary>
+        public int VerifiedCredits { get; set; }
+
+        /// <summary>
+        /// The last event identifiers the callback carried, so a retried callback pays once. The network retries
+        /// twenty times in a day and then daily for a week, so this list has to outlive a restart; it is capped
+        /// because nothing older than the last few videos can still be in flight.
+        /// </summary>
+        public List<string> VerifiedEvents { get; set; } = new();
     }
 
     public enum AdPlacement : byte

@@ -47,6 +47,16 @@ namespace CrushRoyale.Contracts
         public string BalanceJson { get; set; }
 
         public long ServerTimeUnixMs { get; set; }
+
+        /// <summary>
+        /// The LevelPlay ad units, served rather than baked in. An ad unit id is not a secret and does not need a
+        /// new build to change, so it lives in the server's environment: a unit renamed or replaced on the
+        /// mediation dashboard is picked up at the next launch instead of costing an hour of build and a store
+        /// review. Empty means no ads, and the game then offers none.
+        /// </summary>
+        public string AdRewardedUnitId { get; set; }
+
+        public string AdInterstitialUnitId { get; set; }
     }
 
     public sealed class HeroDto

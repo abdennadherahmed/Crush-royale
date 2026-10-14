@@ -2131,6 +2131,16 @@
   "chat.block": "屏蔽该玩家",
   "chat.reported": "已举报，管理员会查看。",
   "chat.blocked": "已屏蔽 {0}，你不会再看到他的消息。",
-  "error.PurchaseDeferred": "购买正在等待批准，通过后即可到账。"
+  "error.PurchaseDeferred": "购买正在等待批准，通过后即可到账。",
+  "ads.freeLifeTitle": "免费生命",
+  "ads.freeLifeBody": "观看一段短视频，找回一条生命。",
+  "ads.watch": "观看",
+  "ads.notReady": "现在没有可看的视频。",
+  "ads.pending": "正在向广告平台核对...",
+  "error.AdNotVerified": "视频尚未确认，稍后再试。",
+  "ads.consentTitle": "广告",
+  "ads.consentBody": "《Crush Royale》靠广告免费。可以让广告平台用它们掌握的信息来挑选广告吗？拒绝不会影响游戏。",
+  "ads.consentYes": "允许",
+  "ads.consentNo": "不允许"
 }
 

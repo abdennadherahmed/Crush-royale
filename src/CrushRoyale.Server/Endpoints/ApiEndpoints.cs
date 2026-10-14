@@ -20,6 +20,17 @@ public static class ApiEndpoints
 
         app.MapGet(ApiRoutes.Config, (ProfileService s) => s.GetConfig()).AllowAnonymous();
 
+        // The ad network's reward callback. Anonymous by necessity -- LevelPlay has no player token -- and
+        // authenticated instead by the signature on the query, which only it and this server can produce. Both
+        // methods, because their own samples read the parameters one way and their URL format implies the other.
+        // The body must read back "<event id>:OK" or the retries continue for a week.
+        app.MapMethods(ApiRoutes.AdCallback, new[] { "GET", "POST" }, async (
+                [FromQuery] string? applicationUserId, [FromQuery] string? eventId, [FromQuery] string? rewards,
+                [FromQuery] string? timestamp, [FromQuery] string? signature,
+                EconomyService s, CancellationToken ct) =>
+            Results.Text(await s.VerifyAdCallbackAsync(applicationUserId, eventId, rewards, timestamp, signature, ct)))
+            .AllowAnonymous();
+
         RouteGroupBuilder api = app.MapGroup(string.Empty).RequireAuthorization().RequireRateLimiting(PlayerRateLimit);
         MapPlayer(api);
         MapStory(api);

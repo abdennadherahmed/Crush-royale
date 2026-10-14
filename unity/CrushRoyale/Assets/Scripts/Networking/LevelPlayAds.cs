@@ -30,15 +30,23 @@ namespace CrushRoyale.Game.Networking
         private TaskCompletionSource<string> _rewardedShow;
         private TaskCompletionSource<bool> _interstitialShow;
 
-        public LevelPlayAdsProvider(string appKey, string rewardedUnitId, string interstitialUnitId)
+        public LevelPlayAdsProvider(string appKey, string rewardedUnitId, string interstitialUnitId, bool personalised)
         {
             _rewardedUnitId = rewardedUnitId;
             _interstitialUnitId = interstitialUnitId;
 
             LevelPlay.OnInitSuccess += OnInitSuccess;
             LevelPlay.OnInitFailed += error => Debug.LogWarning("LevelPlay init failed: " + error);
+            // Before the first request, or the first ad is served under whatever the SDK assumed.
+            LevelPlay.SetConsent(personalised);
             LevelPlay.Init(appKey);
         }
+
+        /// <summary>
+        /// Personalised ads, or not. LevelPlay wants this before the first ad request, so it is set from the
+        /// constructor with whatever the player answered last time and again the moment they change their mind.
+        /// </summary>
+        public static void SetConsent(bool personalised) => LevelPlay.SetConsent(personalised);
 
         public bool IsRewardedReady => _rewarded != null && _rewarded.IsAdReady();
 
@@ -48,14 +56,14 @@ namespace CrushRoyale.Game.Networking
         {
             // The ad objects cannot exist before the SDK is up, so everything is built from this callback.
             _rewarded = new LevelPlayRewardedAd(_rewardedUnitId);
-            _rewarded.OnAdRewarded += (placement, info) => _rewardedShow?.TrySetResult("levelplay");
+            _rewarded.OnAdRewarded += (info, reward) => _rewardedShow?.TrySetResult(info?.AdId ?? "levelplay");
             _rewarded.OnAdClosed += info =>
             {
                 // Closed without the reward callback: the player skipped, and nothing is granted.
                 _rewardedShow?.TrySetResult(null);
                 _rewarded.LoadAd();
             };
-            _rewarded.OnAdDisplayFailed += error =>
+            _rewarded.OnAdDisplayFailed += (info, error) =>
             {
                 Debug.LogWarning("Rewarded display failed: " + error);
                 _rewardedShow?.TrySetResult(null);
@@ -70,7 +78,7 @@ namespace CrushRoyale.Game.Networking
                 _interstitialShow?.TrySetResult(true);
                 _interstitial.LoadAd();
             };
-            _interstitial.OnAdDisplayFailed += error =>
+            _interstitial.OnAdDisplayFailed += (info, error) =>
             {
                 _interstitialShow?.TrySetResult(false);
                 _interstitial.LoadAd();
@@ -105,9 +113,13 @@ namespace CrushRoyale.Game.Networking
             return _interstitialShow.Task;
         }
 #else
-        public LevelPlayAdsProvider(string appKey, string rewardedUnitId, string interstitialUnitId)
+        public LevelPlayAdsProvider(string appKey, string rewardedUnitId, string interstitialUnitId, bool personalised)
         {
             Debug.Log("LevelPlay package not installed: ads disabled.");
+        }
+
+        public static void SetConsent(bool personalised)
+        {
         }
 
         public bool IsRewardedReady => false;

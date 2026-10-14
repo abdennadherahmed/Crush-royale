@@ -85,7 +85,7 @@ namespace CrushRoyale.Game
             Telemetry.Track("app_open", ("first_launch", !Save.Settings.HeroCreated), ("language", Loc.Language));
             Google = GoogleSignIn.Create(transform);
             Iap = new IapService(Backend, Config);
-            Ads = new AdsService(Config);
+            Ads = new AdsService(Config, Save.Settings.AdsPersonalised);
             Notifications = new NotificationService(Loc, Save);
 
             UI = UIRoot.Create(transform, this);

@@ -24,7 +24,12 @@ public sealed class CrushApp : WebApplicationFactory<Program>
     {
         Environment.SetEnvironmentVariable("Game__EnableBackgroundJobs", "false");
         Environment.SetEnvironmentVariable("Game__RateLimitPerMinute", "100000");
+        Environment.SetEnvironmentVariable("Game__RewardedAdsEnabled", "true");
+        Environment.SetEnvironmentVariable("Ads__LevelPlayPrivateKey", AdCallbackKey);
     }
+
+    /// <summary>The key the fake ad network signs its callbacks with.</summary>
+    public const string AdCallbackKey = "test-private-key";
 
     public ManualClock Clock { get; } = new(new DateTime(2026, 9, 16, 12, 0, 0, DateTimeKind.Utc));
 
@@ -611,5 +616,48 @@ public sealed class ServerIntegrationTests : IClassFixture<CrushApp>
         var result = await admin.PostOk<System.Text.Json.JsonElement>(ApiRoutes.AdminSeasonReset, null);
         Assert.True(result.TryGetProperty("processed", out var processed) && processed.ValueKind == System.Text.Json.JsonValueKind.Number && processed.GetInt32() >= 2, result.GetRawText());
         Assert.Equal(650, (await _app.StateAsync(target)).Pvp.Trophies);
+    }
+
+    [Fact]
+    public async Task RewardedAd_PaysOnlyOnASignedCallback_AndPaysItOnce()
+    {
+        var (id, http, _) = await _app.NewPlayerAsync();
+        await _app.MutateAsync(id, s => s.Stamina.Lives = 0);
+
+        // The game asking on its own gets nothing: no video has been confirmed.
+        HttpResponseMessage unverified = await http.PostAsJsonAsync(ApiRoutes.RewardedAd, new RewardedAdRequest { Placement = "life", AdToken = "whatever" });
+        Assert.Equal(HttpStatusCode.BadRequest, unverified.StatusCode);
+
+        HttpClient network = _app.CreateClient();
+        const string eventId = "e1a2b3c4";
+        const string timestamp = "202610140930";
+        string query = "?applicationUserId=" + id + "&eventId=" + eventId + "&rewards=1&timestamp=" + timestamp;
+
+        // A callback with the wrong signature is refused, and still leaves nothing to claim.
+        Assert.Equal(HttpStatusCode.Forbidden, (await network.GetAsync(ApiRoutes.AdCallback + query + "&signature=" + new string('0', 32))).StatusCode);
+
+        string signature = Signature(timestamp, eventId, id.ToString(), "1");
+        HttpResponseMessage callback = await network.GetAsync(ApiRoutes.AdCallback + query + "&signature=" + signature);
+        Assert.Equal(HttpStatusCode.OK, callback.StatusCode);
+        // Without this exact shape in the body, LevelPlay retries the same event for a week.
+        Assert.Contains(eventId + ":OK", await callback.Content.ReadAsStringAsync());
+
+        RewardedAdResponse granted = await http.PostOk<RewardedAdResponse>(ApiRoutes.RewardedAd, new RewardedAdRequest { Placement = "life" });
+        Assert.Equal(1, granted.Reward.Lives);
+
+        // One video, one life. The second claim has nothing left to spend.
+        HttpResponseMessage twice = await http.PostAsJsonAsync(ApiRoutes.RewardedAd, new RewardedAdRequest { Placement = "life" });
+        Assert.Equal(HttpStatusCode.BadRequest, twice.StatusCode);
+
+        // And the network repeating itself does not add a second credit.
+        Assert.Equal(HttpStatusCode.OK, (await network.GetAsync(ApiRoutes.AdCallback + query + "&signature=" + signature)).StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, (await http.PostAsJsonAsync(ApiRoutes.RewardedAd, new RewardedAdRequest { Placement = "life" })).StatusCode);
+    }
+
+    private static string Signature(string timestamp, string eventId, string userId, string rewards)
+    {
+        byte[] hash = System.Security.Cryptography.MD5.HashData(
+            System.Text.Encoding.UTF8.GetBytes(timestamp + eventId + userId + rewards + CrushApp.AdCallbackKey));
+        return Convert.ToHexString(hash).ToLowerInvariant();
     }
 }

@@ -25,9 +25,11 @@ builder.WebHost.ConfigureKestrel(kestrel => kestrel.Limits.MaxRequestBodySize = 
 DatabaseOptions database = builder.Configuration.GetSection("Database").Get<DatabaseOptions>() ?? new DatabaseOptions();
 IapOptions iap = builder.Configuration.GetSection("Iap").Get<IapOptions>() ?? new IapOptions();
 GameServerOptions game = builder.Configuration.GetSection("Game").Get<GameServerOptions>() ?? new GameServerOptions();
+AdsOptions ads = builder.Configuration.GetSection("Ads").Get<AdsOptions>() ?? new AdsOptions();
 builder.Services.AddSingleton(database);
 builder.Services.AddSingleton(iap);
 builder.Services.AddSingleton(game);
+builder.Services.AddSingleton(ads);
 
 builder.Services.ConfigureHttpJsonOptions(options => Json.Configure(options.SerializerOptions));
 builder.Services.AddSingleton<IClock>(SystemClock.Instance);

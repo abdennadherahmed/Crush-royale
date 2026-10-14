@@ -41,7 +41,10 @@ namespace CrushRoyale.Core.Common
         ReplayMismatch,
         VersionMismatch,
         DuplicateRequest,
-        MessageRejected
+        MessageRejected,
+
+        /// <summary>The video was watched but the ad network has not confirmed it to the server yet. Retry.</summary>
+        AdNotVerified
     }
 
     /// <summary>Result of an operation that can fail for gameplay/business reasons (not exceptions).</summary>

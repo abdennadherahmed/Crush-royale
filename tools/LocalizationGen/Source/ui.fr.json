@@ -2131,6 +2131,16 @@
   "chat.block": "Bloquer ce joueur",
   "chat.reported": "Signalé. Nos modérateurs vont l'examiner.",
   "chat.blocked": "{0} est bloqué. Tu ne verras plus ses messages.",
-  "error.PurchaseDeferred": "Ton achat attend une autorisation. Il arrivera une fois accepté."
+  "error.PurchaseDeferred": "Ton achat attend une autorisation. Il arrivera une fois accepté.",
+  "ads.freeLifeTitle": "Vie gratuite",
+  "ads.freeLifeBody": "Regarde une courte vidéo et récupère une vie.",
+  "ads.watch": "Regarder",
+  "ads.notReady": "Aucune vidéo disponible pour le moment.",
+  "ads.pending": "Vérification auprès de la régie...",
+  "error.AdNotVerified": "La vidéo n'est pas encore confirmée. Réessaie dans un instant.",
+  "ads.consentTitle": "Publicités",
+  "ads.consentBody": "Crush Royale est gratuit grâce à la publicité. Les régies peuvent-elles utiliser ce qu'elles savent de toi pour choisir les annonces ? Refuser ne change rien au jeu.",
+  "ads.consentYes": "Accepter",
+  "ads.consentNo": "Refuser"
 }
 

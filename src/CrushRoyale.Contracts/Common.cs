@@ -38,6 +38,9 @@ namespace CrushRoyale.Contracts
         public const string IapValidate = Prefix + "/iap/validate";
         public const string Equip = Prefix + "/inventory/equip";
         public const string RewardedAd = Prefix + "/ads/rewarded";
+
+        /// <summary>The ad network calls this one, not the game. Anonymous, signed, and idempotent.</summary>
+        public const string AdCallback = Prefix + "/ads/levelplay";
         public const string PetSummon = Prefix + "/pets/summon";
         public const string Telemetry = Prefix + "/telemetry";
         public const string ChallengeCreate = Prefix + "/challenges";

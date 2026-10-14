@@ -5,8 +5,10 @@
   "googleWebClientId": "1037126935521-d32qnejfl2lbd4sapnk9vmef1s771nas.apps.googleusercontent.com",
   "deviceSalt": "crush-royale-device-v1",
   "iapEnabled": true,
-  "adsEnabled": false,
+  "adsEnabled": true,
   "levelPlayAppKey": "28b3561c5",
+  "levelPlayRewardedUnitId": "",
+  "levelPlayInterstitialUnitId": "",
   "privacyPolicyUrl": "https://crushroyale-legal.onrender.com/privacy.html",
   "termsUrl": "https://crushroyale-legal.onrender.com/terms.html",
   "supportEmail": "abdennadherahmed975@gmail.com"

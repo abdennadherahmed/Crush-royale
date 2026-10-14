@@ -19,10 +19,12 @@ public sealed class EconomyService
     private readonly ILogger<EconomyService> _logger;
 
     private readonly GameServerOptions _options;
+    private readonly AdsOptions _ads;
 
-    public EconomyService(PlayerOperations ops, IReceiptValidator receipts, GameServerOptions options, ILogger<EconomyService> logger)
+    public EconomyService(PlayerOperations ops, IReceiptValidator receipts, GameServerOptions options, AdsOptions ads, ILogger<EconomyService> logger)
     {
         _options = options;
+        _ads = ads;
         _ops = ops;
         _receipts = receipts;
         _logger = logger;
@@ -280,10 +282,19 @@ public sealed class EconomyService
             {
                 throw new ApiException(ErrorCode.InvalidArgument, "placement must be life or coins.");
             }
+            // The video has to have been confirmed by the network before anything is paid. The confirmation
+            // arrives on its own connection, signed, usually a second or two after the player closes the ad, so
+            // the client is told to come back rather than told no.
+            AdPolicy.RollDay(ws.State.Ads, ws.Now);
+            if (ws.State.Ads.VerifiedCredits <= 0)
+            {
+                throw new ApiException(ErrorCode.AdNotVerified, "The ad network has not confirmed this video yet.");
+            }
             if (!AdPolicy.RegisterRewarded(ws.State.Ads, ws.Now, ws.Balance.LiveOps))
             {
                 throw new ApiException(ErrorCode.LimitReached, "Daily rewarded ad limit reached.");
             }
+            ws.State.Ads.VerifiedCredits--;
 
             var reward = new RewardData();
             if (placement == "life")
@@ -304,6 +315,75 @@ public sealed class EconomyService
                 Lives = Mappers.Lives(ws)
             };
         }, ct);
+
+    /// <summary>
+    /// The ad network telling the server, on its own connection, that a player finished a video. This is the only
+    /// place a rewarded video becomes payable: the game asking for a reward proves nothing, because the game runs
+    /// on the player's phone.
+    ///
+    /// The signature is the MD5 of the timestamp, the event id, the user id and the reward count with the private
+    /// key appended, which only LevelPlay and this server know. An unsigned or wrongly signed call is refused
+    /// without touching the player.
+    ///
+    /// LevelPlay retries twenty times in the first day and then daily for a week until it reads back
+    /// "&lt;event id&gt;:OK", so the same event arrives several times and must pay exactly once. The event ids
+    /// already seen are kept on the player for that reason, and the answer is the same for a repeat as for the
+    /// first call.
+    /// </summary>
+    public async Task<string> VerifyAdCallbackAsync(string? userId, string? eventId, string? rewards, string? timestamp, string? signature, CancellationToken ct)
+    {
+        if (!_ads.CanVerifyCallbacks)
+        {
+            throw new ApiException(ErrorCode.FeatureLocked, "No callback key is configured.");
+        }
+        if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(eventId) ||
+            string.IsNullOrWhiteSpace(rewards) || string.IsNullOrWhiteSpace(timestamp) || string.IsNullOrWhiteSpace(signature))
+        {
+            throw new ApiException(ErrorCode.InvalidArgument, "userId, eventId, rewards, timestamp and signature are all required.");
+        }
+        if (!Guid.TryParse(userId, out Guid player))
+        {
+            throw new ApiException(ErrorCode.InvalidArgument, "userId is not a player id.");
+        }
+        string expected = Md5(timestamp + eventId + userId + rewards + _ads.LevelPlayPrivateKey);
+        if (!CryptographicOperations.FixedTimeEquals(Encoding.ASCII.GetBytes(expected), Encoding.ASCII.GetBytes(signature.Trim().ToLowerInvariant())))
+        {
+            _logger.LogWarning("Rewarded ad callback refused for {Player}: bad signature on event {Event}.", player, eventId);
+            throw new ApiException(ErrorCode.PermissionDenied, "Bad signature.");
+        }
+
+        await _ops.RunAsync(player, ctx =>
+        {
+            AdState state = ctx.Player.State.Ads;
+            state.VerifiedEvents ??= new List<string>();
+            if (state.VerifiedEvents.Contains(eventId!))
+            {
+                // A retry of something already paid. Answering OK is what stops the retries.
+                return true;
+            }
+            state.VerifiedEvents.Add(eventId!);
+            if (state.VerifiedEvents.Count > 32)
+            {
+                state.VerifiedEvents.RemoveRange(0, state.VerifiedEvents.Count - 32);
+            }
+            state.VerifiedCredits = Math.Min(state.VerifiedCredits + 1, 16);
+            return true;
+        }, ct);
+
+        // Exactly this shape, anywhere in a 200, or the network keeps calling back for a week.
+        return eventId + ":OK";
+    }
+
+    private static string Md5(string value)
+    {
+        byte[] hash = MD5.HashData(Encoding.UTF8.GetBytes(value));
+        var text = new StringBuilder(32);
+        foreach (byte b in hash)
+        {
+            text.Append(b.ToString("x2"));
+        }
+        return text.ToString();
+    }
 
     private ShopSystem CreateShop(PlayerWorkspace ws)
     {

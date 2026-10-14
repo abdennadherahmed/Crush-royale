@@ -69,8 +69,28 @@ public sealed class GameServerOptions
     public bool EnableBackgroundJobs { get; set; } = true;
 
     /// <summary>
-    /// Rewarded ad grants. Off until the ad network's server-side verification callback is wired: otherwise a modified
-    /// client could claim ad rewards without watching anything (audit S-01 / rewarded ads).
+    /// Rewarded ad grants. Safe to leave on now that a reward is only paid against a signed callback from the ad
+    /// network itself: a modified client that never watches anything has nothing to claim (audit S-01).
     /// </summary>
     public bool RewardedAdsEnabled { get; set; }
+}
+
+/// <summary>LevelPlay mediation (section "Ads").</summary>
+public sealed class AdsOptions
+{
+    /// <summary>
+    /// The private key typed into the LevelPlay dashboard beside the callback URL. The callback's signature is the
+    /// MD5 of timestamp, event id, user id, reward count and this key, concatenated; without the key the signature
+    /// cannot be forged, and without the signature the callback is refused.
+    /// </summary>
+    public string? LevelPlayPrivateKey { get; set; }
+
+    /// <summary>True when the callback can be verified at all. Nothing is credited while this is false.</summary>
+    public bool CanVerifyCallbacks => !string.IsNullOrWhiteSpace(LevelPlayPrivateKey);
+
+    /// <summary>The rewarded ad unit the game should ask LevelPlay for. Handed to the client at startup.</summary>
+    public string? RewardedUnitId { get; set; }
+
+    /// <summary>The interstitial ad unit. Empty if interstitials are not wanted yet.</summary>
+    public string? InterstitialUnitId { get; set; }
 }

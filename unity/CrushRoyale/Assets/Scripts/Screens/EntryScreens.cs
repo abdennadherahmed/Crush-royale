@@ -135,6 +135,18 @@ namespace CrushRoyale.Game.Screens
                 }
             }
 
+            // Asked once, after the privacy notice and before any ad can be requested. Refusing is a real
+            // answer, not a loop: a non-personalised ad still pays, and the SDK is told either way.
+            if (Game.Config.AdsEnabled && !Game.Save.Settings.AdsConsentAsked)
+            {
+                bool personalised = await UI.Dialog(
+                    Loc.T("ads.consentTitle"), Loc.T("ads.consentBody"),
+                    Loc.T("ads.consentYes"), Loc.T("ads.consentNo"));
+                Game.Save.Settings.AdsConsentAsked = true;
+                Game.Save.Settings.AdsPersonalised = personalised;
+                Game.Save.SaveSettings();
+            }
+
             if (await RunUpdaterAsync(false))
             {
                 return;
@@ -156,6 +168,16 @@ namespace CrushRoyale.Game.Screens
             if (_offlineButton != null)
             {
                 Destroy(_offlineButton.gameObject);
+            }
+
+            // The ad units arrive with the config, so this is the first moment the SDK can be brought up. Offline
+            // it is skipped entirely: there would be no server to confirm a reward to anyway.
+            if (online)
+            {
+                Game.Ads.Start(
+                    Game.Backend.Client.AdRewardedUnitId,
+                    Game.Backend.Client.AdInterstitialUnitId,
+                    Game.Save.Settings.AdsPersonalised);
             }
 
             if (!online)

@@ -23,10 +23,13 @@ public sealed class ProfileService
     private readonly GuildService _guilds;
     private readonly ILogger<ProfileService> _logger;
 
-    public ProfileService(PlayerOperations ops, GuildService guilds, ILogger<ProfileService> logger)
+    private readonly AdsOptions _ads;
+
+    public ProfileService(PlayerOperations ops, GuildService guilds, AdsOptions ads, ILogger<ProfileService> logger)
     {
         _ops = ops;
         _guilds = guilds;
+        _ads = ads;
         _logger = logger;
     }
 
@@ -256,7 +259,9 @@ public sealed class ProfileService
         RulesVersion = GameBalance.RulesVersion,
         BalanceHash = _ops.Balance.HashHex,
         BalanceJson = _ops.Balance.Json,
-        ServerTimeUnixMs = TimeUtil.ToUnixMs(_ops.Clock.UtcNow)
+        ServerTimeUnixMs = TimeUtil.ToUnixMs(_ops.Clock.UtcNow),
+        AdRewardedUnitId = _ads.RewardedUnitId ?? string.Empty,
+        AdInterstitialUnitId = _ads.InterstitialUnitId ?? string.Empty
     };
 
     private (PlayerRecord Record, List<LedgerEntry> Ledger) CreatePlayer(Guid userId, LoginRequest request)

@@ -26,6 +26,16 @@ namespace CrushRoyale.Game
         /// <summary>Board mechanics already explained by their one-screen tutorial (bomb, blight, egg).</summary>
         public System.Collections.Generic.List<string> SeenMechanics = new System.Collections.Generic.List<string>();
         public bool PrivacyAccepted;
+
+        /// <summary>
+        /// Whether the player agreed to ads chosen from what the networks know about them. False until they say
+        /// otherwise, which is both the honest default and the one European law asks for: a non-personalised ad
+        /// still pays, just less.
+        /// </summary>
+        public bool AdsPersonalised;
+
+        /// <summary>True once the question has been put, so it is not asked at every launch.</summary>
+        public bool AdsConsentAsked;
         public int LastSeenStage;
 
         /// <summary>Stage the hero stood on at the last map visit (the hero walks from there to the new one).</summary>

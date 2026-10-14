@@ -2131,6 +2131,16 @@
   "chat.block": "このプレイヤーをブロック",
   "chat.reported": "報告しました。モデレーターが確認します。",
   "chat.blocked": "{0} をブロックしました。今後メッセージは表示されません。",
-  "error.PurchaseDeferred": "購入は承認待ちです。承認されると反映されます。"
+  "error.PurchaseDeferred": "購入は承認待ちです。承認されると反映されます。",
+  "ads.freeLifeTitle": "無料ライフ",
+  "ads.freeLifeBody": "短い動画を見てライフを 1 つ取り戻します。",
+  "ads.watch": "見る",
+  "ads.notReady": "現在視聴できる動画がありません。",
+  "ads.pending": "広告ネットワークに確認中...",
+  "error.AdNotVerified": "動画がまだ確認されていません。しばらくしてからお試しください。",
+  "ads.consentTitle": "広告",
+  "ads.consentBody": "Crush Royale は広告のおかげで無料です。広告ネットワークがあなたについて知っている情報を使って広告を選んでもよいですか。断ってもゲームは変わりません。",
+  "ads.consentYes": "許可する",
+  "ads.consentNo": "許可しない"
 }
 

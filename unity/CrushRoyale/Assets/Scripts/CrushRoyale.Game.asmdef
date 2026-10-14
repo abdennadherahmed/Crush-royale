@@ -1,35 +1,41 @@
 {
-  "name": "CrushRoyale.Game",
-  "rootNamespace": "CrushRoyale.Game",
-  "references": [
-    "UnityEngine.UI",
-    "Unity.Purchasing",
-    "Unity.Purchasing.Stores",
-    "Unity.Notifications.Android"
-  ],
-  "includePlatforms": [],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": true,
-  "precompiledReferences": [
-    "CrushRoyale.Core.dll",
-    "CrushRoyale.Contracts.dll",
-    "CrushRoyale.Client.dll",
-    "Newtonsoft.Json.dll"
-  ],
-  "autoReferenced": true,
-  "defineConstraints": [],
-  "versionDefines": [
-    {
-      "name": "com.unity.purchasing",
-      "expression": "4.0.0",
-      "define": "CRUSH_IAP"
-    },
-    {
-      "name": "com.unity.mobile.notifications",
-      "expression": "2.0.0",
-      "define": "CRUSH_NOTIFICATIONS"
-    }
-  ],
-  "noEngineReferences": false
+    "name": "CrushRoyale.Game",
+    "rootNamespace": "CrushRoyale.Game",
+    "references": [
+        "UnityEngine.UI",
+        "Unity.Purchasing",
+        "Unity.Purchasing.Stores",
+        "Unity.Notifications.Android",
+        "Unity.LevelPlay"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "CrushRoyale.Core.dll",
+        "CrushRoyale.Contracts.dll",
+        "CrushRoyale.Client.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.purchasing",
+            "expression": "4.0.0",
+            "define": "CRUSH_IAP"
+        },
+        {
+            "name": "com.unity.mobile.notifications",
+            "expression": "2.0.0",
+            "define": "CRUSH_NOTIFICATIONS"
+        },
+        {
+            "name": "com.unity.services.levelplay",
+            "expression": "9.0.0",
+            "define": "CRUSH_ADS"
+        }
+    ],
+    "noEngineReferences": false
 }

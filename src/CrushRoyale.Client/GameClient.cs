@@ -100,6 +100,12 @@ namespace CrushRoyale.Client
             return login;
         }
 
+        /// <summary>The rewarded ad unit the server wants used, empty until the config has been downloaded.</summary>
+        public string AdRewardedUnitId { get; private set; } = string.Empty;
+
+        /// <summary>The interstitial ad unit, empty when interstitials are not in use.</summary>
+        public string AdInterstitialUnitId { get; private set; } = string.Empty;
+
         /// <summary>Downloads the live balance and verifies the client reproduces the server hash exactly.</summary>
         public async Task RefreshConfigAsync(CancellationToken cancellationToken = default)
         {
@@ -109,6 +115,8 @@ namespace CrushRoyale.Client
                 throw new CrushApiException("VersionMismatch", 426, "A game update is required.");
             }
 
+            AdRewardedUnitId = config.AdRewardedUnitId ?? string.Empty;
+            AdInterstitialUnitId = config.AdInterstitialUnitId ?? string.Empty;
             GameBalance balance = ParseBalance(config.BalanceJson, config.BalanceHash);
             ApplyBalance(balance);
             _configCache?.Save(JsonSettings.Serialize(config));

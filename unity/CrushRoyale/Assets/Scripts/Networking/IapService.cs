@@ -271,16 +271,45 @@ namespace CrushRoyale.Game.Networking
     /// <summary>Ad orchestration: interstitials only when the server says so (frequency caps live server-side).</summary>
     public sealed class AdsService
     {
-        public AdsService(ClientConfig config)
+        private readonly ClientConfig _config;
+        private bool _started;
+
+        public AdsService(ClientConfig config, bool personalisedConsent = false)
         {
-            if (!config.AdsEnabled)
+            _config = config;
+            Personalised = personalisedConsent;
+            // Nothing until Start is called: the ad unit ids come from the server, so there is nothing to
+            // initialise at boot and no ad is offered before the config has landed.
+            Provider = !config.AdsEnabled ? new NoAdsProvider()
+                : Application.isEditor ? new SimulatedAdsProvider()
+                : (IAdsProvider)new NoAdsProvider();
+        }
+
+        /// <summary>Whether the player allowed ads chosen from what the networks know about them.</summary>
+        public bool Personalised { get; private set; }
+
+        /// <summary>
+        /// Brings the SDK up once the ad unit ids are known, which is after the first /config download. Calling it
+        /// again does nothing: the SDK initialises once per process and a second Init would drop the loaded ads.
+        /// The ids are taken from the server when it supplies them and from client.json otherwise, so a build can
+        /// still be tested with nothing deployed.
+        /// </summary>
+        public void Start(string rewardedUnitId, string interstitialUnitId, bool personalised)
+        {
+            Personalised = personalised;
+            if (_started || !_config.AdsEnabled || Application.isEditor)
             {
-                Provider = new NoAdsProvider();
+                return;
             }
-            else
+            string rewarded = string.IsNullOrWhiteSpace(rewardedUnitId) ? _config.LevelPlayRewardedUnitId : rewardedUnitId;
+            string interstitial = string.IsNullOrWhiteSpace(interstitialUnitId) ? _config.LevelPlayInterstitialUnitId : interstitialUnitId;
+            if (string.IsNullOrWhiteSpace(_config.LevelPlayAppKey) || string.IsNullOrWhiteSpace(rewarded))
             {
-                Provider = Application.isEditor || Debug.isDebugBuild ? new SimulatedAdsProvider() : (IAdsProvider)new NoAdsProvider();
+                Debug.LogWarning("Ads are enabled but no LevelPlay app key or rewarded ad unit is configured.");
+                return;
             }
+            _started = true;
+            Provider = new LevelPlayAdsProvider(_config.LevelPlayAppKey, rewarded, interstitial, personalised);
         }
 
         /// <summary>Swap in a real SDK adapter at startup.</summary>
