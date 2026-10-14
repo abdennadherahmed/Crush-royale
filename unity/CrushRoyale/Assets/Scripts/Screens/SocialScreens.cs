@@ -648,7 +648,7 @@ namespace CrushRoyale.Game.Screens
             if (a.Claimed)
             {
                 Text claimed = UIFactory.Label(card.transform, "✔ " + Loc.T("achievements.claimed"), Theme.SmallSize, Theme.Success, TextAnchor.MiddleRight, FontStyle.Bold);
-                UIFactory.Anchor(claimed.rectTransform, 0.6f, 0.05f, 0.97f, 0.32f);
+                UIFactory.Anchor(claimed.rectTransform, 0.6f, 0.12f, 0.97f, 0.38f);
             }
             else if (a.Unlocked)
             {
@@ -1109,7 +1109,7 @@ namespace CrushRoyale.Game.Screens
             if (quest.Claimed)
             {
                 Text claimed = UIFactory.Label(card.transform, "✔ " + Loc.T("achievements.claimed"), Theme.SmallSize, Theme.Success, TextAnchor.MiddleRight, FontStyle.Bold);
-                UIFactory.Anchor(claimed.rectTransform, 0.6f, 0.06f, 0.97f, 0.38f);
+                UIFactory.Anchor(claimed.rectTransform, 0.6f, 0.13f, 0.97f, 0.44f);
             }
             else
             {

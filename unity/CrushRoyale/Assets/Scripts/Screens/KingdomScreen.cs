@@ -460,8 +460,10 @@ namespace CrushRoyale.Game.Screens
                 }
                 if (!affordable)
                 {
+                    // Au-dessus de la bordure du cadre, et sous le bouton qui commence a 42 % : a 12 % la ligne
+                    // debordait sous la carte et mordait sur le panneau suivant.
                     Text missing = UIFactory.Label(card.transform, Loc.T("kingdom.missing", task.Cost - stars), Theme.SmallSize - 10, Theme.Danger, TextAnchor.MiddleCenter);
-                    UIFactory.Anchor(missing.rectTransform, 0.7f, 0.12f, 0.98f, 0.4f);
+                    UIFactory.Anchor(missing.rectTransform, 0.7f, 0.16f, 0.98f, 0.4f);
                 }
             }
         }

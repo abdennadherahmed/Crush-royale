@@ -129,6 +129,12 @@ namespace CrushRoyale.Game.Screens
             Widgets.TitleOutline(pity);
             UIFactory.ProgressBar(rect, pets.PullsSinceWholePet / (float)Math.Max(1, pets.PityPulls), Theme.Gold, out RectTransform pityBar);
             UIFactory.Anchor(pityBar, 0.08f, 0.26f, 0.92f, 0.32f);
+            // Le compte dans la barre, comme partout ailleurs dans le jeu. Sans lui, une barre a zero se lit
+            // comme un element qui ne marche pas plutot que comme une jauge qui n'a pas encore demarre.
+            Text pityCount = UIFactory.Label(pityBar, pets.PullsSinceWholePet + " / " + Math.Max(1, pets.PityPulls),
+                Theme.SmallSize - 6, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+            UIFactory.Stretch(pityCount.rectTransform);
+            Widgets.TitleOutline(pityCount);
 
             Button one = UIFactory.Button(rect, Loc.T("pets.summon1", pets.SummonCostOrbes), () => _ = SummonAsync(1), Theme.PanelLight, Theme.BodySize);
             UIFactory.Anchor(one.GetComponent<RectTransform>(), 0.06f, 0.06f, 0.48f, 0.22f);
@@ -142,7 +148,7 @@ namespace CrushRoyale.Game.Screens
             if (saving > 0)
             {
                 Image tag = UIFactory.Panel("Deal", ten.transform, Theme.Danger);
-                UIFactory.Anchor(tag.rectTransform, 0.62f, 0.78f, 1.04f, 1.18f);
+                UIFactory.Anchor(tag.rectTransform, 0.58f, 0.74f, 0.98f, 1.12f);
                 Text tagText = UIFactory.Label(tag.transform, "-" + saving + "%", Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Stretch(tagText.rectTransform);
                 tag.gameObject.AddComponent<Pulse>().Scale = true;
@@ -280,13 +286,13 @@ namespace CrushRoyale.Game.Screens
             {
                 Button awaken = UIFactory.Button(card, Loc.T("pets.awaken", pet.AwakenFragments, pet.AwakenCoins), () => _ = AwakenAsync(pet.Type),
                     pet.Fragments >= pet.AwakenFragments ? Theme.Orbe : Theme.PanelLight, Theme.SmallSize - 8);
-                UIFactory.Anchor(awaken.GetComponent<RectTransform>(), canConvert ? 0.555f : 0.33f, 0.05f, canConvert ? 0.765f : 0.64f, 0.3f);
+                UIFactory.Anchor(awaken.GetComponent<RectTransform>(), canConvert ? 0.555f : 0.33f, 0.11f, canConvert ? 0.765f : 0.64f, 0.38f);
             }
             if (canConvert)
             {
                 PetDto source = pet;
                 Button convert = UIFactory.Button(card, Loc.T("pets.convert"), () => ShowConvert(source, pets), Theme.Crystal, Theme.SmallSize - 6);
-                UIFactory.Anchor(convert.GetComponent<RectTransform>(), 0.33f, 0.05f, convertMax, 0.3f);
+                UIFactory.Anchor(convert.GetComponent<RectTransform>(), 0.33f, 0.11f, convertMax, 0.38f);
                 Pulse pulse = convert.gameObject.AddComponent<Pulse>();
                 pulse.Scale = true;
             }
@@ -297,7 +303,7 @@ namespace CrushRoyale.Game.Screens
                     _ = EquipAsync(pet.Type);
                 }
             }, equipped ? Theme.Success : Theme.Gold, Theme.SmallSize);
-            UIFactory.Anchor(equip.GetComponent<RectTransform>(), pet.CanAwaken && canConvert ? 0.78f : 0.67f, 0.05f, 0.97f, 0.3f);
+            UIFactory.Anchor(equip.GetComponent<RectTransform>(), pet.CanAwaken && canConvert ? 0.78f : 0.67f, 0.11f, 0.97f, 0.38f);
         }
 
         private int ConvertRatio => Math.Max(1, Game.Backend.Balance?.Pets?.ConvertRatio ?? 3);
