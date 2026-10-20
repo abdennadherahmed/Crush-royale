@@ -621,6 +621,9 @@ namespace CrushRoyale.EditorTools
                 new ScreenCase("06-WorldMap", typeof(WorldMapScreen)),
                 new ScreenCase("07-StagePreview", typeof(StagePreviewScreen), _ => 7),
                 new ScreenCase("08-Gameplay", typeof(GameplayScreen), _ => MatchLaunch.OfflineStory(1)),
+                // Une etape glacee : les obstacles ne sont visibles sur aucune autre capture, et c'est justement
+                // la que la glace devenait invisible derriere une gemme rouge.
+                new ScreenCase("08b-Gameplay-Glace", typeof(GameplayScreen), _ => MatchLaunch.OfflineStory(44)),
                 new ScreenCase("09-StoryResult", typeof(StoryResultScreen), StoryResult),
                 new ScreenCase("10-StoryResult-Lost", typeof(StoryResultScreen), StoryResultLost),
                 new ScreenCase("11-Pvp", typeof(PvpScreen)),

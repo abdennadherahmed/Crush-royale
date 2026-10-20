@@ -83,8 +83,11 @@ namespace CrushRoyale.Game.Gameplay
             frame.raycastTarget = !ghost;
 
             view._cellsLayer = UIFactory.Stretch(UIFactory.Rect("Cells", rect));
-            view._iceLayer = UIFactory.Stretch(UIFactory.Rect("Ice", rect));
             view._piecesLayer = UIFactory.Stretch(UIFactory.Rect("Pieces", rect));
+            // La glace passe devant la gemme, pas derriere. Derriere, une gemme rouge la recouvrait entierement
+            // et le joueur ne voyait plus quelles cases il devait casser : l'objectif de l'etape devenait
+            // invisible. Devant, et translucide, elle givre la gemme sans cacher sa couleur.
+            view._iceLayer = UIFactory.Stretch(UIFactory.Rect("Ice", rect));
             view._chainLayer = UIFactory.Stretch(UIFactory.Rect("Chains", rect));
             view._fxLayer = UIFactory.Stretch(UIFactory.Rect("Fx", rect));
             return view;
@@ -574,14 +577,16 @@ namespace CrushRoyale.Game.Gameplay
                 origin /= originCount;
             }
 
-            var vanishing = new List<PieceView>();
-            var vanishDelay = new List<float>();
+            // Une seule liste, et non une de cases plus une de retards : les deux avancaient separement, une
+            // pierre cassee dans le meme coup n'etait ajoutee qu'a l'une des deux, et l'effacement sortait du
+            // tableau a la premiere image. Le coup etait joue, mais plus rien ne tombait. Une paire ne peut plus
+            // se desynchroniser, parce qu'il n'y a plus rien a tenir synchronise.
+            var vanishing = new List<(PieceView View, float Delay)>();
             float longestDelay = 0f;
             foreach (ClearedPiece cleared in step.Cleared)
             {
                 if (_pieces.TryGetValue(cleared.Piece.Id, out PieceView view))
                 {
-                    vanishing.Add(view);
                     // Un alignement ordinaire part d'un bloc : tout ensemble, sinon on casse son rythme. Seules
                     // les cases soufflees attendent leur tour. Plafonne, pour qu'une explosion de plateau entier
                     // ne tienne pas l'ecran une seconde de plus.
@@ -591,7 +596,7 @@ namespace CrushRoyale.Game.Gameplay
                         float distance = Mathf.Abs(cleared.Position.X - origin.x) + Mathf.Abs(cleared.Position.Y - origin.y);
                         delay = Mathf.Min(distance * BlastStaggerPerCell, MaxBlastStagger);
                     }
-                    vanishDelay.Add(delay);
+                    vanishing.Add((view, delay));
                     longestDelay = Mathf.Max(longestDelay, delay);
                     if (!IsGhost && vanishing.Count <= 24)
                     {
@@ -614,7 +619,8 @@ namespace CrushRoyale.Game.Gameplay
                 }
                 if (hit.Destroyed)
                 {
-                    vanishing.Add(stone);
+                    // Une pierre part avec son coup, sans attendre son tour : elle n'est pas soufflee.
+                    vanishing.Add((stone, 0f));
                     if (!IsGhost && hit.Type != PieceType.Stone)
                     {
                         // Corrupted crystal shatters in magenta, a dragon egg in gold.
@@ -645,9 +651,9 @@ namespace CrushRoyale.Game.Gameplay
                 OnMirrorReflected(reflection);
             }
 
-            foreach (PieceView v in vanishing)
+            foreach ((PieceView view, float _) in vanishing)
             {
-                v?.Panic();
+                view?.Panic();
             }
             // Squash and stretch plutot qu'un retrecissement uniforme. La gemme gonfle sur le premier quart,
             // ce qui annonce ce qui va se passer, puis s'ecrase : elle s'etale en largeur pendant qu'elle
@@ -661,14 +667,13 @@ namespace CrushRoyale.Game.Gameplay
             yield return CoroutineTask.Tween(clearSpan, k =>
             {
                 float now = k * clearSpan;
-                for (int i = 0; i < vanishing.Count; i++)
+                foreach ((PieceView v, float delay) in vanishing)
                 {
-                    PieceView v = vanishing[i];
                     if (v == null)
                     {
                         continue;
                     }
-                    float local = Mathf.Clamp01((now - vanishDelay[i]) / clearTime);
+                    float local = Mathf.Clamp01((now - delay) / clearTime);
                     float x, y, alpha;
                     if (local <= 0f)
                     {
@@ -695,7 +700,7 @@ namespace CrushRoyale.Game.Gameplay
                     v.Alpha = Mathf.Clamp01(alpha);
                 }
             });
-            foreach (PieceView v in vanishing)
+            foreach ((PieceView v, float _) in vanishing)
             {
                 if (v != null)
                 {
@@ -1100,10 +1105,11 @@ namespace CrushRoyale.Game.Gameplay
             int layers = _iceLayers[y * Width + x];
             Image ice = _ice[y * Width + x];
             ice.enabled = layers > 0;
-            // The illustrated cube sits behind the piece: thicker ice is more opaque.
+            // Posee devant la gemme : assez opaque pour se voir sur n'importe quelle couleur, assez transparente
+            // pour qu'on lise encore la gemme dessous. Une deuxieme couche givre davantage.
             ice.color = ice.type == Image.Type.Sliced
-                ? new Color(0.75f, 0.92f, 1f, 0.18f + 0.18f * layers)
-                : new Color(1f, 1f, 1f, 0.45f + 0.25f * layers);
+                ? new Color(0.75f, 0.92f, 1f, 0.30f + 0.16f * layers)
+                : new Color(1f, 1f, 1f, 0.42f + 0.16f * layers);
         }
     }
 }
