@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using CrushRoyale.Contracts;
 using CrushRoyale.Core.Gameplay;
+using CrushRoyale.Core.Config;
+using CrushRoyale.Core.Story;
 using CrushRoyale.Game;
 using CrushRoyale.Game.Gameplay;
 using CrushRoyale.Game.UI;
@@ -43,6 +46,109 @@ namespace CrushRoyale.EditorTools
 
         [MenuItem("Crush Royale/Jouer le jeu (rapport)")]
         public static void RunFromMenu() => Execute(Path.GetFullPath("playthrough"));
+
+        /// <summary>
+        /// Joue les etapes demandees, avec le compte releve, et dit ce que chacune a donne.
+        ///
+        ///     Unity -batchmode -quit -projectPath . -executeMethod CrushRoyale.EditorTools.Playthrough.PlayStages
+        ///         -stages 164,165 -playthroughOutput &lt;dossier&gt;
+        ///
+        /// Le bot joue avec l'equipement du compte, sur le plateau exact de l'etape, avec les memes regles que
+        /// le telephone : le moteur est partage, c'est celui que le serveur rejoue pour verifier un score.
+        /// </summary>
+        public static void PlayStages()
+        {
+            string list = Argument("-stages") ?? "1";
+            string output = Path.GetFullPath(Argument("-playthroughOutput") ?? "playthrough");
+            Directory.CreateDirectory(output);
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            GameRoot game = OfflineHarness.BootGame();
+            OfflineHarness.SetProfile(game, true);
+
+            var steps = new List<Step>();
+            int problems = 0;
+            foreach (string piece in list.Split(','))
+            {
+                if (!int.TryParse(piece.Trim(), out int stageId))
+                {
+                    continue;
+                }
+                problems += PlayStage(game, stageId, steps);
+            }
+            OfflineHarness.Shutdown(game);
+            WriteReport(output, steps, problems);
+            Debug.Log("Playthrough: " + steps.Count + " etape(s) jouee(s), " + problems + " probleme(s), rapport dans " + output);
+        }
+
+        /// <summary>Joue une etape jusqu'au bout et resume ce qu'elle demandait et ce qui a ete fait.</summary>
+        private static int PlayStage(GameRoot game, int stageId, List<Step> steps)
+        {
+            var step = new Step { Screen = "Etape " + stageId };
+            try
+            {
+                MatchLaunch launch = MatchLaunch.OfflineStory(stageId);
+                // L'equipement du compte, pas un plateau nu : des power-ups changent ce qu'une etape demande.
+                Dictionary<string, int> owned = game.Backend.Profile?.Inventory?.PowerUps;
+                if (owned != null)
+                {
+                    GameBalance balance = game.Backend.Balance;
+                    // Les memes limites qu'un joueur : un nombre de places, et certains power-ups qui ne
+                    // s'emportent qu'une fois. Les ignorer faisait refuser la partie avant de commencer.
+                    foreach (KeyValuePair<string, int> entry in owned)
+                    {
+                        if (launch.OfflineLoadout.Count >= balance.PowerUps.LoadoutSlots)
+                        {
+                            break;
+                        }
+                        if (entry.Value <= 0 || !Enum.TryParse(entry.Key, true, out PowerUpType type))
+                        {
+                            continue;
+                        }
+                        PowerUpDefinition def = balance.PowerUps.Get(type);
+                        // Une partie hors ligne est jouee en Bronze : un power-up debloque plus haut serait
+                        // refuse, exactement comme pour un joueur qui n'y est pas encore arrive.
+                        if (def.PvpOnly || def.UnlockLeague > League.Bronze)
+                        {
+                            continue;
+                        }
+                        launch.OfflineLoadout.Add(new LoadoutEntry(type, def.OncePerMatch ? 1 : entry.Value));
+                    }
+                }
+                SessionConfig config = launch.BuildConfig(game.Backend);
+                var session = new GameSession(config, game.Backend.Balance, game.Backend.PlayerId);
+                StageResult result = HeadlessRunner.Run(session, new GreedyBot());
+                step.Button = Objectives(config);
+                step.Outcome = result.State.ToString();
+                step.Detail = "score " + result.FinalScore + ", " + result.Stars + " etoile(s), "
+                              + result.MovesUsed + " coup(s)";
+                steps.Add(step);
+                // Perdre n'est pas un defaut : une etape difficile se perd, et c'est le bot qui joue, pas un
+                // joueur. Seule une partie qui ne se termine pas du tout signale un probleme.
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                step.Outcome = "exception";
+                step.Detail = ex.GetBaseException().Message;
+                steps.Add(step);
+                return 1;
+            }
+        }
+
+        /// <summary>Ce que l'etape demande, en clair, pour que le resultat se lise sans ouvrir le jeu.</summary>
+        private static string Objectives(SessionConfig config)
+        {
+            var text = new StringBuilder();
+            foreach (StageObjective objective in config.Objectives ?? new List<StageObjective>())
+            {
+                if (text.Length > 0)
+                {
+                    text.Append(" + ");
+                }
+                text.Append(objective.Type).Append(' ').Append(objective.Target);
+            }
+            return text.Length > 0 ? text.ToString() : "sans objectif";
+        }
 
         public static void Run()
         {
