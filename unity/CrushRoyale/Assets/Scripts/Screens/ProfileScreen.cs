@@ -45,7 +45,9 @@ namespace CrushRoyale.Game.Screens
 
         public override async Task OnShownAsync()
         {
-            if (_loading || !Game.Backend.IsOnline)
+            // Hors ligne, Api repond avec le jeu de donnees du harnais quand il y en a un, et ne tente rien sinon.
+            // Couper le chargement ici en plus privait les captures de cet ecran : il restait vide, donc jamais relu.
+            if (_loading || (!Game.Backend.IsOnline && Game.Backend.OfflineFixture<PlayerStatsDto>() == null))
             {
                 return;
             }
