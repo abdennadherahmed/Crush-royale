@@ -101,8 +101,11 @@ namespace CrushRoyale.EditorTools
                         steps.Add(step);
                         continue;
                     }
+                    string before = Fingerprint(host);
                     button.onClick.Invoke();
+                    Canvas.ForceUpdateCanvases();
                     step.Outcome = "ok";
+                    step.Detail = WhereItLed(game, host, before);
                 }
                 catch (Exception ex)
                 {
@@ -117,10 +120,52 @@ namespace CrushRoyale.EditorTools
                         UnityEngine.Object.DestroyImmediate(host.gameObject);
                     }
                     ClearOverlays(game);
+                    game.UI.ResetForTooling();
                 }
                 steps.Add(step);
             }
             return problems;
+        }
+
+        /// <summary>
+        /// Ou l'appui a mene : une page, une fenetre, un message, ou nulle part.
+        ///
+        /// « nulle part » est la trouvaille interessante : un bouton qui ne fait rien ressemble, sur une photo,
+        /// exactement a un bouton qui marche. C'est le genre de defaut qu'un joueur signale par « j'appuie et il
+        /// ne se passe rien », sans pouvoir dire lequel.
+        /// </summary>
+        private static string WhereItLed(GameRoot game, RectTransform host, string before)
+        {
+            if (game.UI.Current != null)
+            {
+                return "ouvre " + game.UI.Current.GetType().Name;
+            }
+            if (game.UI.DialogLayer != null && game.UI.DialogLayer.childCount > 0)
+            {
+                return "ouvre une fenetre";
+            }
+            if (game.UI.ToastLayer != null && game.UI.ToastLayer.childCount > 0)
+            {
+                return "affiche un message";
+            }
+            // Un onglet, un tri, une case cochee ne changent pas de page : ils refont la page sur place. Les
+            // confondre avec un bouton mort remplirait le rapport de faux signalements.
+            return Fingerprint(host) != before ? "met la page a jour" : "ne mene nulle part";
+        }
+
+        /// <summary>Ce que la page montre, resume : de quoi voir qu'un appui l'a changee.</summary>
+        private static string Fingerprint(RectTransform host)
+        {
+            var text = new StringBuilder();
+            foreach (Text label in host.GetComponentsInChildren<Text>(true))
+            {
+                text.Append(label.text).Append('|');
+            }
+            foreach (Image image in host.GetComponentsInChildren<Image>(true))
+            {
+                text.Append(image.sprite != null ? image.sprite.name : "-").Append(image.color.ToString()).Append('|');
+            }
+            return text.ToString();
         }
 
         private static int CountButtons(GameRoot game, ScreenCase test)
@@ -243,6 +288,10 @@ namespace CrushRoyale.EditorTools
             text.AppendLine("# Partie jouee par le harnais");
             text.AppendLine();
             text.AppendLine(steps.Count + " appui(s), " + problems + " probleme(s).");
+            text.AppendLine();
+            text.AppendLine("Le harnais joue hors ligne. Tout ce qui demande le serveur (chercher une partie, creer");
+            text.AppendLine("une guilde, acheter) ne peut donc mener nulle part, et le retour n'a pas de page ou");
+            text.AppendLine("revenir. Ce sont les autres « ne mene nulle part » qui meritent d'etre regardes.");
             text.AppendLine();
             foreach (IGrouping<string, Step> screen in steps.GroupBy(s => s.Screen))
             {

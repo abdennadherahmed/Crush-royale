@@ -11,6 +11,7 @@ using CrushRoyale.Contracts;
 using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
 using CrushRoyale.Core.Social;
+using CrushRoyale.Core.Story;
 using CrushRoyale.Server.Infrastructure;
 using CrushRoyale.Server.Persistence;
 using CrushRoyale.Server.Services;
@@ -215,6 +216,11 @@ namespace CrushRoyale.Tools.ProfileSnapshot
             public void Apply(GameBalance balance)
             {
             }
+
+            public System.Threading.Tasks.Task RefreshAsync(IGameStore store, CancellationToken cancellationToken) =>
+                System.Threading.Tasks.Task.CompletedTask;
+
+            public OperationResult<GameBalance> Parse(string json) => OperationResult<GameBalance>.Ok(_balance);
         }
     }
 }

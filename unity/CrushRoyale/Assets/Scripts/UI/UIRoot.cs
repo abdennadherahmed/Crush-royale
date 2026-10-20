@@ -291,6 +291,22 @@ namespace CrushRoyale.Game.UI
         /// <summary>Pour l'outillage : un message en cours doit etre retire avant l'appui suivant.</summary>
         public Transform ToastLayer => _toasts;
 
+        /// <summary>
+        /// Pour l'outillage : repart d'une page vierge, pour que l'essai suivant parte du meme etat.
+        ///
+        /// Le harnais appuie sur un bouton et regarde ou il mene. Sans remise a zero, la page ouverte par l'appui
+        /// precedent serait encore la, et le bouton suivant passerait pour n'avoir rien fait.
+        /// </summary>
+        public void ResetForTooling()
+        {
+            for (int i = _screens.childCount - 1; i >= 0; i--)
+            {
+                DestroyImmediate(_screens.GetChild(i).gameObject);
+            }
+            _history.Clear();
+            Current = null;
+        }
+
         public Task Alert(string title, string message) => Dialog(title, message, _game.Loc.T("common.ok"), null);
 
         public async Task<bool> Confirm(string title, string message, string ok = null, string cancel = null) =>
