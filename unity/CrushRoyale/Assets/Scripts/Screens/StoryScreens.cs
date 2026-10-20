@@ -424,9 +424,8 @@ namespace CrushRoyale.Game.Screens
             {
                 Image petImage = UIFactory.Icon(marker, petArt, Color.white, 0);
                 UIFactory.Anchor(petImage.rectTransform, 0.72f, -0.2f, 1.3f, 0.45f);
-                Breathe hop = petImage.gameObject.AddComponent<Breathe>();
-                hop.Amount = 0.08f;
-                hop.Speed = 4f;
+                // Sur la carte il est minuscule : un bond franc, sinon on ne voit rien du tout.
+                PetIdle.On(petImage, hopHeight: 0.22f, swayDegrees: 5f);
             }
             marker.gameObject.AddComponent<Breathe>().Amount = 0.06f;
             return marker;

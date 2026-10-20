@@ -201,7 +201,8 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Anchor(image.rectTransform, 0.02f, 0.08f, 0.31f, 0.92f);
                 if (pet.Owned)
                 {
-                    image.gameObject.AddComponent<Breathe>().Amount = 0.03f;
+                    // Dans la liste, un bond court : vingt familiers qui sautent haut donneraient une page agitee.
+                    PetIdle.On(image, hopHeight: 0.07f, swayDegrees: 2.5f);
                 }
             }
 

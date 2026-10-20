@@ -557,9 +557,8 @@ namespace CrushRoyale.Game.Screens
                 pet.raycastTarget = false;
                 pet.rectTransform.pivot = new Vector2(0.5f, 0f);
                 UIFactory.Anchor(pet.rectTransform, 0.6f, 0.335f, 0.86f, 0.48f);
-                Breathe hop = pet.gameObject.AddComponent<Breathe>();
-                hop.Amount = 0.05f;
-                hop.Speed = 3f;
+                // Le compagnon du menu est le familier le plus regarde du jeu : il bondit un peu plus haut.
+                PetIdle.On(pet, hopHeight: 0.16f, swayDegrees: 4f);
             }
 
             if (profile != null)
@@ -789,7 +788,12 @@ namespace CrushRoyale.Game.Screens
                 Image image = UIFactory.Icon(button.transform, art, Color.white, 0);
                 image.preserveAspect = true;
                 image.raycastTarget = false;
-                UIFactory.Anchor(image.rectTransform, 0.04f, 0.2f, 0.96f, 1f);
+                // L'illustration se tient a l'interieur du liseré dore, et ne le touche pas.
+                //
+                // Elle occupait presque toute la tuile, bords compris. Le cadre dore ayant sa propre marge
+                // transparente, le parchemin des quetes et le ruban des hauts faits passaient par-dessus le
+                // liseré et se faisaient trancher par le bord. Une tuile sur deux avait l'air mal decoupee.
+                UIFactory.Anchor(image.rectTransform, 0.1f, 0.3f, 0.9f, 0.98f);
             }
             return button;
         }
@@ -819,7 +823,10 @@ namespace CrushRoyale.Game.Screens
 
             Image plate = UIFactory.Panel("CaptionPlate", rect, new Color(0.05f, 0.02f, 0.11f, 0.86f));
             plate.raycastTarget = false;
-            UIFactory.Anchor(plate.rectTransform, -0.05f, -0.03f, 1.05f, 0.24f);
+            // Alignee sur la tuile, et non plus plus large qu'elle. Elle depassait de chaque cote pour laisser
+            // la place aux mots longs, mais une plaque qui sort du cadre donne a toute la colonne l'air mal
+            // rangee. Le texte se retrecit desormais au lieu de pousser la plaque.
+            UIFactory.Anchor(plate.rectTransform, 0.02f, -0.02f, 0.98f, 0.24f);
 
             Text caption = UIFactory.Label(plate.transform, text, Theme.SmallSize - 6, unlocked ? Theme.Text : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
             caption.raycastTarget = false;
@@ -843,14 +850,17 @@ namespace CrushRoyale.Game.Screens
             Image image = UIFactory.Icon(rect, lockArt, Color.white, 0);
             image.preserveAspect = true;
             image.raycastTarget = false;
-            UIFactory.Anchor(image.rectTransform, 0.58f, 0.55f, 0.98f, 0.98f);
+            // Pose dans le coin, entierement visible. Il debordait du bord droit et se faisait couper en deux,
+            // tout en ecrasant l'illustration : on ne lisait plus ni le cadenas ni l'icone.
+            UIFactory.Anchor(image.rectTransform, 0.6f, 0.58f, 0.92f, 0.9f);
         }
 
         private static void CountBadge(RectTransform rect, int count)
         {
             Image dot = UIFactory.Icon(rect, ProceduralSprites.Circle(), Theme.Danger, 0);
             dot.raycastTarget = false;
-            UIFactory.Anchor(dot.rectTransform, 0.66f, 0.7f, 0.98f, 1.02f);
+            // Comme le cadenas : dans le coin, et dedans. Elle depassait du haut de la tuile.
+            UIFactory.Anchor(dot.rectTransform, 0.64f, 0.66f, 0.94f, 0.96f);
             dot.preserveAspect = true;
             Text number = UIFactory.Label(dot.transform, count > 9 ? "9+" : count.ToString(), Theme.SmallSize - 4, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Stretch(number.rectTransform);

@@ -96,9 +96,8 @@ namespace CrushRoyale.Game.Screens
                 {
                     Image petImage = UIFactory.Icon(scene, pet, Color.white, 0);
                     UIFactory.Anchor(petImage.rectTransform, 0.66f, 0.02f, 0.94f, 0.28f);
-                    Breathe hop = petImage.gameObject.AddComponent<Breathe>();
-                    hop.Amount = 0.06f;
-                    hop.Speed = 3f;
+                    // Aux pieds du heros, dans la scene du profil : il doit avoir l'air de l'accompagner.
+                    PetIdle.On(petImage, hopHeight: 0.14f, swayDegrees: 4f);
                     Text level = UIFactory.Label(scene, Loc.T("pets.level", _stats.PetLevel), Theme.SmallSize - 6, new Color(0.7f, 1f, 0.8f), TextAnchor.MiddleCenter, FontStyle.Bold);
                     UIFactory.Anchor(level.rectTransform, 0.66f, 0.26f, 0.94f, 0.32f);
                     Widgets.TitleOutline(level);
