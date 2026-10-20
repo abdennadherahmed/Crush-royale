@@ -288,6 +288,9 @@ namespace CrushRoyale.Game.UI
         /// <summary>Layer above every screen for dialogs, popups and full-screen reveals.</summary>
         public Transform DialogLayer => _dialogs;
 
+        /// <summary>Pour l'outillage : un message en cours doit etre retire avant l'appui suivant.</summary>
+        public Transform ToastLayer => _toasts;
+
         public Task Alert(string title, string message) => Dialog(title, message, _game.Loc.T("common.ok"), null);
 
         public async Task<bool> Confirm(string title, string message, string ok = null, string cancel = null) =>

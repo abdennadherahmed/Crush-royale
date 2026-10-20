@@ -201,6 +201,30 @@ jobs:
             -executeMethod CrushRoyale.EditorTools.ScreenshotTool.CaptureAll
             -screenshotOutput ${{ github.workspace }}/screenshots
 
+      # Une capture montre un ecran a l'arret : elle ne dit pas si ses boutons repondent. Cette etape ouvre chaque
+      # ecran, appuie sur chacun de ses boutons et joue une etape entiere, ce qu'aucune photo ne peut verifier.
+      - name: Play the game (every button, one full stage)
+        id: playthrough
+        continue-on-error: true
+        uses: RageAgainstThePixel/unity-action@v3
+        with:
+          project-path: ${{ env.PROJECT_PATH }}
+          build-target: Android
+          log-name: playthrough
+          args: >-
+            -quit -batchmode -force-graphics
+            -executeMethod CrushRoyale.EditorTools.Playthrough.Run
+            -playthroughOutput ${{ github.workspace }}/playthrough
+
+      - name: Upload the playthrough report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playthrough-${{ github.run_number }}
+          path: playthrough
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v7
