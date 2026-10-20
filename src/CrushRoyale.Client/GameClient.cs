@@ -67,7 +67,9 @@ namespace CrushRoyale.Client
         /// <summary>Signs in (guest if needed), logs into the game server, syncs rules and flushes queued submissions.</summary>
         public async Task<LoginResponse> StartAsync(string deviceHash, string region, string language, CancellationToken cancellationToken = default)
         {
-            if (!Auth.IsSignedIn)
+            // Contre un serveur de developpement, l'identite voyage dans un entete et il n'y a donc personne a
+            // qui demander un jeton : joindre Supabase ferait echouer un demarrage qui doit rester local.
+            if (!Auth.IsSignedIn && string.IsNullOrEmpty(Options.DevUserId))
             {
                 await Auth.SignInAnonymouslyAsync(cancellationToken).ConfigureAwait(false);
             }

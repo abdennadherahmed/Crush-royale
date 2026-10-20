@@ -28,10 +28,20 @@ namespace CrushRoyale.Game
         [JsonProperty("termsUrl")] public string TermsUrl;
         [JsonProperty("supportEmail")] public string SupportEmail;
 
+        /// <summary>
+        /// Rempli uniquement par l'outillage, pour jouer contre un serveur local lance en Development.
+        ///
+        /// Ce n'est pas un reglage de build : le fichier livre ne le contient pas, et un serveur de production
+        /// refuse de toute facon cette authentification. Il existe pour qu'une action puisse etre jouee en ligne
+        /// de bout en bout depuis l'editeur, qui n'a pas de compte Google.
+        /// </summary>
+        [JsonIgnore] public string DevUserId;
+
         public bool IsConfigured =>
             !string.IsNullOrEmpty(ApiBaseUrl) && !ApiBaseUrl.Contains("example")
-            && !string.IsNullOrEmpty(SupabaseUrl) && !SupabaseUrl.Contains("YOUR-PROJECT-REF")
-            && !string.IsNullOrEmpty(SupabasePublishableKey) && !SupabasePublishableKey.Contains("REPLACE_ME");
+            && (!string.IsNullOrEmpty(DevUserId)
+                || (!string.IsNullOrEmpty(SupabaseUrl) && !SupabaseUrl.Contains("YOUR-PROJECT-REF")
+                    && !string.IsNullOrEmpty(SupabasePublishableKey) && !SupabasePublishableKey.Contains("REPLACE_ME")));
 
         public static ClientConfig Load()
         {

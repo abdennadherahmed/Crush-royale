@@ -42,7 +42,8 @@ namespace CrushRoyale.Game.Networking
                 {
                     ApiBaseUrl = config.ApiBaseUrl,
                     SupabaseUrl = config.SupabaseUrl,
-                    SupabasePublishableKey = config.SupabasePublishableKey
+                    SupabasePublishableKey = config.SupabasePublishableKey,
+                    DevUserId = config.DevUserId
                 }, save.Sessions, save.Queue, save);
 
                 Client.ProfileChanged += profile => MainThread.Post(() => ProfileChanged?.Invoke(profile));

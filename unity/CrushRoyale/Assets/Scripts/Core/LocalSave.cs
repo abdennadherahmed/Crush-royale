@@ -109,6 +109,20 @@ namespace CrushRoyale.Game
         /// <summary>SHA-256 of the platform device id, salted per game (the raw id never leaves the device).</summary>
         public string DeviceHash(string salt)
         {
+            // Retenu des la premiere demande : l'identifiant de l'appareil ne peut etre lu que depuis le fil
+            // principal, et l'outillage qui joue en ligne fait ses appels reseau ailleurs. Il ne change pas
+            // d'une lecture a l'autre, donc le garder ne cache rien.
+            if (_deviceRaw == null)
+            {
+                _deviceRaw = ReadDeviceId();
+            }
+            return CrushRoyale.Client.DeviceHash.Compute(_deviceRaw, salt);
+        }
+
+        private string _deviceRaw;
+
+        private string ReadDeviceId()
+        {
             string raw = SystemInfo.deviceUniqueIdentifier;
             if (string.IsNullOrEmpty(raw) || raw == SystemInfo.unsupportedIdentifier)
             {
@@ -120,7 +134,7 @@ namespace CrushRoyale.Game
                     PlayerPrefs.Save();
                 }
             }
-            return CrushRoyale.Client.DeviceHash.Compute(raw, salt);
+            return raw;
         }
 
         private PlayerSettings LoadSettings()

@@ -30,6 +30,14 @@ namespace CrushRoyale.Game
 
         public ClientConfig Config { get; private set; }
 
+        /// <summary>
+        /// L'outillage peut rediriger le jeu vers un serveur local juste avant son demarrage.
+        ///
+        /// Sans ca, l'editeur n'a aucun moyen d'etre connecte : l'authentification passe par un compte Google
+        /// que cette machine n'a pas, et tout ce qui demande le serveur restait donc intestable hors telephone.
+        /// </summary>
+        public static System.Action<ClientConfig> ConfigOverride;
+
         public LocalSave Save { get; private set; }
 
         public Localization Loc { get; private set; }
@@ -68,6 +76,11 @@ namespace CrushRoyale.Game
 
             MainThread.EnsureExists(transform);
             Config = ClientConfig.Load();
+            // Mis par l'outillage avant le demarrage, pour jouer contre un serveur local au lieu du vrai.
+            if (ConfigOverride != null)
+            {
+                ConfigOverride(Config);
+            }
             Save = new LocalSave();
             Loc = new Localization(Save.Settings.Language);
             Haptics = new Haptics(Save);

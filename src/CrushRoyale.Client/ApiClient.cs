@@ -59,10 +59,18 @@ namespace CrushRoyale.Client
             {
                 using (var request = new HttpRequestMessage(method, _options.ApiBaseUrl.TrimEnd('/') + route))
                 {
-                    string token = _accessToken == null ? null : await _accessToken(cancellationToken).ConfigureAwait(false);
-                    if (token != null)
+                    if (!string.IsNullOrEmpty(_options.DevUserId))
                     {
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        // Serveur de developpement : pas de jeton a demander, donc pas de Supabase a joindre.
+                        request.Headers.Add("X-Dev-User", _options.DevUserId);
+                    }
+                    else
+                    {
+                        string token = _accessToken == null ? null : await _accessToken(cancellationToken).ConfigureAwait(false);
+                        if (token != null)
+                        {
+                            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        }
                     }
                     if (bodyJson != null)
                     {

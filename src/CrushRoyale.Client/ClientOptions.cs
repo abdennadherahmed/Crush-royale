@@ -20,6 +20,18 @@ namespace CrushRoyale.Client
         /// <summary>Supabase publishable key (sb_publishable_...). Never ship a secret key in the app.</summary>
         public string SupabasePublishableKey { get; set; }
 
+        /// <summary>
+        /// Identifiant joue en developpement, pour parler a un serveur local sans passer par Google.
+        ///
+        /// Un serveur lance en Development accepte l'entete X-Dev-User a la place du jeton : c'est ainsi que les
+        /// tests du serveur s'authentifient depuis toujours. Le mettre ici permet a l'outillage de jouer une
+        /// action en ligne de bout en bout, chose impossible autrement puisque l'editeur n'a pas de compte Google.
+        ///
+        /// Un serveur de production refuse ce schema d'authentification, donc remplir ce champ par erreur ne
+        /// donne acces a rien : la requete repart en 401.
+        /// </summary>
+        public string DevUserId { get; set; }
+
         public int TimeoutSeconds { get; set; } = 10;
 
         public int MaxAttempts { get; set; } = 3;
@@ -29,6 +41,11 @@ namespace CrushRoyale.Client
             if (string.IsNullOrWhiteSpace(ApiBaseUrl) || !Uri.IsWellFormedUriString(ApiBaseUrl, UriKind.Absolute))
             {
                 throw new ArgumentException("ApiBaseUrl must be an absolute URL.");
+            }
+            if (!string.IsNullOrEmpty(DevUserId))
+            {
+                // Serveur de developpement : aucune identite n'est demandee a Supabase, donc rien a valider.
+                return;
             }
             if (string.IsNullOrWhiteSpace(SupabaseUrl) || !Uri.IsWellFormedUriString(SupabaseUrl, UriKind.Absolute))
             {
