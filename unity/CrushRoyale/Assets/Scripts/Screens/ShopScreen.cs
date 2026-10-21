@@ -181,15 +181,20 @@ namespace CrushRoyale.Game.Screens
             if (!compact)
             {
                 Text desc = UIFactory.Label(card.transform, Loc.T("powerup." + item.PowerUp + ".desc"), Theme.SmallSize - 8, Theme.TextMuted, TextAnchor.UpperCenter);
-                UIFactory.Anchor(desc.rectTransform, 0.06f, 0.25f, 0.94f, 0.37f);
+                // Deux lignes tiennent, trois etaient coupees net au milieu d'un mot : la description du
+                // Nuclear Bomb s'arretait sur « around », et le « it » disparaissait sous le bord.
+                UIFactory.Anchor(desc.rectTransform, 0.06f, 0.21f, 0.94f, 0.37f);
             }
             if (item.DiscountPermille > 0)
             {
-                Badge(card.transform, "-" + item.DiscountPermille / 10 + "%", Theme.Danger, 0.62f, 0.86f, 1.04f, 1.02f);
+                // Les deux etiquettes flottaient au-dessus de la carte, celle de remise debordant meme a droite
+                // entre deux cartes : elles avaient l'air detachees de l'article qu'elles annoncent. Elles sont
+                // maintenant posees sur le haut de la carte, chacune dans son coin.
+                Badge(card.transform, "-" + item.DiscountPermille / 10 + "%", Theme.Danger, 0.6f, 0.82f, 0.98f, 0.97f);
             }
             if (deal)
             {
-                Badge(card.transform, Loc.T("shop.bestDeal"), Theme.Gold, -0.04f, 0.86f, 0.5f, 1.02f);
+                Badge(card.transform, Loc.T("shop.bestDeal"), Theme.Gold, 0.02f, 0.82f, 0.5f, 0.97f);
             }
 
             float bottom = compact ? 0.26f : 0.23f;
@@ -321,7 +326,7 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Anchor(perEuro.rectTransform, 0.05f, 0.23f, 0.95f, 0.32f);
                 if (item.OrbesPerEuro == best && packs.Count > 1)
                 {
-                    Badge(card.transform, Loc.T("shop.bestValue"), Theme.Success, -0.04f, 0.86f, 0.62f, 1.02f);
+                    Badge(card.transform, Loc.T("shop.bestValue"), Theme.Success, 0.02f, 0.82f, 0.62f, 0.97f);
                 }
                 else if (item.Id == popular)
                 {
@@ -349,7 +354,7 @@ namespace CrushRoyale.Game.Screens
                     Amount(card.transform, Loc.Number(item.CoinsGranted), Theme.Gold);
                     if (index == coins.Count - 1 && coins.Count > 1)
                     {
-                        Badge(card.transform, Loc.T("shop.bestValue"), Theme.Success, -0.04f, 0.86f, 0.62f, 1.02f);
+                        Badge(card.transform, Loc.T("shop.bestValue"), Theme.Success, 0.02f, 0.82f, 0.62f, 0.97f);
                     }
                     PriceButton(card.transform, "item_orbs", Loc.Number(item.PriceOrbes), Theme.Orbe, () => _ = BuyAsync(item, "Orbes"), 0.08f, 0.04f, 0.92f, 0.24f);
                 });
@@ -366,7 +371,7 @@ namespace CrushRoyale.Game.Screens
                     Amount(card.transform, "+" + item.Quantity, Theme.Danger);
                     if (item.IsDeal)
                     {
-                        Badge(card.transform, Loc.T("shop.bestDeal"), Theme.Gold, -0.04f, 0.86f, 0.62f, 1.02f);
+                        Badge(card.transform, Loc.T("shop.bestDeal"), Theme.Gold, 0.02f, 0.82f, 0.62f, 0.97f);
                     }
                     bool both = item.PriceCoins > 0 && item.PriceOrbes > 0;
                     if (item.PriceCoins > 0)

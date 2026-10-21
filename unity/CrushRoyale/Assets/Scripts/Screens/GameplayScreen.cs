@@ -23,6 +23,11 @@ namespace CrushRoyale.Game.Screens
         private MatchLaunch _launch;
         private MatchController _controller;
         private Text _score;
+
+        private Text _scoreCaption;
+
+        /// <summary>Le score n'est elargi qu'une fois, a la premiere image qui dit qu'il n'y a pas de chronometre.</summary>
+        private bool _scoreWidened;
         private Text _moves;
         private Text _time;
         private Text _objectives;
@@ -78,6 +83,7 @@ namespace CrushRoyale.Game.Screens
 
             Text scoreCaption = UIFactory.Label(hud.transform, Loc.T("hud.scoreLabel"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(scoreCaption.rectTransform, 0.36f, 0.62f, 0.68f, 0.88f);
+            _scoreCaption = scoreCaption;
             _score = UIFactory.Label(hud.transform, "0", Theme.TitleSize, Theme.Gold, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(_score.rectTransform, 0.34f, 0.1f, 0.7f, 0.68f);
             Widgets.TitleOutline(_score);
@@ -396,6 +402,14 @@ namespace CrushRoyale.Game.Screens
                 if (_clockIcon != null)
                 {
                     _clockIcon.enabled = false;
+                }
+                // Sans chronometre, le tiers droit du bandeau restait vide : une large bordure doree autour de
+                // rien, avec un score minuscule serre au milieu. Le score prend toute la place laissee libre.
+                if (!_scoreWidened)
+                {
+                    _scoreWidened = true;
+                    UIFactory.Anchor(_score.rectTransform, 0.34f, 0.1f, 0.96f, 0.68f);
+                    UIFactory.Anchor(_scoreCaption.rectTransform, 0.36f, 0.62f, 0.94f, 0.88f);
                 }
             }
             else
