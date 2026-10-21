@@ -37,12 +37,9 @@ namespace CrushRoyale.Game
         /// </summary>
         [JsonIgnore] public string DevUserId;
 
-        /// <summary>Jeton ouvert hors du jeu, pour que l'outillage puisse jouer sur un compte reel.</summary>
-        [JsonIgnore] public string AccessToken;
-
         public bool IsConfigured =>
             !string.IsNullOrEmpty(ApiBaseUrl) && !ApiBaseUrl.Contains("example")
-            && (!string.IsNullOrEmpty(DevUserId) || !string.IsNullOrEmpty(AccessToken)
+            && (!string.IsNullOrEmpty(DevUserId)
                 || (!string.IsNullOrEmpty(SupabaseUrl) && !SupabaseUrl.Contains("YOUR-PROJECT-REF")
                     && !string.IsNullOrEmpty(SupabasePublishableKey) && !SupabasePublishableKey.Contains("REPLACE_ME")));
 

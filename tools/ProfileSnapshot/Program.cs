@@ -99,8 +99,11 @@ namespace CrushRoyale.Tools.ProfileSnapshot
                 return true;
             }, CancellationToken.None).ConfigureAwait(false);
 
-            (Guid Id, string Name) me = players.FirstOrDefault(
-                p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+            // Deux comptes peuvent porter le meme nom : rien ne l'interdit. L'identifiant les distingue, et
+            // c'est le seul moyen de designer celui qu'on veut quand les deux s'appellent pareil.
+            (Guid Id, string Name) me = Guid.TryParse(name, out Guid wanted)
+                ? players.FirstOrDefault(p => p.Id == wanted)
+                : players.FirstOrDefault(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
             if (me.Id == Guid.Empty)
             {
                 Console.Error.WriteLine("No player called \"" + name + "\" among " + players.Count + " players.");
@@ -119,6 +122,17 @@ namespace CrushRoyale.Tools.ProfileSnapshot
 
             // Named after the response type, because that is how the harness hands a fixture to a screen: the screen
             // asks for a BattlePassResponse, it is given the BattlePassResponse of this account.
+            // L'etat brut, tel qu'il est range en base, en plus des reponses. C'est ce qu'un serveur local
+            // attend pour rejouer une partie sur ce compte : les DTO decrivent ce qu'un ecran affiche, pas ce
+            // que le serveur manipule.
+            PlayerRecord mine = await store.TransactAsync(tx => tx.GetPlayerAsync(me.Id), CancellationToken.None)
+                .ConfigureAwait(false);
+            if (mine != null)
+            {
+                File.WriteAllText(Path.Combine(folder, "playerRecord.json"), Json.Serialize(mine));
+                written.Add("playerRecord");
+            }
+
             await WriteAsync(folder, written, "profile", () => profiles.GetMeAsync(me.Id, false, CancellationToken.None));
             await WriteAsync(folder, written, "PlayerStatsDto", () => profiles.GetStatsAsync(me.Id, CancellationToken.None));
             await WriteAsync(folder, written, "FriendsResponse", () => social.GetFriendsAsync(me.Id, CancellationToken.None));

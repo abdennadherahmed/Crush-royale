@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using CrushRoyale.Client;
 using CrushRoyale.Contracts;
+using CrushRoyale.Core.Gameplay;
 using CrushRoyale.Game;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -43,8 +45,9 @@ namespace CrushRoyale.EditorTools
             string output = Path.GetFullPath(Argument("-onlineOutput") ?? "online");
             Directory.CreateDirectory(output);
 
-            // Un joueur neuf a chaque passage : un essai ne depend ainsi jamais de ce qu'a laisse le precedent.
-            string player = Guid.NewGuid().ToString();
+            // Le compte releve est charge dans le serveur local quand il y en a un, et c'est lui qui joue.
+            // Sinon un joueur neuf, different a chaque passage, pour qu'un essai ne depende jamais du precedent.
+            string player = ImportAccount(server) ?? Guid.NewGuid().ToString();
             GameRoot.ConfigOverride = config =>
             {
                 config.ApiBaseUrl = server.TrimEnd('/');
@@ -117,6 +120,14 @@ namespace CrushRoyale.EditorTools
                         GuildSearchResponse guilds = await game.Backend.Client.Api.SearchGuildsAsync(string.Empty);
                         return (guilds.Guilds?.Count ?? 0) + " guilde(s)";
                     });
+
+                    foreach (string piece in (Argument("-stages") ?? string.Empty).Split(','))
+                    {
+                        if (int.TryParse(piece.Trim(), out int stageId))
+                        {
+                            problems += await PlayStageAsync(game, stageId, steps);
+                        }
+                    }
                 }
             }
             finally
@@ -127,6 +138,88 @@ namespace CrushRoyale.EditorTools
             WriteReport(output, server, steps, problems);
             Debug.Log("OnlineRun: " + steps.Count + " action(s), " + problems + " probleme(s), rapport dans " + output);
             return problems;
+        }
+
+        /// <summary>
+        /// Joue une etape du debut a la fin comme le telephone le ferait, et laisse le serveur decider.
+        ///
+        /// C'est la seule maniere de verifier la chaine entiere : le serveur distribue le plateau, le moteur
+        /// joue, la rejouee repart, le serveur la rejoue coup par coup pour verifier le score, accorde les
+        /// etoiles et les recompenses, et enregistre la progression. Un score calcule ici et jamais envoye ne
+        /// prouve rien de tout cela.
+        /// </summary>
+        /// <summary>
+        /// Depose le compte releve dans le serveur local et renvoie son identifiant, ou null s'il n'y en a pas.
+        ///
+        /// La route n'existe qu'en developpement : un serveur de production ne l'expose pas du tout.
+        /// </summary>
+        private static string ImportAccount(string server)
+        {
+            const string path = "Assets/Editor/Fixtures/playerRecord.json";
+            if (!File.Exists(path))
+            {
+                Debug.Log("OnlineRun: pas de compte releve, un joueur neuf sera cree.");
+                return null;
+            }
+            try
+            {
+                string body = File.ReadAllText(path);
+                using var http = new System.Net.Http.HttpClient();
+                var content = new System.Net.Http.StringContent(body, Encoding.UTF8, "application/json");
+                System.Net.Http.HttpResponseMessage response =
+                    http.PostAsync(server.TrimEnd('/') + "/dev/import-player", content).GetAwaiter().GetResult();
+                response.EnsureSuccessStatusCode();
+                string id = Newtonsoft.Json.Linq.JObject.Parse(body)["id"]?.ToString();
+                Debug.Log("OnlineRun: compte " + id + " charge dans le serveur local.");
+                return id;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning("OnlineRun: import impossible (" + ex.Message + "), un joueur neuf sera cree.");
+                return null;
+            }
+        }
+
+        private static async Task<int> PlayStageAsync(GameRoot game, int stageId, List<Step> steps)
+        {
+            return await Try(steps, "etape " + stageId, async () =>
+            {
+                // Un chronometre ordinaire, et non l'horloge d'Unity : celle-ci ne se lit que depuis le fil
+                // principal, et tout ceci se passe ailleurs.
+                var elapsed = System.Diagnostics.Stopwatch.StartNew();
+                MatchStartResponse start = await game.Backend.Client.Api.StartStageAsync(stageId, new StartStageRequest());
+                SessionConfig config = MatchConfigFactory.Build(start, game.Backend.Balance, game.Backend.Catalog);
+                var session = new GameSession(config, game.Backend.Balance, game.Backend.PlayerId);
+                StageResult local = HeadlessRunner.Run(session, new GreedyBot());
+
+                // Le bot joue une etape de quatre-vingt-dix secondes en deux millisecondes. Le serveur compare
+                // la duree annoncee par la rejouee au temps reellement ecoule depuis qu'il a distribue le
+                // plateau, et refuse l'ecart : c'est exactement la triche qu'il doit arreter. Il faut donc
+                // attendre, pour de vrai, le temps que la partie a dure.
+                long owed = session.Replay.EndTimeMs - elapsed.ElapsedMilliseconds;
+                if (owed > 0)
+                {
+                    Debug.Log("OnlineRun: la partie a dure " + session.Replay.EndTimeMs
+                              + " ms, attente de " + owed + " ms avant l'envoi.");
+                    await Task.Delay((int)Math.Min(owed + 500, 300000));
+                }
+
+                StageCompleteResponse server = await game.Backend.Client.SubmitStageAsync(start.MatchId, session.Replay);
+                if (server == null)
+                {
+                    throw new Exception("aucune reponse du serveur (mise en file d'attente)");
+                }
+                if (!server.Accepted)
+                {
+                    throw new Exception("refusee par le serveur : " + server.Error);
+                }
+                // Relu depuis le serveur, et non depuis ce qui vient d'etre joue : c'est ce qui prouve que la
+                // partie a ete enregistree et pas seulement acceptee.
+                ProfileDto after = await game.Backend.Client.Api.GetMeAsync();
+                return server.State + ", score " + server.Score + " (local " + local.FinalScore + "), "
+                       + server.Stars + " etoile(s), +" + server.CoinsEarned + " pieces, +"
+                       + server.OrbesEarned + " orbes, etape atteinte " + after.Story?.HighestUnlockedStage;
+            });
         }
 
         private static async Task<int> Try(List<Step> steps, string name, Func<Task<string>> action)

@@ -527,3 +527,6 @@ unity/CrushRoyale/Assets/Resources/Atlases/
 
 # Local Android builds: a 100 MB APK must never reach a commit by accident.
 build/
+
+# Jetons de session ouverts par tools/open-session.ps1 : jamais versionnes.
+.secrets/

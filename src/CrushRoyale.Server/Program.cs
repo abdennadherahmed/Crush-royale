@@ -113,6 +113,38 @@ app.UseAuthorization();
 app.UseRateLimiter();
 app.MapCrushEndpoints();
 
+// Porte d'entree reservee au developpement : charger un compte reel dans un serveur local.
+//
+// Sans elle, un serveur lance ici demarre vide, et jouer « avec son compte » voulait dire jouer avec un
+// compte neuf qui ne ressemble a rien. Avec elle, l'outillage peut rejouer une partie entiere, envoi de la
+// rejouee et verification comprises, sur l'etat exact d'un vrai joueur.
+//
+// Elle n'existe pas en production : l'environnement est verifie ici, et un serveur de production n'expose
+// donc meme pas la route.
+if (app.Environment.IsDevelopment())
+{
+    app.MapPost("/dev/import-player", async (HttpContext http, IGameStore store, CancellationToken ct) =>
+    {
+        using var reader = new StreamReader(http.Request.Body);
+        PlayerRecord record = Json.Deserialize<PlayerRecord>(await reader.ReadToEndAsync(ct));
+        await store.TransactAsync(async tx =>
+        {
+            PlayerRecord existing = await tx.GetPlayerAsync(record.Id).ConfigureAwait(false);
+            if (existing == null)
+            {
+                await tx.InsertPlayerAsync(record).ConfigureAwait(false);
+            }
+            else
+            {
+                record.Version = existing.Version;
+                await tx.UpdatePlayerAsync(record).ConfigureAwait(false);
+            }
+            return true;
+        }, ct).ConfigureAwait(false);
+        return Results.Ok(new { imported = record.Id, name = record.State?.DisplayName });
+    }).AllowAnonymous();
+}
+
 if (app.Services.GetService<SupabaseJwksProvider>() is SupabaseJwksProvider jwks)
 {
     await jwks.RefreshAsync(CancellationToken.None);
