@@ -148,7 +148,9 @@ namespace CrushRoyale.Game.Screens
             if (saving > 0)
             {
                 Image tag = UIFactory.Panel("Deal", ten.transform, Theme.Danger);
-                UIFactory.Anchor(tag.rectTransform, 0.58f, 0.74f, 0.98f, 1.12f);
+                // Posee sur le coin du bouton, et non par-dessus son texte : l'etiquette mordait sur le prix,
+                // et depassait du haut du bouton par-dessus le marche.
+                UIFactory.Anchor(tag.rectTransform, 0.7f, 0.82f, 1.06f, 1.26f);
                 Text tagText = UIFactory.Label(tag.transform, "-" + saving + "%", Theme.SmallSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Stretch(tagText.rectTransform);
                 tag.gameObject.AddComponent<Pulse>().Scale = true;

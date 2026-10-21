@@ -12,6 +12,10 @@ namespace CrushRoyale.Game.UI
         public static InputField Input(Transform parent, string placeholder, int characterLimit, InputField.ContentType contentType = InputField.ContentType.Standard)
         {
             Image background = UIFactory.Panel("Input", parent, Theme.BackgroundLight);
+            // Le champ portait un simple rectangle sombre, pose a cote de boutons illustres a liseré dore : les
+            // deux n'avaient pas l'air d'appartenir au meme jeu. Le cadre en verre du kit lui donne la meme
+            // facture que le reste, tout en restant creux, ce qu'un champ de saisie doit etre.
+            UiKit.GlassCard(background);
             InputField field = background.gameObject.AddComponent<InputField>();
             field.targetGraphic = background;
 

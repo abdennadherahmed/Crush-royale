@@ -311,7 +311,9 @@ namespace CrushRoyale.Game.Screens
             Text score = Outlined(card.transform, Loc.Number(race.Points), Theme.TitleSize, Theme.Gold, TextAnchor.MiddleLeft);
             UIFactory.Anchor(score.rectTransform, 0.05f, race.Ranked ? 0.52f : 0.6f, 0.55f, 0.92f);
             Text caption = Outlined(card.transform, Loc.T("guild.racePoints"), Theme.SmallSize - 4, Theme.TextMuted, TextAnchor.MiddleLeft);
-            UIFactory.Anchor(caption.rectTransform, 0.05f, race.Ranked ? 0.34f : 0.46f, 0.55f, 0.52f);
+            // Plus de hauteur et de largeur : la legende etait rabotee jusqu'a dix-sept pixels pour tenir dans
+            // sa boite, en dessous de ce qui se lit sur un telephone.
+            UIFactory.Anchor(caption.rectTransform, 0.05f, race.Ranked ? 0.34f : 0.46f, 0.68f, 0.52f);
 
             Chip(card.transform, "item_trophy", Loc.T("guild.racePrize", Loc.Number(race.FirstPrizeCoins), Loc.Number(race.FirstPrizeOrbes)),
                 0.56f, 0.97f, race.Ranked ? 0.62f : 0.7f, 0.9f);

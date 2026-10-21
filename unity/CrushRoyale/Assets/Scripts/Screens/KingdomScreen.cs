@@ -96,7 +96,9 @@ namespace CrushRoyale.Game.Screens
         /// <summary>Zone ribbon, then one line that answers "where am I in the whole restoration" and the star purse.</summary>
         private void BuildHeader(RectTransform body, RestorationZone zone, HashSet<string> built, int stars)
         {
-            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", body), 0.02f, 0.925f, 0.98f, 1f);
+            // Un cran plus bas et un peu plus etroit que la banniere du titre : les deux se touchaient, et deux
+            // rubans colles l'un a l'autre se lisent comme un seul bandeau epais au lieu de deux informations.
+            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", body), 0.06f, 0.918f, 0.94f, 0.986f);
             UiKit.Ribbon(ribbon);
             Text title = UIFactory.Label(ribbon, Loc.T("kingdom.zone", zone.Number, Restoration.Zones.Count, ZoneName(zone.Number)), Theme.BodySize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Anchor(title.rectTransform, 0.16f, 0.34f, 0.84f, 0.92f);

@@ -245,7 +245,12 @@ namespace CrushRoyale.Game.UI
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Truncate;
             label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = Mathf.Max(14, size / 2);
+            // Plancher lisible, et non la moitie de la taille demandee.
+            //
+            // Un texte a l'etroit se reduisait tout seul jusqu'a quatorze pixels, sans rien signaler : sur un
+            // telephone, c'est illisible, et la boite trop petite restait invisible pour tout le monde. Avec un
+            // plancher, le texte deborde ou se coupe, ce qui se voit et se corrige, au lieu de retrecir en douce.
+            label.resizeTextMinSize = Mathf.Min(size, 18);
             label.resizeTextMaxSize = size;
             label.raycastTarget = false;
             Shadow shadow = rect.gameObject.AddComponent<Shadow>();

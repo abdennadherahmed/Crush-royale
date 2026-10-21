@@ -43,7 +43,8 @@ namespace CrushRoyale.Game.Networking
                     ApiBaseUrl = config.ApiBaseUrl,
                     SupabaseUrl = config.SupabaseUrl,
                     SupabasePublishableKey = config.SupabasePublishableKey,
-                    DevUserId = config.DevUserId
+                    DevUserId = config.DevUserId,
+                    AccessToken = config.AccessToken
                 }, save.Sessions, save.Queue, save);
 
                 Client.ProfileChanged += profile => MainThread.Post(() => ProfileChanged?.Invoke(profile));
@@ -111,7 +112,19 @@ namespace CrushRoyale.Game.Networking
 
         public ProfileDto Profile => IsOnline ? Client.Profile : OfflineProfile;
 
-        public string PlayerId => Client?.Auth.UserId ?? "offline-player";
+        // Contre un serveur de developpement, l'identite voyage dans un entete et Supabase n'est jamais joint :
+        // il n'y a donc pas d'utilisateur signe a qui demander son identifiant. Sans ce reli, une partie jouee
+        // par l'outillage portait un identifiant qui n'etait pas celui du joueur authentifie, et le serveur
+        // refusait la rejouee avec ReplayMismatch, a juste titre.
+        // L'identite de developpement passe devant, et pas seulement en secours : une session anonyme gardee
+        // d'un essai precedent reste en cache, et c'est son identifiant qui ressortait alors que le serveur
+        // authentifiait tout autre chose.
+        public string PlayerId => !string.IsNullOrEmpty(_config?.DevUserId)
+            ? _config.DevUserId
+            : (Client?.Auth.UserId ?? _loggedInAs ?? "offline-player");
+
+        /// <summary>Le joueur que le serveur a reconnu, quand l'identite vient d'un jeton et non d'une session.</summary>
+        private string _loggedInAs;
 
         public bool IsGuest => Client == null || Client.Auth.IsAnonymous;
 
@@ -168,6 +181,9 @@ namespace CrushRoyale.Game.Networking
             try
             {
                 await Client.StartAsync(_save.DeviceHash(_config.DeviceSalt), RegionCode(), language);
+                // Avec un jeton fourni, il n'y a pas de session locale a interroger : le joueur reconnu est
+                // celui que le serveur vient de nommer dans le profil.
+                _loggedInAs = Client.Profile?.Id;
                 IsOnline = true;
                 LastError = null;
             }

@@ -858,7 +858,10 @@ namespace CrushRoyale.Game.Screens
                 UIFactory.Anchor(image.rectTransform, 0.02f, 0.12f, 0.13f, 0.88f);
             }
             Text label = UIFactory.Label(row.transform, text, Theme.SmallSize, Theme.Text, TextAnchor.MiddleLeft, FontStyle.Bold);
-            UIFactory.Anchor(label.rectTransform, 0.15f, progress >= 0 ? 0.52f : 0.2f, 0.62f, 0.94f);
+            // Le titre descendait jusqu'au tiers inferieur, la ou se trouve deja la ligne d'etat : centres, les
+            // deux textes se croisaient de justesse, mais un titre qui passe sur deux lignes se posait dessus.
+            float titleBottom = progress >= 0 ? 0.52f : (string.IsNullOrEmpty(state) ? 0.2f : 0.36f);
+            UIFactory.Anchor(label.rectTransform, 0.15f, titleBottom, 0.62f, 0.94f);
             if (progress >= 0)
             {
                 UIFactory.ProgressBar(row.transform, progress, Theme.Success, out RectTransform bar);
@@ -956,7 +959,8 @@ namespace CrushRoyale.Game.Screens
                 if (lockArt != null)
                 {
                     Image lockIcon = UIFactory.Icon(cell.transform, lockArt, Color.white, 0);
-                    UIFactory.Anchor(lockIcon.rectTransform, 0.78f, 0.62f, 0.98f, 1.05f);
+                    // L'anse du cadenas sortait par le haut de la carte et se faisait trancher par la bordure.
+                    UIFactory.Anchor(lockIcon.rectTransform, 0.76f, 0.56f, 0.96f, 0.94f);
                 }
             }
             if (claimed)
