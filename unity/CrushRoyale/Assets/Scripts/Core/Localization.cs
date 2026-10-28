@@ -53,31 +53,7 @@ namespace CrushRoyale.Game
         {
             Language = Array.IndexOf(Supported, code) >= 0 ? code : "en";
             _strings = Language == "en" ? _fallback : LoadTable(Language);
-            ApplyCulture(Language);
             LanguageChanged?.Invoke();
-        }
-
-        /// <summary>
-        /// Accorde le format des nombres a la langue du jeu, et non a celle du telephone.
-        ///
-        /// Les chances d'invocation s'affichaient « 0,83% » dans un texte anglais, parce que chaque nombre etait
-        /// mis en forme avec la culture du systeme. Un joueur anglophone sur un telephone francais voyait donc
-        /// des virgules decimales partout, et l'inverse pour un francophone sur un telephone anglais.
-        ///
-        /// Les echanges avec le serveur ne sont pas concernes : ils imposent deja la culture invariante.
-        /// </summary>
-        private static void ApplyCulture(string language)
-        {
-            try
-            {
-                var culture = new System.Globalization.CultureInfo(language);
-                System.Globalization.CultureInfo.DefaultThreadCurrentCulture = culture;
-                System.Threading.Thread.CurrentThread.CurrentCulture = culture;
-            }
-            catch (Exception)
-            {
-                // Une langue que le systeme ne connait pas ne doit pas empecher le jeu de demarrer.
-            }
         }
 
         public bool Has(string key) => key != null && (_strings.ContainsKey(key) || _fallback.ContainsKey(key));
