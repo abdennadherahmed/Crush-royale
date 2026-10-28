@@ -522,7 +522,16 @@ namespace CrushRoyale.Game.Screens
             {
                 Game.Audio.PlaySFX(SoundIds.Click);
                 Game.Backend.TryReconnect();
-                UI.Toast(Loc.T("menu.offlineRetry"));
+                // La raison de l'echec, et non seulement « reconnexion ».
+                //
+                // Le jeu disait « reconnexion en cours » puis restait hors ligne, sans jamais dire pourquoi. Un
+                // joueur ne pouvait donc rapporter que « ca ne marche pas », et il a fallu fouiller une base de
+                // donnees pour comprendre ou la connexion s'arretait. L'erreur est deja connue du client : il
+                // suffisait de la montrer.
+                CrushApiException last = Game.Backend.LastError;
+                UI.Toast(last == null
+                    ? Loc.T("menu.offlineRetry")
+                    : Loc.T("menu.offlineRetry") + "\n" + last.Code + " · " + last.Message);
             });
         }
 
