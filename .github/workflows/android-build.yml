@@ -21,8 +21,12 @@ on:
   push:
     branches: [master, main, crush-royale-v1]
 
+# Le format fait partie du verrou. Sans lui, demander l'AAB pendant que l'APK se construit annulait
+# l'APK : les deux partageaient le meme groupe, et le dernier arrive tuait le precedent. Un build a deja
+# ete perdu ainsi. Avec le format dans le nom, les deux se construisent cote a cote, et une version peut
+# partir sur un telephone et sur le Play Store a partir du meme code.
 concurrency:
-  group: android-${{ github.ref }}
+  group: android-${{ github.ref }}-${{ inputs.format || 'apk' }}
   cancel-in-progress: true
 
 env:
