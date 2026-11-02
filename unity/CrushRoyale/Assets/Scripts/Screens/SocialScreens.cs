@@ -913,7 +913,10 @@ namespace CrushRoyale.Game.Screens
             Image line = UIFactory.Panel("Line", row, reached ? Theme.Gold : Theme.BackgroundLight, rounded: false);
             UIFactory.Anchor(line.rectTransform, 0.485f, -0.05f, 0.515f, 1.05f);
             RectTransform medal = UIFactory.Anchor(UIFactory.Rect("Medal", row), 0.43f, 0.3f, 0.57f, 0.7f);
-            medal.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.WidthControlsHeight;
+            // La hauteur commande la largeur, et non l'inverse : la medaille tirait sa taille de la largeur de
+            // la ligne, devenait plus haute que la ligne elle-meme, et les numeros de deux paliers voisins se
+            // chevauchaient. Bornee par la hauteur, elle reste dans sa ligne.
+            medal.gameObject.AddComponent<AspectRatioFitter>().aspectMode = AspectRatioFitter.AspectMode.HeightControlsWidth;
             UiKit.RoundBadge(medal, crystal: !reached);
             Text number = UIFactory.Label(medal, tier.Tier.ToString(), Theme.BodySize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
             UIFactory.Stretch(number.rectTransform);

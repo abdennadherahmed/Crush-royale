@@ -708,21 +708,18 @@ namespace CrushRoyale.Game.Screens
         {
             _stageId = Args is int id ? id : 1;
             StageData stage = Game.Backend.Catalog.Get(_stageId);
-            RectTransform body = Frame("stage.title");
+            // Le numero de l'etape et son royaume tiennent dans la banniere du cadre. L'ecran posait son propre
+            // ruban juste en dessous, identique, et celui du haut ne disait rien de plus que « Etape ».
+            RectTransform body = Frame("stage.title", titleText: Loc.T("stage.heading", stage.Id, Loc.T("kingdom." + stage.Kingdom)));
             RectTransform list = UIFactory.ScrollList(body, 22, 36);
             UIFactory.Stretch((RectTransform)list.parent.parent, 0, 0, 0, 240);
 
-            // Header: ribbon with the stage number and kingdom, stars already earned below.
+            // Les etoiles deja gagnees, sous la banniere.
             RectTransform header = UIFactory.Rect("Header", list);
-            UIFactory.Height(header, 190);
-            RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", header), 0.02f, 0.25f, 0.98f, 1f);
-            UiKit.Ribbon(ribbon);
-            Text title = UIFactory.Label(ribbon, Loc.T("stage.heading", stage.Id, Loc.T("kingdom." + stage.Kingdom)), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
-            UIFactory.Anchor(title.rectTransform, 0.18f, 0.34f, 0.82f, 0.92f);
-            Widgets.TitleOutline(title);
+            UIFactory.Height(header, 96);
             string stars = Game.Backend.Profile?.Story?.StarsByStage ?? string.Empty;
             int earned = stage.Id - 1 < stars.Length ? stars[stage.Id - 1] - '0' : 0;
-            StarRow(header, earned, 0.32f, 0f, 0.68f, 0.3f);
+            StarRow(header, earned, 0.32f, 0.08f, 0.68f, 0.92f);
 
             if (stage.IsBoss)
             {

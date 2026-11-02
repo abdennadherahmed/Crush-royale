@@ -85,9 +85,28 @@ namespace CrushRoyale.Game.UI
         }
 
         /// <summary>"Label  [-] 70% [+]" stepper (0-1 by 10%).</summary>
+        /// <summary>
+        /// Pose une ligne de reglage sur un fond, au lieu de la laisser a meme l'illustration.
+        ///
+        /// Les ecrans de reglages ecrivaient « Volume general » ou « Mode daltonien » en blanc par-dessus un
+        /// decor charge, telescope, bibliotheque, lanternes : le texte s'y perdait, et rien ne reliait un
+        /// libelle au bouton qui lui repond. Un fond discret rend la ligne lisible et la fait exister comme
+        /// ligne. Mis ici, il profite a chaque reglage du jeu.
+        /// </summary>
+        private static HorizontalLayoutGroup SettingRow(Transform parent, float height)
+        {
+            HorizontalLayoutGroup row = UIFactory.Row(parent, height, 12);
+            Image back = row.gameObject.AddComponent<Image>();
+            back.color = new Color(0.07f, 0.05f, 0.15f, 0.72f);
+            back.raycastTarget = false;
+            UiKit.GlassCard(back);
+            row.padding = new RectOffset(30, 36, 12, 12);
+            return row;
+        }
+
         public static void Stepper(Transform parent, string label, float value, Action<float> onChange)
         {
-            HorizontalLayoutGroup row = UIFactory.Row(parent, 110, 12);
+            HorizontalLayoutGroup row = SettingRow(parent, 118);
             Text name = UIFactory.Label(row.transform, label, Theme.BodySize, Theme.Text, TextAnchor.MiddleLeft);
             UIFactory.Width(name, 460);
             Text display = null;
@@ -112,7 +131,7 @@ namespace CrushRoyale.Game.UI
 
         public static void Toggle(Transform parent, string label, bool value, Action<bool> onChange)
         {
-            HorizontalLayoutGroup row = UIFactory.Row(parent, 110, 12);
+            HorizontalLayoutGroup row = SettingRow(parent, 118);
             Text name = UIFactory.Label(row.transform, label, Theme.BodySize, Theme.Text, TextAnchor.MiddleLeft);
             UIFactory.Width(name, 640);
             bool current = value;

@@ -65,7 +65,15 @@ namespace CrushRoyale.Game.UI
         protected virtual string BackdropScene => null;
 
         /// <summary>Safe-area content container with a title bar and optional back button.</summary>
-        protected RectTransform Frame(string titleKey, bool backButton = true)
+        /// <summary>
+        /// Cadre d'ecran : fond, zone sure, banniere de titre et bouton retour.
+        ///
+        /// <paramref name="titleText"/> remplace le titre traduit quand l'ecran sait deja quoi ecrire, par
+        /// exemple « Etape 7, Frostreach ». Sans lui, un ecran devait poser son propre ruban sous celui du
+        /// cadre, et deux rubans empiles se lisaient comme un seul bandeau epais, le premier ne disant rien de
+        /// plus que « Etape ».
+        /// </summary>
+        protected RectTransform Frame(string titleKey, bool backButton = true, string titleText = null)
         {
             if (string.IsNullOrEmpty(BackdropScene))
             {
@@ -83,7 +91,7 @@ namespace CrushRoyale.Game.UI
             RectTransform ribbon = UIFactory.Anchor(UIFactory.Rect("Ribbon", bar), 0.13f, -0.08f, 0.87f, 1.02f);
             if (UiKit.Ribbon(ribbon) != null)
             {
-                Text ribbonTitle = UIFactory.Label(ribbon, Loc.T(titleKey), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
+                Text ribbonTitle = UIFactory.Label(ribbon, titleText ?? Loc.T(titleKey), Theme.HeaderSize, Theme.Text, TextAnchor.MiddleCenter, FontStyle.Bold);
                 UIFactory.Anchor(ribbonTitle.rectTransform, 0.2f, 0.36f, 0.8f, 0.9f);
                 Widgets.TitleOutline(ribbonTitle);
             }
