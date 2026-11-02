@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "فتح حتى المرحلة",
   "admin.amount": "الكمية",
   "admin.apply": "تطبيق",
-  "admin.done": "تم."
+  "admin.done": "تم.",
+  "leaderboard.unranked": "لم يتم تصنيفك بعد هذا الأسبوع",
+  "leaderboard.guildUnranked": "نقابتك غير مصنفة بعد"
 }
 

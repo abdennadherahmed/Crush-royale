@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "Unlock up to stage",
   "admin.amount": "Amount",
   "admin.apply": "Apply",
-  "admin.done": "Done."
+  "admin.done": "Done.",
+  "leaderboard.unranked": "Not ranked yet this week",
+  "leaderboard.guildUnranked": "Your guild is not ranked yet"
 }
 

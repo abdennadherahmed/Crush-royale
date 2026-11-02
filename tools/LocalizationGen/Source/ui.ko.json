@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "단계까지 해제",
   "admin.amount": "수량",
   "admin.apply": "적용",
-  "admin.done": "완료되었습니다."
+  "admin.done": "완료되었습니다.",
+  "leaderboard.unranked": "이번 주 아직 순위 없음",
+  "leaderboard.guildUnranked": "길드가 아직 순위에 없습니다"
 }
 

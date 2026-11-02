@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "ステージまで解放",
   "admin.amount": "数量",
   "admin.apply": "適用",
-  "admin.done": "完了しました。"
+  "admin.done": "完了しました。",
+  "leaderboard.unranked": "今週はまだランク外です",
+  "leaderboard.guildUnranked": "ギルドはまだランク外です"
 }
 

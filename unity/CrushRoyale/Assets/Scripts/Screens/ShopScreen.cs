@@ -123,7 +123,7 @@ namespace CrushRoyale.Game.Screens
 
         private void FillPowerUps()
         {
-            TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(_shop.NextRefreshUnixMs) - DateTimeOffset.UtcNow;
+            TimeSpan left = Widgets.Remaining(_shop.NextRefreshUnixMs);
             InfoBar(_list, "item_hourglass", Loc.T("shop.refreshIn", (int)left.TotalHours, left.Minutes));
 
             Widgets.SectionTitle(_list, Loc.T("shop.dailyDeals"));

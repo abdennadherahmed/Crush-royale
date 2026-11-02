@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "Открыть до этапа",
   "admin.amount": "Количество",
   "admin.apply": "Применить",
-  "admin.done": "Готово."
+  "admin.done": "Готово.",
+  "leaderboard.unranked": "Ещё нет места в рейтинге на этой неделе",
+  "leaderboard.guildUnranked": "Ваша гильдия ещё не в рейтинге"
 }
 

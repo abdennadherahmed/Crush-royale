@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "Débloquer jusqu'à l'étape",
   "admin.amount": "Quantité",
   "admin.apply": "Appliquer",
-  "admin.done": "Fait."
+  "admin.done": "Fait.",
+  "leaderboard.unranked": "Pas encore classé cette semaine",
+  "leaderboard.guildUnranked": "Ta guilde n'est pas encore classée"
 }
 

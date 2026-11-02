@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "Sblocca fino alla tappa",
   "admin.amount": "Quantità",
   "admin.apply": "Applica",
-  "admin.done": "Fatto."
+  "admin.done": "Fatto.",
+  "leaderboard.unranked": "Non ancora in classifica questa settimana",
+  "leaderboard.guildUnranked": "La tua gilda non è ancora in classifica"
 }
 

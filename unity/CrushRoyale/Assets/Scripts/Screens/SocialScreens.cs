@@ -381,7 +381,9 @@ namespace CrushRoyale.Game.Screens
                     return;
                 }
                 resetAt = _guilds.ResetAtUnixMs;
-                mine = Loc.T("leaderboard.myGuildRank", _guilds.MyGuildRank?.ToString() ?? "-");
+                mine = _guilds.MyGuildRank.HasValue
+                    ? Loc.T("leaderboard.myGuildRank", _guilds.MyGuildRank.Value.ToString())
+                    : Loc.T("leaderboard.guildUnranked");
                 rows.AddRange(_guilds.Entries.Select(g => (g.Rank, g.Name, (long)g.TotalTrophies, Theme.Text, false)));
                 _ids.Clear();
             }
@@ -392,12 +394,16 @@ namespace CrushRoyale.Game.Screens
                     return;
                 }
                 resetAt = _players.ResetAtUnixMs;
-                mine = Loc.T("leaderboard.myRank", _players.MyRank?.ToString() ?? "-");
+                // « My rank: #- » s'affichait a tout joueur pas encore classe, c'est-a-dire a tout nouveau
+                // venu : un tiret colle derriere un diese ne veut rien dire. Une phrase le dit.
+                mine = _players.MyRank.HasValue
+                    ? Loc.T("leaderboard.myRank", _players.MyRank.Value.ToString())
+                    : Loc.T("leaderboard.unranked");
                 rows.AddRange(_players.Entries.Select(e => (e.Rank, e.DisplayName, (long)e.Trophies, Theme.League(e.League), e.PlayerId == Game.Backend.PlayerId)));
                 _ids = _players.Entries.GroupBy(e => e.Rank).ToDictionary(g => g.Key, g => g.First().PlayerId);
             }
 
-            TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(resetAt) - DateTimeOffset.UtcNow;
+            TimeSpan left = Widgets.Remaining(resetAt);
             Image info = UIFactory.Panel("Info", list, Theme.Panel);
             UIFactory.Height(info, 120);
             UiKit.CardFrame(info);
@@ -729,7 +735,7 @@ namespace CrushRoyale.Game.Screens
             UIFactory.Height(panel, 380);
             UiKit.FramePanel(panel);
 
-            TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(_pass.SeasonEndUnixMs) - DateTimeOffset.UtcNow;
+            TimeSpan left = Widgets.Remaining(_pass.SeasonEndUnixMs);
             SeasonDefinition definition = SeasonCatalog.ByIndex(_pass.Season);
             Text season = UIFactory.Label(panel.transform, Loc.T("battlepass.seasonShort", Loc.T(definition.NameKey, definition.Index), Math.Max(0, left.Days)),
                 Theme.SmallSize, definition.IsBeta ? Theme.Crystal : Theme.TextMuted, TextAnchor.MiddleCenter, FontStyle.Bold);
@@ -1048,7 +1054,7 @@ namespace CrushRoyale.Game.Screens
                 return;
             }
 
-            TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(_quests.ResetAtUnixMs) - DateTimeOffset.UtcNow;
+            TimeSpan left = Widgets.Remaining(_quests.ResetAtUnixMs);
             Image info = UIFactory.Panel("Reset", list, Theme.Panel);
             UIFactory.Height(info, 110);
             UiKit.CardFrame(info);

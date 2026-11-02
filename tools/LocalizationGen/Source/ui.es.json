@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "Desbloquear hasta la etapa",
   "admin.amount": "Cantidad",
   "admin.apply": "Aplicar",
-  "admin.done": "Hecho."
+  "admin.done": "Hecho.",
+  "leaderboard.unranked": "Aún sin clasificar esta semana",
+  "leaderboard.guildUnranked": "Tu gremio aún no está clasificado"
 }
 

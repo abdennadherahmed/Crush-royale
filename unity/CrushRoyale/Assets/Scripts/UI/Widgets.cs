@@ -9,6 +9,21 @@ namespace CrushRoyale.Game.UI
     /// <summary>Reusable composite widgets.</summary>
     public static class Widgets
     {
+        /// <summary>
+        /// Temps restant avant une echeance, jamais negatif.
+        ///
+        /// Les cinq comptes a rebours du jeu, quetes, boutique, pass, classement et boss de guilde, soustrayaient
+        /// simplement l'heure courante a l'echeance. Une echeance deja passee, parce que le serveur n'a pas encore
+        /// renouvele les quetes ou parce que l'appareil est a l'heure d'un autre fuseau, donnait un affichage du
+        /// genre « nouvelles quetes dans -298h -24min ». Mis en commun ici, le probleme ne peut plus revenir dans
+        /// l'un des cinq endroits sans revenir dans tous.
+        /// </summary>
+        public static TimeSpan Remaining(long deadlineUnixMs)
+        {
+            TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(deadlineUnixMs) - DateTimeOffset.UtcNow;
+            return left > TimeSpan.Zero ? left : TimeSpan.Zero;
+        }
+
         public static InputField Input(Transform parent, string placeholder, int characterLimit, InputField.ContentType contentType = InputField.ContentType.Standard)
         {
             Image background = UIFactory.Panel("Input", parent, Theme.BackgroundLight);

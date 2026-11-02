@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "解锁到关卡",
   "admin.amount": "数量",
   "admin.apply": "应用",
-  "admin.done": "完成。"
+  "admin.done": "完成。",
+  "leaderboard.unranked": "本周尚未上榜",
+  "leaderboard.guildUnranked": "你的公会尚未上榜"
 }
 

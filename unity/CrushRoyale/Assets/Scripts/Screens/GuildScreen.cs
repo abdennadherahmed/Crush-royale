@@ -805,7 +805,7 @@ namespace CrushRoyale.Game.Screens
             Text rule = Outlined(ruleBar.transform, GuildBossRule(Loc, boss.BossIndex), Theme.SmallSize - 6, Theme.Warning, TextAnchor.MiddleCenter);
             UIFactory.Stretch(rule.rectTransform, 12, 12, 4, 4);
             Chip(scene, "item_medal", Loc.T("guild.bossWeek", boss.BossIndex), 0.03f, 0.34f, 0.755f, 0.825f);
-            TimeSpan left = DateTimeOffset.FromUnixTimeMilliseconds(boss.ResetAtUnixMs) - DateTimeOffset.UtcNow;
+            TimeSpan left = Widgets.Remaining(boss.ResetAtUnixMs);
             if (left < TimeSpan.Zero)
             {
                 left = TimeSpan.Zero;

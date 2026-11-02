@@ -2149,6 +2149,8 @@
   "admin.unlockStage": "Freischalten bis Stufe",
   "admin.amount": "Menge",
   "admin.apply": "Anwenden",
-  "admin.done": "Erledigt."
+  "admin.done": "Erledigt.",
+  "leaderboard.unranked": "Diese Woche noch nicht platziert",
+  "leaderboard.guildUnranked": "Deine Gilde ist noch nicht platziert"
 }
 
