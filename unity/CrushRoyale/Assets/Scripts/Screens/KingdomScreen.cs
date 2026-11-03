@@ -312,6 +312,13 @@ namespace CrushRoyale.Game.Screens
             const float duration = 1.1f;
             for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
             {
+                // Quitter le royaume, ou reconstruire l'ecran, detruit la fenetre et l'eclat pendant que
+                // l'animation tourne encore. Les etincelles etaient deja verifiees une par une, mais pas eux,
+                // et c'etait le plantage le plus frequent du jeu : vingt-huit fois sur la version en ligne.
+                if (this == null || window == null || group == null || burst == null)
+                {
+                    yield break;
+                }
                 float k = t / duration;
                 group.alpha = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(k * 1.6f));
                 float pop = 1f + 0.12f * Mathf.Sin(Mathf.Clamp01(k * 1.6f) * Mathf.PI);
@@ -327,6 +334,10 @@ namespace CrushRoyale.Game.Screens
                     }
                 }
                 yield return null;
+            }
+            if (this == null || window == null || group == null || burst == null)
+            {
+                yield break;
             }
             group.alpha = 1f;
             window.localScale = Vector3.one;
@@ -359,10 +370,18 @@ namespace CrushRoyale.Game.Screens
             const float duration = 0.8f;
             for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
             {
+                if (this == null || flash == null)
+                {
+                    yield break;
+                }
                 float k = t / duration;
                 flash.color = new Color(1f, 0.95f, 0.7f, 1f - k);
                 flash.rectTransform.localScale = Vector3.one * (0.4f + k * 1.4f);
                 yield return null;
+            }
+            if (this == null || flash == null)
+            {
+                yield break;
             }
             Destroy(flash.gameObject);
             Game.Audio.PlaySFX(SoundIds.Sparkle);
@@ -390,6 +409,10 @@ namespace CrushRoyale.Game.Screens
             const float duration = 1.5f;
             for (float t = 0; t < duration; t += Time.unscaledDeltaTime)
             {
+                if (this == null || wash == null)
+                {
+                    yield break;
+                }
                 float k = t / duration;
                 wash.color = new Color(1f, 0.95f, 0.75f, 0.45f * Mathf.Sin(k * Mathf.PI));
                 foreach ((RectTransform rect, float speed, float sway) in confetti)
@@ -401,6 +424,10 @@ namespace CrushRoyale.Game.Screens
                     }
                 }
                 yield return null;
+            }
+            if (this == null || wash == null)
+            {
+                yield break;
             }
             Destroy(wash.gameObject);
             foreach ((RectTransform rect, float _, float __) in confetti)
