@@ -60,7 +60,7 @@ murs(ord, section, ligne, valeur, rn) as (
 plantages(ord, section, ligne, valeur, rn) as (
   select 60, 'Plantages',
          app_version || ' x' || occurrences,
-         message,
+         left(message, 120) || coalesce(chr(10) || first_frame, ''),
          row_number() over (order by last_seen desc, occurrences desc)
   from analytics.top_errors
 )

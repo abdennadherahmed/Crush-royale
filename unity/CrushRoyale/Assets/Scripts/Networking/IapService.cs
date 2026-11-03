@@ -205,14 +205,47 @@ namespace CrushRoyale.Game.Networking
             }
         }
 
-        /// <summary>Unity IAP Google Play receipt: {"Payload": "{\"json\": \"{... purchaseToken ...}\"}"}.</summary>
+        /// <summary>
+        /// Unity IAP Google Play receipt: {"Payload": "{\"json\": \"{... purchaseToken ...}\"}"}.
+        ///
+        /// Les trois couches sont analysees separement pour que l'echec dise laquelle a lache. Une trentaine
+        /// de rapports ne disaient que « caractere inattendu : T, position 0 », sans indiquer si c'etait le
+        /// recu, sa charge utile ou son json : il n'y avait rien a corriger a partir de ca.
+        ///
+        /// Le contenu d'un recu n'est jamais journalise, il porte le jeton d'achat. Seules la premiere lettre
+        /// et la longueur le sont, ce qui suffit a reconnaitre un texte brut la ou du JSON etait attendu.
+        /// </summary>
         private static string ExtractPurchaseToken(string unifiedReceipt, out string orderId)
         {
-            JObject receipt = JObject.Parse(unifiedReceipt);
-            JObject payload = JObject.Parse((string)receipt["Payload"]);
-            JObject json = JObject.Parse((string)payload["json"]);
+            JObject receipt = ParseReceiptLayer(unifiedReceipt, "receipt");
+            JObject payload = ParseReceiptLayer((string)receipt["Payload"], "Payload");
+            JObject json = ParseReceiptLayer((string)payload["json"], "json");
             orderId = (string)json["orderId"];
-            return (string)json["purchaseToken"];
+            string token = (string)json["purchaseToken"];
+            if (string.IsNullOrEmpty(token))
+            {
+                // La commande reste en attente et le magasin la represente : un achat paye n'est jamais perdu
+                // parce que le recu avait une forme inattendue.
+                throw new InvalidOperationException("Store receipt: no purchaseToken in the json layer.");
+            }
+            return token;
+        }
+
+        private static JObject ParseReceiptLayer(string text, string layer)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new InvalidOperationException("Store receipt: the " + layer + " layer is missing or empty.");
+            }
+            try
+            {
+                return JObject.Parse(text);
+            }
+            catch (Newtonsoft.Json.JsonException)
+            {
+                throw new InvalidOperationException("Store receipt: the " + layer + " layer is not JSON (starts with '"
+                    + text[0] + "', " + text.Length + " chars).");
+            }
         }
 #else
         public void Initialize(IEnumerable<string> skus, IEnumerable<string> durableSkus)

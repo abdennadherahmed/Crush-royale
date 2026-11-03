@@ -41,6 +41,12 @@ namespace CrushRoyale.EditorTools
             if (int.TryParse(versionCode, out int code) && code > 0)
             {
                 PlayerSettings.Android.bundleVersionCode = code;
+                // Le nom de version suit le numero de build.
+                //
+                // Seul le numero entier etait pose, et le nom restait « 1.0.0 » depuis le premier build. Tous
+                // les rapports de plantage arrivaient donc sous la meme version : impossible de dire si une
+                // erreur venait de la version en ligne ou d'une vieille, ni de voir qu'une correction a pris.
+                PlayerSettings.bundleVersion = "1.0." + code;
             }
 
             Build(output, appBundle, !appBundle && GetArgument("-fastTestBuild") == "true");
