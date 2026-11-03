@@ -616,7 +616,7 @@
 
   "pvp.pending": "대기 중",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "나 {0}   ·   상대 {1}",
 
   "pvp.frozen": "동결 점수: 나 {0} · 상대 {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "적용",
   "admin.done": "완료되었습니다.",
   "leaderboard.unranked": "이번 주 아직 순위 없음",
-  "leaderboard.guildUnranked": "길드가 아직 순위에 없습니다"
+  "leaderboard.guildUnranked": "길드가 아직 순위에 없습니다",
+  "firstDuel.title": "첫 대결",
+  "firstDuel.intro": "크라그가 이미 보석을 맞추고 있습니다. 보드가 끝나기 전에 그보다 더 많은 점수를 올리세요.",
+  "firstDuel.fight": "대결",
+  "firstDuel.preparing": "보드를 고르는 중...",
+  "firstDuel.you": "나",
+  "firstDuel.opponent": "크라그",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "승리",
+  "firstDuel.wonBody": "크라그가 재대결을 원합니다. 먼저 영웅을 고르세요.",
+  "firstDuel.lostTitle": "이번엔 크라그의 승리",
+  "firstDuel.lostBody": "영웅을 고르고 복수하러 돌아오세요.",
+  "firstDuel.continue": "영웅 선택",
+  "notif.freeChest.title": "무료 상자가 기다립니다",
+  "notif.freeChest.body": "이기지 않아도 됩니다. 받아 가세요."
 }
 

@@ -616,7 +616,7 @@
 
   "pvp.pending": "IN ATTESA",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "Tu {0}   ·   Avversario {1}",
 
   "pvp.frozen": "Punti congelati: tu {0} · avversario {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "Applica",
   "admin.done": "Fatto.",
   "leaderboard.unranked": "Non ancora in classifica questa settimana",
-  "leaderboard.guildUnranked": "La tua gilda non è ancora in classifica"
+  "leaderboard.guildUnranked": "La tua gilda non è ancora in classifica",
+  "firstDuel.title": "Il tuo primo duello",
+  "firstDuel.intro": "Krag sta già combinando gemme. Fai più punti di lui prima che il tabellone finisca.",
+  "firstDuel.fight": "Combatti",
+  "firstDuel.preparing": "Scelta del tabellone...",
+  "firstDuel.you": "Tu",
+  "firstDuel.opponent": "Krag",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "Hai vinto",
+  "firstDuel.wonBody": "Krag vuole la rivincita. Prima scegli il tuo eroe.",
+  "firstDuel.lostTitle": "Questa l'ha vinta Krag",
+  "firstDuel.lostBody": "Scegli il tuo eroe e torna a prenderlo.",
+  "firstDuel.continue": "Scegli il mio eroe",
+  "notif.freeChest.title": "Ti aspetta uno scrigno gratis",
+  "notif.freeChest.body": "Non serve vincere. Vieni a prenderlo."
 }
 

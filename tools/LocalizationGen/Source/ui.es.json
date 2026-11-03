@@ -616,7 +616,7 @@
 
   "pvp.pending": "EN ESPERA",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "Tú {0}   ·   Rival {1}",
 
   "pvp.frozen": "Puntos congelados: tú {0} · rival {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "Aplicar",
   "admin.done": "Hecho.",
   "leaderboard.unranked": "Aún sin clasificar esta semana",
-  "leaderboard.guildUnranked": "Tu gremio aún no está clasificado"
+  "leaderboard.guildUnranked": "Tu gremio aún no está clasificado",
+  "firstDuel.title": "Tu primer duelo",
+  "firstDuel.intro": "Krag ya está combinando gemas. Consigue más puntos que él antes de que acabe el tablero.",
+  "firstDuel.fight": "Luchar",
+  "firstDuel.preparing": "Eligiendo tablero...",
+  "firstDuel.you": "Tú",
+  "firstDuel.opponent": "Krag",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "Has ganado",
+  "firstDuel.wonBody": "Krag quiere la revancha. Elige tu héroe primero.",
+  "firstDuel.lostTitle": "Krag ha ganado esta",
+  "firstDuel.lostBody": "Elige tu héroe y vuelve a por él.",
+  "firstDuel.continue": "Elegir mi héroe",
+  "notif.freeChest.title": "Te espera un cofre gratis",
+  "notif.freeChest.body": "No hace falta ganar. Entra a por él."
 }
 

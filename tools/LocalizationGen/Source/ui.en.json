@@ -616,7 +616,7 @@
 
   "pvp.pending": "WAITING",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "You {0}   ·   Opponent {1}",
 
   "pvp.frozen": "Frozen points: you {0} · opponent {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "Apply",
   "admin.done": "Done.",
   "leaderboard.unranked": "Not ranked yet this week",
-  "leaderboard.guildUnranked": "Your guild is not ranked yet"
+  "leaderboard.guildUnranked": "Your guild is not ranked yet",
+  "firstDuel.title": "Your first duel",
+  "firstDuel.intro": "Krag is already matching gems. Score more than he does before the board runs out.",
+  "firstDuel.fight": "Fight",
+  "firstDuel.preparing": "Picking a board...",
+  "firstDuel.you": "You",
+  "firstDuel.opponent": "Krag",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "You won",
+  "firstDuel.wonBody": "Krag wants a rematch. Pick your hero first.",
+  "firstDuel.lostTitle": "Krag won this one",
+  "firstDuel.lostBody": "Pick your hero and come back for him.",
+  "firstDuel.continue": "Choose my hero",
+  "notif.freeChest.title": "A free chest is waiting",
+  "notif.freeChest.body": "No win needed. Tap to take it."
 }
 

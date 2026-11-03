@@ -43,6 +43,8 @@ namespace CrushRoyale.Game
 
         /// <summary>Hero chosen on this device (possibly offline, synced to the server at the next login).</summary>
         public bool HeroCreated;
+
+
         public string HeroGender;
         public string HeroPseudo;
         public int HeroAge;

@@ -62,6 +62,15 @@ namespace CrushRoyale.Game.Networking
                         Send(_loc.T("notif.chest.title"), _loc.T("notif.chest.body"), DateTime.Now.AddSeconds(chest.SecondsLeft));
                     }
                 }
+
+                // Le coffre offert est le seul rendez-vous qui ne demande rien au joueur : ni victoire, ni
+                // paiement, juste de revenir. Le jeu connaissait l'heure a laquelle il se remplit et ne la
+                // disait jamais, alors que c'est le rappel le plus facile a honorer.
+                if (profile.Chests.FreeChestSecondsLeft > 60)
+                {
+                    Send(_loc.T("notif.freeChest.title"), _loc.T("notif.freeChest.body"),
+                        DateTime.Now.AddSeconds(profile.Chests.FreeChestSecondsLeft));
+                }
             }
 
             DateTime tomorrow = DateTime.Now.Date.AddDays(1).AddHours(19);

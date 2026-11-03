@@ -207,7 +207,7 @@ namespace CrushRoyale.Game.Screens
                 }
                 else
                 {
-                    UI.ShowRoot<HeroSelectScreen>();
+                    ShowFirstRun(UI, Game);
                 }
                 return;
             }
@@ -258,12 +258,27 @@ namespace CrushRoyale.Game.Screens
 
             if (!profile.HeroChosen)
             {
-                ui.ShowRoot<HeroSelectScreen>();
+                ShowFirstRun(ui, game);
             }
             else
             {
                 ui.ShowRoot<MainMenuScreen>();
             }
+        }
+
+        /// <summary>
+        /// Premier lancement : le duel d'abord, le choix du heros ensuite.
+        ///
+        /// Un joueur qui a deja un heros ne passe jamais par ici, donc une mise a jour ne reaffiche pas le duel.
+        /// </summary>
+        private static void ShowFirstRun(UIRoot ui, GameRoot game)
+        {
+            if (game.Save.Settings.FirstDuelDone)
+            {
+                ui.ShowRoot<HeroSelectScreen>();
+                return;
+            }
+            ui.ShowRoot<FirstDuelScreen>();
         }
 
         /// <summary>A slow server (cold start, weak network) must never trap the player: offer offline play after 3 s.</summary>

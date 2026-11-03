@@ -174,6 +174,7 @@ namespace CrushRoyale.EditorTools
                 problems += PressEveryButton(game, test, steps);
             }
             problems += PlayOneStage(game, steps);
+            problems += PlayFirstDuel(game, steps);
 
             OfflineHarness.Shutdown(game);
             WriteReport(output, steps, problems);
@@ -378,6 +379,38 @@ namespace CrushRoyale.EditorTools
                 step.Detail = "score " + result.FinalScore + ", " + result.State;
                 steps.Add(step);
                 return 0;
+            }
+            catch (Exception ex)
+            {
+                step.Outcome = "exception";
+                step.Detail = ex.GetBaseException().Message;
+                steps.Add(step);
+                return 1;
+            }
+        }
+
+        /// <summary>
+        /// Le duel d'accueil doit se gagner par un debutant, sinon il dit exactement le contraire de ce qu'il
+        /// existe pour dire.
+        ///
+        /// Le debutant est joue ici comme un joueur ordinaire : il voit le meilleur coup environ deux fois sur
+        /// cinq et met deux a trois secondes et demie a le jouer. S'il perd, c'est la selection de graine qu'il
+        /// faut revoir, pas les regles.
+        /// </summary>
+        private static int PlayFirstDuel(GameRoot game, List<Step> steps)
+        {
+            var step = new Step { Screen = "Duel d'accueil", Button = "debutant contre Krag" };
+            try
+            {
+                MatchLaunch launch = MatchLaunch.OnboardingDuel(game.Backend.Balance);
+                var session = new GameSession(launch.BuildConfig(game.Backend), game.Backend.Balance, game.Backend.PlayerId);
+                StageResult result = HeadlessRunner.Run(session, new SkilledBot(launch.OfflineSeed, 400, 2000, 3500));
+                long krag = launch.OfflineGhost?.FinalScore ?? 0;
+                bool won = result.FinalScore >= krag;
+                step.Outcome = won ? "gagne" : "perdu";
+                step.Detail = "graine " + launch.OfflineSeed + ", debutant " + result.FinalScore + " contre " + krag;
+                steps.Add(step);
+                return won ? 0 : 1;
             }
             catch (Exception ex)
             {

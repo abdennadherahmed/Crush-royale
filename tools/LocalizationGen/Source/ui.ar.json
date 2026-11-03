@@ -616,7 +616,7 @@
 
   "pvp.pending": "بانتظار النتيجة",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "أنت {0}   ·   الخصم {1}",
 
   "pvp.frozen": "النقاط المجمّدة: أنت {0} · الخصم {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "تطبيق",
   "admin.done": "تم.",
   "leaderboard.unranked": "لم يتم تصنيفك بعد هذا الأسبوع",
-  "leaderboard.guildUnranked": "نقابتك غير مصنفة بعد"
+  "leaderboard.guildUnranked": "نقابتك غير مصنفة بعد",
+  "firstDuel.title": "أول مبارزة لك",
+  "firstDuel.intro": "كراغ بدأ بالمطابقة فعلاً. اجمع نقاطاً أكثر منه قبل نهاية اللوح.",
+  "firstDuel.fight": "قاتل",
+  "firstDuel.preparing": "جارٍ اختيار اللوح...",
+  "firstDuel.you": "أنت",
+  "firstDuel.opponent": "كراغ",
+  "firstDuel.vs": "ضد",
+  "firstDuel.wonTitle": "لقد فزت",
+  "firstDuel.wonBody": "كراغ يريد مباراة أخرى. اختر بطلك أولاً.",
+  "firstDuel.lostTitle": "فاز كراغ هذه المرة",
+  "firstDuel.lostBody": "اختر بطلك وعُد إليه.",
+  "firstDuel.continue": "اختيار بطلي",
+  "notif.freeChest.title": "صندوق مجاني ينتظرك",
+  "notif.freeChest.body": "لا تحتاج إلى الفوز. اضغط لأخذه."
 }
 

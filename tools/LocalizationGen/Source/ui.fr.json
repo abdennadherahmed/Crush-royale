@@ -616,7 +616,7 @@
 
   "pvp.pending": "EN ATTENTE",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "Toi {0}   ·   Adversaire {1}",
 
   "pvp.frozen": "Points gelés : toi {0} · adversaire {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "Appliquer",
   "admin.done": "Fait.",
   "leaderboard.unranked": "Pas encore classé cette semaine",
-  "leaderboard.guildUnranked": "Ta guilde n'est pas encore classée"
+  "leaderboard.guildUnranked": "Ta guilde n'est pas encore classée",
+  "firstDuel.title": "Ton premier duel",
+  "firstDuel.intro": "Krag a déjà commencé à aligner. Marque plus de points que lui avant la fin du plateau.",
+  "firstDuel.fight": "Combattre",
+  "firstDuel.preparing": "Choix du plateau...",
+  "firstDuel.you": "Toi",
+  "firstDuel.opponent": "Krag",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "Tu as gagné",
+  "firstDuel.wonBody": "Krag veut sa revanche. Choisis ton héros d'abord.",
+  "firstDuel.lostTitle": "Krag a gagné celui-là",
+  "firstDuel.lostBody": "Choisis ton héros et reviens le chercher.",
+  "firstDuel.continue": "Choisir mon héros",
+  "notif.freeChest.title": "Un coffre offert t'attend",
+  "notif.freeChest.body": "Pas besoin de gagner. Viens le prendre."
 }
 

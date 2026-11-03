@@ -27,6 +27,12 @@ namespace CrushRoyale.Game.Gameplay
         /// <summary>Offline PvP opponent (a bot replay recorded on the same seed).</summary>
         public ReplayData OfflineGhost { get; private set; }
 
+        /// <summary>
+        /// Le duel d'accueil, joue avant meme la creation du heros. Rien n'est soumis, rien n'est recompense :
+        /// il n'existe que pour qu'un nouveau joueur ait gagne un duel avant d'avoir vu un menu.
+        /// </summary>
+        public bool Onboarding { get; private set; }
+
         public static MatchLaunch Online(MatchStartResponse ticket) => new MatchLaunch
         {
             Ticket = ticket,
@@ -54,6 +60,33 @@ namespace CrushRoyale.Game.Gameplay
                 OfflineSeed = seed,
                 OfflineGhost = bot.Replay
             };
+        }
+
+        /// <summary>
+        /// Premier lancement : un duel contre un bot lent, sur le plateau le plus abordable d'un lot de graines.
+        ///
+        /// Le bot joue son premier coup en 150 ms puis met trois a quatre secondes par coup. Il prend donc
+        /// l'avance, le joueur le rattrape, et c'est exactement la forme d'un duel qu'on raconte. Choisir
+        /// ensuite la graine ou ce bot finit le plus bas ne change aucune regle : la partie reste celle que le
+        /// moteur produit, on choisit seulement laquelle d'une vingtaine on propose en premier.
+        /// </summary>
+        public static MatchLaunch OnboardingDuel(GameBalance balance, ulong firstSeed = 1, int candidates = 24)
+        {
+            MatchLaunch easiest = null;
+            long lowest = long.MaxValue;
+            for (ulong seed = firstSeed; seed < firstSeed + (ulong)candidates; seed++)
+            {
+                MatchLaunch candidate = OfflinePvp(balance, seed, League.Bronze, easy: true);
+                long score = candidate.OfflineGhost?.FinalScore ?? long.MaxValue;
+                if (score < lowest)
+                {
+                    lowest = score;
+                    easiest = candidate;
+                }
+            }
+            easiest = easiest ?? OfflinePvp(balance, firstSeed, League.Bronze, easy: true);
+            easiest.Onboarding = true;
+            return easiest;
         }
 
         public SessionConfig BuildConfig(BackendManager backend)

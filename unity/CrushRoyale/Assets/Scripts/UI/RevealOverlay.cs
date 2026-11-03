@@ -323,6 +323,9 @@ namespace CrushRoyale.Game.UI
             layout.childControlWidth = layout.childControlHeight = true;
             layout.childForceExpandWidth = false;
             layout.childForceExpandHeight = true;
+            // Les lots sortent du coffre sur une note qui monte. Chacun au meme ton, la serie s'entendait
+            // comme une liste ; en montant, elle s'entend comme une recompense qui s'accumule.
+            int index = 0;
             foreach (RevealItem item in items)
             {
                 Image card = UIFactory.Panel("Prize", row, Theme.Panel);
@@ -337,7 +340,8 @@ namespace CrushRoyale.Game.UI
                 UIFactory.Anchor(label.rectTransform, 0.05f, 0.04f, 0.95f, 0.36f);
                 Widgets.TitleOutline(label);
                 card.gameObject.AddComponent<PopIn>();
-                Game.Audio.PlaySFX(SoundIds.Coins);
+                Game.Audio.PlaySFX(SoundIds.Coins, 1f + Mathf.Min(index, 7) * 0.07f);
+                index++;
                 yield return new WaitForSeconds(0.28f);
             }
         }

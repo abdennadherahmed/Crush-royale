@@ -849,6 +849,19 @@ namespace CrushRoyale.Game.Screens
 
         private async Task SubmitPvpAsync(StageResult result)
         {
+            if (_launch.Onboarding)
+            {
+                // Duel d'accueil : aucun trophee, aucune recompense, aucun envoi. Le joueur passe a la
+                // creation de son heros, qui est le vrai debut du jeu.
+                Game.Save.Settings.FirstDuelDone = true;
+                Game.Save.SaveSettings();
+                long mine = result.FinalScore;
+                long theirs = _controller.Ghost?.CurrentScore ?? 0;
+                Game.Telemetry.Track("first_duel_end", ("result", mine >= theirs ? "Won" : "Lost"), ("score", mine), ("opponent", theirs));
+                UI.Show<FirstDuelResultScreen>(new FirstDuelResultScreen.Args { You = mine, Opponent = theirs }, addToHistory: false);
+                return;
+            }
+
             var args = new PvpResultArgs
             {
                 Launch = _launch,

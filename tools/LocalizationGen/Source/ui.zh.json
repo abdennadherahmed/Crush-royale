@@ -616,7 +616,7 @@
 
   "pvp.pending": "等待中",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "你 {0}   ·   对手 {1}",
 
   "pvp.frozen": "冻结分数：你 {0} · 对手 {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "应用",
   "admin.done": "完成。",
   "leaderboard.unranked": "本周尚未上榜",
-  "leaderboard.guildUnranked": "你的公会尚未上榜"
+  "leaderboard.guildUnranked": "你的公会尚未上榜",
+  "firstDuel.title": "你的第一场对决",
+  "firstDuel.intro": "克拉格已经在消除了。在棋盘结束前拿到比他更高的分数。",
+  "firstDuel.fight": "开战",
+  "firstDuel.preparing": "正在挑选棋盘...",
+  "firstDuel.you": "你",
+  "firstDuel.opponent": "克拉格",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "你赢了",
+  "firstDuel.wonBody": "克拉格想再来一局。先选好你的英雄。",
+  "firstDuel.lostTitle": "这局克拉格赢了",
+  "firstDuel.lostBody": "选好英雄，再回来找他。",
+  "firstDuel.continue": "选择英雄",
+  "notif.freeChest.title": "有一个免费宝箱在等你",
+  "notif.freeChest.body": "无需取胜，直接来领取。"
 }
 

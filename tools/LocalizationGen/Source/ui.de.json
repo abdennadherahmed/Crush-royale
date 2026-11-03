@@ -616,7 +616,7 @@
 
   "pvp.pending": "WARTEN",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "Du {0}   ·   Gegner {1}",
 
   "pvp.frozen": "Eingefrorene Punkte: du {0} · Gegner {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "Anwenden",
   "admin.done": "Erledigt.",
   "leaderboard.unranked": "Diese Woche noch nicht platziert",
-  "leaderboard.guildUnranked": "Deine Gilde ist noch nicht platziert"
+  "leaderboard.guildUnranked": "Deine Gilde ist noch nicht platziert",
+  "firstDuel.title": "Dein erstes Duell",
+  "firstDuel.intro": "Krag kombiniert schon. Hol mehr Punkte als er, bevor das Feld endet.",
+  "firstDuel.fight": "Kämpfen",
+  "firstDuel.preparing": "Feld wird gewählt...",
+  "firstDuel.you": "Du",
+  "firstDuel.opponent": "Krag",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "Gewonnen",
+  "firstDuel.wonBody": "Krag will Revanche. Wähl erst deinen Helden.",
+  "firstDuel.lostTitle": "Krag hat dieses gewonnen",
+  "firstDuel.lostBody": "Wähl deinen Helden und hol ihn dir.",
+  "firstDuel.continue": "Helden wählen",
+  "notif.freeChest.title": "Eine Gratis-Truhe wartet",
+  "notif.freeChest.body": "Kein Sieg nötig. Hol sie dir."
 }
 

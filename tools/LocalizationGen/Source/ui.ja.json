@@ -616,7 +616,7 @@
 
   "pvp.pending": "結果待ち",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "あなた {0}   ·   相手 {1}",
 
   "pvp.frozen": "凍結ポイント：あなた {0} · 相手 {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "適用",
   "admin.done": "完了しました。",
   "leaderboard.unranked": "今週はまだランク外です",
-  "leaderboard.guildUnranked": "ギルドはまだランク外です"
+  "leaderboard.guildUnranked": "ギルドはまだランク外です",
+  "firstDuel.title": "はじめての対戦",
+  "firstDuel.intro": "クラグはもう揃えはじめている。盤面が終わる前に彼より多く得点しよう。",
+  "firstDuel.fight": "たたかう",
+  "firstDuel.preparing": "盤面を選んでいます...",
+  "firstDuel.you": "あなた",
+  "firstDuel.opponent": "クラグ",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "勝利",
+  "firstDuel.wonBody": "クラグは再戦を望んでいる。まずはヒーローを選ぼう。",
+  "firstDuel.lostTitle": "この一戦はクラグの勝ち",
+  "firstDuel.lostBody": "ヒーローを選んで、やり返しに行こう。",
+  "firstDuel.continue": "ヒーローを選ぶ",
+  "notif.freeChest.title": "無料の宝箱が待っています",
+  "notif.freeChest.body": "勝たなくても大丈夫。受け取りに来よう。"
 }
 

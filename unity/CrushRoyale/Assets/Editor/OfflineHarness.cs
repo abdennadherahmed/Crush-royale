@@ -614,6 +614,11 @@ namespace CrushRoyale.EditorTools
             return new List<ScreenCase>
             {
                 new ScreenCase("01-Splash", typeof(SplashScreen), withProfile: false),
+                // Le duel d'accueil et sa carte de fin : les deux premiers ecrans d'un nouveau joueur, donc
+                // les deux qu'il ne faut surtout pas casser sans le voir.
+                new ScreenCase("01b-FirstDuel", typeof(FirstDuelScreen), withProfile: false),
+                new ScreenCase("01c-FirstDuelResult", typeof(FirstDuelResultScreen),
+                    _ => new FirstDuelResultScreen.Args { You = 7420, Opponent = 3398 }, withProfile: false),
                 new ScreenCase("02-HeroSelect", typeof(HeroSelectScreen), withProfile: false),
                 new ScreenCase("03-MainMenu", typeof(MainMenuScreen)),
                 new ScreenCase("04-MainMenu-Offline", typeof(MainMenuScreen), withProfile: false),

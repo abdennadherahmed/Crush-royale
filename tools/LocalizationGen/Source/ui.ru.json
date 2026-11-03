@@ -616,7 +616,7 @@
 
   "pvp.pending": "ОЖИДАНИЕ",
 
-  "pvp.scores": "{0} – {1}",
+  "pvp.scores": "Ты {0}   ·   Соперник {1}",
 
   "pvp.frozen": "Замороженные очки: вы {0} · соперник {1}",
 
@@ -2151,6 +2151,20 @@
   "admin.apply": "Применить",
   "admin.done": "Готово.",
   "leaderboard.unranked": "Ещё нет места в рейтинге на этой неделе",
-  "leaderboard.guildUnranked": "Ваша гильдия ещё не в рейтинге"
+  "leaderboard.guildUnranked": "Ваша гильдия ещё не в рейтинге",
+  "firstDuel.title": "Твоя первая дуэль",
+  "firstDuel.intro": "Краг уже собирает комбинации. Набери больше очков, чем он, пока поле не закончилось.",
+  "firstDuel.fight": "В бой",
+  "firstDuel.preparing": "Выбираем поле...",
+  "firstDuel.you": "Ты",
+  "firstDuel.opponent": "Краг",
+  "firstDuel.vs": "VS",
+  "firstDuel.wonTitle": "Победа",
+  "firstDuel.wonBody": "Краг хочет отыграться. Сначала выбери героя.",
+  "firstDuel.lostTitle": "Этот раунд за Крагом",
+  "firstDuel.lostBody": "Выбери героя и вернись за ним.",
+  "firstDuel.continue": "Выбрать героя",
+  "notif.freeChest.title": "Тебя ждёт бесплатный сундук",
+  "notif.freeChest.body": "Побеждать не нужно. Просто забери его."
 }
 
