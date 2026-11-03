@@ -13,10 +13,13 @@ select app_version,
        occurrences,
        last_seen,
        left(message, 200) as message,
+       device,
+       os,
+       -- En dernier, parce que « create or replace view » sait ajouter une colonne a la fin et rien d'autre :
+       -- la glisser avant device revenait, pour Postgres, a renommer une colonne existante.
+       --
        -- Unity prefixe souvent la pile d'un saut de ligne : on prend la premiere ligne non vide.
        (select trim(line) from unnest(string_to_array(stack, E'\n')) as line
-        where trim(line) <> '' limit 1) as first_frame,
-       device,
-       os
+        where trim(line) <> '' limit 1) as first_frame
 from public.client_errors
 order by last_seen desc, occurrences desc;
