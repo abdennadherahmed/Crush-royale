@@ -12,7 +12,7 @@
 
 with
 -- Sept derniers jours d'activite.
-activite as (
+activite(ord, section, ligne, valeur, rn) as (
   select 10 as ord, 'Activite' as section,
          to_char(day, 'DD/MM') as ligne,
          players || ' joueurs, ' || sessions || ' sessions, ' || stages_played || ' etapes, ' || duels_played || ' duels' as valeur,
@@ -20,7 +20,7 @@ activite as (
   from analytics.daily_active
 ),
 -- Retention par jour d'installation. C'est le seul chiffre qui dit si le jeu tient.
-retention as (
+retention(ord, section, ligne, valeur, rn) as (
   select 20, 'Retention',
          to_char(install_day, 'DD/MM') || ' (' || installs || ' install.)',
          'J1 ' || coalesce(d1_percent, 0) || ' %, J7 ' || coalesce(d7_percent, 0) || ' %',
@@ -31,7 +31,7 @@ retention as (
 ouvertures as (
   select max(players) as total from analytics.onboarding_funnel
 ),
-entonnoir as (
+entonnoir(ord, section, ligne, valeur, rn) as (
   select 30, 'Premiere session',
          f.step,
          f.players || ' joueurs' ||
@@ -40,7 +40,7 @@ entonnoir as (
   from analytics.onboarding_funnel f cross join ouvertures o
 ),
 -- Le duel d'accueil doit se gagner. Sous 75 % de victoires, la selection de graine ne suffit plus.
-duel as (
+duel(ord, section, ligne, valeur, rn) as (
   select 40, 'Duel d''accueil',
          to_char(day, 'DD/MM'),
          duels || ' duels, ' || won_percent || ' % gagnes, ' || avg_player_score || ' contre ' || avg_bot_score,
@@ -48,7 +48,7 @@ duel as (
   from analytics.first_duel
 ),
 -- Les dix etapes ou l'on abandonne le plus : au moins vingt tentatives, du pire taux de victoire au moins pire.
-murs as (
+murs(ord, section, ligne, valeur, rn) as (
   select 50, 'Murs de difficulte',
          'Etape ' || stage,
          win_percent || ' % gagnees sur ' || attempts || ' tentatives',
@@ -57,7 +57,7 @@ murs as (
   where attempts >= 20
 ),
 -- Les plantages les plus recents, qui comptent plus que les plus nombreux : ils sont dans la version en ligne.
-plantages as (
+plantages(ord, section, ligne, valeur, rn) as (
   select 60, 'Plantages',
          app_version || ' x' || occurrences,
          message,
