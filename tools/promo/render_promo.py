@@ -775,6 +775,13 @@ def main():
     ap.add_argument("--lang", default="fr", choices=sorted(TEXT))
     ap.add_argument("--recording", default=str(OUT / "promo_match.json"))
     ap.add_argument("--preview", default=None, help="comma-separated seconds: write PNG frames only")
+    # Le film complet dure vingt-neuf secondes, ce qui convient a une fiche de magasin et a rien d'autre.
+    # Une publicite verticale se joue sur les premieres secondes, donc elle se taille dans les memes scenes
+    # plutot que de se tourner a part : meme moteur, meme partie, juste moins de plans.
+    ap.add_argument("--scenes", default=None,
+                    help="scenes a garder, separees par des virgules : hook, pvp, powerups, guild, story, league, end")
+    ap.add_argument("--name", default="promo", help="nom du fichier de sortie")
+    ap.add_argument("--vertical-only", action="store_true", help="ne pas produire la version 16:9")
     args = ap.parse_args()
 
     OUT.mkdir(parents=True, exist_ok=True)
@@ -782,11 +789,20 @@ def main():
     rec = json.loads(Path(args.recording).read_text(encoding="utf-8"))
     scenes, portraits, T = build_timeline(rec, args.lang)
 
+    if args.scenes:
+        wanted = [name.strip() for name in args.scenes.split(",") if name.strip()]
+        known = {sc["name"] for sc in scenes}
+        unknown = [name for name in wanted if name not in known]
+        if unknown:
+            raise SystemExit("scene inconnue : " + ", ".join(unknown) + " (connues : " + ", ".join(sorted(known)) + ")")
+        order = {name: i for i, name in enumerate(wanted)}
+        scenes = sorted((sc for sc in scenes if sc["name"] in order), key=lambda sc: order[sc["name"]])
+
     if args.preview:
         render(scenes, portraits, T, None, [float(v) for v in args.preview.split(",")])
         return 0
 
-    silent = OUT / f"_silent_{args.lang}.mp4"
+    silent = OUT / f"_silent_{args.lang}_{args.name}.mp4"
     ff = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(FPS), "-i", "-",
                            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p", str(silent)], stdin=subprocess.PIPE)
     total, events = render(scenes, portraits, T, ff.stdin)
@@ -794,11 +810,15 @@ def main():
     if ff.wait() != 0:
         raise SystemExit("ffmpeg video encoding failed")
 
-    vertical = OUT / f"crushroyale_promo_{args.lang}_9x16.mp4"
+    vertical = OUT / f"crushroyale_{args.name}_{args.lang}_9x16.mp4"
     mux_audio(silent, events, total, vertical)
     silent.unlink(missing_ok=True)
 
-    wide = OUT / f"crushroyale_promo_{args.lang}_16x9.mp4"
+    if args.vertical_only:
+        print(f"done: {vertical.name} ({total:.1f} s)")
+        return 0
+
+    wide = OUT / f"crushroyale_{args.name}_{args.lang}_16x9.mp4"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(vertical), "-filter_complex",
                     "[0:v]scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,boxblur=28:2,eq=brightness=-0.12[bg];"
                     "[0:v]scale=-2:1080[fg];[bg][fg]overlay=(W-w)/2:0,format=yuv420p[v]",

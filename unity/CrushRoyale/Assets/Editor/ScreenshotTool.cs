@@ -191,6 +191,18 @@ namespace CrushRoyale.EditorTools
                     error = ex;
                 }
 
+                // Un ecran qui s'ouvre hors ligne previent par un bandeau flottant, et le harnais est toujours
+                // hors ligne. Ce bandeau se retrouvait donc en travers de la capture, et quatre des photos
+                // publiees sur le Play Store affichent « You are offline » en plein milieu du jeu. Il est
+                // retire juste avant la prise de vue : c'est un message d'etat du moment, pas un element de
+                // l'ecran qu'on photographie.
+                ClearLayer(game.UI.ToastLayer);
+
+                // Meme chose pour les voiles d'introduction d'une partie : ils attendent un appui du joueur,
+                // et l'editeur n'appuie jamais, donc ils restaient figes par-dessus le plateau. La photo de
+                // jeu publiee sur le Play Store montre ainsi un bandeau « OBJECTIVE » et rien du plateau.
+                RemoveByName(host, "GoalBanner", "Coach");
+
                 Settle(canvas.transform);
                 // Twice: layout groups and content-size fitters settle on the second pass, and the first render is
                 // what makes the dynamic font build the glyphs the second one actually draws.
@@ -215,6 +227,7 @@ namespace CrushRoyale.EditorTools
             {
                 UnityEngine.Object.DestroyImmediate(host.gameObject);
                 ClearLayer(game.UI.DialogLayer);
+                ClearLayer(game.UI.ToastLayer);
             }
         }
 
@@ -240,6 +253,18 @@ namespace CrushRoyale.EditorTools
             foreach (CanvasGroup group in root.GetComponentsInChildren<CanvasGroup>(true))
             {
                 group.alpha = 1f;
+            }
+        }
+
+        /// <summary>Supprime les voiles transitoires d'un ecran, reconnus par leur nom.</summary>
+        private static void RemoveByName(Transform host, params string[] names)
+        {
+            foreach (Transform child in host.GetComponentsInChildren<Transform>(true))
+            {
+                if (child != null && child != host && System.Array.IndexOf(names, child.name) >= 0)
+                {
+                    UnityEngine.Object.DestroyImmediate(child.gameObject);
+                }
             }
         }
 
