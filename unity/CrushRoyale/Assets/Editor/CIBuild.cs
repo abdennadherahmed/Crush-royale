@@ -36,6 +36,7 @@ namespace CrushRoyale.EditorTools
             }
 
             ApplyReleaseSigning();
+            RequireGooglePlayBilling();
 
             string versionCode = GetArgument("-androidVersionCode");
             if (int.TryParse(versionCode, out int code) && code > 0)
@@ -128,6 +129,28 @@ namespace CrushRoyale.EditorTools
             PlayerSettings.Android.keyaliasName = Environment.GetEnvironmentVariable("ANDROID_KEY_ALIAS") ?? "crushroyale";
             PlayerSettings.Android.keyaliasPass = password;
             Debug.Log("CIBuild: release signing with the keystore from secrets.");
+        }
+
+        /// <summary>
+        /// Sans Resources/BillingMode.json, Unity bascule silencieusement sur son magasin factice.
+        ///
+        /// Sur Android, la bibliotheque d'achats lit ce fichier pour savoir a quel magasin parler. Absent,
+        /// elle repond « magasin non specifie » et choisit le FakeAppStore : chaque produit s'affiche a
+        /// 0,01 $ et chaque achat echoue, sans la moindre erreur. Une version entiere est partie en
+        /// production comme ca, avec une boutique qui ne pouvait rien vendre.
+        ///
+        /// Le build echoue maintenant plutot que de livrer une boutique morte.
+        /// </summary>
+        private static void RequireGooglePlayBilling()
+        {
+            const string path = "Assets/Resources/BillingMode.json";
+            string json = File.Exists(path) ? File.ReadAllText(path) : null;
+            if (json == null || json.IndexOf("GooglePlay", StringComparison.OrdinalIgnoreCase) < 0)
+            {
+                throw new UnityEditor.Build.BuildFailedException(
+                    path + " doit exister et contenir {\"androidStore\":\"GooglePlay\"}, sinon les achats "
+                    + "passent par le magasin factice de Unity : tout a 0,01 $ et aucun achat possible.");
+            }
         }
 
         private static string GetArgument(string name)
