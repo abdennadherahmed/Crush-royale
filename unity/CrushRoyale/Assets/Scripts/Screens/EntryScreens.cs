@@ -273,12 +273,19 @@ namespace CrushRoyale.Game.Screens
         /// </summary>
         private static void ShowFirstRun(UIRoot ui, GameRoot game)
         {
-            if (game.Save.Settings.FirstDuelDone)
+            if (!game.Save.Settings.FirstDuelDone)
             {
-                ui.ShowRoot<HeroSelectScreen>();
+                ui.ShowRoot<FirstDuelScreen>();
                 return;
             }
-            ui.ShowRoot<FirstDuelScreen>();
+            // La connexion arrive apres le duel et avant la creation du heros : le joueur a deja joue, il
+            // sait donc ce qu'il protege, et il n'a pas encore de personnage a perdre s'il abandonne ici.
+            if (!game.Save.Settings.SignInOffered)
+            {
+                ui.ShowRoot<SignInScreen>();
+                return;
+            }
+            ui.ShowRoot<HeroSelectScreen>();
         }
 
         /// <summary>A slow server (cold start, weak network) must never trap the player: offer offline play after 3 s.</summary>

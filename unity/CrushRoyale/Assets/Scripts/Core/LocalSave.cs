@@ -52,6 +52,9 @@ namespace CrushRoyale.Game
         /// <summary>The first duel is played against a gentle bot (onboarding).</summary>
         public bool FirstDuelDone;
 
+        /// <summary>L'ecran de connexion n'est propose qu'une fois, meme si le joueur le passe.</summary>
+        public bool SignInOffered;
+
         /// <summary>Last challenge code read from the clipboard (offered only once).</summary>
         public string LastChallengeCode;
     }

@@ -619,6 +619,7 @@ namespace CrushRoyale.EditorTools
                 new ScreenCase("01b-FirstDuel", typeof(FirstDuelScreen), withProfile: false),
                 new ScreenCase("01c-FirstDuelResult", typeof(FirstDuelResultScreen),
                     _ => new FirstDuelResultScreen.Args { You = 7420, Opponent = 3398 }, withProfile: false),
+                new ScreenCase("01d-SignIn", typeof(SignInScreen), withProfile: false),
                 new ScreenCase("02-HeroSelect", typeof(HeroSelectScreen), withProfile: false),
                 new ScreenCase("03-MainMenu", typeof(MainMenuScreen)),
                 new ScreenCase("04-MainMenu-Offline", typeof(MainMenuScreen), withProfile: false),

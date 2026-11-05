@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "Pick your hero and come back for him.",
   "firstDuel.continue": "Choose my hero",
   "notif.freeChest.title": "A free chest is waiting",
-  "notif.freeChest.body": "No win needed. Tap to take it."
+  "notif.freeChest.body": "No win needed. Tap to take it.",
+  "signIn.title": "Keep your progress",
+  "signIn.body": "Without an account, your progress lives only on this phone. Uninstall the game or change device and it is gone.",
+  "signIn.google": "Continue with Google",
+  "signIn.skip": "Continue without an account",
+  "signIn.failed": "Sign-in failed",
+  "signIn.unavailable": "Google sign-in is not available in this build."
 }
 

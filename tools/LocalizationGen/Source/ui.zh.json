@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "选好英雄，再回来找他。",
   "firstDuel.continue": "选择英雄",
   "notif.freeChest.title": "有一个免费宝箱在等你",
-  "notif.freeChest.body": "无需取胜，直接来领取。"
+  "notif.freeChest.body": "无需取胜，直接来领取。",
+  "signIn.title": "保存你的进度",
+  "signIn.body": "没有账号，进度只保存在这台手机上。卸载游戏或更换设备就会消失。",
+  "signIn.google": "使用 Google 继续",
+  "signIn.skip": "不使用账号继续",
+  "signIn.failed": "登录失败",
+  "signIn.unavailable": "此版本不支持 Google 登录。"
 }
 

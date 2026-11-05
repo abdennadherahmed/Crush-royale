@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "Scegli il tuo eroe e torna a prenderlo.",
   "firstDuel.continue": "Scegli il mio eroe",
   "notif.freeChest.title": "Ti aspetta uno scrigno gratis",
-  "notif.freeChest.body": "Non serve vincere. Vieni a prenderlo."
+  "notif.freeChest.body": "Non serve vincere. Vieni a prenderlo.",
+  "signIn.title": "Salva i tuoi progressi",
+  "signIn.body": "Senza account, i tuoi progressi restano solo su questo telefono. Disinstalla il gioco o cambia dispositivo e spariscono.",
+  "signIn.google": "Continua con Google",
+  "signIn.skip": "Continua senza account",
+  "signIn.failed": "Accesso non riuscito",
+  "signIn.unavailable": "L'accesso con Google non è disponibile in questa versione."
 }
 

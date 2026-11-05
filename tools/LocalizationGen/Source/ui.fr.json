@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "Choisis ton héros et reviens le chercher.",
   "firstDuel.continue": "Choisir mon héros",
   "notif.freeChest.title": "Un coffre offert t'attend",
-  "notif.freeChest.body": "Pas besoin de gagner. Viens le prendre."
+  "notif.freeChest.body": "Pas besoin de gagner. Viens le prendre.",
+  "signIn.title": "Garde ta progression",
+  "signIn.body": "Sans compte, ta progression ne vit que sur ce téléphone. Désinstalle le jeu ou change d'appareil et elle disparaît.",
+  "signIn.google": "Continuer avec Google",
+  "signIn.skip": "Continuer sans compte",
+  "signIn.failed": "La connexion a échoué",
+  "signIn.unavailable": "La connexion Google n'est pas disponible dans cette version."
 }
 

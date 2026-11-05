@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "Escolhe o teu herói e volta para o apanhar.",
   "firstDuel.continue": "Escolher o meu herói",
   "notif.freeChest.title": "Um baú grátis está à tua espera",
-  "notif.freeChest.body": "Não precisas de ganhar. Vem buscá-lo."
+  "notif.freeChest.body": "Não precisas de ganhar. Vem buscá-lo.",
+  "signIn.title": "Guarda o teu progresso",
+  "signIn.body": "Sem conta, o teu progresso só existe neste telemóvel. Se desinstalares o jogo ou mudares de aparelho, perde-se.",
+  "signIn.google": "Continuar com o Google",
+  "signIn.skip": "Continuar sem conta",
+  "signIn.failed": "Falha ao iniciar sessão",
+  "signIn.unavailable": "O início de sessão com Google não está disponível nesta versão."
 }
 

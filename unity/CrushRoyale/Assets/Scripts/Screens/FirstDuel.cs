@@ -181,7 +181,7 @@ namespace CrushRoyale.Game.Screens
             Button next = UIFactory.Button(safe, Loc.T("firstDuel.continue"), () =>
             {
                 Game.Audio.PlaySFX(SoundIds.Click);
-                UI.ShowRoot<HeroSelectScreen>();
+                UI.ShowRoot<SignInScreen>();
             }, Theme.Gold, Theme.HeaderSize + 2);
             UIFactory.Anchor(next.GetComponent<RectTransform>(), 0.16f, 0.08f, 0.84f, 0.2f);
             next.gameObject.AddComponent<Breathe>().Amount = 0.035f;

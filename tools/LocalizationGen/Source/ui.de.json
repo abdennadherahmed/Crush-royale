@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "Wähl deinen Helden und hol ihn dir.",
   "firstDuel.continue": "Helden wählen",
   "notif.freeChest.title": "Eine Gratis-Truhe wartet",
-  "notif.freeChest.body": "Kein Sieg nötig. Hol sie dir."
+  "notif.freeChest.body": "Kein Sieg nötig. Hol sie dir.",
+  "signIn.title": "Fortschritt sichern",
+  "signIn.body": "Ohne Konto liegt dein Fortschritt nur auf diesem Handy. Deinstallierst du das Spiel oder wechselst das Gerät, ist er weg.",
+  "signIn.google": "Mit Google fortfahren",
+  "signIn.skip": "Ohne Konto fortfahren",
+  "signIn.failed": "Anmeldung fehlgeschlagen",
+  "signIn.unavailable": "Google-Anmeldung ist in dieser Version nicht verfügbar."
 }
 

@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "Elige tu héroe y vuelve a por él.",
   "firstDuel.continue": "Elegir mi héroe",
   "notif.freeChest.title": "Te espera un cofre gratis",
-  "notif.freeChest.body": "No hace falta ganar. Entra a por él."
+  "notif.freeChest.body": "No hace falta ganar. Entra a por él.",
+  "signIn.title": "Guarda tu progreso",
+  "signIn.body": "Sin cuenta, tu progreso solo existe en este teléfono. Si desinstalas el juego o cambias de dispositivo, se pierde.",
+  "signIn.google": "Continuar con Google",
+  "signIn.skip": "Continuar sin cuenta",
+  "signIn.failed": "No se pudo iniciar sesión",
+  "signIn.unavailable": "El inicio de sesión con Google no está disponible en esta versión."
 }
 

@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "اختر بطلك وعُد إليه.",
   "firstDuel.continue": "اختيار بطلي",
   "notif.freeChest.title": "صندوق مجاني ينتظرك",
-  "notif.freeChest.body": "لا تحتاج إلى الفوز. اضغط لأخذه."
+  "notif.freeChest.body": "لا تحتاج إلى الفوز. اضغط لأخذه.",
+  "signIn.title": "احتفظ بتقدمك",
+  "signIn.body": "بدون حساب، يبقى تقدمك على هذا الهاتف فقط. إذا حذفت اللعبة أو غيّرت الجهاز فسيضيع.",
+  "signIn.google": "المتابعة باستخدام Google",
+  "signIn.skip": "المتابعة بدون حساب",
+  "signIn.failed": "فشل تسجيل الدخول",
+  "signIn.unavailable": "تسجيل الدخول عبر Google غير متاح في هذه النسخة."
 }
 

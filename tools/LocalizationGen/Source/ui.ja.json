@@ -2165,6 +2165,12 @@
   "firstDuel.lostBody": "ヒーローを選んで、やり返しに行こう。",
   "firstDuel.continue": "ヒーローを選ぶ",
   "notif.freeChest.title": "無料の宝箱が待っています",
-  "notif.freeChest.body": "勝たなくても大丈夫。受け取りに来よう。"
+  "notif.freeChest.body": "勝たなくても大丈夫。受け取りに来よう。",
+  "signIn.title": "進行状況を守る",
+  "signIn.body": "アカウントがないと進行状況はこの端末にしか残りません。アンインストールや機種変更で消えます。",
+  "signIn.google": "Google で続ける",
+  "signIn.skip": "アカウントなしで続ける",
+  "signIn.failed": "サインインできませんでした",
+  "signIn.unavailable": "このビルドでは Google サインインを利用できません。"
 }
 
