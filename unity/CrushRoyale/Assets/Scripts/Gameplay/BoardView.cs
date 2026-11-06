@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using CrushRoyale.Core.Board;
@@ -1105,11 +1105,13 @@ namespace CrushRoyale.Game.Gameplay
             int layers = _iceLayers[y * Width + x];
             Image ice = _ice[y * Width + x];
             ice.enabled = layers > 0;
-            // Posee devant la gemme : assez opaque pour se voir sur n'importe quelle couleur, assez transparente
-            // pour qu'on lise encore la gemme dessous. Une deuxieme couche givre davantage.
+            // Posee devant la gemme. Le givre n'a plus de centre opaque, il ne reste qu'un cadre gelé avec
+            // quelques reflets au milieu, donc il peut rester franc sur les bords sans cacher la couleur de la
+            // piece. Il le cachait entierement avant : le sprite etait plein, et on ne distinguait plus de quelle
+            // gemme il s'agissait. Une deuxieme couche givre davantage.
             ice.color = ice.type == Image.Type.Sliced
-                ? new Color(0.75f, 0.92f, 1f, 0.30f + 0.16f * layers)
-                : new Color(1f, 1f, 1f, 0.42f + 0.16f * layers);
+                ? new Color(0.75f, 0.92f, 1f, 0.22f + 0.12f * layers)
+                : new Color(1f, 1f, 1f, 0.64f + 0.16f * layers);
         }
     }
 }
