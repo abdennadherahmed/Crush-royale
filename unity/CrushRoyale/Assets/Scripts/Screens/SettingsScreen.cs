@@ -190,9 +190,17 @@ namespace CrushRoyale.Game.Screens
                 UI.Toast(Loc.T("settings.linked"));
                 Rebuild();
             }
-            else if (Game.Backend.LastError != null)
+            else
             {
-                UI.ShowError(Game.Backend.LastError);
+                // La raison exacte, et non « echec de connexion ».
+                //
+                // Le pont Android renvoie le type et le message de l'exception de Credential Manager, par
+                // exemple « NoCredentialException » ou « GetCredentialUnknownException: [28431] Developer
+                // console is not set up correctly ». Ces deux cas demandent des corrections opposees, et
+                // l'ecran les affichait tous les deux comme « Sign-in failed ». On a cherche a l'aveugle.
+                string detail = Game.Backend.LastError?.Message;
+                Game.Telemetry.Track("google_sign_in_failed", ("detail", detail ?? "unknown"));
+                UI.Toast(Loc.T("signIn.failed") + (string.IsNullOrWhiteSpace(detail) ? string.Empty : System.Environment.NewLine + detail), 10f);
             }
         }
 
