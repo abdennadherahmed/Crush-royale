@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Net.Http;
 using System.Threading;
@@ -84,6 +84,18 @@ namespace CrushRoyale.Client
                 Region = region,
                 Language = language
             }, cancellationToken).ConfigureAwait(false);
+
+            // Les unites publicitaires arrivent avec la connexion. Elles etaient auparavant lues seulement dans
+            // /v1/config, que le client ne telecharge que si les regles ont change : un lancement ordinaire les
+            // laissait vides, et la publicite ne demarrait jamais.
+            if (!string.IsNullOrWhiteSpace(login.AdRewardedUnitId))
+            {
+                AdRewardedUnitId = login.AdRewardedUnitId;
+            }
+            if (!string.IsNullOrWhiteSpace(login.AdInterstitialUnitId))
+            {
+                AdInterstitialUnitId = login.AdInterstitialUnitId;
+            }
 
             if (login.ConfigOutdated)
             {

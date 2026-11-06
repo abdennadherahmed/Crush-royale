@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace CrushRoyale.Contracts
 {
@@ -35,6 +35,15 @@ namespace CrushRoyale.Contracts
         public int RulesVersion { get; set; }
 
         public long ServerTimeUnixMs { get; set; }
+
+        /// <summary>
+        /// Les unites publicitaires, livrees avec la connexion parce que le client ne telecharge /v1/config que
+        /// lorsque les regles ont change. Les y laisser seules voulait dire qu'un lancement ordinaire ne les
+        /// recevait jamais, et que la publicite ne demarrait pas : elle n'a jamais pu s'afficher.
+        /// </summary>
+        public string AdRewardedUnitId { get; set; }
+
+        public string AdInterstitialUnitId { get; set; }
     }
 
     public sealed class ConfigResponse

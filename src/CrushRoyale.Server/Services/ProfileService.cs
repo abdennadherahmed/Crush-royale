@@ -1,4 +1,4 @@
-using CrushRoyale.Contracts;
+﻿using CrushRoyale.Contracts;
 using CrushRoyale.Core.AntiCheat;
 using CrushRoyale.Core.Common;
 using CrushRoyale.Core.Config;
@@ -91,7 +91,9 @@ public sealed class ProfileService
                 ConfigOutdated = !string.Equals(request.BalanceHash, _ops.Balance.HashHex, StringComparison.OrdinalIgnoreCase),
                 BalanceHash = _ops.Balance.HashHex,
                 RulesVersion = GameBalance.RulesVersion,
-                ServerTimeUnixMs = ws.NowMs
+                ServerTimeUnixMs = ws.NowMs,
+                AdRewardedUnitId = _ads.RewardedUnitId ?? string.Empty,
+                AdInterstitialUnitId = _ads.InterstitialUnitId ?? string.Empty
             };
         }, ct, allowBanned: true).ConfigureAwait(false);
     }
